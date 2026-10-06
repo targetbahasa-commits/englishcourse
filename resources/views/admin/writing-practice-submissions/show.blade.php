@@ -680,7 +680,7 @@
              x-transition:enter="transition ease-out duration-200 transform"
              x-transition:enter-start="-translate-y-2 opacity-0"
              x-transition:enter-end="translate-y-0 opacity-100"
-             style="background-color: #111827 !important; color: #ffffff !important; opacity: 1 !important; backdrop-filter: none !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important;"
+             style="background-color: #111827 !important; color: #ffffff !important; opacity: 1 !important; backdrop-filter: none !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important; display: none;"
              class="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 p-4 rounded-2xl border border-slate-700 grid grid-cols-2 gap-2 min-w-[340px] max-w-[440px] z-[400]">
             <div class="col-span-2 text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between pb-2 border-b border-slate-800">
                 <span>Pilih Stempel Evaluasi IELTS:</span>

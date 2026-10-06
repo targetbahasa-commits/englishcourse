@@ -611,12 +611,13 @@
                                                     <div class="flex gap-2 items-start">
                                                         <div class="flex-1">
                                                             <div class="relative">
-                                                                <input type="text" x-model="sentence.answer"
+                                                                <textarea rows="1" x-model="sentence.answer"
+                                                                    style="field-sizing: content;"
                                                                     @input="saveState()"
                                                                     @keydown.enter.prevent="if(!sentence.submitted) submitAnswer(sentence)"
                                                                     :disabled="sentence.submitted"
                                                                     placeholder="Tulis bahasa Inggrisnya di sini..."
-                                                                    class="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-white disabled:text-gray-500">
+                                                                    class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-white disabled:text-gray-500"></textarea>
                                                                 <button type="button"
                                                                     @click.prevent="sentence.answer = ''; sentence.submitted = false; sentence.evaluation = ''; sentence.isExplaining = false; sentence.ai_explanation = ''; saveState()"
                                                                     title="Refresh/Ulangi Latihan Ini"
@@ -707,9 +708,10 @@
 
                                     <div class="relative">
                                         <textarea x-model="output.paragraph.answer" @input="saveState()"
+                                            style="field-sizing: content;"
                                             :disabled="output.paragraph?.submitted"
                                             rows="{{ $level === 'all' ? '12' : '6' }}"
-                                            class="w-full p-4 pr-12 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white disabled:bg-white disabled:text-gray-500"
+                                            class="auto-expand-answer resize-none overflow-hidden w-full p-4 pr-12 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white disabled:bg-white disabled:text-gray-500"
                                             placeholder="Tulis terjemahan paragraf di sini..."></textarea>
                                         <button type="button"
                                             @click.prevent="output.paragraph.answer = ''; output.paragraph.submitted = false; output.paragraph.evaluation = ''; output.paragraph.isExplaining = false; output.paragraph.ai_explanation = ''; saveState()"

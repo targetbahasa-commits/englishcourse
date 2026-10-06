@@ -128,7 +128,8 @@
                         <textarea
                             name="userParagraphAnswer"
                             rows="14"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan paragraf di sini..."
                             @if($submitted) readonly="readonly" @endif>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                     </div>

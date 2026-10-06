@@ -412,7 +412,15 @@ class GrammarWritingSessionController extends Controller
             'fast-track_meeting2_user_paragraph',
             'fast-track_meeting2_draft_answers',
             'fast-track_meeting2_draft_paragraph',
+            'fast-track_meeting2_draft_paragraph_answer',
         ]);
+
+        // grammarWritingMeetingDraft() (the "Translate Kalimat" autosave endpoint)
+        // caches under these keys, not the generic user_{id}_meeting2_user_answers
+        // shape resetGrammarWritingMeetingSession() already forgets - without this,
+        // the cached draft survived the reset and kept repopulating the page.
+        \Illuminate\Support\Facades\Cache::forget('user_' . \Illuminate\Support\Facades\Auth::id() . '_fast-track_meeting2_draft_answers');
+        \Illuminate\Support\Facades\Cache::forget('user_' . \Illuminate\Support\Facades\Auth::id() . '_fast-track_meeting2_draft_paragraph_answer');
 
         return $this->resetGrammarWritingMeetingSession(
             'assignments.grammar-writing.meeting2',
@@ -652,7 +660,6 @@ class GrammarWritingSessionController extends Controller
             $buildGrammarWritingMeeting10ViewData->handle(
                 $this->data->meeting10Paragraph,
                 $this->data->meeting10Examples,
-                $displayMeetingNumber
             ),
             [
                 'displayMeetingNumber' => $displayMeetingNumber,
@@ -768,7 +775,6 @@ class GrammarWritingSessionController extends Controller
             $buildGrammarWritingMeeting12ViewData->handle(
                 $this->data->meeting12Questions,
                 $this->data->meeting12Paragraph,
-                $displayMeetingNumber
             ),
             [
                 'displayMeetingNumber' => $displayMeetingNumber,

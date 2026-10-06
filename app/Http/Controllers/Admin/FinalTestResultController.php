@@ -113,10 +113,162 @@ class FinalTestResultController extends Controller
         return view('admin.final-test-results.index', compact('results', 'testTypes', 'statuses', 'stats'));
     }
 
+    public function searchStudents(Request $request)
+    {
+        $q = trim((string) $request->input('q', ''));
+        $users = \App\Models\User::query()
+            ->when($q, function ($query, $q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(30)
+            ->get(['id', 'name', 'email']);
+
+        return response()->json($users);
+    }
+
+    public function manualIssue(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id'          => 'nullable|exists:users,id',
+            'name'             => 'required|string|max:255',
+            'email'            => 'nullable|email|max:255',
+            'test_type'        => 'required|string|max:100',
+            'issue_date'       => 'nullable|date',
+            'score'            => 'nullable|numeric|min:0',
+            'grade'            => 'nullable|string|max:50',
+            // TOEFL breakdown
+            'listening_score'  => 'nullable|numeric|min:0',
+            'structure_score'  => 'nullable|numeric|min:0',
+            'reading_score'    => 'nullable|numeric|min:0',
+            'toefl_score'      => 'nullable|numeric|min:0',
+            // IELTS breakdown
+            'ielts_listening'  => 'nullable|numeric|min:0|max:9',
+            'ielts_reading'    => 'nullable|numeric|min:0|max:9',
+            'ielts_writing'    => 'nullable|numeric|min:0|max:9',
+            'ielts_speaking'   => 'nullable|numeric|min:0|max:9',
+            'overall_band'     => 'nullable|numeric|min:0|max:9',
+            // Notes
+            'notes'            => 'nullable|string|max:1000',
+        ]);
+
+        $testType = $validated['test_type'];
+        $issueDate = !empty($validated['issue_date']) ? \Carbon\Carbon::parse($validated['issue_date']) : now();
+
+        $labels = [
+            'toefl_itp' => 'TOEFL ITP',
+            'ielts_academic' => 'IELTS Academic',
+            'ielts_general' => 'IELTS General',
+            'pte_academic' => 'PTE Academic',
+            'fast_track_grammar_for_writing' => 'Fast Track Grammar for Writing',
+            'introductory_grammar_for_writing' => 'Introductory Grammar for Writing',
+            'complexity_grammar_for_writing' => 'Complexity Grammar for Writing',
+            'proficiency_grammar_for_writing' => 'Proficiency Grammar for Writing',
+            'introductory_speaking' => 'Introductory Speaking',
+            'intermediate_speaking' => 'Intermediate Speaking',
+            'advanced_speaking' => 'Advanced Speaking',
+            'speaking' => 'Speaking Course',
+        ];
+        $testLabel = $labels[$testType] ?? ucwords(str_replace('_', ' ', $testType));
+
+        $evaluationData = [
+            'manually_issued' => true,
+            'issued_by'       => auth()->user()?->name ?? 'Admin',
+            'issued_at'       => now()->toDateTimeString(),
+            'notes'           => $validated['notes'] ?? null,
+        ];
+
+        $finalScore = 0;
+
+        if ($testType === 'toefl_itp') {
+            $l = (int) ($validated['listening_score'] ?? 0);
+            $s = (int) ($validated['structure_score'] ?? 0);
+            $r = (int) ($validated['reading_score'] ?? 0);
+            
+            $computedToefl = ($l && $s && $r) ? (int) round((($l + $s + $r) * 10) / 3) : 0;
+            $toeflScore = !empty($validated['toefl_score']) ? (float) $validated['toefl_score'] : ($computedToefl ?: (float) ($validated['score'] ?? 500));
+            
+            $evaluationData['listening_score'] = $l ?: null;
+            $evaluationData['structure_score'] = $s ?: null;
+            $evaluationData['reading_score'] = $r ?: null;
+            $evaluationData['toefl_score'] = $toeflScore;
+            $finalScore = $toeflScore;
+        } elseif (in_array($testType, ['ielts_academic', 'ielts_general'])) {
+            $l = $validated['ielts_listening'] !== null ? (float) $validated['ielts_listening'] : null;
+            $r = $validated['ielts_reading'] !== null ? (float) $validated['ielts_reading'] : null;
+            $w = $validated['ielts_writing'] !== null ? (float) $validated['ielts_writing'] : null;
+            $s = $validated['ielts_speaking'] !== null ? (float) $validated['ielts_speaking'] : null;
+
+            if ($l !== null && $r !== null && $w !== null && $s !== null) {
+                $avg = ($l + $r + $w + $s) / 4;
+                $computedOverall = round($avg * 2) / 2;
+            } else {
+                $computedOverall = (float) ($validated['overall_band'] ?? $validated['score'] ?? 7.0);
+            }
+
+            $overall = !empty($validated['overall_band']) ? (float) $validated['overall_band'] : $computedOverall;
+            $evaluationData['listening_score'] = $l;
+            $evaluationData['reading_score'] = $r;
+            $evaluationData['writing_score'] = $w;
+            $evaluationData['speaking_score'] = $s;
+            $evaluationData['overall_band'] = $overall;
+            $finalScore = $overall;
+        } else {
+            $finalScore = (float) ($validated['score'] ?? 85);
+            $grade = $validated['grade'] ?? null;
+            if (!$grade) {
+                if ($finalScore >= 90) $grade = 'Distinction';
+                elseif ($finalScore >= 80) $grade = 'High Merit';
+                elseif ($finalScore >= 70) $grade = 'Merit';
+                elseif ($finalScore >= 60) $grade = 'Pass with Credit';
+                elseif ($finalScore >= 50) $grade = 'Pass';
+                else $grade = 'Fail';
+            }
+            $evaluationData['grade'] = $grade;
+            $evaluationData['predicate'] = $grade;
+        }
+
+        $candidateId = 'TB-' . strtoupper(substr(md5(uniqid('', true)), 0, 8));
+
+        $result = new FinalTestResult();
+        $result->user_id = $validated['user_id'] ?? null;
+        $result->name = $validated['name'];
+        $result->email = $validated['email'] ?? ($validated['user_id'] ? \App\Models\User::find($validated['user_id'])?->email : 'manual@targetbahasa.com');
+        $result->candidate_id = $candidateId;
+        $result->test_type = $testType;
+        $result->test_label = $testLabel;
+        $result->status = 'completed';
+        $result->score = $finalScore;
+        $result->evaluation_data = $evaluationData;
+        $result->answers_data = ['manually_issued' => true];
+        $result->started_at = $issueDate;
+        $result->completed_at = $issueDate;
+        $result->created_at = $issueDate;
+        $result->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'            => true,
+                'message'            => 'Sertifikat berhasil diterbitkan!',
+                'id'                 => $result->id,
+                'certificate_number' => $result->certificate_number,
+                'download_url'       => route('admin.final-test-results.certificate', $result->id),
+                'verify_url'         => route('certificates.verify', $result->certificate_number),
+            ]);
+        }
+
+        return redirect()->route('admin.final-test-results.certificate', $result->id);
+    }
+
     public function certificate($id)
     {
         $result = \App\Models\FinalTestResult::findOrFail($id);
-        $certificate = \App\Models\FreeTestCertificate::where('test_type', $result->test_type)->whereNull('program_id')->first();
+        $certificate = \App\Models\FreeTestCertificate::where('test_type', $result->test_type)->whereNull('program_id')->first()
+            ?? \App\Models\FreeTestCertificate::where('test_type', $result->test_type)->first()
+            ?? \App\Models\FreeTestCertificate::first();
 
         if (!$certificate) {
             return back()->with('error', 'Sertifikat untuk tipe tes ini belum disiapkan.');
@@ -127,12 +279,12 @@ class FinalTestResultController extends Controller
         $data = [
             'result'      => $result,
             'certificate' => $certificate,
-            'testName'    => $result->test_label ?? 'Final Test',
-            'user'        => (object) ['name' => $result->name],
+            'testName'    => $result->test_label ?? 'Certificate of Completion',
+            'user'        => (object) ['name' => $result->name, 'email' => $result->email],
             'date'        => $date,
         ];
 
-        return \Barryvdh\DomPDF\Facade\Pdf::loadView('free-tests.certificate-pdf', $data)->stream('Certificate.pdf');
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView('free-tests.certificate-pdf', $data)->stream('Certificate-' . ($result->certificate_number ?? $result->id) . '.pdf');
     }
 
     public function show($id)

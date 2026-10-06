@@ -26,19 +26,16 @@ class QuestionAnswerKeyResolver
      */
     public function classify(array $question): string
     {
-        $type = $question['type'] ?? null;
-        $usesBlanksFormat = in_array($type, self::BLANKS_FORMAT_TYPES, true);
-
-        if (!$usesBlanksFormat && isset($question['sub_questions']) && is_array($question['sub_questions'])) {
-            return self::SHAPE_SUB_QUESTIONS;
-        }
-
         if (!empty($question['blanks'])) {
             return self::SHAPE_BLANKS;
         }
 
         if (!empty($question['placeholders'])) {
             return self::SHAPE_PLACEHOLDERS;
+        }
+
+        if (isset($question['sub_questions']) && is_array($question['sub_questions']) && count($question['sub_questions']) > 0) {
+            return self::SHAPE_SUB_QUESTIONS;
         }
 
         return self::SHAPE_SCALAR;
@@ -56,14 +53,27 @@ class QuestionAnswerKeyResolver
 
         switch ($this->classify($question)) {
             case self::SHAPE_SUB_QUESTIONS:
+                $isMultiSelect = in_array($question['type'] ?? '', ['multiple_choice_multiple', 'checkbox'], true);
+                $allCorrectLetters = [];
+                if ($isMultiSelect) {
+                    foreach ($question['sub_questions'] as $sub) {
+                        $c = $sub['correct_answer'] ?? (is_array($correctAnswers) ? ($correctAnswers[$sub['id'] ?? ''] ?? null) : null);
+                        if ($c) {
+                            foreach (explode('/', (string)$c) as $letter) {
+                                $trimmed = trim($letter);
+                                if ($trimmed !== '' && !in_array($trimmed, $allCorrectLetters, true)) {
+                                    $allCorrectLetters[] = $trimmed;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 foreach ($question['sub_questions'] as $sub) {
                     $id = $sub['id'] ?? null;
+                    $rawCorrect = $sub['correct_answer'] ?? (is_array($correctAnswers) ? ($correctAnswers[$id] ?? null) : null);
                     $keys[$id] = [
-                        // Prefer the correct_answer embedded on the sub-question itself
-                        // (the convention most content actually uses); fall back to a
-                        // top-level correct_answer map keyed by sub-id (the other
-                        // convention some content uses).
-                        'correct' => $sub['correct_answer'] ?? (is_array($correctAnswers) ? ($correctAnswers[$id] ?? null) : null),
+                        'correct' => ($isMultiSelect && count($allCorrectLetters) > 0) ? implode('/', $allCorrectLetters) : $rawCorrect,
                         'explanation' => $explanation,
                     ];
                 }

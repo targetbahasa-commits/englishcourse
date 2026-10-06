@@ -107,13 +107,13 @@ class IeltsWritingAiSupport
 
                 foreach ($keys as $index => $key) {
                     $modelsToTry = match ($provider) {
-                        'groq' => ['openai/gpt-oss-120b', 'qwen/qwen3.6-27b', 'llama-3.1-8b-instant'],
-                        'gemini' => ['gemini-2.0-flash', 'gemini-1.5-flash'],
+                        'groq' => ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+                        'gemini' => ['gemini-2.5-flash', 'gemini-3.6-flash'],
                         'sambanova' => ['Meta-Llama-3.3-70B-Instruct'],
-                        'cerebras' => ['llama3.3-70b', 'gpt-oss-120b'],
+                        'cerebras' => ['gpt-oss-120b', 'qwen-3.8-27b'],
                         'deepinfra' => ['meta-llama/Llama-3.3-70B-Instruct'],
                         'siliconflow' => ['deepseek-ai/DeepSeek-V3'],
-                        'openrouter' => ['meta-llama/llama-3.3-70b-instruct:free'],
+                        'openrouter' => ['meta-llama/llama-3.3-70b-instruct'],
                         'openai' => ['gpt-4o-mini'],
                         default => ['default']
                     };

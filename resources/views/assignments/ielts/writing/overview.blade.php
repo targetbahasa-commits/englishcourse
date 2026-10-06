@@ -88,7 +88,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write your overview:</label>
-                    <textarea name="overview_line" x-model="answers.overview_line" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-sm placeholder-gray-400" placeholder="Overall, ..."></textarea>
+                    <textarea name="overview_line" x-model="answers.overview_line" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Overall, ..."></textarea>
                 </div>
             </div>
 
@@ -144,7 +144,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write your overview:</label>
-                    <textarea name="overview_table" x-model="answers.overview_table" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 transition-all text-sm placeholder-gray-400" placeholder="Overall, ..."></textarea>
+                    <textarea name="overview_table" x-model="answers.overview_table" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Overall, ..."></textarea>
                 </div>
             </div>
 
@@ -161,7 +161,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write your overview:</label>
-                    <textarea name="overview_bar" x-model="answers.overview_bar" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 transition-all text-sm placeholder-gray-400" placeholder="Overall, ..."></textarea>
+                    <textarea name="overview_bar" x-model="answers.overview_bar" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Overall, ..."></textarea>
                 </div>
             </div>
 
@@ -187,7 +187,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write your overview:</label>
-                    <textarea name="overview_pie" x-model="answers.overview_pie" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 transition-all text-sm placeholder-gray-400" placeholder="Overall, ..."></textarea>
+                    <textarea name="overview_pie" x-model="answers.overview_pie" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Overall, ..."></textarea>
                 </div>
             </div>
 
@@ -204,7 +204,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write your overview:</label>
-                    <textarea name="overview_mixed" x-model="answers.overview_mixed" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 transition-all text-sm placeholder-gray-400" placeholder="Overall, ..."></textarea>
+                    <textarea name="overview_mixed" x-model="answers.overview_mixed" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Overall, ..."></textarea>
                 </div>
             </div>
 

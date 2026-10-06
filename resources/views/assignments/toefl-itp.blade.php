@@ -26,7 +26,7 @@
         @endif
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-8 pb-24">
             <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">

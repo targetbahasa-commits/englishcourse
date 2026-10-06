@@ -15,7 +15,7 @@ class ManageProgramDiscounts
         return $this->repository->getDiscountsForProgram($program->id);
     }
 
-    public function create(mixed $program, array $data, mixed $request): void
+    public function create(mixed $program, array $data, mixed $request): mixed
     {
         $conditions = null;
         if ($data['type'] === 'holiday' && !empty($data['start_date'])) {
@@ -28,7 +28,7 @@ class ManageProgramDiscounts
             $conditions = ['regions' => array_filter($regions)];
         }
 
-        $this->repository->createDiscount($program, [
+        return $this->repository->createDiscount($program, [
             'type'           => $data['type'],
             'label'          => $data['label'],
             'discount_type'  => $data['discount_type'],
@@ -38,12 +38,13 @@ class ManageProgramDiscounts
         ]);
     }
 
-    public function toggleActive(mixed $discount): void
+    public function toggleActive(mixed $discount): mixed
     {
         $this->repository->update($discount, ['is_active' => !$discount->is_active]);
+        return $discount;
     }
 
-    public function update(mixed $discount, array $data, mixed $request): void
+    public function update(mixed $discount, array $data, mixed $request): mixed
     {
         $conditions = $discount->conditions;
         if ($discount->type === 'holiday' && !empty($data['start_date'])) {
@@ -63,6 +64,8 @@ class ManageProgramDiscounts
             'conditions'     => $conditions,
             'is_active'      => $request->boolean('is_active', true),
         ]);
+
+        return $discount;
     }
 
     public function delete(mixed $discount): void

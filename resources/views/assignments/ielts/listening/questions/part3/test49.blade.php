@@ -1,46 +1,169 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3 - Practice Test 49</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3</h3>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 21-23</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Books & Literature</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD ONLY</strong> for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Research about different energy-saving innovations</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Kites in Germany used in different <strong class="text-blue-600 font-bold ml-1 mr-1">21</strong><input type="text" name="answers[21]" value="{{ old('answers.21') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> conditions to reduce the emission of toxic gas</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Vehicles in America powered by <strong class="text-blue-600 font-bold ml-1 mr-1">22</strong><input type="text" name="answers[22]" value="{{ old('answers.22') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Gas canister in South Africa invented to reduce its chances to <strong class="text-blue-600 font-bold ml-1 mr-1">23</strong><input type="text" name="answers[23]" value="{{ old('answers.23') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 24-25</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>TWO</strong> letters, <strong>A-E</strong>._</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Which <strong>TWO</strong> types of interviewees do Greg and Syria choose to do the survey?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>A</strong>staff on campus</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>B</strong> professors</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>C</strong> local residents</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>D</strong> companies</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong> university students</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 26-30</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong>, or <strong>C</strong>.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>26</strong>What does Syria think about renewable energy?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[26]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>Most people know very little about renewable energy.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[26]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>The general public can distinguish different kinds of renewable energy.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Colleges & Universities</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[26]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>The majority of people feel the need to replace fossil fuels with renewable energy.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>27</strong>What do the speakers say about modem windmills?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[27]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>They can be used to pump water from wells.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[27]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>The location to build them should be carefully chosen.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[27]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Farmers use them to grind grain.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>28</strong>What aspect of traditional fuels are they going to address?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[28]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>how to avoid fossil fuels from being depleted</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[28]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>the possible future of traditional resources</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[28]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>how to prevent pollution of traditional resources</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>29</strong>What does Greg say about nuclear plants?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[29]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>They are cleaner and less expensive than fossil fuel.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[29]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>It is the best way to fight climate change.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[29]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Few people think they are safe</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>30</strong>What does Syria think of hydrogen fuel?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[30]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>The price of it will drop eventually.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[30]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>It entails environmental problems.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Renewable & Alternative Energy</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[30]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>The benefits of it overweigh its high cost.</span></label>
+    {{-- Questions 21-25: Multiple Choice --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Questions 21-25</h4>
+            <p class="text-gray-600 font-medium mt-1">Choose the correct letter, <strong class="text-gray-900">A</strong>, <strong class="text-gray-900">B</strong> or <strong class="text-gray-900">C</strong>.</p>
+        </div>
+
+        {{-- Q21 --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="font-semibold text-gray-900 text-base mb-3"><span class="text-gray-900 font-bold mr-2">21</span> Why did Anita and Lee choose to talk about John Chapman?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="A" {{ old('answers.21') == 'A' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">He was Lee’s childhood hero.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="B" {{ old('answers.21') == 'B' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">They wanted to talk about the USA.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="C" {{ old('answers.21') == 'C' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">He was relevant to the topic of their studies.</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Q22 --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="font-semibold text-gray-900 text-base mb-3"><span class="text-gray-900 font-bold mr-2">22</span> Where did the students record their sources of information?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="A" {{ old('answers.22') == 'A' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">on their laptops</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="B" {{ old('answers.22') == 'B' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">on a handout</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="C" {{ old('answers.22') == 'C' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">on a database</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Q23 --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="font-semibold text-gray-900 text-base mb-3"><span class="text-gray-900 font-bold mr-2">23</span> The tutor claims she does not understand whether</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="A" {{ old('answers.23') == 'A' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">apples grew in America before Europeans arrived.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="B" {{ old('answers.23') == 'B' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">the Native Americans had always eaten apples.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="C" {{ old('answers.23') == 'C' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">American apples were first bred in Europe.</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Q24 --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="font-semibold text-gray-900 text-base mb-3"><span class="text-gray-900 font-bold mr-2">24</span> The tutor says the audience was particularly interested to hear about</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="A" {{ old('answers.24') == 'A' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">grafting techniques in ancient China.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="B" {{ old('answers.24') == 'B' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">the cultivation of apples in Kazakhstan.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="C" {{ old('answers.24') == 'C' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">the spread of apples along the Silk Route.</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Q25 --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="font-semibold text-gray-900 text-base mb-3"><span class="text-gray-900 font-bold mr-2">25</span> How will Anita and Lee present their follow-up work?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="A" {{ old('answers.25') == 'A' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">on the department website</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="B" {{ old('answers.25') == 'B' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">as a paper</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="C" {{ old('answers.25') == 'C' ? 'checked' : '' }} class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">as a poster</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    {{-- Questions 26-30: Matching --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Questions 26-30</h4>
+            <p class="text-gray-600 font-medium mt-1">What do Lee and Anita agree about their presentation skills with their tutor?</p>
+            <p class="text-gray-600 font-medium">Write the correct letter, <strong class="text-gray-900">A</strong>, <strong class="text-gray-900">B</strong> or <strong class="text-gray-900">C</strong> next to questions 26-30.</p>
+        </div>
+
+        {{-- Options Box --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 max-w-sm mx-auto text-center">
+            <h5 class="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wide">Options</h5>
+            <div class="flex justify-around text-sm font-semibold text-gray-800">
+                <div><span class="font-bold text-gray-900 mr-1">A</span> excellent</div>
+                <div><span class="font-bold text-gray-900 mr-1">B</span> acceptable</div>
+                <div><span class="font-bold text-gray-900 mr-1">C</span> poor</div>
+            </div>
+        </div>
+
+        <div class="space-y-3 max-w-xl mx-auto pt-2">
+            <h5 class="font-bold text-gray-800 text-base mb-2">Presentation skills</h5>
+
+            @php
+                $skills = [
+                    26 => 'use of equipment',
+                    27 => 'handling software',
+                    28 => 'timing of sections',
+                    29 => 'design of handout',
+                    30 => 'clarity of speech'
+                ];
+            @endphp
+
+            @foreach($skills as $q => $label)
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100/70 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-900 text-lg w-6">{{ $q }}</span>
+                        <span class="text-gray-800 font-medium text-base">{{ $label }}</span>
+                    </div>
+                    <select name="answers[{{ $q }}]" class="border border-gray-300 focus:border-black outline-none px-4 py-1.5 rounded-lg font-bold bg-white text-gray-800 transition-colors cursor-pointer">
+                        <option value="" disabled {{ old("answers.$q") ? '' : 'selected' }}>Select</option>
+                        @foreach(['A','B','C'] as $opt)
+                            <option value="{{ $opt }}" {{ old("answers.$q") == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endforeach
+        </div>
     </div>
 </div>

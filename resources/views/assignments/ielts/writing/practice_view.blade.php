@@ -9,6 +9,29 @@
 @endphp
 
 @section('content')
+@php
+    $hasExistingSubmission = !empty($existingSubmission) && !empty($existingSubmission->scores);
+    $existingOverallBand = $hasExistingSubmission ? ($existingSubmission->scores['overall_band'] ?? $existingSubmission->teacher_score ?? null) : null;
+    $initialResultData = $hasExistingSubmission ? [
+        'scores' => $existingSubmission->scores ?? [],
+        'feedback' => $existingSubmission->scores['feedback'] ?? null,
+        'correction_html' => $existingSubmission->scores['correction_html'] ?? null,
+        'better_version' => $existingSubmission->scores['better_version'] ?? null,
+        'grammar_improvements' => $existingSubmission->scores['grammar_improvements'] ?? [],
+        'cohesive_devices_used' => $existingSubmission->scores['cohesive_devices_used'] ?? [],
+        'good_vocabulary_used' => $existingSubmission->scores['good_vocabulary_used'] ?? [],
+        'vocabulary_improvements' => $existingSubmission->scores['vocabulary_improvements'] ?? []
+    ] : [
+        'scores' => (object)[],
+        'feedback' => null,
+        'correction_html' => null,
+        'better_version' => null,
+        'grammar_improvements' => [],
+        'cohesive_devices_used' => [],
+        'good_vocabulary_used' => [],
+        'vocabulary_improvements' => []
+    ];
+@endphp
 <style>
     .row-indigo { background-color: #eef2ff; }
     .row-fuchsia { background-color: #fdf4ff; }
@@ -72,8 +95,25 @@
                 </div>
             </div>
 
-            <!-- Right Side: Admin Actions -->
+            <!-- Right Side: Status, Retry & Admin Actions -->
             <div class="flex items-center gap-3 shrink-0">
+                @if(!$hasExistingSubmission)
+                    <div id="autosave-status" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span id="autosave-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="autosave-status-text">Autosave Aktif</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-2">
+                        <div class="student-score-badge flex items-center gap-1.5 px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Band {{ is_numeric($existingOverallBand) ? number_format((float)$existingOverallBand, 1) : $existingOverallBand }}</span>
+                        </div>
+                        <button type="button" @click="confirmResetPractice()" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            <span>Kerjakan Ulang</span>
+                        </button>
+                    </div>
+                @endif
                 @if(Auth::check() && Auth::user()->role === 'admin')
                     <button type="button" @click="previewEvaluasi()" :disabled="loading" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2" title="Khusus Admin: Preview Hasil Evaluasi AI (menggunakan sistem evaluasi yang sama dengan submission asli)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -421,12 +461,16 @@
             <div x-show="showResults" class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex-none flex justify-between items-center">
                  <h3 class="text-lg font-bold text-indigo-800">Evaluation Results</h3>
                  <div class="flex items-center gap-3">
+                     <button type="button" @click="confirmResetPractice()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                         <span>Kerjakan Ulang ↺</span>
+                     </button>
                      <template x-if="lastSubmissionId">
                          <a :href="'/assignments/ielts-academic/writing/submission/' + lastSubmissionId" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors" target="_blank">
                              <span>Halaman Hasil Pengerjaan Lengkap ↗</span>
                          </a>
                      </template>
-                     <button @click="showResults = false" class="text-sm text-indigo-600 hover:text-indigo-800 underline">Back to Edit</button>
+                     <button @click="showResults = false" class="text-sm text-indigo-600 hover:text-indigo-800 underline">Lihat Teks Essay</button>
                  </div>
             </div>
 
@@ -446,7 +490,52 @@
                     </template>
                 </div>
 
-                <textarea name="essay" x-model="essay" rows="25" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all text-base placeholder-gray-400 font-mono leading-relaxed resize-y" placeholder="{{ ($meeting->meeting_number >= 2000 || !empty($isGeneral)) ? 'Dear Sir or Madam,&#10;&#10;I am writing to...' : 'The chart illustrates...' }}"></textarea>
+                <div class="relative">
+                    <textarea name="essay" x-model="essay" x-show="!msOpen" rows="25" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$watch('essay', () => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } }); $nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all text-base placeholder-gray-400 font-mono leading-relaxed resize-none overflow-hidden" placeholder="{{ ($meeting->meeting_number >= 2000 || !empty($isGeneral)) ? 'Dear Sir or Madam,&#10;&#10;I am writing to...' : 'The chart illustrates...' }}"></textarea>
+
+                    {{-- Magic Sentence inline overlay: mirrors the essay text as a static
+                         span immediately followed by a contenteditable span, so the
+                         Indonesian sentence appears to be typed right where the cursor
+                         was in the essay - same UX as the promo test page - instead of
+                         a separate popup dialog. --}}
+                    <div x-show="msOpen" x-cloak class="absolute inset-0 w-full h-full min-h-[400px] z-10 bg-white border border-gray-300 rounded-lg">
+                        <div class="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-20">
+                            <div class="bg-gray-900 bg-opacity-90 text-white px-4 py-2 rounded-full shadow-lg text-[11px] sm:text-xs flex items-center gap-2 backdrop-blur-sm">
+                                <span class="text-white"><strong>Magic Sentence:</strong> Ketik B. Indonesia →
+                                    tekan <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Ctrl+Enter</kbd> /
+                                    <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Cmd+Return</kbd>
+                                    untuk translate ke gaya IELTS, atau <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Esc</kbd> untuk keluar.</span>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 w-full h-full px-4 py-3 text-base font-mono leading-relaxed overflow-y-auto whitespace-pre-wrap break-words cursor-text"
+                            @click="if($refs.msInput) {
+                                $refs.msInput.focus();
+                                try {
+                                    let sel = window.getSelection();
+                                    let range = document.createRange();
+                                    range.selectNodeContents($refs.msInput);
+                                    range.collapse(false);
+                                    sel.removeAllRanges();
+                                    sel.addRange(range);
+                                } catch(e) {}
+                            }"><span x-text="essay"></span><span x-ref="msInput" contenteditable="true" inputmode="text"
+                                class="outline-none border-b-2 border-dashed border-blue-400 bg-blue-50 text-blue-900 empty:before:content-[attr(data-placeholder)] empty:before:text-blue-300 cursor-text inline"
+                                data-placeholder="Ketik kalimat di sini..."
+                                @keydown.enter.ctrl.prevent="msText = $el.innerText; translateSentence()"
+                                @keydown.enter.meta.prevent="msText = $el.innerText; translateSentence()"
+                                @keydown.escape.prevent="msOpen = false; msText = ''"
+                                @input="msText = $el.innerText"></span><button
+                                type="button" x-show="msText.trim().length > 0 && !msLoading"
+                                @click.stop="if($refs.msInput) { msText = $refs.msInput.innerText; translateSentence(); }"
+                                class="inline-flex items-center justify-center w-4 h-4 ml-0.5 bg-blue-500 hover:bg-blue-600 text-white rounded shadow-sm transition-transform hover:scale-110 focus:outline-none align-baseline"
+                                title="Translate (Ctrl+Enter / Cmd+Enter)">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            </button><span x-show="msLoading" class="inline-flex items-center ml-1 text-blue-500 align-baseline">
+                                <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="mt-2 flex justify-end items-center text-xs text-gray-400">
                     <button @click="refreshEssay()" class="hover:text-red-500 flex items-center gap-1 transition-colors">
@@ -837,7 +926,7 @@
     @endif
     
     @include('assignments.ielts.writing.partials.practice_panels')
-    @include('assignments.ielts.writing.practice_toolbar')
+    @include('assignments.ielts.writing.practice_toolbar', ['inlineMagicSentence' => true])
 </div>
 
 @push('scripts')
@@ -1367,14 +1456,19 @@ function sanitizeLatexDegrees(text) {
 document.addEventListener('alpine:init', () => {
     Alpine.data('practiceView', (meetingId, taskType, idioms = [], collocations = []) => ({
         // State
-        essay: '', 
+        essay: @json($existingSubmission?->essay ?? ''),
+        // Magic Sentence (inline-in-textarea, same UX as the promo test page)
+        msOpen: false,
+        msText: '',
+        msLoading: false,
+        msError: null,
         time: 0,
         interval: null,
         loading: false,
         improving: false,
         error: null,
-        lastSubmissionId: null,
-        showResults: false,
+        lastSubmissionId: {{ $existingSubmission?->id ?? 'null' }},
+        showResults: {{ $hasExistingSubmission ? 'true' : 'false' }},
         feedbackFailed: false,
         correctionFailed: false,
         improveFailed: false,
@@ -1406,16 +1500,7 @@ document.addEventListener('alpine:init', () => {
             prompt: ''
         },
 
-        result: {
-            scores: {},
-            feedback: null,
-            correction_html: null,
-            better_version: null,
-            grammar_improvements: [],
-            cohesive_devices_used: [],
-            good_vocabulary_used: [],
-            vocabulary_improvements: []
-        },
+        result: {{ Js::from($initialResultData) }},
         
         // Computed
         get wordCount() {
@@ -1456,7 +1541,7 @@ document.addEventListener('alpine:init', () => {
             // Restore Essay local backup if exists (AutoSave handles main restore)
             const key = 'ielts_writing_practice_' + meetingId;
             const saved = localStorage.getItem(key);
-            if (saved && saved !== 'undefined') {
+            if (!this.essay && saved && saved !== 'undefined') {
                  this.essay = sanitizeLatexDegrees(saved);
                  this._essayRestoredLocally = true;
             }
@@ -1468,6 +1553,7 @@ document.addEventListener('alpine:init', () => {
 
             this.time = (taskType == 2) ? 2400 : 1200; // 40 mins for Task 2, 20 mins for Task 1
             
+            @if(!$hasExistingSubmission)
             this.interval = setInterval(() => { 
                 if (this.time > 0) {
                     this.time--; 
@@ -1475,6 +1561,7 @@ document.addEventListener('alpine:init', () => {
                     clearInterval(this.interval);
                 }
             }, 1000);
+            @endif
             
             // Call the other initialization logic
             this.initProperties();
@@ -1497,6 +1584,89 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        toggleMagicSentence() {
+            this.msOpen = !this.msOpen;
+            if (this.msOpen) {
+                this.msText = '';
+                if (this.$refs.msInput) {
+                    this.$refs.msInput.innerText = '';
+                }
+                setTimeout(() => {
+                    if (this.$refs.msInput) {
+                        this.$refs.msInput.focus();
+                        try {
+                            let sel = window.getSelection();
+                            let range = document.createRange();
+                            range.selectNodeContents(this.$refs.msInput);
+                            range.collapse(false);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        } catch(e) {}
+                    }
+                }, 50);
+            }
+        },
+
+        async translateSentence() {
+            if (!this.msText.trim()) return;
+            this.msLoading = true;
+            this.msError = null;
+            try {
+                const response = await fetch('/api/ollama/translate-sentence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content')
+                    },
+                    body: JSON.stringify({ text: this.msText.trim() })
+                });
+                if (!response.ok) throw new Error('Translation failed.');
+                const data = await response.json();
+                if (data.translation) {
+                    const current = this.essay || '';
+                    const prefix = current.length > 0 && !current.endsWith(' ') && !current.endsWith('\n') ? ' ' : '';
+                    this.essay = current + prefix + data.translation;
+                    this.msText = '';
+                    this.msOpen = false;
+                } else {
+                    this.msError = 'Unexpected response from AI.';
+                }
+            } catch (e) {
+                this.msError = e.message;
+            } finally {
+                this.msLoading = false;
+            }
+        },
+
+        updateAutosaveStatus(text, type = 'active') {
+            const textEl = document.getElementById('autosave-status-text');
+            const dotEl = document.getElementById('autosave-status-dot');
+            if (textEl) textEl.textContent = text;
+            if (dotEl) {
+                if (type === 'saving') {
+                    dotEl.className = 'w-2 h-2 rounded-full bg-amber-500 animate-spin';
+                } else if (type === 'saved') {
+                    dotEl.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                } else {
+                    dotEl.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                }
+            }
+        },
+
+        confirmResetPractice() {
+            if (confirm('Apakah Anda yakin ingin mengerjakan ulang latihan ini? Hasil evaluasi dan draft sebelumnya akan direset.')) {
+                const planKey = 'ielts_plan_practice_' + meetingId;
+                const key = 'ielts_writing_practice_' + meetingId;
+                localStorage.removeItem(planKey);
+                localStorage.removeItem(key);
+                if (window.AutoSave && typeof window.AutoSave.clearSaved === 'function') {
+                    try { window.AutoSave.clearSaved(); } catch (e) {}
+                }
+                window.location.href = window.location.pathname + '?retry=1';
+            }
+        },
+
         // Helper to initialize properties
         initProperties() {
             // Load Plan
@@ -1512,9 +1682,11 @@ document.addEventListener('alpine:init', () => {
                 } catch(e) { console.error('Error loading plan', e); }
             }
 
+            @if(!$hasExistingSubmission)
             if (!this._essayRestoredLocally || !planRestoredLocally) {
                 this.restoreFromServerAnswers(!this._essayRestoredLocally, !planRestoredLocally);
             }
+            @endif
 
             // Watch Plan
             this.$watch('plan', (val) => {
@@ -1529,9 +1701,11 @@ document.addEventListener('alpine:init', () => {
 
             setTimeout(() => {
                 // Sync Essay
-                const textarea = document.querySelector('textarea[name="essay"]');
-                if (textarea && textarea.value) {
-                    this.essay = sanitizeLatexDegrees(textarea.value);
+                if (!this.essay) {
+                    const textarea = document.querySelector('textarea[name="essay"]');
+                    if (textarea && textarea.value) {
+                        this.essay = sanitizeLatexDegrees(textarea.value);
+                    }
                 }
             }, 500);
             
@@ -1571,6 +1745,8 @@ document.addEventListener('alpine:init', () => {
                     this.plan.extras = extras;
                 }
             }
+
+            this.updateAutosaveStatus('Draft dipulihkan', 'saved');
         },
 
         // Inverse of restoreFromServerAnswers() - flattens essay/plan into
@@ -1591,13 +1767,16 @@ document.addEventListener('alpine:init', () => {
         },
 
         queueDraftSync() {
+            @if(!$hasExistingSubmission)
+            this.updateAutosaveStatus('Menyimpan...', 'saving');
             clearTimeout(this.draftSyncTimer);
             this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            @endif
         },
 
         async syncDraftToServer() {
             try {
-                await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
+                const response = await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1607,6 +1786,11 @@ document.addEventListener('alpine:init', () => {
                     body: JSON.stringify({ userAnswers: this.buildDraftPayload() }),
                     keepalive: true,
                 });
+                if (response.ok) {
+                    const now = new Date();
+                    const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+                    this.updateAutosaveStatus('✓ Tersimpan (' + timeStr + ')', 'saved');
+                }
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
             }

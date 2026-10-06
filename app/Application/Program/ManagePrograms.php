@@ -5,6 +5,7 @@ namespace App\Application\Program;
 use App\Domain\Program\Contracts\ProgramBrochureStorage;
 use App\Domain\Program\Repositories\ProgramRepository;
 use App\Domain\FreeTest\Repositories\FreeTestRepository;
+use App\Services\AiBrochureImageGenerator;
 use Illuminate\Support\Str;
 
 class ManagePrograms
@@ -157,9 +158,100 @@ class ManagePrograms
         return false;
     }
 
+    /**
+     * Builds a ready-to-use marketing-brochure prompt from a program's own
+     * data (name, description, price, CEFR level, delivery mode) - shared by
+     * both the "copy this into Gemini/ChatGPT yourself" flow and the
+     * "generate the image for me" flow below, so both stay consistent.
+     */
+    public function buildBrochurePrompt(mixed $program): string
+    {
+        $modeLabel = $program->delivery_mode === 'offline' ? 'Offline (Pare)' : 'Online';
+
+        $tierFields = $program->delivery_mode === 'offline'
+            ? ['Reguler' => 'price_offline', 'Semi Private' => 'price_semi_private_offline', 'Private' => 'price_private_offline']
+            : ['Reguler' => 'price', 'Semi Private' => 'price_semi_private', 'Private' => 'price_private'];
+
+        $priceLines = [];
+        foreach ($tierFields as $label => $field) {
+            $amount = $program->discountedPrice($field);
+            if ($amount > 0) {
+                $priceLines[] = $label . ': Rp ' . number_format($amount, 0, ',', '.');
+            }
+        }
+        $priceText = $priceLines ? implode(', ', $priceLines) : 'Hubungi kami untuk info harga';
+
+        $levelText = '';
+        if ($program->min_cefr_level || $program->max_cefr_level) {
+            $levelText = 'Target level CEFR: ' . ($program->min_cefr_level ?: 'A1') . ' - ' . ($program->max_cefr_level ?: $program->min_cefr_level ?: 'C2') . ".\n";
+        }
+
+        return trim(
+            "Buatkan desain gambar brosur promosi digital untuk program kursus bahasa Inggris berikut, dengan gaya modern, profesional, dan mudah dibaca - mirip flyer promosi kursus online/edukasi.\n\n"
+            . "Nama Program: {$program->name}\n"
+            . "Mode Kelas: {$modeLabel}\n"
+            . "Durasi: {$program->period}\n"
+            . $levelText
+            . "Deskripsi: {$program->description}\n"
+            . "Harga: {$priceText}\n\n"
+            . "Ketentuan desain:\n"
+            . "- Ukuran potret (rasio kira-kira 4:5, cocok untuk Instagram/WhatsApp)\n"
+            . "- Palet warna utama biru tua dan kuning/emas, dengan aksen putih\n"
+            . "- Judul program ditulis besar dan tebal sebagai fokus utama\n"
+            . "- Sertakan badge kecil mode kelas ('{$modeLabel}')\n"
+            . "- Tampilkan 3-5 poin fokus/manfaat program dalam bentuk list singkat, berdasarkan deskripsi di atas\n"
+            . "- Cantumkan harga dengan jelas\n"
+            . "- Sertakan area untuk nama brand 'TARGET BAHASA' dan tagline 'English Skills. Global Success.' di bagian bawah\n"
+            . "- Gunakan foto/ilustrasi yang relevan dengan tema belajar bahasa Inggris (buku, laptop, orang belajar, dsb) sebagai elemen visual pendukung\n"
+            . "- Jangan sertakan teks placeholder seperti 'lorem ipsum' - gunakan teks asli sesuai data program di atas"
+        );
+    }
+
+    /**
+     * Calls the chosen AI provider to generate a brochure image and stages
+     * it as a draft (not yet saved onto the program) so the admin can review
+     * it before it replaces any existing brochure image.
+     *
+     * @return array{success: true, draft_path: string, draft_url: string}|array{success: false, message: string}
+     */
+    public function generateAiBrochureImage(string $provider, string $prompt): array
+    {
+        $result = AiBrochureImageGenerator::generate($provider, $prompt);
+        if (!$result['success']) {
+            return $result;
+        }
+
+        $extension = str_contains($result['mime'], 'jpeg') ? 'jpg' : 'png';
+        $draftPath = $this->brochureStorage->storeDraftImage($result['binary'], $extension);
+
+        return [
+            'success' => true,
+            'draft_path' => $draftPath,
+            'draft_url' => \Illuminate\Support\Facades\Storage::disk('public')->url($draftPath),
+        ];
+    }
+
+    /**
+     * Promotes a previously generated draft into the program's actual
+     * brochure_image, replacing whatever was there before.
+     */
+    public function acceptAiBrochureImage(mixed $program, string $draftPath): string
+    {
+        $this->brochureStorage->deleteFile($program->brochure_image);
+        $finalPath = $this->brochureStorage->promoteDraft($draftPath);
+        $this->repository->update($program, ['brochure_image' => $finalPath]);
+
+        return $finalPath;
+    }
+
     public function deactivate(mixed $program): void
     {
         $this->repository->deactivate($program);
+    }
+
+    public function toggleActive(mixed $program): mixed
+    {
+        return $this->repository->toggleActive($program);
     }
 
     public function delete(mixed $program): string
@@ -193,5 +285,15 @@ class ManagePrograms
     public function reorderMeetings(mixed $program, array $order): void
     {
         $this->repository->reorderMeetings($program, $order);
+    }
+
+    public function listSplittableCandidates(): array
+    {
+        return $this->repository->findSplittableCandidates();
+    }
+
+    public function splitIntoOfflineVariant(mixed $program, ?string $nameSuffix = null): mixed
+    {
+        return $this->repository->splitIntoOfflineVariant($program, $nameSuffix);
     }
 }

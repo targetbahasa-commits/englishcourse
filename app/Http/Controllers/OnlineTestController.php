@@ -568,6 +568,19 @@ class OnlineTestController extends Controller
         ]);
     }
 
+    /**
+     * The shared host's default python3 is 3.6.8, far too old for
+     * Kokoro/torch - a dedicated venv with Python 3.11 is installed at this
+     * fixed path for that reason. Falls back to plain python3 wherever that
+     * venv doesn't exist (e.g. local dev).
+     */
+    private function kokoroPythonBinary(): string
+    {
+        $venvPython = '/home/u822472458/kokoro_venv/bin/python3.11';
+
+        return file_exists($venvPython) ? $venvPython : 'python3';
+    }
+
     public function streamKokoroSpeech(Request $request)
     {
         $text = trim((string) $request->query('text'));
@@ -586,7 +599,7 @@ class OnlineTestController extends Controller
         if (!file_exists($absoluteOutput)) {
             $scriptPath = base_path('scripts/kokoro_tts.py');
             $kokoro = new Process([
-                'python3',
+                $this->kokoroPythonBinary(),
                 $scriptPath,
                 '--text',
                 $text,
@@ -596,7 +609,7 @@ class OnlineTestController extends Controller
                 $voice,
                 '--lang',
                 $lang,
-            ]);
+            ], null, ['HF_HUB_DISABLE_XET' => '1']);
             $kokoro->setTimeout(120);
             $kokoro->run();
 
@@ -633,7 +646,7 @@ class OnlineTestController extends Controller
             $scriptPath = base_path('scripts/kokoro_tts.py');
             
             $kokoro = new Process([
-                'python3',
+                $this->kokoroPythonBinary(),
                 $scriptPath,
                 '--text',
                 $text,
@@ -643,7 +656,7 @@ class OnlineTestController extends Controller
                 $voice,
                 '--lang',
                 $lang,
-            ]);
+            ], null, ['HF_HUB_DISABLE_XET' => '1']);
 
             // Set timeout very long for first-run model downloads (up to 5 minutes)
             // Kokoro downloads ~500MB model on first use

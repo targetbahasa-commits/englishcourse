@@ -531,7 +531,27 @@
 
             <!-- Semua Meeting: full meeting list per program with click-to-view
                  Q&A, so admin can review/correct without leaving this page. -->
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8" x-data="{ viewingMeeting: null }">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8" x-data="{
+                    viewingMeeting: null,
+                    refreshingMeeting: false,
+                    refreshViewingMeeting() {
+                        if (!this.viewingMeeting || this.refreshingMeeting) return;
+                        this.refreshingMeeting = true;
+                        const params = new URLSearchParams({
+                            program_id: this.viewingMeeting.programId,
+                            meeting_number: this.viewingMeeting.meetingNumber,
+                        });
+                        fetch(@js(route('admin.students.meeting_answers', $student)) + '?' + params.toString(), {
+                            headers: { 'Accept': 'application/json' },
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.viewingMeeting = { ...this.viewingMeeting, ...data };
+                            })
+                            .finally(() => { this.refreshingMeeting = false; });
+                    },
+                    ...draftViewerWithDrawing(),
+                }">
                 <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     Semua Meeting
@@ -623,7 +643,7 @@
                                 @endphp
                                 <button type="button"
                                     @if($status !== 'not_started')
-                                    @click="viewingMeeting = { programName: @js($group['program']->name), meetingNumber: {{ (int) $m->meeting_number }}, title: @js($m->title), status: @js($status), score: {{ $score->score ?? 'null' }}, meetingScoreId: {{ $isGrammarWritingTrack ? ($score->id ?? 'null') : 'null' }}, savedAt: @js($savedAt), answers: @js($answers), questions: @js($questions) }"
+                                    @click="viewingMeeting = { programId: {{ (int) $group['program']->id }}, programName: @js($group['program']->name), meetingNumber: {{ (int) $m->meeting_number }}, title: @js($m->title), status: @js($status), score: {{ $score->score ?? 'null' }}, meetingScoreId: {{ $isGrammarWritingTrack ? ($score->id ?? 'null') : 'null' }}, savedAt: @js($savedAt), answers: @js($answers), questions: @js($questions) }"
                                     @endif
                                     {{ $status === 'not_started' ? 'disabled' : '' }}
                                     class="w-full flex items-center justify-between gap-3 p-3 rounded-xl border transition text-left
@@ -650,6 +670,13 @@
                                         @endif
                                     </div>
                                 </button>
+                                @if($status === 'in_progress' && $isGrammarWritingTrack)
+                                    <button type="button"
+                                        @click="viewingDraft = { id: {{ (int) $draft->id }}, user_id: {{ (int) $draft->user_id }}, program_id: {{ (int) $group['program']->id }}, meeting_number: {{ (int) $m->meeting_number }}, name: @js($student->name), email: @js($student->email ?? ''), meta: @js($group['program']->name . ' · Meeting ' . $m->meeting_number), savedAt: @js($savedAt), answers: @js($answers), questions: @js($questions) }"
+                                        class="mt-1.5 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition cursor-pointer">
+                                        ✏️ Koreksi (Coret-Coret &amp; Download)
+                                    </button>
+                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -678,9 +705,14 @@
                                     <span class="text-xs text-gray-500 font-medium" x-text="viewingMeeting?.savedAt ? ('Tersimpan ' + viewingMeeting.savedAt) : ''"></span>
                                 </div>
                             </div>
-                            <button type="button" @click="viewingMeeting = null" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition shrink-0 shadow-xs">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button type="button" @click="refreshViewingMeeting()" :disabled="refreshingMeeting" title="Refresh jawaban terbaru" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition shadow-xs disabled:opacity-50">
+                                    <svg class="w-4 h-4" :class="refreshingMeeting ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                </button>
+                                <button type="button" @click="viewingMeeting = null" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition shadow-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-100px)]">
@@ -777,6 +809,8 @@
                         </div>
                     </div>
                 </div>
+
+                @include('admin.partials.draft-drawing-modal')
             </div>
 
             <!-- Notes or Bio -->
@@ -839,3 +873,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@include('admin.partials.draft-drawing-script')
+@endpush

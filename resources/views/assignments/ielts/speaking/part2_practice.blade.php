@@ -4,20 +4,20 @@
 
 @php
     $colorMap = [
-        'blue' => ['bg' => 'bg-white', 'text' => 'text-blue-600', 'border' => 'border-blue-200', 'progress' => 'bg-blue-500', 'ring' => 'ring-blue-200', 'hover' => 'hover:bg-blue-200'],
+        'blue' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600', 'border' => 'border-blue-200', 'progress' => 'bg-blue-500', 'ring' => 'ring-blue-200', 'hover' => 'hover:bg-blue-200'],
         'green' => ['bg' => 'bg-green-100', 'text' => 'text-green-600', 'border' => 'border-green-200', 'progress' => 'bg-green-500', 'ring' => 'ring-green-200', 'hover' => 'hover:bg-green-200'],
-        'indigo' => ['bg' => 'bg-white', 'text' => 'text-indigo-600', 'border' => 'border-indigo-200', 'progress' => 'bg-indigo-500', 'ring' => 'ring-indigo-200', 'hover' => 'hover:bg-indigo-200'],
-        'orange' => ['bg' => 'bg-white', 'text' => 'text-orange-600', 'border' => 'border-orange-200', 'progress' => 'bg-orange-500', 'ring' => 'ring-orange-200', 'hover' => 'hover:bg-orange-200'],
-        'purple' => ['bg' => 'bg-white', 'text' => 'text-purple-600', 'border' => 'border-purple-200', 'progress' => 'bg-purple-500', 'ring' => 'ring-purple-200', 'hover' => 'hover:bg-purple-200'],
+        'indigo' => ['bg' => 'bg-indigo-100', 'text' => 'text-indigo-600', 'border' => 'border-indigo-200', 'progress' => 'bg-indigo-500', 'ring' => 'ring-indigo-200', 'hover' => 'hover:bg-indigo-200'],
+        'orange' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-600', 'border' => 'border-orange-200', 'progress' => 'bg-orange-500', 'ring' => 'ring-orange-200', 'hover' => 'hover:bg-orange-200'],
+        'purple' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-200', 'progress' => 'bg-purple-500', 'ring' => 'ring-purple-200', 'hover' => 'hover:bg-purple-200'],
         'red' => ['bg' => 'bg-red-100', 'text' => 'text-red-600', 'border' => 'border-red-200', 'progress' => 'bg-red-500', 'ring' => 'ring-red-200', 'hover' => 'hover:bg-red-200'],
-        'cyan' => ['bg' => 'bg-white', 'text' => 'text-cyan-600', 'border' => 'border-cyan-200', 'progress' => 'bg-cyan-500', 'ring' => 'ring-cyan-200', 'hover' => 'hover:bg-cyan-200'],
+        'cyan' => ['bg' => 'bg-cyan-100', 'text' => 'text-cyan-600', 'border' => 'border-cyan-200', 'progress' => 'bg-cyan-500', 'ring' => 'ring-cyan-200', 'hover' => 'hover:bg-cyan-200'],
         'pink' => ['bg' => 'bg-pink-100', 'text' => 'text-pink-600', 'border' => 'border-pink-200', 'progress' => 'bg-pink-500', 'ring' => 'ring-pink-200', 'hover' => 'hover:bg-pink-200'],
-        'teal' => ['bg' => 'bg-white', 'text' => 'text-teal-600', 'border' => 'border-teal-200', 'progress' => 'bg-teal-500', 'ring' => 'ring-teal-200', 'hover' => 'hover:bg-teal-200'],
-        'emerald' => ['bg' => 'bg-white', 'text' => 'text-emerald-600', 'border' => 'border-emerald-200', 'progress' => 'bg-emerald-500', 'ring' => 'ring-emerald-200', 'hover' => 'hover:bg-emerald-200'],
-        'amber' => ['bg' => 'bg-white', 'text' => 'text-amber-600', 'border' => 'border-amber-200', 'progress' => 'bg-amber-500', 'ring' => 'ring-amber-200', 'hover' => 'hover:bg-amber-200'],
+        'teal' => ['bg' => 'bg-teal-100', 'text' => 'text-teal-600', 'border' => 'border-teal-200', 'progress' => 'bg-teal-500', 'ring' => 'ring-teal-200', 'hover' => 'hover:bg-teal-200'],
+        'emerald' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-600', 'border' => 'border-emerald-200', 'progress' => 'bg-emerald-500', 'ring' => 'ring-emerald-200', 'hover' => 'hover:bg-emerald-200'],
+        'amber' => ['bg' => 'bg-amber-100', 'text' => 'text-amber-600', 'border' => 'border-amber-200', 'progress' => 'bg-amber-500', 'ring' => 'ring-amber-200', 'hover' => 'hover:bg-amber-200'],
         'rose' => ['bg' => 'bg-rose-100', 'text' => 'text-rose-600', 'border' => 'border-rose-200', 'progress' => 'bg-rose-500', 'ring' => 'ring-rose-200', 'hover' => 'hover:bg-rose-200'],
-        'yellow' => ['bg' => 'bg-white', 'text' => 'text-yellow-600', 'border' => 'border-yellow-200', 'progress' => 'bg-yellow-500', 'ring' => 'ring-yellow-200', 'hover' => 'hover:bg-yellow-200'],
-        'gray' => ['bg' => 'bg-white', 'text' => 'text-gray-600', 'border' => 'border-gray-200', 'progress' => 'bg-gray-500', 'ring' => 'ring-gray-200', 'hover' => 'hover:bg-gray-200'],
+        'yellow' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'border' => 'border-yellow-200', 'progress' => 'bg-yellow-500', 'ring' => 'ring-yellow-200', 'hover' => 'hover:bg-yellow-200'],
+        'gray' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'border' => 'border-gray-200', 'progress' => 'bg-gray-500', 'ring' => 'ring-gray-200', 'hover' => 'hover:bg-gray-200'],
         'violet' => ['bg' => 'bg-violet-100', 'text' => 'text-violet-600', 'border' => 'border-violet-200', 'progress' => 'bg-violet-500', 'ring' => 'ring-violet-200', 'hover' => 'hover:bg-violet-200'],
         'lime' => ['bg' => 'bg-lime-100', 'text' => 'text-lime-600', 'border' => 'border-lime-200', 'progress' => 'bg-lime-500', 'ring' => 'ring-lime-200', 'hover' => 'hover:bg-lime-200'],
         'fuchsia' => ['bg' => 'bg-fuchsia-100', 'text' => 'text-fuchsia-600', 'border' => 'border-fuchsia-200', 'progress' => 'bg-fuchsia-500', 'ring' => 'ring-fuchsia-200', 'hover' => 'hover:bg-fuchsia-200'],
@@ -54,12 +54,12 @@
             <div class="flex items-center gap-3">
                 @if(auth()->user() && (auth()->user()->isTeacher() || auth()->user()->isAdmin()))
                     @if(auth()->user()->isAdmin())
-                    <a href="{{ route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topic['slug']]) }}" class="inline-flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-semibold shadow-sm">
+                    <a href="{{ route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topic['slug']]) }}" class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-semibold shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         Review Hasil
                     </a>
                     @endif
-                    <button @click="showEditModal = true" class="inline-flex items-center px-4 py-2 bg-white text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-semibold shadow-sm">
+                    <button @click="showEditModal = true" class="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-semibold shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit Soal
                     </button>
@@ -77,7 +77,7 @@
         <div class="bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col relative">
             
             <!-- Phase Navigation Tab -->
-            <div class="bg-white border-b border-gray-100 p-2 flex text-center text-sm font-bold">
+            <div class="bg-gray-50 border-b border-gray-100 p-2 flex text-center text-sm font-bold">
                  <div class="flex-1 py-2 rounded-xl transition-colors cursor-pointer" 
                       @click="step !== 'speaking' && (step = 'prep')"
                       :class="{'{{ $theme['bg'] }} {{ $theme['text'] }}': step === 'prep', 'text-gray-400': step !== 'prep'}">
@@ -96,7 +96,7 @@
                 <div x-show="step === 'prep'" class="w-full" x-transition:enter="transition ease-out duration-300">
                     <div class="grid md:grid-cols-2 gap-12 items-center">
                         <!-- Left: Cue Card -->
-                        <div class="prose prose-lg text-gray-700 bg-white p-6 rounded-2xl border-2 {{ $theme['border'] }}">
+                        <div class="prose prose-lg text-gray-700 bg-gray-50 p-6 rounded-2xl border-2 {{ $theme['border'] }}">
                              <p class="font-bold text-xl mb-4 text-gray-900">{{ $topic['questions'][0] }}</p>
                              
                              <p class="text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">You should say:</p>
@@ -163,7 +163,7 @@
                     </div>
 
                     <!-- Visualizer -->
-                    <div class="h-24 flex items-center justify-center gap-1.5 mb-12 bg-white rounded-2xl p-4 border border-gray-100">
+                    <div class="h-24 flex items-center justify-center gap-1.5 mb-12 bg-gray-50 rounded-2xl p-4 border border-gray-100">
                        <template x-for="(barHeight, index) in visualizerBars" :key="index">
                            <div class="w-2 rounded-full transition-all duration-75 ease-linear"
                                 :class="index % 2 === 0 ? 'bg-red-400' : 'bg-orange-400'"
@@ -185,21 +185,21 @@
             </div>
 
             <!-- Inline Helper Buttons (Part 1 Style) -->
-            <div class="bg-white p-4 border-t border-gray-100 flex justify-center gap-4">
+            <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-center gap-4">
                 <button @click="isCollocationsOpen = !isCollocationsOpen" 
-                        class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors bg-white text-teal-700 hover:bg-teal-200">
+                        class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors bg-teal-100 text-teal-700 hover:bg-teal-200">
                     <span class="text-lg">🔗</span> Collocations
                 </button>
 
                 <button @click="isIdiomsOpen = !isIdiomsOpen" 
-                        class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors bg-white text-orange-700 hover:bg-orange-200">
-                    <span class="text-lg"></span> Idioms
+                        class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors bg-orange-100 text-orange-700 hover:bg-orange-200">
+                    <span class="text-lg">💡</span> Idioms
                 </button>
 
                 <!-- Whiteboard Button -->
                 <button @click="toggleBoard()" 
                         class="w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-sm border border-indigo-100"
-                        :class="isBoardOpen ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-600 hover:bg-white'"
+                        :class="isBoardOpen ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'"
                         title="Open Whiteboard">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -283,7 +283,7 @@
                             <!-- Idioms Tab -->
                             <div x-show="editTab === 'idioms'" class="space-y-4">
                                 <template x-for="(item, index) in editIdioms" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editIdioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -298,7 +298,7 @@
                             <!-- Part 3 Idioms Tab -->
                             <div x-show="editTab === 'part3_idioms'" class="space-y-4">
                                 <template x-for="(item, index) in editPart3Idioms" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editPart3Idioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`part3_idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -313,7 +313,7 @@
                             <!-- Collocations Tab -->
                             <div x-show="editTab === 'collocations'" class="space-y-4">
                                 <template x-for="(item, index) in editCollocations" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editCollocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -328,7 +328,7 @@
                             <!-- Part 3 Collocations Tab -->
                             <div x-show="editTab === 'part3_collocations'" class="space-y-4">
                                 <template x-for="(item, index) in editPart3Collocations" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editPart3Collocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`part3_collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -343,7 +343,7 @@
                             <!-- Adv Verbs Tab -->
                             <div x-show="editTab === 'adv_verbs'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvVerbs" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvVerbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_verbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -360,7 +360,7 @@
                             <!-- Adv Adverbs Tab -->
                             <div x-show="editTab === 'adv_adverbs'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvAdverbs" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvAdverbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adverbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -377,7 +377,7 @@
                             <!-- Adv Adjectives Tab -->
                             <div x-show="editTab === 'adv_adjectives'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvAdjectives" :key="index">
-                                    <div class="bg-white p-4 rounded-lg relative">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvAdjectives.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adjectives[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -393,7 +393,7 @@
                         </div>
 
                         <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
+                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
                                 Cancel
                             </button>
                             <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors">
@@ -419,8 +419,8 @@
                  x-transition:leave="transition ease-in duration-300" 
                  x-transition:leave-start="translate-x-0" 
                  x-transition:leave-end="translate-x-full">
-                 <div class="p-4 bg-white border-b border-orange-100 flex justify-between items-center">
-                     <h3 class="font-bold text-orange-800"> Idioms</h3>
+                 <div class="p-4 bg-orange-50 border-b border-orange-100 flex justify-between items-center">
+                     <h3 class="font-bold text-orange-800">💡 Idioms</h3>
                      <button @click="isIdiomsOpen = false" class="text-orange-400 hover:text-orange-600">&times;</button>
                  </div>
                  <div class="flex-1 overflow-y-auto p-4 space-y-4">
@@ -428,7 +428,7 @@
                          <div class="p-3 bg-white border border-orange-100 rounded-xl shadow-sm">
                              <div class="font-bold text-orange-600" x-text="item.phrase"></div>
                              <div class="text-sm text-gray-600 italic" x-text="item.meaning"></div>
-                             <div class="mt-2 text-xs bg-white p-2 rounded text-gray-500" x-text="item.example"></div>
+                             <div class="mt-2 text-xs bg-gray-50 p-2 rounded text-gray-500" x-text="item.example"></div>
                          </div>
                      </template>
                      <div x-show="!idioms.length" class="text-center text-gray-400 mt-10">No idioms available.</div>
@@ -447,7 +447,7 @@
                  x-transition:leave="transition ease-in duration-300"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="-translate-x-full">
-                 <div class="p-4 bg-white border-b border-teal-100 flex justify-between items-center">
+                 <div class="p-4 bg-teal-50 border-b border-teal-100 flex justify-between items-center">
                      <h3 class="font-bold text-teal-800">🔗 Collocations</h3>
                      <button @click="isCollocationsOpen = false" class="text-teal-400 hover:text-teal-600">&times;</button>
                  </div>
@@ -456,7 +456,7 @@
                          <div class="p-3 bg-white border border-teal-100 rounded-xl shadow-sm">
                              <div class="font-bold text-teal-600" x-text="item.phrase"></div>
                              <div class="text-sm text-gray-600 italic" x-text="item.meaning"></div>
-                             <div class="mt-2 text-xs bg-white p-2 rounded text-gray-500" x-text="item.example"></div>
+                             <div class="mt-2 text-xs bg-gray-50 p-2 rounded text-gray-500" x-text="item.example"></div>
                          </div>
                      </template>
                  </div>
@@ -1038,22 +1038,21 @@
     @include('assignments.ielts.speaking.components.advanced_adjectives_modal')
     @include('assignments.ielts.speaking.components.advanced_adverbs_modal')
     @include('assignments.ielts.speaking.components.advanced_verbs_modal')
-    <!-- Whiteboard Overlay (Windowed) -->
+    <!-- Whiteboard Overlay (Windowed) - no x-transition: this element's
+         :style is driven by boardX/Y/Width/Height, which change continuously
+         while dragging/resizing, and that fights x-transition's own
+         opacity/transform inline-style management, leaving the whole board
+         stuck invisible (opacity:0) the moment you drag it (confirmed on the
+         identical component in ielts/speaking/practice.blade.php). -->
     <div x-show="isBoardOpen"
          class="fixed z-50 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-200"
          :style="'top: ' + boardY + 'px; left: ' + boardX + 'px; width: ' + boardWidth + 'px; height: ' + boardHeight + 'px;'"
          @mousemove.window="onDragBoard($event); onResize($event)"
          @mouseup.window="stopDragBoard(); stopResize()"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-90"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-90"
          x-cloak>
          
         <!-- Toolbar (Draggable Handle) -->
-        <div class="bg-white p-3 flex justify-between items-center cursor-move border-b border-gray-200 select-none"
+        <div class="bg-gray-100 p-3 flex justify-between items-center cursor-move border-b border-gray-200 select-none"
              @mousedown="startDragBoard">
             <h3 class="text-sm font-bold text-gray-700 flex items-center pointer-events-none">
                 <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1066,24 +1065,24 @@
                 <!-- Tools -->
                 <div class="flex items-center bg-white rounded-lg p-1 border border-gray-200 shadow-sm" @mousedown.stop>
                     <button @click="setTool('pen')" 
-                            class="p-1.5 rounded hover:bg-white transition-colors"
-                            :class="{'bg-white text-indigo-600': currentTool === 'pen', 'text-gray-500': currentTool !== 'pen'}"
+                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'pen', 'text-gray-500': currentTool !== 'pen'}"
                             title="Pen">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </button>
                     <button @click="setTool('text')" 
-                            class="p-1.5 rounded hover:bg-white transition-colors"
-                            :class="{'bg-white text-indigo-600': currentTool === 'text', 'text-gray-500': currentTool !== 'text'}"
+                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'text', 'text-gray-500': currentTool !== 'text'}"
                             title="Text Tool">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M12 6v14" />
                         </svg>
                     </button>
                     <button @click="setTool('eraser')" 
-                            class="p-1.5 rounded hover:bg-white transition-colors"
-                            :class="{'bg-white text-indigo-600': currentTool === 'eraser', 'text-gray-500': currentTool !== 'eraser'}"
+                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'eraser', 'text-gray-500': currentTool !== 'eraser'}"
                             title="Eraser">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1103,7 +1102,7 @@
                 
                 <div class="h-6 w-px bg-gray-300 mx-1"></div>
 
-                <button @click="drawGrid()" @mousedown.stop class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-white rounded transition-colors" title="Divide Board (4 Parts)">
+                <button @click="drawGrid()" @mousedown.stop class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Divide Board (4 Parts)">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16M12 4v16" />
                     </svg>

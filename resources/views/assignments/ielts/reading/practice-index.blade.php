@@ -242,8 +242,8 @@
                         ],
                         21 => [
                             'title'          => 'Practice Test 21',
-                            'passages'       => ['The Birth of Suburbia', 'The History of Tea', 'Artificial Intelligence in Modern Society'],
-                            'question_types' => ['true_false_not_given', 'summary_completion', 'multiple_choice'],
+                            'passages'       => ['Corporate Social Responsibility', 'Griffith and American Films', 'Environmentally-friendly Vehicles'],
+                            'question_types' => ['matching_paragraph_information', 'short_answer', 'matching_headings', 'matching_features', 'multiple_choice', 'true_false_not_given'],
                             'gradient'       => 'linear-gradient(135deg, #0d9488 0%, #0891b2 100%)',
                             'btn_color'      => '#0d7377',
                             'icon_color'     => '#0d9488',
@@ -252,8 +252,8 @@
                         ],
                         22 => [
                             'title'          => 'Practice Test 22',
-                            'passages'       => ['The Psychology of Fame', 'The Evolution of Human Language', 'Deep Sea Exploration'],
-                            'question_types' => ['matching_paragraph_information', 'short_answer_group', 'multiple_choice'],
+                            'passages'       => ['Origin of Species', 'Western Immigration of Canada', 'Beyond the Blue Line'],
+                            'question_types' => ['matching_features', 'matching_paragraph_information', 'summary_completion', 'matching_headings', 'multiple_choice', 'true_false_not_given'],
                             'gradient'       => 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
                             'btn_color'      => '#5b21b6',
                             'icon_color'     => '#7c3aed',
@@ -262,8 +262,8 @@
                         ],
                         23 => [
                             'title'          => 'Practice Test 23',
-                            'passages'       => ['The Origins of Writing Systems', 'Renewable Energy Innovations', 'The Mystery of Sleep'],
-                            'question_types' => ['summary_completion', 'yes_no_not_given', 'matching_headings'],
+                            'passages'       => ['Museum', 'The Lost City', 'Knowledge in Medicine'],
+                            'question_types' => ['matching_paragraph_information', 'summary_completion', 'multiple_choice_multiple', 'multiple_choice', 'short_answer'],
                             'gradient'       => 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
                             'btn_color'      => '#d97706',
                             'icon_color'     => '#f59e0b',
@@ -272,8 +272,8 @@
                         ],
                         24 => [
                             'title'          => 'Practice Test 24',
-                            'passages'       => ['Urban Farming Technologies', 'The History of Maps and Cartography', 'Neuroscience and Decision Making'],
-                            'question_types' => ['matching_paragraph_information', 'true_false_not_given', 'multiple_choice'],
+                            'passages'       => ['Traditional Farming System in Africa', 'Can We Call It “ART”?', 'Honey Bees in Trouble'],
+                            'question_types' => ['sentence_completion', 'short_answer', 'true_false_not_given', 'multiple_choice', 'matching_paragraph_information', 'yes_no_not_given'],
                             'gradient'       => 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
                             'btn_color'      => '#1d4ed8',
                             'icon_color'     => '#2563eb',
@@ -282,8 +282,8 @@
                         ],
                         25 => [
                             'title'          => 'Practice Test 25',
-                            'passages'       => ['The Story of Silk', 'Space Exploration Futures', 'The Impact of Social Media on Communication'],
-                            'question_types' => ['matching_features', 'summary_completion', 'multiple_choice'],
+                            'passages'       => ['Ancient Societies Classification', 'The Development of Plastics', 'How Should Reading Be Taught?'],
+                            'question_types' => ['true_false_not_given', 'short_answer', 'matching_headings', 'matching_features'],
                             'gradient'       => 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)',
                             'btn_color'      => '#db2777',
                             'icon_color'     => '#ec4899',
@@ -292,8 +292,8 @@
                         ],
                         26 => [
                             'title'          => 'Practice Test 26',
-                            'passages'       => ['The Golden Age of Discovery', 'Cybersecurity in the Digital Age', 'The Science of Memory Retention'],
-                            'question_types' => ['sentence_completion', 'true_false_not_given', 'multiple_choice'],
+                            'passages'       => ['Going Bananas', 'Can We Call It “ART” (2)?', 'Global Warming in New Zealand'],
+                            'question_types' => ['sentence_completion', 'matching_features', 'true_false_not_given', 'matching_paragraph_information', 'multiple_choice', 'summary_completion', 'yes_no_not_given'],
                             'gradient'       => 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
                             'btn_color'      => '#059669',
                             'icon_color'     => '#10b981',
@@ -302,8 +302,8 @@
                         ],
                         27 => [
                             'title'          => 'Practice Test 27',
-                            'passages'       => ['Sustainable Architecture', 'The History of Currency', 'Bioluminescence in Nature'],
-                            'question_types' => ['matching_headings', 'yes_no_not_given', 'summary_completion'],
+                            'passages'       => ['The Coming Back of the Extinct', 'London Swaying Footbridge', 'Book Review on Musicophilia'],
+                            'question_types' => ['true_false_not_given', 'matching_features', 'multiple_choice_multiple', 'summary_completion', 'short_answer', 'multiple_choice', 'sentence_completion'],
                             'gradient'       => 'linear-gradient(135deg, #f97316 0%, #be123c 100%)',
                             'btn_color'      => '#c2410c',
                             'icon_color'     => '#ea580c',
@@ -312,8 +312,8 @@
                         ],
                         28 => [
                             'title'          => 'Practice Test 28',
-                            'passages'       => ['The Secrets of Long-Lived Communities', 'Robotics in Manufacturing', 'The Global Water Crisis'],
-                            'question_types' => ['matching_paragraph_information', 'short_answer_group', 'multiple_choice'],
+                            'passages'       => ['Can We Hold Back the Flood?', 'The History of the Pencil', 'TV Addiction 2'],
+                            'question_types' => ['matching_paragraph_information', 'summary_completion', 'multiple_choice_multiple', 'sentence_completion', 'true_false_not_given', 'matching_features'],
                             'gradient'       => 'linear-gradient(135deg, #84cc16 0%, #16a34a 100%)',
                             'btn_color'      => '#4ade80',
                             'icon_color'     => '#65a30d',
@@ -322,8 +322,8 @@
                         ],
                         29 => [
                             'title'          => 'Practice Test 29',
-                            'passages'       => ['The Rise of E-Commerce', 'Glacier Retreat and Climate Change', 'The Biology of Stress'],
-                            'question_types' => ['true_false_not_given', 'summary_completion', 'multiple_choice'],
+                            'passages'       => ['William Gilbert and Magnetism', 'Twin Study: Two of a Kind', 'Compliance or Noncompliance for Children'],
+                            'question_types' => ['matching_headings', 'true_false_not_given', 'multiple_choice_multiple', 'matching_paragraph_information', 'summary_completion', 'multiple_choice', 'matching_features'],
                             'gradient'       => 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)',
                             'btn_color'      => '#4f46e5',
                             'icon_color'     => '#4338ca',
@@ -332,8 +332,8 @@
                         ],
                         30 => [
                             'title'          => 'Practice Test 30',
-                            'passages'       => ['The Cultural History of Coffee', 'Autonomous Vehicles and the Future of Transport', 'Preserving Biodiversity in Coral Reefs'],
-                            'question_types' => ['matching_paragraph_information', 'true_false_not_given', 'multiple_choice'],
+                            'passages'       => ['Food Advertising on Children', 'Finding Our Way', 'Decision, Decision!'],
+                            'question_types' => ['matching_headings', 'yes_no_not_given', 'matching_features', 'multiple_choice', 'true_false_not_given'],
                             'gradient'       => 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
                             'btn_color'      => '#0284c7',
                             'icon_color'     => '#0ea5e9',
@@ -542,26 +542,47 @@
                         ],
                     ];
 
-                    for ($tNum = 51; $tNum <= 100; $tNum++) {
-                        $passagesForMat = \App\Models\IeltsReadingPassage::where('material_id', $tNum)->orderBy('order')->get();
+                    // Eager-load passages and questions for tests 51-111 to display authentic titles and question types
+                    $extraPassagesByMat = \App\Models\IeltsReadingPassage::whereBetween('material_id', [51, 111])
+                        ->with('questions')
+                        ->orderBy('order')
+                        ->get()
+                        ->groupBy('material_id');
+
+                    $extraGradients = [
+                        'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                        'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                        'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                        'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+                        'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                        'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
+                    ];
+
+                    for ($tNum = 51; $tNum <= 111; $tNum++) {
+                        $passagesForMat = $extraPassagesByMat->get($tNum) ?? collect();
                         $pTitles = $passagesForMat->count() > 0
                             ? $passagesForMat->pluck('title')->toArray()
                             : ["Passage 1", "Passage 2", "Passage 3"];
-                            
-                        $gradients = [
-                            'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                            'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-                            'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-                            'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
-                            'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-                            'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
-                        ];
-                        $g = $gradients[$tNum % count($gradients)];
-                        
+
+                        $qTypes = [];
+                        foreach ($passagesForMat as $p) {
+                            foreach ($p->questions as $q) {
+                                if (!empty($q->type)) {
+                                    $qTypes[] = $q->type;
+                                }
+                            }
+                        }
+                        $qTypes = array_values(array_unique($qTypes));
+                        if (empty($qTypes)) {
+                            $qTypes = ['true_false_not_given', 'matching_headings', 'summary_completion', 'multiple_choice'];
+                        }
+
+                        $g = $extraGradients[$tNum % count($extraGradients)];
+
                         $tests[$tNum] = [
                             'title'          => "Practice Test {$tNum}",
                             'passages'       => $pTitles,
-                            'question_types' => ['true_false_not_given', 'matching_headings', 'summary_completion', 'multiple_choice'],
+                            'question_types' => $qTypes,
                             'gradient'       => $g,
                             'btn_color'      => '#2563eb',
                             'icon_color'     => '#3b82f6',
@@ -582,8 +603,8 @@
                             'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
                         ];
 
-                        for ($i = 1; $i <= 19; $i++) {
-                            $matId = 100 + $i;
+                        for ($i = 1; $i <= 8; $i++) {
+                            $matId = 111 + $i;
                             $passagesForMat = \App\Models\IeltsReadingPassage::where('material_id', $matId)->orderBy('order')->get();
                             // Real IELTS General Training Reading has 5 short/medium texts across
                             // 3 themed groups (2 Social Survival + 2 Workplace + 1 General Interest),
@@ -663,10 +684,12 @@
                                         </span>
                                     @endif
                                     @if(isset($studentResults) && isset($studentResults[$test['material_id']]))
-                                        <div class="student-score-badge">
-                                            <span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-600 shadow-sm flex items-center gap-1">
-                                                ✓ Completed <span class="band-score ml-1 bg-white text-emerald-600 px-1.5 py-0.5 rounded text-[10px]">Band {{ number_format($studentResults[$test['material_id']]->band_score, 1) }}</span>
-                                            </span>
+                                        @php
+                                            $res = $studentResults[$test['material_id']];
+                                        @endphp
+                                        <div class="student-score-badge flex items-center gap-1.5 px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-md">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            <span>Band {{ number_format($res->band_score, 1) }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -792,14 +815,41 @@
                                 </ul>
                             @endif
 
+                            @if(isset($studentResults) && isset($studentResults[$test['material_id']]))
+                                @php
+                                    $res = $studentResults[$test['material_id']];
+                                @endphp
+                                <div class="mb-4 p-3 bg-emerald-50 rounded-2xl border border-emerald-200/80 flex items-center justify-between shadow-sm">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                                            ✓
+                                        </div>
+                                        <div>
+                                            <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Sudah Dikerjakan</p>
+                                            <p class="text-xs text-emerald-700 font-medium">{{ $res->correct_count }} / {{ $res->total_questions }} Soal Benar</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] text-gray-500 font-medium block uppercase tracking-wider">Skor Band</span>
+                                        <span class="text-base font-black text-emerald-700">Band {{ number_format($res->band_score, 1) }}</span>
+                                    </div>
+                                </div>
+                            @endif
+
                             @if($test['available'] && $test['material_id'])
+                                @php
+                                    $isDone = isset($studentResults) && isset($studentResults[$test['material_id']]);
+                                @endphp
                                 <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.reading.material', $test['material_id']) : route('assignments.ielts-academic.reading.material', $test['material_id']) }}"
                                    style="background-color: {{ $test['btn_color'] }}"
-                                   class="block w-full py-3 text-white text-center rounded-xl font-bold transition shadow hover:shadow-md active:scale-95 hover:opacity-90">
-                                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
-                                        Kerjakan Ulang ↺
+                                   class="block w-full py-3 text-white text-center rounded-xl font-bold transition shadow hover:shadow-md active:scale-95 hover:opacity-90 flex items-center justify-center gap-1.5">
+                                    @if($isDone)
+                                        <span>Review Hasil & Kerjakan Ulang</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    @elseif(!empty($isClassEnded) && Auth::user()->isStudent())
+                                        <span>Kerjakan Ulang ↺</span>
                                     @else
-                                        Start Practice →
+                                        <span>Start Practice →</span>
                                     @endif
                                 </a>
                             @else

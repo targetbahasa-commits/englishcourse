@@ -165,9 +165,10 @@
                             </summary>
                             <div class="p-3 grid grid-cols-1 gap-2 border-t border-gray-200 bg-white/50">
                                 @foreach($categoryPrograms as $prog)
-                                    <label class="block relative text-left rounded-lg border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:ring-2 has-[:checked]:ring-blue-200">
+                                    <label class="block relative text-left rounded-lg border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:ring-2 has-[:checked]:ring-blue-200"
+                                        x-show="!form.mode || form.mode === '{{ $prog->delivery_mode }}'">
                                         <input type="radio" name="program_id" value="{{ $prog->id }}" x-model="form.program_id" @change="onProgramOrModeChanged(); programError = false" class="hidden">
-                                        <p class="font-semibold text-gray-900">{{ $prog->name }}</p>
+                                        <p class="font-semibold text-gray-900">{{ $prog->name }} <span class="text-xs font-normal text-gray-400">({{ $prog->delivery_mode === 'offline' ? 'Offline' : 'Online' }})</span></p>
                                         <p class="text-sm text-gray-500">{{ \Illuminate\Support\Str::limit(strip_tags($prog->description ?? 'Tingkatkan kemampuan bahasa Inggris Anda secara intensif.'), 100) }}</p>
                                     </label>
                                 @endforeach
@@ -206,7 +207,7 @@
             {{-- Mode --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Mode Belajar <span class="text-red-500">*</span></label>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 gap-3">
                     <label class="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-400 transition has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 text-center">
                         <input type="radio" name="mode" value="online" x-model="form.mode" @change="onProgramOrModeChanged()" class="hidden">
                         <span class="text-sm font-semibold text-gray-700">Online</span>
@@ -217,28 +218,13 @@
                         <span class="text-sm font-semibold text-gray-700">Offline</span>
                         <span class="text-xs text-gray-400">Di lokasi kelas</span>
                     </label>
-                    <label class="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-400 transition has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50 text-center">
-                        <input type="radio" name="mode" value="flexible" x-model="form.mode" @change="onProgramOrModeChanged()" class="hidden">
-                        <span class="text-sm font-semibold text-gray-700">Fleksibel</span>
-                        <span class="text-xs text-gray-400">Bisa keduanya</span>
-                    </label>
                 </div>
                 @error('mode')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
 
                 {{-- Kondisional Online --}}
-                <div x-show="form.mode === 'online' || form.mode === 'flexible'" x-transition class="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                    <template x-if="form.mode === 'online'">
-                        <div>
-                            <p class="text-xs font-semibold text-purple-700 mb-2">Info untuk kelas online:</p>
-                            <p class="text-xs text-purple-600">Kelas dilaksanakan via Zoom/Google Meet. Pastikan kamu memiliki koneksi internet yang stabil. Tim akan mengirimkan link kelas via WhatsApp.</p>
-                        </div>
-                    </template>
-                    <template x-if="form.mode === 'flexible'">
-                        <div>
-                            <p class="text-xs font-semibold text-teal-700 mb-2">Info untuk kelas fleksibel:</p>
-                            <p class="text-xs text-teal-600">Kelas fleksibel (online & offline) hanya tersedia dengan konfirmasi admin. Silakan hubungi admin terlebih dahulu sebelum memilih mode ini.</p>
-                        </div>
-                    </template>
+                <div x-show="form.mode === 'online'" x-transition class="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
+                    <p class="text-xs font-semibold text-purple-700 mb-2">Info untuk kelas online:</p>
+                    <p class="text-xs text-purple-600">Kelas dilaksanakan via Zoom/Google Meet. Pastikan kamu memiliki koneksi internet yang stabil. Tim akan mengirimkan link kelas via WhatsApp.</p>
                 </div>
 
                 {{-- Kondisional Offline --}}
@@ -503,7 +489,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Mode Belajar</span>
-                    <span class="font-semibold capitalize" :class="{'text-purple-600': form.mode==='online','text-orange-600': form.mode==='offline','text-teal-600': form.mode==='flexible'}" x-text="form.mode || '—'"></span>
+                    <span class="font-semibold capitalize" :class="{'text-purple-600': form.mode==='online','text-orange-600': form.mode==='offline'}" x-text="form.mode || '—'"></span>
                 </div>
                 <div class="flex justify-between" x-show="selectedBatchLabel()">
                     <span class="text-gray-500">Batch Kelas</span>
@@ -652,7 +638,7 @@ function regForm() {
             program_id:           '{{ old('program_id', request('program_id')) }}',
             class_period_id:      '{{ old('class_period_id', request('class_period_id')) }}',
             program_interest:     '{{ old('program_interest') }}',
-            mode:                 '{{ old('mode', request('mode', 'flexible')) }}',
+            mode:                 '{{ old('mode', request('mode', '')) }}',
             schedule_preference:  '{{ old('schedule_preference', 'flexible') }}',
             preferred_time:       '{{ old('preferred_time', 'flexible') }}',
             learning_goal:        '{{ old('learning_goal') }}',
@@ -709,7 +695,7 @@ function regForm() {
         },
         isBatchVisible(programId, learningMode) {
             const matchProgram = !this.form.program_id || String(this.form.program_id) === String(programId);
-            const matchMode = this.form.mode === 'flexible' || this.form.mode === learningMode;
+            const matchMode = !this.form.mode || this.form.mode === learningMode;
             return matchProgram && matchMode;
         },
         selectedBatchLabel() {
@@ -722,15 +708,9 @@ function regForm() {
             const program = programsData.find(p => String(p.id) === String(this.form.program_id));
             if (!program) return 'Rp 0';
             
-            let basePrice = program.price || 0;
-            const mode = this.form.mode;
-            
-            // Program is regular by default in this form (we don't have classType selection like private/semi_private in form.blade.php explicitly, 
-            // but if they select offline, we should use offline price)
-            if (mode === 'offline') {
-                basePrice = program.price_offline || basePrice;
-            }
-            
+            // program is already mode-scoped (delivery_mode), so its own price is always correct.
+            const basePrice = program.price || 0;
+
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(basePrice);
         },
         onBatchChanged() {
@@ -748,6 +728,13 @@ function regForm() {
             }
         },
         onProgramOrModeChanged() {
+            if (this.form.mode && this.form.program_id) {
+                const selectedProgram = programsData.find((p) => String(p.id) === String(this.form.program_id));
+                if (selectedProgram && selectedProgram.delivery_mode !== this.form.mode) {
+                    this.form.program_id = '';
+                }
+            }
+
             if (!this.form.class_period_id) {
                 return;
             }
@@ -771,6 +758,10 @@ function regForm() {
                     return;
                 }
                 this.programError = false;
+
+                if (!this.form.mode) {
+                    return;
+                }
             }
             
             // Validate password on step 4

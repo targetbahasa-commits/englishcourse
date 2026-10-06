@@ -81,7 +81,7 @@
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write Body Paragraph 1 (Increasing Trends):</label>
-                    <textarea name="body1" x-model="answers.body1" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-sm placeholder-gray-400" placeholder="Regarding the increasing trends..."></textarea>
+                    <textarea name="body1" x-model="answers.body1" rows="5" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-sm placeholder-gray-400 resize-none overflow-hidden" placeholder="Regarding the increasing trends..."></textarea>
                 </div>
             </div>
 

@@ -96,7 +96,8 @@
                         <textarea
                             name="userParagraphAnswer"
                             rows="14"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan paragraf di sini..."
                             {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                     </div>
@@ -217,7 +218,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const isReadonly = document.querySelector('form[action*="/assignments/grammar-writing/meeting"] input[type="text"][readonly], form[action*="/assignments/grammar-writing/meeting"] textarea[readonly]');
             
             return !!isReadonly;
         },

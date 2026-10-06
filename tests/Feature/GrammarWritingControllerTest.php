@@ -670,7 +670,7 @@ class GrammarWritingControllerTest extends TestCase
                 parent::__construct($repository);
             }
 
-            public function handle(array $fallbackQuestions, array $fallbackParagraph, bool $hasSectionColumn): array
+            public function handle(array $tenseExamples, array $vocabularies): array
             {
                 return [
                     'questions' => [1 => ['id' => 'Question 1', 'en' => 'Answer 1']],
@@ -875,7 +875,7 @@ class GrammarWritingControllerTest extends TestCase
                 parent::__construct($repository);
             }
 
-            public function handle(array $fallbackParagraph, array $examples): array
+            public function handle(array $fallbackParagraph, array $examples, int $meetingNumber = 10): array
             {
                 return [
                     'questions' => collect([

@@ -59,9 +59,16 @@ class EloquentToeflStructureRepository implements ToeflStructureRepository
     public function getRelatedExercises(int $mainNumber, string $title): array
     {
         return ToeflStructureMeeting::where('meeting_number', $mainNumber)
-            ->orWhere(function ($query) use ($title) {
+            ->orWhere(function ($query) use ($mainNumber, $title) {
                 $query->where('meeting_number', '>', 50)
-                    ->where('title', 'like', $title . '%');
+                    ->where(function ($sub) use ($mainNumber, $title) {
+                        $sub->where('title', 'like', $title . '%')
+                            ->orWhere('description', 'parent:' . $mainNumber)
+                            ->orWhere('description', 'like', 'parent:' . $mainNumber . ';%')
+                            ->orWhere('description', 'like', 'parent:' . $mainNumber . ' %')
+                            ->orWhere('description', 'like', '%,parent:' . $mainNumber . '%')
+                            ->orWhere('description', 'like', '%parent_meeting:' . $mainNumber . '%');
+                    });
             })
             ->orderBy('meeting_number')
             ->get()->all();

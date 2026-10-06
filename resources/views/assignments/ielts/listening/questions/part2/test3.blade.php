@@ -1,197 +1,95 @@
-<div class="mb-8">
-    <h3 class="text-xl font-bold mb-4">SECTION 3</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2</h3>
 
-    {{-- Questions 21-25 --}}
-    <h4 class="text-lg font-bold mb-2">Questions 21 &ndash; 25</h4>
-    <p class="mb-6 text-gray-700">Choose the correct letter, <strong>A, B</strong>, or <strong>C</strong>.</p>
-
-    <div class="space-y-8 mb-12">
-        {{-- Q21 --}}
+    {{-- Questions 11-15: Notes Completion --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div>
-            <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; The position needs someone good at</p>
-            <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">A</span><span>Computers.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">B</span><span>Dealing with people.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">C</span><span>Arts.</span>
-                </label>
-            </div>
+            <h4 class="text-xl font-bold text-gray-800">Questions 11-15</h4>
+            <p class="text-gray-600 font-medium mt-1">Complete the notes below.</p>
+            <p class="text-gray-600 font-medium">Write <strong class="text-gray-900">ONE WORD ONLY</strong> for each answer.</p>
         </div>
 
-        {{-- Q22 --}}
-        <div>
-            <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; The directors will select someone from the faculty of</p>
-            <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[22]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">A</span><span>Arts.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[22]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">B</span><span>Computing.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[22]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">C</span><span>Business.</span>
-                </label>
-            </div>
-        </div>
+        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 space-y-4 max-w-2xl mx-auto">
+            <h5 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 text-center uppercase tracking-wide">
+                “Fit for Life” Health Centre
+            </h5>
 
-        {{-- Q23 --}}
-        <div>
-            <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; The position will require the person to</p>
-            <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[23]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">A</span><span>Work long hours.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[23]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">B</span><span>Train others.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[23]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">C</span><span>Do weekend work.</span>
-                </label>
-            </div>
-        </div>
+            <div class="space-y-4 text-base text-gray-800 leading-relaxed">
+                <div>
+                    <strong>•</strong> The initial step is a one-and-a-half-hour <strong class="text-gray-900 font-bold ml-1 mr-1">11</strong>
+                    <input type="text" name="answers[11]" value="{{ old('answers.11') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> in which lifestyle and goals are analysed.
+                </div>
 
-        {{-- Q24 --}}
-        <div>
-            <p class="text-lg font-medium mb-3"><strong class="text-blue-600">24</strong>&nbsp; The position will come with a</p>
-            <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[24]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">A</span><span>Car.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[24]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">B</span><span>Parking space.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[24]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">C</span><span>Much better salary.</span>
-                </label>
-            </div>
-        </div>
+                <div>
+                    <strong>•</strong> It is important to control what you eat: you will need to show self-control and discipline in your <strong class="text-gray-900 font-bold ml-1 mr-1">12</strong>
+                    <input type="text" name="answers[12]" value="{{ old('answers.12') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-32 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off">.
+                </div>
 
-        {{-- Q25 --}}
-        <div>
-            <p class="text-lg font-medium mb-3"><strong class="text-blue-600">25</strong>&nbsp; The best aspect of the job is it</p>
-            <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[25]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">A</span><span>Gives more responsibility.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[25]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">B</span><span>Comes with a private office.</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
-                    <input type="radio" name="answers[25]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
-                    <span class="font-bold">C</span><span>Is a step to higher positions.</span>
-                </label>
+                <div>
+                    <strong>•</strong> Your exercise regime involves a <strong class="text-gray-900 font-bold ml-1 mr-1">13</strong>
+                    <input type="text" name="answers[13]" value="{{ old('answers.13') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-28 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> to measure heart rate and blood pressure to determine fitness level.
+                </div>
+
+                <div>
+                    <strong>•</strong> Your exercise schedule and consultation will be reviewed <strong class="text-gray-900 font-bold ml-1 mr-1">14</strong>
+                    <input type="text" name="answers[14]" value="{{ old('answers.14') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-32 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off">.
+                </div>
+
+                <div>
+                    <strong>•</strong> Members should think about which of <strong class="text-gray-900 font-bold ml-1 mr-1">15</strong>
+                    <input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-28 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> areas they wish to target: muscle mass, stamina, or general fitness.
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- Questions 26-30 --}}
-    <h4 class="text-lg font-bold mb-2">Questions 26-30</h4>
-    <p class="mb-1 text-gray-700">Complete the table.</p>
-    <p class="mb-6 text-gray-700">Write <strong>NO MORE THAN TWO WORDS OR A NUMBER</strong> for each answer.</p>
+    {{-- Questions 16-20: Matching --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Questions 16-20</h4>
+            <p class="text-gray-600 font-medium mt-1">What is each facility best for?</p>
+            <p class="text-gray-600 font-medium">Choose <strong class="text-gray-900">FIVE</strong> answers from the box and write the correct letter, <strong class="text-gray-900">A-G</strong>, next to questions 16-20.</p>
+        </div>
 
-    <div class="border border-gray-200 rounded-lg overflow-x-auto overflow-hidden mb-12">
-        <table class="w-full text-left border-collapse">
-            {{-- Header Row 1 --}}
-            <tr class="bg-white border-b border-gray-200">
-                <th class="p-4 border-r border-gray-200 w-1/5"></th>
-                <th colspan="4" class="p-4 font-bold text-center text-gray-800">Candidates</th>
-            </tr>
-            {{-- Header Row 2 --}}
-            <tr class="bg-white border-b border-gray-200">
-                <th class="p-4 border-r border-gray-200 w-1/5"></th>
-                <th class="p-4 font-bold text-center text-gray-800 w-1/5">Steven</th>
-                <th class="p-4 font-bold text-center text-gray-800 w-1/5">Abdul</th>
-                <th class="p-4 font-bold text-center text-gray-800 w-1/5">Lek</th>
-                <th class="p-4 font-bold text-center text-gray-800 w-1/5">Oscar</th>
-            </tr>
+        {{-- Options Box --}}
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 max-w-md mx-auto">
+            <h5 class="font-bold text-gray-800 mb-2 text-center text-sm uppercase tracking-wide">Facilities</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-800 pl-4">
+                <div><span class="font-bold text-gray-900 mr-2">A</span> Jogging machines</div>
+                <div><span class="font-bold text-gray-900 mr-2">B</span> Yoga studio</div>
+                <div><span class="font-bold text-gray-900 mr-2">C</span> Weight units</div>
+                <div><span class="font-bold text-gray-900 mr-2">D</span> Front-desk area</div>
+                <div><span class="font-bold text-gray-900 mr-2">E</span> Squash courts</div>
+                <div><span class="font-bold text-gray-900 mr-2">F</span> Shower blocks</div>
+                <div><span class="font-bold text-gray-900 mr-2">G</span> Swimming pool</div>
+            </div>
+        </div>
 
-            {{-- Row 1: Years of Experience --}}
-            <tr class="bg-white hover:bg-white transition-colors border-b border-gray-200">
-                <td class="p-4 border-r border-gray-200 font-bold text-gray-800 align-middle">
-                    Years of Experience
-                </td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <strong class="text-blue-600">26</strong>
-                        <span class="inline-block w-24">
-                            <input type="text" name="answers[26]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
-                        </span>
-                    </div>
-                </td>
-                <td class="p-4 text-center text-gray-700">7</td>
-                <td class="p-4 text-center text-gray-700">8</td>
-                <td class="p-4 text-center text-gray-700">12</td>
-            </tr>
+        <div class="space-y-3 max-w-xl mx-auto pt-2">
+            @php
+                $goals = [
+                    16 => 'Developing confidence',
+                    17 => 'Reducing stress',
+                    18 => 'Building fitness',
+                    19 => 'Meeting others',
+                    20 => 'Finding information'
+                ];
+            @endphp
 
-            {{-- Row 2: Qualification --}}
-            <tr class="bg-white hover:bg-white transition-colors border-b border-gray-200">
-                <td class="p-4 border-r border-gray-200 font-bold text-gray-800 align-middle">
-                    Qualification
-                </td>
-                <td class="p-4 text-center text-gray-700">MBA</td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <strong class="text-blue-600">27</strong>
-                        <span class="inline-block w-24">
-                            <input type="text" name="answers[27]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
-                        </span>
+            @foreach($goals as $q => $label)
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100/70 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-900 text-lg w-6">{{ $q }}</span>
+                        <span class="text-gray-800 font-medium text-base">{{ $label }}</span>
                     </div>
-                </td>
-                <td class="p-4 text-center text-gray-700">degree</td>
-                <td class="p-4 text-center text-gray-700">Certificates</td>
-            </tr>
-
-            {{-- Row 3: Possible Concerns --}}
-            <tr class="bg-white hover:bg-white transition-colors">
-                <td class="p-4 border-r border-gray-200 font-bold text-gray-800 align-middle">
-                    Possible Concerns
-                </td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <strong class="text-blue-600">28</strong>
-                        <span class="inline-block w-24">
-                            <input type="text" name="answers[28]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
-                        </span>
-                    </div>
-                </td>
-                <td class="p-4 text-center text-gray-700">
-                    limited<br>English
-                </td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <strong class="text-blue-600">29</strong>
-                        <span class="inline-block w-24">
-                            <input type="text" name="answers[29]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
-                        </span>
-                    </div>
-                </td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <strong class="text-blue-600">30</strong>
-                        <span class="inline-block w-24">
-                            <input type="text" name="answers[30]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
-                        </span>
-                    </div>
-                </td>
-            </tr>
-        </table>
+                    <select name="answers[{{ $q }}]" class="border border-gray-300 focus:border-black outline-none px-4 py-1.5 rounded-lg font-bold bg-white text-gray-800 transition-colors cursor-pointer">
+                        <option value="" disabled {{ old("answers.$q") ? '' : 'selected' }}>Select</option>
+                        @foreach(['A','B','C','D','E','F','G'] as $opt)
+                            <option value="{{ $opt }}" {{ old("answers.$q") == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endforeach
+        </div>
     </div>
 </div>

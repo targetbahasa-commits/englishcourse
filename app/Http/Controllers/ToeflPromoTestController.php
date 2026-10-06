@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FreeTestSubmission;
+use App\Models\ToeflPromoQuestion;
 use App\Models\ToeflPromoTest;
 use Illuminate\Http\Request;
 
@@ -17,6 +18,11 @@ class ToeflPromoTestController extends Controller
 
         if (!$test->isPromoActive()) {
             return view('promo.expired');
+        }
+
+        // 40 questions full test is standard 25 minutes
+        if ($test->questions->count() == 40 || empty($test->duration_minutes)) {
+            $test->duration_minutes = 25;
         }
 
         $brochureType = $request->query('b', 'online');
@@ -60,11 +66,15 @@ class ToeflPromoTestController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'whatsapp_number' => 'required|string|max:25',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'whatsapp_number' => 'nullable|string|max:25',
             'answers' => 'nullable|array',
         ]);
+
+        $leadName = !empty($validated['name']) ? $validated['name'] : 'Peserta TOEFL (Waktu Habis)';
+        $leadEmail = !empty($validated['email']) ? $validated['email'] : 'peserta@targetbahasa.com';
+        $leadWhatsapp = !empty($validated['whatsapp_number']) ? $validated['whatsapp_number'] : '081234567890';
 
         $questions = $test->questions;
         $userAnswers = $validated['answers'] ?? [];
@@ -87,8 +97,7 @@ class ToeflPromoTestController extends Controller
                 $correctCount++;
             }
 
-            $isPartA = ($q->part === 'part_a' || $q->question_number <= 15);
-            if ($isPartA) {
+            if ($q->part === 'part_a' || $q->question_number <= 15) {
                 $partATotal++;
                 if ($isCorrect) $partACorrect++;
             } else {
@@ -105,14 +114,14 @@ class ToeflPromoTestController extends Controller
                 'option_b' => $q->option_b,
                 'option_c' => $q->option_c,
                 'option_d' => $q->option_d,
-                'user_answer' => $userAns ?: '-',
-                'correct_answer' => $correctAns,
+                'correct_answer' => $q->correct_answer,
+                'user_answer' => $userAns,
                 'is_correct' => $isCorrect,
                 'explanation' => $q->explanation,
             ];
         }
 
-        // Calculate TOEFL ITP Section 2 scaled score (20 - 68)
+        // Calculate TOEFL ITP Section 2 scaled score (31 - 68, ETS official)
         $percentage = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100) : 0;
         $scaledScore = $this->calculateToeflStructureScaledScore($correctCount, $totalQuestions);
         $cefrLevel = $this->calculateCefrLevel($scaledScore);
@@ -133,9 +142,9 @@ class ToeflPromoTestController extends Controller
 
         // Persist lead submission
         $submission = FreeTestSubmission::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'whatsapp_number' => $validated['whatsapp_number'],
+            'name' => $leadName,
+            'email' => $leadEmail,
+            'whatsapp_number' => $leadWhatsapp,
             'test_type' => 'toefl_itp_structure_' . $test->id,
             'estimated_band_score' => $scaledScore,
             'ai_raw_json_feedback' => $feedbackData,
@@ -150,27 +159,74 @@ class ToeflPromoTestController extends Controller
     }
 
     /**
-     * Map raw correct answers to standard TOEFL ITP Structure scaled score (20 - 68).
+     * Map raw correct answers to standard TOEFL ITP Structure scaled score (310 - 680).
+     * Official ETS Section 2 converted range: 31 - 68 -> multiplied by 10 to represent 310 - 680.
      */
     private function calculateToeflStructureScaledScore(int $correct, int $total): int
     {
-        if ($total <= 0) return 20;
+        if ($total <= 0) return 310;
 
-        // Normalized to 40 items scale
-        $ratio = $correct / $total;
-        $scaled = 20 + ($ratio * 48); // range from 20 to 68
+        // Normalize to 40-item scale then apply official lookup table
+        $normalizedCorrect = ($correct / $total) * 40;
 
-        return (int) round(max(20, min(68, $scaled)));
+        // Official ETS conversion table (Structure & Written Expression, 40 items)
+        $conversionTable = [
+             0 => 31,  1 => 31,  2 => 31,  3 => 32,  4 => 33,
+             5 => 34,  6 => 35,  7 => 36,  8 => 37,  9 => 38,
+            10 => 39, 11 => 40, 12 => 41, 13 => 42, 14 => 43,
+            15 => 44, 16 => 45, 17 => 46, 18 => 47, 19 => 48,
+            20 => 49, 21 => 50, 22 => 51, 23 => 52, 24 => 53,
+            25 => 54, 26 => 55, 27 => 56, 28 => 57, 29 => 58,
+            30 => 59, 31 => 60, 32 => 61, 33 => 62, 34 => 63,
+            35 => 64, 36 => 65, 37 => 66, 38 => 67, 39 => 67,
+            40 => 68,
+        ];
+
+        $rounded = (int) round($normalizedCorrect);
+        $rounded = max(0, min(40, $rounded));
+
+        return $conversionTable[$rounded] * 10;
     }
 
     /**
-     * Estimate CEFR level from TOEFL Structure scaled score.
+     * Estimate CEFR level from TOEFL ITP Structure scaled score (310–680).
      */
     private function calculateCefrLevel(int $scaledScore): string
     {
-        if ($scaledScore >= 64) return 'C1 (Advanced)';
-        if ($scaledScore >= 53) return 'B2 (Upper Intermediate)';
-        if ($scaledScore >= 43) return 'B1 (Intermediate)';
-        return 'A2 (Elementary)';
+        if ($scaledScore >= 640) return 'C1 (Advanced)';
+        if ($scaledScore >= 530) return 'B2 (Upper Intermediate)';
+        if ($scaledScore >= 430) return 'B1 (Intermediate)';
+        if ($scaledScore >= 370) return 'A2 (Elementary)';
+        return 'A1 (Beginner)';
+    }
+
+    /**
+     * Update correct answer for a question (Admin only).
+     */
+    public function updateAnswer(Request $request, $questionId)
+    {
+        $isAdmin = auth()->check() && in_array(auth()->user()->role, ['admin', 'teacher']);
+
+        if (!$isAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Fitur ini hanya untuk Admin / Pengajar.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'correct_answer' => 'required|in:A,B,C,D',
+        ]);
+
+        $question = ToeflPromoQuestion::findOrFail($questionId);
+        $question->correct_answer = $validated['correct_answer'];
+        $question->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kunci jawaban berhasil diperbarui.',
+            'question_id' => $question->id,
+            'correct_answer' => $question->correct_answer,
+        ]);
     }
 }

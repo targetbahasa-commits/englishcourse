@@ -67,7 +67,10 @@
                         <div class="p-4 flex-1 flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Describe the trend in one sentence:</label>
                             <textarea 
-                                class="w-full h-24 p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-teal-100 focus:border-teal-400 focus:outline-none transition-all resize-none text-sm leading-relaxed" 
+                                style="field-sizing: content;"
+                                @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })"
+                                class="auto-expand-answer block w-full min-h-[6rem] h-auto p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-teal-100 focus:border-teal-400 focus:outline-none transition-all resize-none overflow-hidden text-sm leading-relaxed" 
                                 :placeholder="'Type your answer for ' + item.id + '...'"
                                 x-model="answers[item.id]"
                                 :name="'answer_' + item.id"

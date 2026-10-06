@@ -20,7 +20,53 @@ class Program extends Model
     {
         return $this->belongsToMany(Program::class, 'program_subprograms', 'package_id', 'subprogram_id');
     }
-    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline', 'is_active', 'brochure_image', 'brochure_pdf', 'active_class_period_id', 'active_class_meeting_id', 'program_type', 'min_cefr_level', 'max_cefr_level'];
+    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline', 'is_active', 'brochure_image', 'brochure_pdf', 'active_class_period_id', 'active_class_meeting_id', 'current_meeting_number', 'program_type', 'min_cefr_level', 'max_cefr_level', 'delivery_mode', 'linked_program_id', 'price_discount_type', 'price_discount_value', 'price_offline_discount_type', 'price_offline_discount_value', 'price_semi_private_discount_type', 'price_semi_private_discount_value', 'price_semi_private_offline_discount_type', 'price_semi_private_offline_discount_value', 'price_private_discount_type', 'price_private_discount_value', 'price_private_offline_discount_type', 'price_private_offline_discount_value'];
+
+    /**
+     * The flat/percentage amount knocked off $this->{$field} by its own inline
+     * discount fields (e.g. field='price_private' reads
+     * price_private_discount_type/price_private_discount_value) - separate
+     * from the audience-based ProgramDiscount promo rules (see discounts()).
+     * Returns 0 if no discount is configured or the base price is 0.
+     */
+    public function priceDiscountAmount(string $field): int
+    {
+        $base = (int) ($this->{$field} ?? 0);
+        if ($base <= 0) {
+            return 0;
+        }
+
+        $type = $this->{$field . '_discount_type'} ?? null;
+        $value = $this->{$field . '_discount_value'} ?? null;
+        if (!$type || $value === null || (int) $value <= 0) {
+            return 0;
+        }
+
+        if ($type === 'percentage') {
+            $percentage = max(0, min(100, (int) $value));
+            return (int) floor($base * $percentage / 100);
+        }
+
+        return min($base, (int) $value);
+    }
+
+    /**
+     * $this->{$field} after applying its own inline discount (never below 0).
+     */
+    public function discountedPrice(string $field): int
+    {
+        return max(0, (int) ($this->{$field} ?? 0) - $this->priceDiscountAmount($field));
+    }
+
+    public function onlineSibling(): BelongsTo
+    {
+        return $this->belongsTo(Program::class, 'linked_program_id');
+    }
+
+    public function offlineSibling(): HasOne
+    {
+        return $this->hasOne(Program::class, 'linked_program_id');
+    }
 
     public function activeClassPeriod(): BelongsTo
     {

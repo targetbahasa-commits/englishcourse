@@ -18,6 +18,8 @@ interface ProgramRepository
 
     public function deactivate(mixed $program): void;
 
+    public function toggleActive(mixed $program): mixed;
+
     public function delete(mixed $program): void;
 
     public function getMeetingsForSyllabus(mixed $program): array;
@@ -31,4 +33,8 @@ interface ProgramRepository
     public function reorderMeetings(mixed $program, array $order): void;
 
     public function findMeetingOrFail(int $id): mixed;
+
+    public function findSplittableCandidates(): array;
+
+    public function splitIntoOfflineVariant(mixed $program, ?string $nameSuffix = null): mixed;
 }

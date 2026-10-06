@@ -333,6 +333,21 @@
                           style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
                     <span x-text="specificPickerExpanded ? '▲' : '▼ Ubah'" style="font-weight:600; color:#a5b4fc; flex-shrink:0;"></span>
                 </button>
+
+                {{-- Independent of watch-target mode ('all' or 'specific') -
+                     a teacher broadcasting to the whole class can still hand
+                     draw permission to one or two specific students without
+                     switching the watch audience away from "Semua Siswa".
+                     Only meaningful while actually broadcasting (see
+                     toggleBroadcast(), which resets this list on stop) - see
+                     updateDrawPermissions()/isAllowedToDrawInBroadcast(). --}}
+                <button x-show="broadcastActive" @pointerdown.stop class="flex"
+                        @click="drawPickerExpanded = !drawPickerExpanded; if (drawPickerExpanded) searchStudents();" type="button"
+                        style="display:flex; align-items:center; gap:6px; min-width:0; flex-shrink:1; overflow:hidden; background:#1f2937; border:1px solid #4b5563; border-radius:6px; cursor:pointer; color:#e5e7eb; font-size:11px; padding:4px 10px; white-space:nowrap; outline:none;">
+                    <span x-text="drawPermittedStudentIds.length === 0 ? '✏️ Izin gambar...' : ('✏️ ' + drawPermittedStudentIds.length + ' boleh gambar')"
+                          style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                    <span x-text="drawPickerExpanded ? '▲' : '▼'" style="font-weight:600; color:#a5b4fc; flex-shrink:0;"></span>
+                </button>
             </div>
 
             <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
@@ -377,6 +392,39 @@
                                        if ($event.target.checked) { if (!selectedStudentIds.includes(student.id)) selectedStudentIds.push(student.id); }
                                        else { selectedStudentIds = selectedStudentIds.filter(id => id !== student.id); }
                                        updateBatchTargets();
+                                   ">
+                            <span x-text="student.name"></span>
+                        </label>
+                    </template>
+                    <p x-show="studentSearchResults.length === 0" style="color:#9ca3af; padding:4px 0;">Tidak ada siswa ditemukan.</p>
+                </div>
+        </div>
+
+        {{-- Draw-permission picker - separate from (and independent of) the
+             watch-target picker above; see the "✏️ Izin gambar" button in the
+             header row. Reuses the same studentSearchResults list (a
+             student doesn't need to be searched twice), so it shares
+             studentSearchQuery/searchStudents() with the watch-target
+             picker - opening either one re-runs the same search, which is
+             harmless since both show the same underlying result set. --}}
+        <div x-show="isStaffViewer && !isEmbeddedPreview && broadcastActive && drawPickerExpanded"
+             style="flex-shrink:0; background:#f0fdf4; border-bottom:1px solid #bbf7d0; font-size:12px; padding:8px 14px;">
+                <input type="text" x-model="studentSearchQuery" @input.debounce.300ms="searchStudents()"
+                       @focus="searchStudents()"
+                       placeholder="Cari nama siswa..."
+                       style="width:100%; padding:6px 10px; border-radius:8px; border:1px solid #d1d5db; margin-bottom:6px; box-sizing:border-box;">
+                <p style="color:#166534; margin:0 0 6px; font-size:11px;">
+                    Siswa yang dicentang boleh ikut mencoret whiteboard ini (selain tombol Aktifkan/Semua Siswa di atas yang hanya untuk menonton).
+                </p>
+                <div style="max-height:140px; overflow-y:auto;">
+                    <template x-for="student in studentSearchResults" :key="student.id">
+                        <label style="display:flex; align-items:center; gap:6px; padding:4px 0; color:#374151; cursor:pointer;">
+                            <input type="checkbox"
+                                   :checked="drawPermittedStudentIds.includes(student.id)"
+                                   @change="
+                                       if ($event.target.checked) { if (!drawPermittedStudentIds.includes(student.id)) drawPermittedStudentIds.push(student.id); }
+                                       else { drawPermittedStudentIds = drawPermittedStudentIds.filter(id => id !== student.id); }
+                                       updateDrawPermissions();
                                    ">
                             <span x-text="student.name"></span>
                         </label>
@@ -749,6 +797,22 @@
              style="flex-shrink:0; background:#7f1d1d; color:#fecaca; padding:8px 16px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px;">
             <span style="width:8px;height:8px;border-radius:9999px;background:#ef4444;display:inline-block;animation:pulse 1.5s infinite;"></span>
             Menonton whiteboard kelas (mode baca saja)
+        </div>
+
+        {{-- Positive counterpart to the read-only banner above - shown
+             instead of it (mutually exclusive with readOnlyMode) when the
+             teacher has individually granted this student draw permission
+             during a broadcast (see checkBatchStatus()/canDraw). Without
+             this, a student suddenly seeing the normal toolbar appear with
+             no explanation could easily miss that they've been called on to
+             draw. Gated on batchViewActive (not just !readOnlyMode) so it
+             never appears while a student is simply drawing on their own
+             individual room, where there was never a read-only banner to
+             begin with. --}}
+        <div x-show="batchViewActive && !readOnlyMode && !directOverlayMode" class="flex"
+             style="flex-shrink:0; background:#064e3b; color:#a7f3d0; padding:8px 16px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px;">
+            <span style="width:8px;height:8px;border-radius:9999px;background:#34d399;display:inline-block;animation:pulse 1.5s infinite;"></span>
+            Kamu diizinkan mencoret whiteboard ini
         </div>
 
         {{-- Shared toolbar - serves BOTH the Whiteboard and Notebook tabs
@@ -1352,6 +1416,7 @@
            x-show="textInput.visible"
            x-cloak
            x-model="textInput.text"
+           @input="autoWrapTextInput()"
            @keydown.enter="handleTextEnterKey($event)"
            @blur="finalizeText()"
            class="fixed bg-transparent border border-dashed border-gray-400 outline-none px-1"
@@ -1590,6 +1655,17 @@
              *  lets the teacher reclaim canvas space once they're done
              *  picking, without losing the current selection. */
             specificPickerExpanded: true,
+            /** Student ids granted permission to DRAW (not just watch) into
+             *  this broadcast - see updateDrawPermissions()/
+             *  LiveDrawingController::isAllowedToDrawInBroadcast(). Reset to
+             *  empty whenever broadcasting turns off (see toggleBroadcast()),
+             *  independent of selectedStudentIds/broadcastTargetMode - a
+             *  student can be granted draw permission whether the watch
+             *  target is "Semua Siswa" or a specific list. */
+            drawPermittedStudentIds: [],
+            /** Whether the draw-permission picker's search box + checkbox
+             *  list is expanded - same pattern as specificPickerExpanded. */
+            drawPickerExpanded: false,
             /** True while this student's canvas is showing a broadcast
              *  instead of their own individual room - see
              *  checkBatchStatus(). Locks drawing (readOnlyMode) since a
@@ -2858,6 +2934,23 @@
                 // distance when zoomed in (and a larger one zoomed out).
                 this.pendingImage.x = d.startX + (clientX - d.startClientX) / this.zoomLevel;
                 this.pendingImage.y = d.startY + (clientY - d.startClientY) / this.zoomLevel;
+
+                // Clamp horizontally to the canvas's CURRENT width - unlike
+                // height (which commitPendingImage() can always grow via
+                // growCanvasHeight()), there's no growCanvasWidth()
+                // equivalent, so dragging the image partly/fully past the
+                // right edge would silently clip it at commit time (same
+                // bug class as free-typed text overflowing - see
+                // executeDraw()'s word-wrap fix). Only clamp y's lower
+                // bound (can't go above the canvas); no upper bound needed
+                // there since height can always grow to fit.
+                const canvas = document.getElementById(this.myCanvasId);
+                if (canvas) {
+                    const maxX = Math.max(0, canvas.width - this.pendingImage.width);
+                    this.pendingImage.x = Math.min(Math.max(0, this.pendingImage.x), maxX);
+                    this.pendingImage.y = Math.max(0, this.pendingImage.y);
+                }
+
                 this.updatePendingImagePos();
             },
 
@@ -2909,6 +3002,28 @@
                 this.pendingImage.y = r.corner.includes('n') ? r.startY + (r.startHeight - newHeight) : r.startY;
                 this.pendingImage.width = newWidth;
                 this.pendingImage.height = newHeight;
+
+                // Clamp back within the canvas's CURRENT width after the
+                // aspect-ratio resize math above - same reasoning as
+                // dragPendingImage()'s clamp: no growCanvasWidth()
+                // equivalent exists, so an east-handle resize dragged past
+                // the right edge (or a west-handle one dragged past the
+                // left, pushing x negative) would silently clip the image
+                // at commit time otherwise. Applied as a final pass so it
+                // works regardless of which corner is being dragged.
+                const canvas = document.getElementById(this.myCanvasId);
+                if (canvas) {
+                    if (this.pendingImage.x < 0) {
+                        this.pendingImage.width += this.pendingImage.x;
+                        this.pendingImage.x = 0;
+                    }
+                    const maxWidth = Math.max(30, canvas.width - this.pendingImage.x);
+                    if (this.pendingImage.width > maxWidth) {
+                        this.pendingImage.width = maxWidth;
+                    }
+                    this.pendingImage.height = this.pendingImage.width / this.pendingImage.aspectRatio;
+                }
+
                 this.updatePendingImagePos();
             },
 
@@ -4169,7 +4284,14 @@
                         this.preBatchTargetUserId = this.targetUserId;
                         this.targetUserId         = data.room;
                         this.batchViewActive      = true;
-                        this.readOnlyMode         = true;
+                        // Read-only UNLESS the teacher has individually
+                        // granted this student draw permission for this
+                        // broadcast (see LiveDrawingController::
+                        // isAllowedToDrawInBroadcast()) - startDrawing()'s
+                        // only enforcement point is readOnlyMode, so this is
+                        // the single flag that unlocks both the toolbar and
+                        // actually drawing.
+                        this.readOnlyMode         = !data.canDraw;
                         this.preBatchRuledLines    = this.ruledLines;
                         this.ruledLines            = !!data.ruledLines;
                         this.preBatchZoomLevel     = this.zoomLevel;
@@ -4220,6 +4342,12 @@
                         if (typeof data.zoomLevel === 'number' && data.zoomLevel !== this.zoomLevel) {
                             this.setZoom(data.zoomLevel);
                         }
+                        // Draw permission can be granted/revoked by the
+                        // teacher mid-broadcast (see updateDrawPermissions())
+                        // - re-check it on every poll so the toolbar/pointer
+                        // events unlock or lock again within 5s, without
+                        // needing to leave and re-attach to the broadcast.
+                        this.readOnlyMode = !data.canDraw;
                     }
                 })
                 .catch(() => { /* silent - retried on the next 5s tick */ });
@@ -4259,6 +4387,13 @@
                     this.sendPresence(false, true);
                     clearInterval(this.broadcastHeartbeat);
                     this.broadcastHeartbeat = null;
+                    // Draw permissions are scoped to this broadcast session
+                    // (see LiveDrawingController::presence()'s own matching
+                    // cleanup) - reset the picker's local selection too so
+                    // starting a NEW broadcast later doesn't silently reuse
+                    // whoever was picked last time.
+                    this.drawPermittedStudentIds = [];
+                    this.drawPickerExpanded      = false;
                 }
             },
 
@@ -4315,6 +4450,31 @@
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: JSON.stringify({ targets }),
+                }).catch(() => { /* best-effort, matches sendPresence() */ });
+            },
+
+            /**
+             * Posts the current draw-permission selection
+             * (drawPermittedStudentIds) to the server - see
+             * LiveDrawingController::presenceDrawPermissions()/
+             * isAllowedToDrawInBroadcast(). Independent of
+             * updateBatchTargets(): a student doesn't need to be in
+             * selectedStudentIds to be granted draw permission (the server
+             * still requires them to be a batch target via broadcastTargetMode
+             * === 'all', which already covers everyone).
+             */
+            updateDrawPermissions() {
+                if (!this.isStaffViewer) return;
+
+                fetch('/api/live-drawing/batch/draw-permissions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':     'application/json',
+                        'Accept':           'application/json',
+                        'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ studentIds: this.drawPermittedStudentIds }),
                 }).catch(() => { /* best-effort, matches sendPresence() */ });
             },
 
@@ -5009,6 +5169,50 @@
             },
 
             /**
+             * Runs on every keystroke in the live text input. Mirrors
+             * executeDraw()'s committed-text word-wrap (same maxWidth math),
+             * but applied live WHILE typing - without this, a long line just
+             * kept growing the input box (see measureTextWidth()) straight
+             * past the canvas's right edge ("text dari whiteboard keluar
+             * whiteboard"), only ever getting wrapped once finally committed
+             * to the canvas. Reuses continueToNextLine()'s own commit/grow/
+             * reposition logic, so an auto-wrap behaves exactly like the
+             * user having pressed Enter at that word boundary themselves.
+             * Loops (not just once) so pasting a large block of text in a
+             * single 'input' event gets fully wrapped immediately instead of
+             * only its first line.
+             */
+            autoWrapTextInput() {
+                if (!this.textInput.visible || !this.ctx) return;
+
+                this.ctx.font = '24px sans-serif';
+                const maxWidth = Math.max(60, this.ctx.canvas.width - this.textInput.x - 20);
+
+                while (this.textInput.text && this.ctx.measureText(this.textInput.text).width > maxWidth) {
+                    const text = this.textInput.text;
+
+                    // Walk back from the end to the last space that still
+                    // fits - wraps at word boundaries, same as the
+                    // committed-render wrap, instead of cutting mid-word.
+                    let breakAt = -1;
+                    for (let i = text.length - 1; i >= 0; i--) {
+                        if (text[i] === ' ' && this.ctx.measureText(text.slice(0, i)).width <= maxWidth) {
+                            breakAt = i;
+                            break;
+                        }
+                    }
+                    // One long word with no space to break on - let it keep
+                    // growing rather than cutting it mid-word.
+                    if (breakAt === -1) break;
+
+                    const overflow = text.slice(breakAt + 1);
+                    this.textInput.text = text.slice(0, breakAt);
+                    this.continueToNextLine();
+                    this.textInput.text = overflow;
+                }
+            },
+
+            /**
              * Enter-key router for the text input. In ruled-lines mode OR
              * the List tool, plain Enter moves to the next line instead of
              * finishing (you need Shift+Enter to actually finish) - for
@@ -5189,7 +5393,46 @@
                     this.ctx.fillStyle = payload.color;
                     this.ctx.font = `${payload.fontSize}px sans-serif`;
                     this.ctx.textBaseline = payload.baseline || 'middle';
-                    this.ctx.fillText(payload.text, x, y);
+
+                    // Word-wrap at the canvas's own current width - a single
+                    // long line (no wrapping before this fix) ran straight
+                    // past the canvas's right edge and got silently clipped
+                    // there ("tulisan di whiteboard sering terpotong"), since
+                    // fillText() never wraps on its own and the live text-
+                    // input box (see measureTextWidth()) grows to fit
+                    // whatever's typed with no limit or warning while typing.
+                    // Runs here (not at commit time) so it applies uniformly
+                    // whether the text was just typed locally or arrived via
+                    // whisper/poll from someone else - executeDraw() is the
+                    // single shared entry point for both.
+                    const maxWidth = Math.max(60, this.ctx.canvas.width - x - 20);
+                    const lineHeight = payload.fontSize * 1.3;
+                    const words = String(payload.text).split(' ');
+                    let line = '';
+                    let lineY = y;
+                    const lines = [];
+                    for (let i = 0; i < words.length; i++) {
+                        const testLine = line ? (line + ' ' + words[i]) : words[i];
+                        if (line && this.ctx.measureText(testLine).width > maxWidth) {
+                            lines.push(line);
+                            line = words[i];
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    lines.push(line);
+
+                    // Grow BEFORE drawing (mirrors renderBase64ToCanvas()'s
+                    // image case) so a long wrapped block never gets clipped
+                    // vertically either - wrapping alone would just move the
+                    // same "terpotong" problem from the right edge to the
+                    // bottom edge for a long enough piece of text.
+                    this.growCanvasHeight(lineY + (lines.length - 1) * lineHeight + lineHeight);
+
+                    lines.forEach((l) => {
+                        this.ctx.fillText(l, x, lineY);
+                        lineY += lineHeight;
+                    });
                     return;
                 }
 

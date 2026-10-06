@@ -252,6 +252,106 @@ class IeltsReadingMaterialRenderTest extends TestCase
         $this->assertStringNotContainsString('detected in ....................', $domBeforeScripts);
     }
 
+    public function test_summary_completion_replaces_middle_blank_when_number_is_at_start_of_line(): void
+    {
+        $passage = IeltsReadingPassage::create([
+            'material_id' => 198,
+            'title' => 'Summary Line Number Test',
+            'content' => '<p>Passage content</p>',
+            'order' => 1,
+        ]);
+
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 19,
+            'question_text' => 'Complete the summary below.',
+            'type' => 'summary_completion',
+            'correct_answer' => ['q19' => 'mail-order company'],
+            'data' => [
+                'summary_text' => "19\u{A0}\u{A0}\u{A0} Farmers was first founded as a……………………… in Auckland by Mr Laidlaw.",
+                'placeholders' => ['q19' => 19],
+                'sub_questions' => [
+                    [
+                        'id' => 'q19',
+                        'label' => 'Farmers was first founded as a……………………… in Auckland by Mr Laidlaw.',
+                        'correct_answer' => 'mail-order company',
+                    ],
+                ],
+            ],
+            'order' => 1,
+        ]);
+
+        $admin = $this->adminUser();
+        $response = $this->actingAs($admin)->get(route('assignments.ielts-academic.reading.material', 198));
+        $response->assertOk();
+
+        $html = $response->content();
+        $this->assertStringContainsString('founded as a <span class="inline-inline-flex', $html);
+        $this->assertStringNotContainsString('founded as a………………………', $html);
+    }
+
+    public function test_summary_completion_strips_trailing_dots_when_bracket_marker_precedes_dots(): void
+    {
+        $passage = IeltsReadingPassage::create([
+            'material_id' => 197,
+            'title' => 'Trailing Dots Test',
+            'content' => '<p>Passage content</p>',
+            'order' => 1,
+        ]);
+
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 27,
+            'question_text' => 'Complete the summary below.',
+            'type' => 'summary_completion',
+            'correct_answer' => ['27' => 'valuable'],
+            'data' => [
+                'summary_text' => 'information about the [27] …………………………. On the excavating site',
+                'placeholders' => [27 => 27],
+            ],
+            'order' => 1,
+        ]);
+
+        $admin = $this->adminUser();
+        $response = $this->actingAs($admin)->get(route('assignments.ielts-academic.reading.material', 197));
+        $response->assertOk();
+
+        $html = $response->content();
+        $this->assertStringNotContainsString('…………………………', $html);
+    }
+
+    public function test_summary_completion_ignores_bogus_true_false_options(): void
+    {
+        $passage = IeltsReadingPassage::create([
+            'material_id' => 196,
+            'title' => 'Bogus Options Test',
+            'content' => '<p>Passage content</p>',
+            'order' => 1,
+        ]);
+
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 7,
+            'question_text' => 'Choose ONE WORD ONLY from the passage.',
+            'type' => 'summary_completion',
+            'options' => ['TRUE' => 'TRUE', 'FALSE' => 'FALSE', 'NOT GIVEN' => 'NOT GIVEN'],
+            'correct_answer' => ['q7' => 'surplus'],
+            'data' => [
+                'summary_text' => 'a food [7] being used as insurance',
+                'placeholders' => ['q7' => 7],
+            ],
+            'order' => 1,
+        ]);
+
+        $admin = $this->adminUser();
+        $response = $this->actingAs($admin)->get(route('assignments.ielts-academic.reading.material', 196));
+        $response->assertOk();
+
+        $html = $response->content();
+        $this->assertStringContainsString('<input type="text"', $html);
+        $this->assertStringNotContainsString('<option value="TRUE">TRUE</option>', $html);
+    }
+
     private function describe(mixed $value): string
     {
         return is_scalar($value) ? (string) $value : json_encode($value);

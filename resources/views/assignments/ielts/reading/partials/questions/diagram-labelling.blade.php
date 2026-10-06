@@ -1,6 +1,6 @@
 <!-- Diagram Labelling -->
 <div class="mt-6 mb-8 overflow-x-auto">
-    @if(!empty($question['instruction']))
+    @if(!empty($question['instruction']) && empty($question['text']))
         <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
     @endif
 

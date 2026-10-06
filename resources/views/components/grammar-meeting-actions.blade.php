@@ -231,9 +231,17 @@ if (typeof window.closeRepeatExerciseModal !== 'function') {
 }
 
 document.getElementById('repeatMeetingForm')?.addEventListener('submit', function() {
+    // grammar-writing-{track}-meeting.blade.php pages (e.g. meeting2's "Translate
+    // Kalimat") run their own inline autosave with a beforeunload listener that
+    // re-saves the CURRENT (still-stale) form values to localStorage/server the
+    // instant this reset form's navigation starts unloading the page - racing
+    // and undoing the reset. syncGrammarDraft()/queueGrammarDraftSync() on that
+    // page both check this flag and no-op while it's set.
+    window.__grammarResetInProgress = true;
     if (window.AutoSave && typeof window.AutoSave.clearSaved === 'function') {
         try { window.AutoSave.clearSaved(); } catch(e) {}
     }
+    try { localStorage.removeItem('{{ 'tb_gw_draft_' . $track . '_m' . $meetingNumber . '_' . (auth()->id() ?? 'guest') }}'); } catch(e) {}
     const btn = document.getElementById('btnExecuteRepeat');
     if (btn) {
         btn.disabled = true;

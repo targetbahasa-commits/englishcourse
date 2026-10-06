@@ -32,7 +32,7 @@ class CreateRegistrationLead
             return ['class_period_id' => 'Batch tidak sesuai dengan program yang dipilih.'];
         }
 
-        if ($data['mode'] !== 'flexible' && $selectedPeriod->learning_mode !== $data['mode']) {
+        if ($selectedPeriod->learning_mode !== $data['mode']) {
             return ['class_period_id' => 'Batch tidak sesuai dengan mode belajar yang dipilih.'];
         }
 

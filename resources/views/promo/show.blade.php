@@ -525,7 +525,7 @@
                                                 tekan <kbd
                                                     class="bg-gray-700 text-white rounded px-1 font-mono">Ctrl+Enter</kbd> /
                                                 <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Cmd+Return</kbd>
-                                                untuk translate ke gaya IELTS.</span>
+                                                untuk translate ke gaya IELTS, atau <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Esc</kbd> untuk keluar.</span>
                                         </div>
                                     </div>
 
@@ -548,6 +548,7 @@
                                             data-placeholder="Ketik kalimat di sini..."
                                             @keydown.enter.ctrl.prevent="msText = $el.innerText; translateSentence()"
                                             @keydown.enter.meta.prevent="msText = $el.innerText; translateSentence()"
+                                            @keydown.escape.prevent="msOpen = false; msText = ''"
                                             @input="msText = $el.innerText; if(!timerStarted) startWritingTimer()"></span><button
                                             type="button" x-show="msText.trim().length > 0 && !msLoading"
                                             @click.stop="if($refs.msInput) { msText = $refs.msInput.innerText; translateSentence(); }"

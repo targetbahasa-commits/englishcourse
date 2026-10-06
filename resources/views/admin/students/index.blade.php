@@ -11,6 +11,11 @@
         </h2>
         <p class="text-sm text-gray-500 mt-1">Monitor academic progress, manage contacts, and track referral codes.</p>
     </div>
+    <a href="{{ route('users.create', ['role' => 'student']) }}"
+        class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Student
+    </a>
 </div>
 @endsection
 
@@ -367,7 +372,7 @@
 
                             <!-- Actions -->
                             <td class="px-4 py-3 whitespace-nowrap text-right">
-                                <div class="flex items-center justify-end gap-1 text-gray-400" x-data="{ openDropdown: false }">
+                                <div class="flex items-center justify-end gap-1 text-gray-400" x-data="{ openDropdown: false, dropdownPos: { top: 0, left: 0 } }">
                                     <!-- Quick Edit Contact -->
                                     <button type="button"
                                         @click="openQuickEdit({{ $student->id }}, '{{ addslashes($student->name) }}', '{{ addslashes($student->phone_number ?? '') }}', '{{ addslashes($student->referral_code ?? '') }}')"
@@ -383,34 +388,53 @@
 
                                     <!-- More Actions Dropdown -->
                                     <div class="relative">
-                                        <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" class="p-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="More Actions">
+                                        <button @click="
+                                                const wasOpen = openDropdown;
+                                                openDropdown = !wasOpen;
+                                                if (!wasOpen) {
+                                                    const r = $el.getBoundingClientRect();
+                                                    const menuHeight = 165;
+                                                    const openUpward = (window.innerHeight - r.bottom) < menuHeight;
+                                                    dropdownPos = {
+                                                        top: openUpward ? (r.top - menuHeight - 8) : (r.bottom + 8),
+                                                        left: r.right - 192,
+                                                    };
+                                                }
+                                            "
+                                            @click.away="openDropdown = false" class="p-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="More Actions">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         </button>
-                                        <div x-show="openDropdown" style="display: none;" class="absolute right-0 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-[100] divide-y divide-gray-100 {{ $loop->remaining < 2 ? 'bottom-full mb-2' : 'top-full mt-2' }}">
-                                            <div class="py-1">
-                                                <a href="{{ route('students.show', $student) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                                    <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                                    View Profile
-                                                </a>
-                                                <a href="{{ route('users.edit', $student) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
-                                                    <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                                    Edit Full Profile
-                                                </a>
-                                                <button type="button" @click="openChangePassword({{ $student->id }}, '{{ addslashes($student->name) }}'); openDropdown = false" class="w-full flex items-center px-4 py-2 text-sm text-amber-700 hover:bg-amber-50">
-                                                    <svg class="mr-3 w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                                                    Change Password
-                                                </button>
-                                            </div>
-                                            <div class="py-1">
-                                                <form method="POST" action="{{ route('users.toggle-status', $student) }}">
-                                                    @csrf
-                                                    <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left">
-                                                        <svg class="mr-3 w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                                        @if($student->status === 'active') Freeze Account @else Unfreeze Account @endif
+                                        <!-- Teleported to <body> so it can never be clipped by the
+                                             table card's overflow-hidden (was silently hiding every
+                                             item except the last when the menu opened near the card's
+                                             top/bottom edge - e.g. on short/filtered result lists). -->
+                                        <template x-teleport="body">
+                                            <div x-show="openDropdown" style="display: none;" :style="`top: ${dropdownPos.top}px; left: ${dropdownPos.left}px`" class="fixed w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-[100] divide-y divide-gray-100">
+                                                <div class="py-1">
+                                                    <a href="{{ route('students.show', $student) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
+                                                        <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        View Profile
+                                                    </a>
+                                                    <a href="{{ route('users.edit', $student) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                                        <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                        Edit Full Profile
+                                                    </a>
+                                                    <button type="button" @click="openChangePassword({{ $student->id }}, '{{ addslashes($student->name) }}'); openDropdown = false" class="w-full flex items-center px-4 py-2 text-sm text-amber-700 hover:bg-amber-50">
+                                                        <svg class="mr-3 w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                                                        Change Password
                                                     </button>
-                                                </form>
+                                                </div>
+                                                <div class="py-1">
+                                                    <form method="POST" action="{{ route('users.toggle-status', $student) }}">
+                                                        @csrf
+                                                        <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left">
+                                                            <svg class="mr-3 w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                                            @if($student->status === 'active') Freeze Account @else Unfreeze Account @endif
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </template>
                                     </div>
                                 </div>
                             </td>

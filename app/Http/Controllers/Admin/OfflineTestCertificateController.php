@@ -48,6 +48,7 @@ class OfflineTestCertificateController extends Controller
             'text_color'              => 'required|string',
             'is_active'               => 'boolean',
             'background_image'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+            'background_opacity'      => 'nullable|numeric|min:0|max:100',
             'signature_image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'stamp_image'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'remove_background_image' => 'nullable|boolean',
@@ -69,15 +70,18 @@ class OfflineTestCertificateController extends Controller
         $certificate->text_color = $validated['text_color'];
         
         $templateConfig = $certificate->template_config ?? [];
-        $templateConfig['eyebrow'] = $validated['eyebrow'] ?? null;
-        $templateConfig['title'] = $validated['title'] ?? null;
-        $templateConfig['subtitle'] = $validated['subtitle'] ?? null;
-        $templateConfig['score_label'] = $validated['score_label'] ?? null;
-        $templateConfig['body'] = $validated['body'] ?? null;
-        $templateConfig['footer_left_label'] = $validated['footer_left_label'] ?? null;
-        $templateConfig['footer_right_label'] = $validated['footer_right_label'] ?? null;
-        $templateConfig['signature_name'] = $validated['signature_name'] ?? null;
-        $templateConfig['signature_title'] = $validated['signature_title'] ?? null;
+        $templateConfig['background_opacity'] = $request->filled('background_opacity')
+            ? (int) $request->input('background_opacity')
+            : (isset($templateConfig['background_opacity']) ? (int) $templateConfig['background_opacity'] : 18);
+        $templateConfig['eyebrow'] = $request->input('eyebrow') ?? '';
+        $templateConfig['title'] = $request->input('title') ?? '';
+        $templateConfig['subtitle'] = $request->input('subtitle') ?? '';
+        $templateConfig['score_label'] = $request->input('score_label') ?? '';
+        $templateConfig['body'] = $request->input('body') ?? '';
+        $templateConfig['footer_left_label'] = $request->input('footer_left_label') ?? '';
+        $templateConfig['footer_right_label'] = $request->input('footer_right_label') ?? '';
+        $templateConfig['signature_name'] = $request->input('signature_name') ?? '';
+        $templateConfig['signature_title'] = $request->input('signature_title') ?? '';
 
         // Handle signature image
         if ($request->boolean('remove_signature_image')) {

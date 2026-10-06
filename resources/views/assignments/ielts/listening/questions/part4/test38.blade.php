@@ -1,62 +1,22 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 4 - Practice Test 38</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 4</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 31-35</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the notes.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Fitness</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORD</strong>S for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Neutrinos</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">are everywhere→100 to 200 <strong class="text-blue-600 font-bold ml-1 mr-1">31</strong><input type="text" name="answers[31]" value="{{ old('answers.31') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> pass through our bodies every second.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">are difficult to detect because of 1. the presence of other particles→usually need a <strong class="text-blue-600 font-bold ml-1 mr-1">32</strong><input type="text" name="answers[32]" value="{{ old('answers.32') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">2. the surrounding <strong class="text-blue-600 font-bold ml-1 mr-1">33</strong><input type="text" name="answers[33]" value="{{ old('answers.33') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">→detection location usually <strong class="text-blue-600 font-bold ml-1 mr-1">34</strong><input type="text" name="answers[34]" value="{{ old('answers.34') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">3. challenge of installing equipment→engineering is very <strong class="text-blue-600 font-bold ml-1 mr-1">35</strong><input type="text" name="answers[35]" value="{{ old('answers.35') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 36-40</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the diagram.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS AND/OR NUMBERS</strong> for each answer.</p>
-<h4 class="text-lg font-bold mb-2 text-gray-700"># Section 1</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">1 10.25 (am)</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">2 Box Hill</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">3 30 to 39</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">4 domestic duties</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">5 married, no children</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">6 walking</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">7 tighten</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">8 hike</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">9 swimming</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">10 energy</p>
-<h4 class="text-lg font-bold mb-2 text-gray-700"># Section 2</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">11 A</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">12 E</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">13 D</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">14 F</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">15 C</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">16 B</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">17 E</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">18 C</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">19 I</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">20 F</p>
-<h4 class="text-lg font-bold mb-2 text-gray-700"># Section 3</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">21 symbols</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">22 interpreted</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">23 nature</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">24 headings</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">25 Legal</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">26 procedures</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">27 associated</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">28 directions</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">29 notes</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">30 headings</p>
-<h4 class="text-lg font-bold mb-2 text-gray-700"># Section 4</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">31 billion</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">32 clean room</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">33 radiation</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">34 (deep) underground</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">35 complex</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">36 heavy water</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">37 electronic</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">38 1000 tons</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">39 electric current</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">40 control</p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 31 - 40</h4>
+        <p class="text-gray-600 font-medium">Write NO MORE THAN TWO WORDS for each answer.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Birds in New Zealand</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Facts</h5>
+        <p class="text-gray-800 text-base leading-relaxed">- The birds often build their nests along the coastline or next to the <strong class="text-gray-900 font-bold ml-1 mr-1">31</strong><input type="text" name="answers[31]" value="{{ old('answers.31') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">- In 1984. researchers found that there were <strong class="text-gray-900 font-bold ml-1 mr-1">32</strong><input type="text" name="answers[32]" value="{{ old('answers.32') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> of this kind of bird left.</p>
+        <p class="text-gray-800 text-base leading-relaxed">- It is difficult to <strong class="text-gray-900 font-bold ml-1 mr-1">33</strong><input type="text" name="answers[33]" value="{{ old('answers.33') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> the number of birds accurately.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Influencing factors</h5>
+        <p class="text-gray-800 text-base leading-relaxed">- Human activities, such as <strong class="text-gray-900 font-bold ml-1 mr-1">34</strong><input type="text" name="answers[34]" value="{{ old('answers.34') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> and building homes threaten the bird population.</p>
+        <p class="text-gray-800 text-base leading-relaxed">- The birds are influenced by many species which can eat their <strong class="text-gray-900 font-bold ml-1 mr-1">35</strong><input type="text" name="answers[35]" value="{{ old('answers.35') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">- Natural disasters like <strong class="text-gray-900 font-bold ml-1 mr-1">36</strong><input type="text" name="answers[36]" value="{{ old('answers.36') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> can also reduce the population of the birds.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Ways of protection</h5>
+        <p class="text-gray-800 text-base leading-relaxed">- The zoo should hire a <strong class="text-gray-900 font-bold ml-1 mr-1">37</strong><input type="text" name="answers[37]" value="{{ old('answers.37') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> to keep the birds from being poached</p>
+        <p class="text-gray-800 text-base leading-relaxed">- The organizer could build <strong class="text-gray-900 font-bold ml-1 mr-1">38</strong><input type="text" name="answers[38]" value="{{ old('answers.38') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> to prevent the public from getting closer.</p>
+        <p class="text-gray-800 text-base leading-relaxed">- People should make more of an effort to protect <strong class="text-gray-900 font-bold ml-1 mr-1">39</strong><input type="text" name="answers[39]" value="{{ old('answers.39') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> birds.</p>
+        <p class="text-gray-800 text-base leading-relaxed">- Through the <strong class="text-gray-900 font-bold ml-1 mr-1">40</strong><input type="text" name="answers[40]" value="{{ old('answers.40') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off">, people will learn more about bird protection.</p>
     </div>
 </div>

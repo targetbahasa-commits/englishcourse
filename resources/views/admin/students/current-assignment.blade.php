@@ -306,25 +306,72 @@
             try {
                 const iframeDoc = liveFrame.contentDocument || liveFrame.contentWindow.document;
                 if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.trim() !== '') {
-                    const flattened = {};
-                    const flatten = (value, prefix) => {
+                    const flatten = (value, prefix, out) => {
                         if (value === null || value === undefined) {
                             return;
                         }
                         if (typeof value === 'object' && !Array.isArray(value)) {
                             Object.keys(value).forEach((key) => {
-                                flatten(value[key], prefix ? `${prefix}[${key}]` : key);
+                                flatten(value[key], prefix ? `${prefix}[${key}]` : key, out);
                             });
                         } else if (Array.isArray(value)) {
                             value.forEach((item, idx) => {
-                                flatten(item, prefix ? `${prefix}[${idx}]` : String(idx));
+                                flatten(item, prefix ? `${prefix}[${idx}]` : String(idx), out);
                             });
                         } else if (prefix) {
-                            flattened[prefix] = (value === null || value === undefined) ? '' : value;
+                            out[prefix] = (value === null || value === undefined) ? '' : value;
                         }
                     };
 
-                    flatten(snapshot.raw_answers, '');
+                    // The server tries to pre-wrap raw_answers to match this
+                    // specific meeting's real "name" attributes (see
+                    // ManageStudents::resolveGrammarMeetingSnapshot() /
+                    // resolveLegacyAnswersWrapperKey()) - but that mapping
+                    // is hardcoded per track/meeting and can silently go
+                    // stale as new meetings are added, producing a snapshot
+                    // with real answers that just don't match any field in
+                    // the DOM. Rather than trust one guess blindly, build a
+                    // few structural variants of the SAME raw_answers
+                    // payload and pick whichever one actually has the most
+                    // fields present in the real iframe DOM - self-healing
+                    // against a wrapper-key mismatch instead of silently
+                    // showing blank inputs again.
+                    const candidates = [];
+                    const addCandidate = (value) => {
+                        const out = {};
+                        flatten(value, '', out);
+                        candidates.push(out);
+                    };
+
+                    addCandidate(snapshot.raw_answers);
+                    if (snapshot.raw_answers && typeof snapshot.raw_answers === 'object' && !Array.isArray(snapshot.raw_answers)) {
+                        addCandidate({ userAnswers: snapshot.raw_answers });
+                        addCandidate({ answers: snapshot.raw_answers });
+
+                        const topKeys = Object.keys(snapshot.raw_answers);
+                        if (topKeys.length === 1 && snapshot.raw_answers[topKeys[0]] && typeof snapshot.raw_answers[topKeys[0]] === 'object') {
+                            addCandidate(snapshot.raw_answers[topKeys[0]]);
+                        }
+                    }
+
+                    let flattened = candidates[0] || {};
+                    let bestScore = -1;
+                    candidates.forEach((candidate) => {
+                        let score = 0;
+                        Object.keys(candidate).forEach((name) => {
+                            if (iframeDoc.querySelector(`[name="${CSS.escape(name)}"]`)) {
+                                score++;
+                            }
+                        });
+                        // Strict ">" so ties keep the server's own (first)
+                        // candidate - no behavior change for meetings whose
+                        // wrapper-key logic is already correct.
+                        if (score > bestScore) {
+                            bestScore = score;
+                            flattened = candidate;
+                        }
+                    });
+
                     if (snapshot.raw_paragraph_answer !== undefined) {
                         if (!('userParagraphAnswer' in flattened)) {
                             flattened['userParagraphAnswer'] = snapshot.raw_paragraph_answer || '';

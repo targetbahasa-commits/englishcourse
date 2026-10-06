@@ -390,17 +390,17 @@
 
 
     @if(session('score_data'))
-        <div class="bg-white border-l-4 border-teal-500 p-6 rounded-r-lg shadow-md mb-8">
+        <div class="bg-teal-50 border-l-4 border-teal-500 p-6 rounded-r-lg shadow-md mb-8">
             <h3 class="text-2xl font-bold text-teal-800 mb-2">Test Completed!</h3>
             <p class="text-lg text-teal-900">
-                Your Score: <span class="font-bold">{{ session('score_data')['score'] }}%</span> 
+                Your Score: <span class="font-bold">{{ session('score_data')['score'] }}{{ session('score_data')['score'] <= 100 ? '%' : '' }}</span>
                 ({{ session('score_data')['correct_count'] }} out of {{ session('score_data')['total_question'] }} correct)
             </p>
         </div>
     @endif
 
     @if(session('success'))
-        <div class="mb-6 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-emerald-800">
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
             {{ session('success') }}
         </div>
     @endif
@@ -416,7 +416,7 @@
             $review = session('listeningPackageReview');
         @endphp
         <div class="mb-6 rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden" x-data="{ reviewFilter: 'all' }">
-            <div class="px-5 py-4 bg-white border-b border-blue-100">
+            <div class="px-5 py-4 bg-blue-50 border-b border-blue-100">
                 <h3 class="text-lg font-bold text-blue-900">Review Jawaban Paket {{ $packageNumber ?? 1 }}</h3>
                 <p class="text-sm text-blue-800 mt-1">Skor {{ $review['score'] }} - Benar {{ $review['correct'] }}/{{ $review['total'] }}</p>
                 <div class="mt-3 flex flex-wrap gap-2">
@@ -436,8 +436,8 @@
                     @foreach(($review['rows'] ?? []) as $row)
                         @php
                             $statusClass = $row['is_correct']
-                                ? 'bg-white border-emerald-200 text-emerald-800'
-                                : ($row['is_unanswered'] ? 'bg-white border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                : ($row['is_unanswered'] ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
                             $statusText = $row['is_correct'] ? 'Benar' : ($row['is_unanswered'] ? 'Kosong' : 'Salah');
                         @endphp
                         <div x-show="reviewFilter === 'all' || (reviewFilter === 'wrong' && {{ $row['is_correct'] ? 'false' : ($row['is_unanswered'] ? 'false' : 'true') }}) || (reviewFilter === 'unanswered' && {{ $row['is_unanswered'] ? 'true' : 'false' }})" class="rounded-lg border px-3 py-2 text-sm {{ $statusClass }}">
@@ -498,7 +498,7 @@
 
     @if(auth()->check() && auth()->user()->isAdmin())
     {{-- Admin Dev Toolbar --}}
-    <div class="mb-6 rounded-xl border border-amber-300 bg-white p-3" x-data="{ devOpen: true }">
+    <div class="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-3" x-data="{ devOpen: true }">
         <div class="flex items-center gap-2 mb-2 cursor-pointer select-none" @click="devOpen = !devOpen">
             <span class="text-xs font-bold text-amber-700 uppercase tracking-widest">🛠 Dev Nav</span>
             <span class="ml-auto text-amber-500 text-xs" x-text="devOpen ? '▲ hide' : '▼ show'"></span>
@@ -552,7 +552,7 @@
                     @endif
                     <button type="button"
                         @click="currentView = 'section2'; currentSection = 'questions'; currentStructureIndex = {{ $idx }}; showWrittenDir = false; window.scrollTo(0,0)"
-                        :class="currentView === 'section2' && currentStructureIndex === {{ $idx }} && !showWrittenDir ? 'bg-indigo-600 text-white ring-2 ring-indigo-300' : 'bg-white text-gray-600 hover:bg-white hover:text-indigo-700'"
+                        :class="currentView === 'section2' && currentStructureIndex === {{ $idx }} && !showWrittenDir ? 'bg-indigo-600 text-white ring-2 ring-indigo-300' : 'bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-700'"
                         class="w-8 h-8 rounded-lg border border-gray-200 text-xs font-bold transition flex items-center justify-center">
                         {{ $sq->question_number }}
                     </button>
@@ -577,7 +577,7 @@
                     @endif
                     <button type="button"
                         @click="currentView = 'section3'; goToReadingPassage({{ $idx }})"
-                        :class="currentView === 'section3' && currentReadingSection === 'questions' && currentReadingPassageIndex === {{ $idx }} ? 'bg-emerald-600 text-white ring-2 ring-emerald-300' : 'bg-white text-gray-600 hover:bg-white hover:text-emerald-700'"
+                        :class="currentView === 'section3' && currentReadingSection === 'questions' && currentReadingPassageIndex === {{ $idx }} ? 'bg-emerald-600 text-white ring-2 ring-emerald-300' : 'bg-white text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'"
                         class="px-3 h-8 rounded-lg border border-gray-200 text-xs font-bold transition flex items-center justify-center">
                         {{ $firstQ && $lastQ ? ($firstQ . '-' . $lastQ) : ('P' . ($idx + 1)) }}
                     </button>
@@ -627,7 +627,7 @@
                                             <form action="{{ route('assignments.toefl-itp.mockup.package.upload-audio', ['package' => $packageNumber ?? 1]) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-1" title="Upload audio directions for Part A">
                                                 @csrf
                                                 <input type="hidden" name="listening_direction_part" value="A">
-                                                <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_a ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_a) : 'No audio — click to upload' }}">
+                                                <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_a ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_a) : 'No audio — click to upload' }}">
                                                     <svg class="w-4 h-4 flex-shrink-0 {{ ($listeningDirectionAudio->audio_part_a ?? null) ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v6m0 0l-2-2m2 2l2-2M9 19H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V17a2 2 0 01-2 2h-2"></path></svg>
                                                     <span class="hidden sm:inline">{{ ($listeningDirectionAudio->audio_part_a ?? null) ? 'Re-upload Audio (A)' : 'Add Audio (A)' }}</span>
                                                     <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,.m4a" class="sr-only" onchange="this.closest('form').submit()">
@@ -691,7 +691,7 @@
                                         <form action="{{ route('assignments.toefl-itp.mockup.package.upload-audio', ['package' => $packageNumber ?? 1]) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-1" title="Upload audio directions for Part B">
                                             @csrf
                                             <input type="hidden" name="listening_direction_part" value="B">
-                                            <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_b ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_b) : 'No audio — click to upload' }}">
+                                            <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_b ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_b) : 'No audio — click to upload' }}">
                                                 <svg class="w-4 h-4 flex-shrink-0 {{ ($listeningDirectionAudio->audio_part_b ?? null) ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v6m0 0l-2-2m2 2l2-2M9 19H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V17a2 2 0 01-2 2h-2"></path></svg>
                                                 <span class="hidden sm:inline">{{ ($listeningDirectionAudio->audio_part_b ?? null) ? 'Re-upload Audio (B)' : 'Add Audio (B)' }}</span>
                                                 <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,.m4a" class="sr-only" onchange="this.closest('form').submit()">
@@ -728,7 +728,7 @@
                                         <form action="{{ route('assignments.toefl-itp.mockup.package.upload-audio', ['package' => $packageNumber ?? 1]) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-1" title="Upload audio directions for Part C">
                                             @csrf
                                             <input type="hidden" name="listening_direction_part" value="C">
-                                            <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_c ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_c) : 'No audio — click to upload' }}">
+                                            <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition text-xs text-gray-400 hover:text-indigo-600" title="{{ ($listeningDirectionAudio->audio_part_c ?? null) ? 'Audio: '.basename($listeningDirectionAudio->audio_part_c) : 'No audio — click to upload' }}">
                                                 <svg class="w-4 h-4 flex-shrink-0 {{ ($listeningDirectionAudio->audio_part_c ?? null) ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v6m0 0l-2-2m2 2l2-2M9 19H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V17a2 2 0 01-2 2h-2"></path></svg>
                                                 <span class="hidden sm:inline">{{ ($listeningDirectionAudio->audio_part_c ?? null) ? 'Re-upload Audio (C)' : 'Add Audio (C)' }}</span>
                                                 <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,.m4a" class="sr-only" onchange="this.closest('form').submit()">
@@ -816,7 +816,7 @@
                                      x-show="currentPageIndex === {{ $p['index'] }}"
                                      :class="{
                                          'border-green-500 text-green-600 bg-green-50': countdown > 6,
-                                         'border-yellow-500 text-yellow-600 bg-white': countdown <= 6 && countdown > 3,
+                                         'border-yellow-500 text-yellow-600 bg-yellow-50': countdown <= 6 && countdown > 3,
                                          'border-red-500 text-red-600 bg-red-50': countdown <= 3
                                      }"
                                 >
@@ -826,7 +826,7 @@
                                 @if(auth()->check() && auth()->user()->isAdmin())
                                     <form action="{{ route('assignments.toefl-itp.mockup.package.question.upload-audio', ['package' => $packageNumber ?? 1, 'question_id' => $q->id]) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-1 ml-2" title="Upload audio for this question">
                                         @csrf
-                                        <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white transition text-xs text-gray-400 hover:text-indigo-600" title="{{ $q->audio_file ? 'Audio: '.basename($q->audio_file) : 'No audio — click to upload' }}">
+                                        <label class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded-lg border border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition text-xs text-gray-400 hover:text-indigo-600" title="{{ $q->audio_file ? 'Audio: '.basename($q->audio_file) : 'No audio — click to upload' }}">
                                             <svg class="w-4 h-4 flex-shrink-0 {{ $q->audio_file ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v6m0 0l-2-2m2 2l2-2M9 19H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V17a2 2 0 01-2 2h-2"></path></svg>
                                             <span class="hidden sm:inline">{{ $q->audio_file ? 'Re-upload' : 'Audio' }}</span>
                                             <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,.m4a" class="sr-only" onchange="this.closest('form').submit()">
@@ -834,7 +834,7 @@
                                     </form>
                                 @endif
 
-                                <span class="ml-auto text-sm text-gray-600 font-semibold bg-white px-4 py-1.5 rounded-full border border-gray-200">Part {{ $p['part'] }}</span>
+                                <span class="ml-auto text-sm text-gray-600 font-semibold bg-gray-100 px-4 py-1.5 rounded-full border border-gray-200">Part {{ $p['part'] }}</span>
                             </div>
 
                             <div class="space-y-4 max-w-2xl pl-2">
@@ -986,7 +986,7 @@
         <div class="fixed top-24 right-8 z-50 bg-white border-2 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-colors duration-300 pointer-events-none"
              :class="{
                  'border-teal-500 text-teal-700': structureCountdown > 300,
-                 'border-orange-400 text-orange-700 bg-white': structureCountdown <= 300 && structureCountdown > 60,
+                 'border-orange-400 text-orange-700 bg-orange-50': structureCountdown <= 300 && structureCountdown > 60,
                  'border-red-500 text-red-700 bg-red-50 animate-pulse': structureCountdown <= 60
              }">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -1081,7 +1081,7 @@
                     <div class="mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
                         <h3 class="text-2xl font-bold text-gray-800" style="margin: 0;">Question {{ $q->question_number }}</h3>
 
-                        <span class="ml-auto text-sm text-gray-600 font-semibold bg-white px-4 py-1.5 rounded-full border border-gray-200">
+                        <span class="ml-auto text-sm text-gray-600 font-semibold bg-gray-100 px-4 py-1.5 rounded-full border border-gray-200">
                             {{ $q->part === 'Structure' ? 'Structure' : 'Written Expression' }}
                         </span>
                     </div>
@@ -1118,7 +1118,7 @@
                     <div class="mt-12 pt-6 border-t border-gray-100 flex justify-between items-center">
                         <button type="button" @click="currentStructureIndex--; window.scrollTo(0,0)" 
                                 :disabled="currentStructureIndex === 0"
-                                :class="currentStructureIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white text-gray-700 shadow-sm bg-white'"
+                                :class="currentStructureIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 text-gray-700 shadow-sm bg-white'"
                                 class="px-6 py-3 rounded-xl border border-gray-300 font-bold transition flex items-center gap-2" style="border-width: 2px;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             Prev
@@ -1188,7 +1188,7 @@
             </div>
             <p style="font-size:1.1rem; font-weight:800; color:#d1a82e; text-align:center; margin:0 0 28px 0;">Now begin work on the questions.</p>
             <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e5e7eb; padding-top:20px;">
-                <button type="button" @click="showWrittenDir = false; window.scrollTo(0,0)" class="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-bold hover:bg-white transition flex items-center gap-2 bg-white shadow-sm">
+                <button type="button" @click="showWrittenDir = false; window.scrollTo(0,0)" class="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition flex items-center gap-2 bg-white shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     Back to Q15
                 </button>
@@ -1434,7 +1434,7 @@
                         </div>
                     </div>
 
-                    <div data-reading-scroll class="bg-white split-screen-right split-screen-custom-scrollbar">
+                    <div data-reading-scroll class="bg-gray-50/60 split-screen-right split-screen-custom-scrollbar">
                         <div class="p-4 md:p-6 space-y-6 flex-1 pb-28">
                             @foreach($passageQuestions as $question)
                                 <article
@@ -1442,7 +1442,7 @@
                                     class="bg-white rounded-xl border border-gray-200 shadow-sm p-3 md:p-4"
                                 >
                                     <div class="flex items-start gap-2 border-b border-gray-100 pb-3 mb-3">
-                                        <div class="w-7 h-7 rounded-lg bg-white text-emerald-700 font-extrabold text-xs flex items-center justify-center border border-emerald-200 shrink-0">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 font-extrabold text-xs flex items-center justify-center border border-emerald-200 shrink-0">
                                             {{ $question['question_number'] }}
                                         </div>
                                         <div class="flex-1">
@@ -1474,13 +1474,13 @@
                             @endforeach
                         </div>
 
-                        <div class="sticky bottom-0 z-30 border-t border-gray-200 bg-white p-4 backdrop-blur w-full mt-auto">
+                        <div class="sticky bottom-0 z-30 border-t border-gray-200 bg-gray-50/95 p-4 backdrop-blur w-full mt-auto">
                             <div class="flex justify-between items-center gap-4">
                                 <button
                                     type="button"
                                     @click="goToReadingPassage(currentReadingPassageIndex - 1)"
                                     :disabled="currentReadingPassageIndex === 0"
-                                    :class="currentReadingPassageIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white text-gray-700 shadow-sm bg-white'"
+                                    :class="currentReadingPassageIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 text-gray-700 shadow-sm bg-white'"
                                     class="px-5 py-2.5 rounded-xl border border-gray-300 font-bold transition flex items-center gap-2"
                                     style="border-width: 2px;"
                                 >

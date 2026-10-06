@@ -57,6 +57,7 @@
             'category' => $category,
             'badgeClass' => $badgeClass,
             'bookingCount' => (int) ($bookingCounts[$p->id] ?? 0),
+            'deliveryMode' => $p->delivery_mode,
         ];
     })->values();
 
@@ -77,7 +78,6 @@
     programsList: {{ json_encode($programsJson, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }},
     filterProgram: '{{ old('program_id', $programs->first()->id ?? '') }}',
     filterType: '{{ old('batch_type', 'regular') }}',
-    filterMode: '{{ old('learning_mode', 'online') }}',
     selectedMonth: '{{ old('booking_month', $months[0] ?? 'Maret 2026') }}',
     selectedWeek: '{{ old('booking_week', 'Minggu 1') }}',
     searchProgram: '',
@@ -87,7 +87,11 @@
     periodCounts: {{ json_encode($periodCounts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }},
 
     get selectedProgram() {
-        return this.programsList.find(p => p.id == this.filterProgram) || this.programsList[0] || { name: 'Pilih Program Kursus', category: 'Semua', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200', bookingCount: 0 };
+        return this.programsList.find(p => p.id == this.filterProgram) || this.programsList[0] || { name: 'Pilih Program Kursus', category: 'Semua', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200', bookingCount: 0, deliveryMode: 'online' };
+    },
+
+    get filterMode() {
+        return this.selectedProgram.deliveryMode || 'online';
     },
 
     get selectedBatchCount() {
@@ -424,24 +428,14 @@
                         </div>
                     </div>
 
-                    {{-- Moda Belajar --}}
+                    {{-- Moda Belajar (mengikuti program yang dipilih) --}}
                     <div>
                         <label class="block font-bold text-slate-800 text-sm mb-2">
-                            Moda Belajar <span class="text-red-500">*</span>
+                            Moda Belajar
                         </label>
-                        <div class="p-1.5 bg-blue-50/80 rounded-full border border-blue-100 inline-flex w-full">
-                            <button type="button" 
-                                    @click="filterMode = 'online'"
-                                    :class="filterMode === 'online' ? 'bg-blue-500 text-white font-bold shadow-sm' : 'text-blue-700 hover:text-blue-900 font-semibold'"
-                                    class="flex-1 py-3 px-4 text-xs sm:text-sm rounded-full transition-all text-center cursor-pointer">
-                                Online (Zoom Live)
-                            </button>
-                            <button type="button" 
-                                    @click="filterMode = 'offline'"
-                                    :class="filterMode === 'offline' ? 'bg-blue-500 text-white font-bold shadow-sm' : 'text-blue-700 hover:text-blue-900 font-semibold'"
-                                    class="flex-1 py-3 px-4 text-xs sm:text-sm rounded-full transition-all text-center cursor-pointer">
-                                Offline (Tatap Muka)
-                            </button>
+                        <div class="p-3 px-4 bg-blue-50/80 rounded-full border border-blue-100 text-sm font-bold text-blue-700 flex items-center gap-2">
+                            <span x-text="filterMode === 'offline' ? '🏫 Offline (Tatap Muka)' : '💻 Online (Zoom Live)'"></span>
+                            <span class="text-xs font-normal text-slate-500">— sesuai program yang dipilih</span>
                         </div>
                     </div>
                 </div>

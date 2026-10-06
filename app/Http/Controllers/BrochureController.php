@@ -19,6 +19,7 @@ class BrochureController extends Controller
         }
 
         $programs = Program::where('is_active', true)
+            ->where('delivery_mode', $type)
             ->where('slug', 'not like', 'cambridge-%')
             ->where('slug', 'not like', 'toefl-itp-mock-package-%')
             ->with(['classPeriods' => function($q) {
@@ -51,9 +52,9 @@ class BrochureController extends Controller
             ->orWhere('id', $slug)
             ->firstOrFail();
 
-        $mode = $request->query('mode', 'offline');
+        $mode = $request->query('mode', $program->delivery_mode);
         if (!in_array($mode, ['online', 'offline'])) {
-            $mode = 'offline';
+            $mode = $program->delivery_mode;
         }
 
         $isDownload = $request->boolean('download') || $request->query('download') == '1';

@@ -1,32 +1,29 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 32</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11-17</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the notes below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Practice exercises collection</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN THREE WORDS</strong> for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">“CV and Interview Skills” Semina</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The speaker suggests that the students use the <strong class="text-blue-600 font-bold ml-1 mr-1">11</strong><input type="text" name="answers[11]" value="{{ old('answers.11') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> when they begin writing resumes.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The students should be sure not to keep the CV <strong class="text-blue-600 font-bold ml-1 mr-1">12</strong><input type="text" name="answers[12]" value="{{ old('answers.12') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">A <strong class="text-blue-600 font-bold ml-1 mr-1">13</strong><input type="text" name="answers[13]" value="{{ old('answers.13') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> cover letter is useful when applying for a job and should be included.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The speaker believes the CV should have a beautiful <strong class="text-blue-600 font-bold ml-1 mr-1">14</strong><input type="text" name="answers[14]" value="{{ old('answers.14') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The CV should not have any spelling and grammar <strong class="text-blue-600 font-bold ml-1 mr-1">15</strong><input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The words in a CV can describe your <strong class="text-blue-600 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Don’t forget to put down a <strong class="text-blue-600 font-bold ml-1 mr-1">17</strong><input type="text" name="answers[17]" value="{{ old('answers.17') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> on the CV.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 18-20</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>THREE</strong> letters, <strong>A-G</strong>, and write them next to questions <strong>18-20</strong>._</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">What <strong>THREE</strong> details should job applicants know in the interview?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>A</strong> Working hours</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>B</strong> Promotion prospect</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>C</strong> Salary range</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>D</strong> Pension contribution bonus</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Exam preparation materials</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong> Training</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>F</strong> Holidays</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>G</strong> Location</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Foreign Language Study</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Psychology</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Primary & Secondary Schooling (K-12)</p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 11-20</h4>
+        <p class="text-gray-600 font-medium">Complete the form below.</p>
+        <p class="text-gray-600 font-medium">Write ONE WORD AND/OR A NUMBER for each answer.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Waste sorting, collection, and disposal</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Necessary characteristics of dustbins: Solid and <strong class="text-gray-900 font-bold ml-1 mr-1">11</strong><input type="text" name="answers[11]" value="{{ old('answers.11') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">Three kinds:</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Waste sorting</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Recyclable garbage (blue or green bin)</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Unrecyclable garbage (yellow bin)</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Toxic waste (red bin)</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Waste collection</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Commercial waste collection:</p>
+        <p class="text-gray-800 text-base leading-relaxed">It mainly refers to <strong class="text-gray-900 font-bold ml-1 mr-1">12</strong><input type="text" name="answers[12]" value="{{ old('answers.12') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> waste.</p>
+        <p class="text-gray-800 text-base leading-relaxed">Warning signs state not to <strong class="text-gray-900 font-bold ml-1 mr-1">13</strong><input type="text" name="answers[13]" value="{{ old('answers.13') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> blue/green bins.</p>
+        <p class="text-gray-800 text-base leading-relaxed">Those <strong class="text-gray-900 font-bold ml-1 mr-1">14</strong><input type="text" name="answers[14]" value="{{ old('answers.14') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> metals will cause environmental pollution.</p>
+        <p class="text-gray-800 text-base leading-relaxed">Household waste collection:</p>
+        <p class="text-gray-800 text-base leading-relaxed">All kitchen garbage should be put into a <strong class="text-gray-900 font-bold ml-1 mr-1">15</strong><input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> bag.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Waste disposal</h5>
+        <p class="text-gray-800 text-base leading-relaxed">The garbage disposal plant is situated in an <strong class="text-gray-900 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> space or field.</p>
+        <p class="text-gray-800 text-base leading-relaxed">The waste is disposed of at least once every <strong class="text-gray-900 font-bold ml-1 mr-1">17</strong><input type="text" name="answers[17]" value="{{ old('answers.17') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">The dustbin should be cleared at night because of <strong class="text-gray-900 font-bold ml-1 mr-1">18</strong><input type="text" name="answers[18]" value="{{ old('answers.18') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">The waste is mainly produced by <strong class="text-gray-900 font-bold ml-1 mr-1">19</strong><input type="text" name="answers[19]" value="{{ old('answers.19') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off">, industry, retail, and offices.</p>
+        <p class="text-gray-800 text-base leading-relaxed">Please do not dispose of <strong class="text-gray-900 font-bold ml-1 mr-1">20</strong><input type="text" name="answers[20]" value="{{ old('answers.20') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> in any of the bins.</p>
     </div>
 </div>

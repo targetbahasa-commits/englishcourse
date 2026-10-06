@@ -17,6 +17,6 @@ class ToeflStructurePracticeController extends Controller
 
     public function index()
     {
-        return view('assignments.toefl-itp.structure.practice-index', $this->buildStructurePracticeIndexData->handle());
+        return view('assignments.toefl-itp.structure.practice-index', $this->buildStructurePracticeIndexData->handle(\Illuminate\Support\Facades\Auth::user()));
     }
 }

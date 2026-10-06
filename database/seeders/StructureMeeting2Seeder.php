@@ -2,30 +2,31 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\ToeflStructureMeeting;
-use App\Models\ToeflStructureQuestion;
 
 class StructureMeeting2Seeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        // 1. Ensure Meeting 2 exists
-        $meeting = ToeflStructureMeeting::firstOrCreate(
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
             ['meeting_number' => 2],
             [
-                'title' => 'Structure Meeting 2',
-                'description' => 'Gerunds and Infinitives',
+                'title' => 'Verb Palsu',
+                'description' => '',
                 'is_locked' => false,
             ]
         );
 
-        // 2. Clear existing questions for this meeting to avoid duplicates
-        ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
+        // Clear existing questions
+        \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
-        // 3. Insert new questions
         $questions = [
             [
+                'question_number' => 1,
                 'question_text' => 'The complex process of photosynthesis involves chlorophyll _____ light energy into chemical energy to fuel the organism\'s activities.',
                 'option_a' => 'convert',
                 'option_b' => 'converting',
@@ -34,6 +35,7 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'B',
             ],
             [
+                'question_number' => 2,
                 'question_text' => 'Astrophysicists generally consider the James Webb Space Telescope _____ a revolutionary tool for observing the earliest galaxies in the universe.',
                 'option_a' => 'be',
                 'option_b' => 'being',
@@ -42,6 +44,7 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'C',
             ],
             [
+                'question_number' => 3,
                 'question_text' => 'Historically, many nomadic tribes across the Eurasian Steppe specialized in _____ horses for both warfare and transportation.',
                 'option_a' => 'breeding',
                 'option_b' => 'breed',
@@ -50,6 +53,7 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'A',
             ],
             [
+                'question_number' => 4,
                 'question_text' => 'The primary objective of the Antarctic Treaty is _____ the continent for peaceful scientific research only.',
                 'option_a' => 'reserve',
                 'option_b' => 'to reserve',
@@ -58,6 +62,7 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'B',
             ],
             [
+                'question_number' => 5,
                 'question_text' => 'Economists emphasize that the central bank cannot risk _____ interest rates too sharply without affecting consumer spending.',
                 'option_a' => 'to raise',
                 'option_b' => 'raising',
@@ -66,22 +71,25 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'B',
             ],
             [
+                'question_number' => 6,
                 'question_text' => 'Sociologists have observed that human beings possess an innate tendency _____ social hierarchies within any given community.',
-                'option_a' => 'forming',
-                'option_b' => 'to form',
+                'option_a' => 'to form',
+                'option_b' => 'forming',
                 'option_c' => 'for forming',
                 'option_d' => 'formed',
-                'correct_answer' => 'B',
+                'correct_answer' => 'A',
             ],
             [
+                'question_number' => 7,
                 'question_text' => 'Modern surgical techniques aim at _____ the recovery time for patients undergoing invasive procedures.',
                 'option_a' => 'minimize',
                 'option_b' => 'to minimize',
-                'option_c' => 'minimizing',
-                'option_d' => 'minimized',
-                'correct_answer' => 'C',
+                'option_c' => 'minimized',
+                'option_d' => 'minimizing',
+                'correct_answer' => 'D',
             ],
             [
+                'question_number' => 8,
                 'question_text' => 'Ancient civilizations often used complex irrigation systems to avoid _____ their crops during periods of severe drought.',
                 'option_a' => 'lose',
                 'option_b' => 'to lose',
@@ -90,14 +98,16 @@ class StructureMeeting2Seeder extends Seeder
                 'correct_answer' => 'C',
             ],
             [
+                'question_number' => 9,
                 'question_text' => 'Scholars continue to debate whether the Voynich Manuscript was intended _____ a genuine scientific treatise or a sophisticated hoax.',
                 'option_a' => 'be',
-                'option_b' => 'to be',
+                'option_b' => 'been',
                 'option_c' => 'being',
-                'option_d' => 'been',
-                'correct_answer' => 'B',
+                'option_d' => 'to be',
+                'correct_answer' => 'D',
             ],
             [
+                'question_number' => 10,
                 'question_text' => 'Environmentalists have succeeded in _____ several endangered species from the brink of extinction through habitat restoration.',
                 'option_a' => 'prevent',
                 'option_b' => 'to prevent',
@@ -107,19 +117,18 @@ class StructureMeeting2Seeder extends Seeder
             ],
         ];
 
-        foreach ($questions as $index => $q) {
-            ToeflStructureQuestion::create([
+        foreach ($questions as $q) {
+            \App\Models\ToeflStructureQuestion::create([
                 'section_id' => $meeting->id,
-                'question_number' => $index + 1,
+                'question_number' => $q['question_number'],
                 'question_text' => $q['question_text'],
                 'option_a' => $q['option_a'],
                 'option_b' => $q['option_b'],
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
-
-        $this->command->info('Structure Meeting 2 seeded successfully with 10 new questions!');
     }
 }

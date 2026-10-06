@@ -153,6 +153,134 @@ class BookingController extends Controller
     }
 
     /**
+     * Admin-only "finish this booking lead's registration myself" action -
+     * the popup trigger on this same page. Does the same guest->student
+     * upgrade + invoice creation as a self-service /daftar submission
+     * (RegistrationController::store()), but driven entirely from here so
+     * admin never has to open the public registration page at all -
+     * previously the only way in was the signed "Registrasi" link, and
+     * clicking that from an already-logged-in admin session hijacked the
+     * admin's own session into the lead's account (continueFromBooking()
+     * calling Auth::login() unconditionally). This endpoint never touches
+     * Auth::login(), so the admin's session is never at risk.
+     *
+     * Returns JSON (not a redirect) since the modal submits this via fetch
+     * and needs the generated password back to display for the admin to
+     * relay to the student - that password is never shown anywhere else,
+     * so losing it here means the student has to use "forgot password".
+     */
+    public function registerLead(Request $request, Enrollment $enrollment)
+    {
+        $user = $enrollment->user;
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Data student tidak ditemukan untuk booking ini.'], 422);
+        }
+
+        if ($user->role !== 'guest') {
+            return response()->json(['success' => false, 'message' => "{$user->name} sudah terdaftar sebagai student."], 422);
+        }
+
+        $validated = $request->validate([
+            'payment_channel' => 'required|in:bank_transfer,qris,cash',
+            'name' => 'required|string|max:255',
+            // Same scoping as RegistrationController::store() - a genuinely
+            // taken email still blocks this (real accounts are never
+            // role=guest), but the admin can freely re-save the lead's own
+            // pre-existing guest email without tripping the unique rule.
+            'email' => ['required', 'email', 'max:150', \Illuminate\Validation\Rule::unique('users', 'email')->where(fn ($query) => $query->where('role', '!=', 'guest'))->ignore($user->id)],
+            'phone_number' => 'nullable|string|max:20',
+            'program_id' => 'required|exists:programs,id',
+            'class_period_id' => 'required|exists:class_periods,id',
+            // Optional - left blank means fall back to the program's own
+            // configured price (see InitiatePayment::handle()'s $overrideAmount).
+            'amount' => 'nullable|integer|min:0',
+        ]);
+
+        // Same program/batch move checks as update() (consistency, conflict
+        // with another booking, closed status, capacity) - duplicated here
+        // rather than reused because update() returns a redirect response
+        // for a form POST while this endpoint always returns JSON for fetch().
+        $classPeriod = ClassPeriod::findOrFail($validated['class_period_id']);
+
+        if ($classPeriod->program_id !== (int) $validated['program_id']) {
+            return response()->json(['success' => false, 'message' => 'Batch yang dipilih bukan bagian dari kelas/program yang dipilih.'], 422);
+        }
+
+        $programChanged = (int) $validated['program_id'] !== $enrollment->program_id;
+
+        if ($programChanged) {
+            $conflict = Enrollment::where('user_id', $enrollment->user_id)
+                ->where('program_id', $validated['program_id'])
+                ->where('id', '!=', $enrollment->id)
+                ->exists();
+
+            if ($conflict) {
+                return response()->json(['success' => false, 'message' => 'Student sudah terdaftar di kelas/program tersebut lewat booking lain. Tidak bisa dipindahkan lewat sini.'], 422);
+            }
+        }
+
+        if ($classPeriod->status === 'closed') {
+            return response()->json(['success' => false, 'message' => 'Batch ini sudah ditutup dan tidak menerima booking baru.'], 422);
+        }
+
+        if ($classPeriod->id !== $enrollment->class_period_id
+            && $classPeriod->max_capacity
+            && $classPeriod->occupiedSeats() >= $classPeriod->max_capacity) {
+            return response()->json(['success' => false, 'message' => 'Batch ini sudah penuh. Silakan pilih batch lain.'], 422);
+        }
+
+        $enrollment->update([
+            'program_id' => $classPeriod->program_id,
+            'class_period_id' => $classPeriod->id,
+        ]);
+
+        $generatedPassword = \Illuminate\Support\Str::random(10);
+
+        // Mirrors RegistrationController::store()'s guest->student branch
+        // exactly (role + converted_from_guest_at), plus setting a real
+        // password (that branch never does - a guest's password is a
+        // random string from booking time that nobody, including the
+        // student, has ever seen) and learning_mode from the batch they
+        // actually booked into, since InitiatePayment below reads
+        // $user->learning_mode to pick the right price field and a
+        // booking-created guest never has it set otherwise.
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone_number = $validated['phone_number'] ?? $user->phone_number;
+        $user->role = 'student';
+        $user->password = bcrypt($generatedPassword);
+        $user->converted_from_guest_at = now();
+        if ($classPeriod?->learning_mode) {
+            $user->learning_mode = $classPeriod->learning_mode;
+        }
+        $user->save();
+
+        try {
+            $result = app(\App\Application\Payment\InitiatePayment::class)->handle(
+                $user,
+                $enrollment->program_id,
+                $validated['payment_channel'],
+                $classPeriod->batch_type ?? 'regular',
+                $enrollment->id,
+                $validated['amount'] ?? null
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to initiate payment for admin lead registration: ' . $e->getMessage());
+            $result = null;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mendaftarkan {$user->name} sebagai student.",
+            'student_name' => $user->name,
+            'student_email' => $user->email,
+            'password' => $generatedPassword,
+            'invoice_created' => $result && in_array($result['status'] ?? null, ['created', 'pending_exists'], true),
+            'invoice_amount' => $result['payment']->amount ?? null,
+        ]);
+    }
+
+    /**
      * Move an existing booking to a different batch, and/or a different
      * program entirely (e.g. admin correcting a student's wrong program
      * pick on the self-service booking form). class_period_booked_at is

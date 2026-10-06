@@ -1,48 +1,173 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 43</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Colleges & Universities</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Foreign Language Study</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Primary & Secondary Schooling (K-12)</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11-14</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>11</strong>What is the project that Mark and Gina want to start?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Educational Resources</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>business school requirements</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>directions to the business school</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>explaining the business school experience</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>12</strong>Who is the target audience?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>business students</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>business school applicants</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>summer school attendees</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>13</strong>How will they convey the information?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>summer course lecture</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>informational video</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>pamphlet in the mail</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>14</strong>They want to do this project because</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>students worry about their studies.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Health Foundations & Medical Research</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Online training courses</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">IELTS Speaking samples</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>they want to obtain a good grade.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>they want to attract future business school applicants.</span></label>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 15-20</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Exam preparation materials</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS AND/OR A NUMBER</strong> for each answer.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Topic</strong><strong>Time</strong></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong> Academics</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">- <strong class="text-blue-600 font-bold ml-1 mr-1">15</strong><input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">7 minutes</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong><strong class="text-blue-600 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">- Cafeteria</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">- <strong class="text-blue-600 font-bold ml-1 mr-1">17</strong><input type="text" name="answers[17]" value="{{ old('answers.17') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">6 minutes</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong> Social activity</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">- <strong class="text-blue-600 font-bold ml-1 mr-1">18</strong><input type="text" name="answers[18]" value="{{ old('answers.18') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">- <strong class="text-blue-600 font-bold ml-1 mr-1">19</strong><input type="text" name="answers[19]" value="{{ old('answers.19') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">8 minutes</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong> Conclusion nearly <strong class="text-blue-600 font-bold ml-1 mr-1">20</strong><input type="text" name="answers[20]" value="{{ old('answers.20') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Psychology</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Standardized & Admissions Tests</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Marketing</p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 11-18</h4>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">11</span> The Heritage Clothes exhibition was put together by</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">museum staff.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">local residents.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">clothing manufacturers.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">12</span> The photographs show the clothes worn by</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">their owners.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">professional models.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">design students.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">13</span> The exhibition called Toys from the Past is</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">displayed in a new gallery.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">on show for a limited time.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">aimed specially at children.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">14</span> Visitors to Toys from the Past are recommended to</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">play with the toy trains.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">look at all the dolls.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">see the board games.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">15</span> The miniature toys have been</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">made by the museum.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">bought by the museum.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">borrowed by the museum.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">16</span> The biscuit factory made tins</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[16]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">for people all over the world.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[16]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">of different shapes.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[16]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">for many famous people.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">17</span> People&#x27;s favourite biscuit used to be</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[17]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">an unsweetened one.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[17]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">one covered in chocolate.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[17]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">one filled with cream.</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">18</span> The hands-on activity allows people to</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[18]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">make some biscuits.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[18]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">taste some of the biscuits.</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[18]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">pack a biscuit tin.</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">Questions 19 and 20</h4>
+        <p class="text-gray-600 font-medium">Write NO MORE THAN TWO WORDS for each answer.</p>
+        <p class="text-gray-800 text-base leading-relaxed my-2"><strong class="text-gray-900 font-bold mr-2">19</strong> The gift shop is located beside the <input type="text" name="answers[19]" value="{{ old('answers.19') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> on the ground floor.</p>
+        <p class="text-gray-800 text-base leading-relaxed my-2"><strong class="text-gray-900 font-bold mr-2">20</strong> Free <input type="text" name="answers[20]" value="{{ old('answers.20') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> are available for visitors’ belongings.</p>
     </div>
 </div>

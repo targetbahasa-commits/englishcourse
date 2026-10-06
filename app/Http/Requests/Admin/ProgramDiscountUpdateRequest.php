@@ -13,6 +13,12 @@ class ProgramDiscountUpdateRequest extends FormRequest
 
     public function rules(): array
     {
+        if ($this->has('toggle_active')) {
+            return [
+                'is_active' => 'nullable|boolean',
+            ];
+        }
+
         return [
             'label' => 'required|string|max:255',
             'discount_type' => 'required|in:percentage,fixed_idr',

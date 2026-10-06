@@ -110,7 +110,6 @@ class BookingClassController extends Controller
             'booking_month' => 'required|string|max:100',
             'booking_week' => 'required|string|max:100',
             'batch_type' => 'nullable|string|in:regular,private,semi_private,all',
-            'learning_mode' => 'nullable|string|in:online,offline,all',
             'notes' => 'nullable|string|max:1000',
             'class_period_id' => 'nullable|exists:class_periods,id',
         ], [
@@ -128,7 +127,6 @@ class BookingClassController extends Controller
         $name = trim($validated['name']);
         $phone = trim($validated['whatsapp']);
         $batchType = in_array($validated['batch_type'] ?? '', ['private', 'semi_private'], true) ? $validated['batch_type'] : 'regular';
-        $learningMode = ($validated['learning_mode'] === 'offline') ? 'offline' : 'online';
         $bookingMonth = trim($validated['booking_month']);
         $bookingWeek = trim($validated['booking_week']);
 
@@ -163,6 +161,7 @@ class BookingClassController extends Controller
 
         /** @var Program $program */
         $program = Program::findOrFail($validated['program_id']);
+        $learningMode = $program->delivery_mode;
 
         // Find or create matching ClassPeriod for this program, month & week
         $periodName = "{$program->name} - {$bookingMonth} ({$bookingWeek})";

@@ -96,6 +96,16 @@ def download_image(args):
         return f"[{tid}] Failed: {title} ({str(e)})"
 
 import time
+import subprocess
+
+def send_notification(count):
+    msg = f"Proses telah mencapai {count} dari 50!"
+    title = f"Notifikasi Progress ({count}/50)"
+    try:
+        subprocess.run(["osascript", "-e", f'display notification "{msg}" with title "{title}"'], check=False)
+    except Exception as e:
+        pass
+
 def main():
     print("Generating 50 AI process diagrams using Pollinations API sequentially...")
     tasks = []
@@ -103,11 +113,20 @@ def main():
         tid = ASSIGNED_IDS[i]
         tasks.append((tid, title, steps_str))
         
-    for task in tasks:
+    for i, task in enumerate(tasks, 1):
         print(download_image(task))
+        
+        # Send notification at milestones 20, 30, 40, and 50
+        if i in [20, 30, 40, 50]:
+            print(f"\n==========================================")
+            print(f"🔔 NOTIFIKASI: Telah mencapai {i} dari 50!")
+            print(f"==========================================\n")
+            send_notification(i)
+            
         time.sleep(1) # prevent rate limit
             
     print("All AI images generated.")
 
 if __name__ == '__main__':
     main()
+

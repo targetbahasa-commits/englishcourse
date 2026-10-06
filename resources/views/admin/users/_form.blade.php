@@ -10,18 +10,41 @@
             'start_date_formatted' => $p->start_date ? \Carbon\Carbon::parse($p->start_date)->format('d M Y') : '',
         ];
     })->values();
+
+    $userEnrolledIds = old('program_ids', isset($user) ? $user->enrolled_program_ids : []);
+    if (!is_array($userEnrolledIds)) $userEnrolledIds = [$userEnrolledIds];
+    if (old('program_id')) $userEnrolledIds[] = (int) old('program_id');
+    $userEnrolledIds = array_map('intval', array_unique(array_filter($userEnrolledIds)));
+
+    // Per-program Teacher / Batch hydration: prefer old() input (validation redisplay),
+    // falling back to this user's existing per-program Enrollment row for that program.
+    $oldTeacherIds = old('teacher_ids', []);
+    $oldClassPeriodIds = old('class_period_ids', []);
+    $programAssignments = [];
+    foreach ($userEnrolledIds as $pid) {
+        $enrollment = isset($user) ? $user->enrollments->firstWhere('program_id', $pid) : null;
+        $programAssignments[$pid] = [
+            'teacher_id' => $oldTeacherIds[$pid] ?? optional($enrollment)->teacher_id,
+            'class_period_id' => $oldClassPeriodIds[$pid] ?? optional($enrollment)->class_period_id,
+        ];
+    }
+
+    $programsSimple = collect($programs ?? [])->map(fn($p) => ['id' => (int) $p->id, 'name' => $p->name])->values();
+    $teachersSimple = collect($teachers ?? [])->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values();
 @endphp
 
 <div class="p-8 space-y-8" x-data="{
     role: '{{ old('role', request('role', $user->role ?? '')) }}',
     learningMode: '{{ old('learning_mode', $user->learning_mode ?? 'online') }}',
-    programId: '{{ old('program_id', $user->program_id ?? '') }}',
-    classPeriodId: '{{ old('class_period_id', $user->class_period_id ?? '') }}',
     campId: '{{ old('camp_id', $user->camp_id ?? '') }}',
     campsData: {{ Js::from($camps ?? []) }},
     classPeriodsData: {{ Js::from($formattedPeriods) }},
+    teachersData: {{ Js::from($teachersSimple) }},
+    programsData: {{ Js::from($programsSimple) }},
+    selectedPrograms: {{ Js::from($userEnrolledIds) }},
+    programAssignments: {{ Js::from($programAssignments) }},
     showCamp: false,
-    
+
     init() {
         this.updateVisibility();
         $watch('role', () => this.updateVisibility());
@@ -40,29 +63,30 @@
             // Clear selections when hiding
             this.campId = '';
         }
-        if (this.role !== 'student') {
-            this.classPeriodId = '';
-            let tSelect = document.getElementById('teacher_id');
-            if (tSelect) tSelect.value = '';
-        }
     },
     availableRooms() {
         if (!this.campId) return [];
         let camp = this.campsData.find(c => c.id == this.campId);
         return camp ? camp.rooms : [];
     },
-    availableBatches() {
-        if (!this.programId) return this.classPeriodsData;
-        return this.classPeriodsData.filter(p => String(p.program_id) === String(this.programId));
-    },
     formatBatchText(p) {
         return `${p.name} (${p.program_name} - ${p.learning_mode}${p.start_date_formatted ? ' | ' + p.start_date_formatted : ''})`;
     },
-    onProgramChange() {
-        let validIds = this.availableBatches().map(p => String(p.id));
-        if (this.classPeriodId && !validIds.includes(String(this.classPeriodId))) {
-            this.classPeriodId = '';
+    toggleProgram(programId, checked) {
+        programId = parseInt(programId);
+        if (checked) {
+            if (!this.selectedPrograms.includes(programId)) this.selectedPrograms.push(programId);
+            if (!this.programAssignments[programId]) this.programAssignments[programId] = { teacher_id: '', class_period_id: '' };
+        } else {
+            this.selectedPrograms = this.selectedPrograms.filter(id => id !== programId);
         }
+    },
+    programName(programId) {
+        let p = this.programsData.find(p => p.id === programId);
+        return p ? p.name : 'Program';
+    },
+    batchesForProgram(programId) {
+        return this.classPeriodsData.filter(p => String(p.program_id) === String(programId));
     }
 }">
     
@@ -174,16 +198,27 @@
                         @if(isset($user)) Change Account Password / Reset Password @else Set Initial Password @endif
                     </h4>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ showPassword: false, showPasswordConfirm: false }">
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-                            New Password 
+                            New Password
                             @if(!isset($user))
                                 <span class="text-red-500">*</span>
                             @endif
                         </label>
-                        <input type="password" id="password" name="password" {{ !isset($user) ? 'required' : '' }} placeholder="{{ isset($user) ? 'Kosongkan jika tidak ingin diubah' : 'Minimal 6 karakter' }}"
-                               class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-shadow @error('password') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror text-sm">
+                        <div class="relative">
+                            <input :type="showPassword ? 'text' : 'password'" id="password" name="password" {{ !isset($user) ? 'required' : '' }} placeholder="{{ isset($user) ? 'Kosongkan jika tidak ingin diubah' : 'Minimal 6 karakter' }}"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-shadow @error('password') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror text-sm pr-10">
+                            <button type="button" @click="showPassword = !showPassword" tabindex="-1" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-amber-600 transition-colors">
+                                <svg x-show="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <svg x-show="showPassword" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                            </button>
+                        </div>
                         @if(isset($user))
                             <p class="mt-1 text-xs text-gray-500">Kosongkan jika tidak ingin mengubah password user ini.</p>
                         @endif
@@ -191,7 +226,7 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    
+
                     <div>
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
                             Confirm New Password
@@ -199,8 +234,19 @@
                                 <span class="text-red-500">*</span>
                             @endif
                         </label>
-                        <input type="password" id="password_confirmation" name="password_confirmation" {{ !isset($user) ? 'required' : '' }} placeholder="{{ isset($user) ? 'Ulangi password baru' : 'Ulangi password baru' }}"
-                               class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-shadow text-sm">
+                        <div class="relative">
+                            <input :type="showPasswordConfirm ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" {{ !isset($user) ? 'required' : '' }} placeholder="{{ isset($user) ? 'Ulangi password baru' : 'Ulangi password baru' }}"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-shadow text-sm pr-10">
+                            <button type="button" @click="showPasswordConfirm = !showPasswordConfirm" tabindex="-1" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-amber-600 transition-colors">
+                                <svg x-show="!showPasswordConfirm" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <svg x-show="showPasswordConfirm" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -227,19 +273,13 @@
                     </span>
                 </div>
 
-                @php
-                    $userEnrolledIds = old('program_ids', isset($user) ? $user->enrolled_program_ids : []);
-                    if (!is_array($userEnrolledIds)) $userEnrolledIds = [$userEnrolledIds];
-                    if (old('program_id')) $userEnrolledIds[] = (int)old('program_id');
-                    $userEnrolledIds = array_map('intval', array_unique(array_filter($userEnrolledIds)));
-                @endphp
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach($programs ?? [] as $program)
                         <label class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50/40 cursor-pointer transition-all shadow-sm">
                             <input type="checkbox" name="program_ids[]" value="{{ $program->id }}"
                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                   {{ in_array((int)$program->id, $userEnrolledIds, true) ? 'checked' : '' }}>
+                                   {{ in_array((int)$program->id, $userEnrolledIds, true) ? 'checked' : '' }}
+                                   @change="toggleProgram({{ $program->id }}, $event.target.checked)">
                             <span class="text-sm font-semibold text-gray-800">{{ $program->name }}</span>
                         </label>
                     @endforeach
@@ -249,34 +289,46 @@
                 @enderror
             </div>
             
-            <!-- Assigned Teacher (Student Only) -->
-            <div x-show="role === 'student'" x-transition style="{{ (old('role', request('role', $user->role ?? '')) !== 'student') ? 'display: none;' : '' }}">
-                <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-1">Assigned Teacher</label>
-                <select id="teacher_id" name="teacher_id" :disabled="role !== 'student'" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('teacher_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                    <option value="">-- No Assigned Teacher --</option>
-                    @foreach($teachers ?? [] as $teacher)
-                        <option value="{{ $teacher->id }}" {{ old('teacher_id', $user->teacher_id ?? '') == $teacher->id ? 'selected' : '' }}>
-                            {{ $teacher->name }}
-                        </option>
-                    @endforeach
-                </select>
-                <p class="mt-1 text-xs text-gray-500">Link a specific student to their responsible teacher.</p>
-                @error('teacher_id')
+            <!-- Assigned Teacher & Batch per Program (Student Only) -->
+            <div class="md:col-span-2" x-show="role === 'student'" x-transition style="{{ (old('role', request('role', $user->role ?? '')) !== 'student') ? 'display: none;' : '' }}">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Assigned Teacher &amp; Batch Kelas</label>
+                <p class="text-xs text-gray-500 mb-3">Setiap program yang dicentang di atas mendapat guru dan batch kelasnya masing-masing.</p>
+
+                <template x-if="selectedPrograms.length === 0">
+                    <p class="text-sm text-gray-400 italic bg-gray-50 rounded-xl p-4 border border-dashed border-gray-200">Pilih minimal 1 program di atas terlebih dahulu.</p>
+                </template>
+
+                <div class="space-y-4">
+                    <template x-for="pid in selectedPrograms" :key="pid">
+                        <div class="bg-white border border-gray-200 rounded-xl p-4">
+                            <p class="text-sm font-bold text-gray-800 mb-3" x-text="programName(pid)"></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Assigned Teacher</label>
+                                    <select :name="'teacher_ids[' + pid + ']'" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow text-sm">
+                                        <option value="">-- No Assigned Teacher --</option>
+                                        <template x-for="t in teachersData" :key="t.id">
+                                            <option :value="t.id" :selected="programAssignments[pid] && String(programAssignments[pid].teacher_id) === String(t.id)" x-text="t.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Batch Kelas / Class Period</label>
+                                    <select :name="'class_period_ids[' + pid + ']'" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow text-sm">
+                                        <option value="">-- No Assigned Batch --</option>
+                                        <template x-for="period in batchesForProgram(pid)" :key="period.id">
+                                            <option :value="period.id" :selected="programAssignments[pid] && String(programAssignments[pid].class_period_id) === String(period.id)" x-text="formatBatchText(period)"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                @error('teacher_ids')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-            </div>
-
-            <!-- Assigned Batch / Class Period (Student Only) -->
-            <div x-show="role === 'student'" x-transition style="{{ (old('role', request('role', $user->role ?? '')) !== 'student') ? 'display: none;' : '' }}">
-                <label for="class_period_id" class="block text-sm font-medium text-gray-700 mb-1">Batch Kelas / Class Period</label>
-                <select id="class_period_id" name="class_period_id" x-model="classPeriodId" :disabled="role !== 'student'" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('class_period_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                    <option value="">-- No Assigned Batch --</option>
-                    <template x-for="period in availableBatches()" :key="period.id">
-                        <option :value="period.id" :selected="String(period.id) === String(classPeriodId)" x-text="formatBatchText(period)"></option>
-                    </template>
-                </select>
-                <p class="mt-1 text-xs text-gray-500">Link student to a specific class period / batch taken from the class.</p>
-                @error('class_period_id')
+                @error('class_period_ids')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>

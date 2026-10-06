@@ -1,48 +1,45 @@
-<div class="p-4 bg-white border border-emerald-200 rounded-xl mb-6">
-    <h3 class="font-bold text-emerald-800 text-lg mb-3 flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Kunci Jawaban Test 31 (Part 4)
-    </h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 31</span>
-            <span class="text-sm font-semibold text-gray-800">less effort</span>
+<div class="space-y-3">
+    <h5 class="font-bold text-gray-800 text-lg mb-4">Kunci Jawaban Section 4 (Test 31)</h5>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 31</span>
+            <span class="font-bold text-blue-600">modules technology</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 32</span>
-            <span class="text-sm font-semibold text-gray-800">uncomfortable</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 32</span>
+            <span class="font-bold text-blue-600">finding a job</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 33</span>
-            <span class="text-sm font-semibold text-gray-800">1860s</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 33</span>
+            <span class="font-bold text-blue-600">old library</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 34</span>
-            <span class="text-sm font-semibold text-gray-800">connected</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 34</span>
+            <span class="font-bold text-blue-600">Maths Department</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 35</span>
-            <span class="text-sm font-semibold text-gray-800">more smoothly</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 35</span>
+            <span class="font-bold text-blue-600">B</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 36</span>
-            <span class="text-sm font-semibold text-gray-800">rubber wheels</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 36</span>
+            <span class="font-bold text-blue-600">C</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 37</span>
-            <span class="text-sm font-semibold text-gray-800">safer</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 37</span>
+            <span class="font-bold text-blue-600">nursery</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 38</span>
-            <span class="text-sm font-semibold text-gray-800">40 C, D, F</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 38</span>
+            <span class="font-bold text-blue-600">medical services center/ centre</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 39</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 39</span>
+            <span class="font-bold text-blue-600">media center/ centre</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 40</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 40</span>
+            <span class="font-bold text-blue-600">new library</span>
         </div>
     </div>
 </div>

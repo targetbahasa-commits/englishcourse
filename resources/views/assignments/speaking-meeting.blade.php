@@ -12,10 +12,55 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- $games arrives as a real view variable from SpeakingAdminController::speakingMeeting()
          (already normalized into a list + filtered for per-student game visibility) --}}
+    @php
+        $subtopics = $subtopics ?? ($meetingData['subtopics'] ?? []);
+
+        $currentStudentUser = Auth::user();
+        $myMeetingGroup = $meetingStudentGroups->first(function ($grp) use ($currentStudentUser) {
+            return $grp->members->contains('id', $currentStudentUser?->id);
+        });
+        $myAssignedRole = 'A';
+        $myPartner = null;
+        $myGroupName = null;
+        if ($myMeetingGroup) {
+            $myGroupName = $myMeetingGroup->name;
+            $membersList = $myMeetingGroup->members->values();
+            $myIndex = $membersList->search(fn($m) => $m->id === $currentStudentUser?->id);
+            if ($myIndex === 1) {
+                $myAssignedRole = 'B';
+                $myPartner = $membersList->get(0);
+            } else {
+                $myAssignedRole = 'A';
+                $myPartner = $membersList->get(1);
+            }
+        }
+    @endphp
     <script>
         window.speakingMeetingApp = function speakingMeetingApp() {
             return {
                 activeTab: 'materi',
+                previewRole: (function() {
+                    @if(!Auth::user()?->isAdmin() && !Auth::user()?->isTeacher())
+                        return 'student';
+                    @else
+                        try {
+                            return localStorage.getItem('tb_speaking_view_role') || 'admin';
+                        } catch(e) {
+                            return 'admin';
+                        }
+                    @endif
+                })(),
+                assignedStudentRole: '{{ $myAssignedRole }}',
+                setPreviewRole(role) {
+                    this.previewRole = role;
+                    try {
+                        localStorage.setItem('tb_speaking_view_role', role);
+                    } catch(e) {}
+                    if (role === 'student') {
+                        this.gameViewMode = 'student';
+                    }
+                    window.dispatchEvent(new CustomEvent('preview-role-changed', { detail: role }));
+                },
                 // Which subtopic block is active in the Materi tab and which
                 // game is active in the Game Speaking tab - lifted to root
                 // scope (rather than tab-local) so switching one can keep
@@ -39,6 +84,8 @@
                 // doesn't have its own bespoke admin bar branch yet - see
                 // setGenericSlot() below.
                 genericActiveSlot: null,
+                activeSubtopicId: null,
+                activeSubtopicIndex: 0,
 
                 init() {
                     this.preloadVoices();
@@ -72,6 +119,20 @@
                         this.selectedGroupPreview = null;
                     }
                     this.activeTab = 'game';
+                    // Auto-select wedding game index if present
+                    if (Array.isArray(this.meetingGames)) {
+                        const wpIdx = this.meetingGames.findIndex(g => (g && g.type === 'wedding_photos'));
+                        if (wpIdx !== -1) {
+                            this.activeGameIndex = wpIdx;
+                        }
+                    } else {
+                        @php
+                            $wpIndex = collect($games)->search(fn($g) => ($g['type'] ?? '') === 'wedding_photos');
+                        @endphp
+                        @if($wpIndex !== false && $wpIndex !== null)
+                            this.activeGameIndex = {{ $wpIndex }};
+                        @endif
+                    }
                     window.dispatchEvent(new CustomEvent('set-wedding-tab', { detail: tab }));
                 },
 
@@ -83,11 +144,23 @@
                         this.selectedGroupPreview = null;
                     }
                     this.activeTab = 'game';
+                    @php
+                        $kgIndex = collect($games)->search(fn($g) => ($g['type'] ?? '') === 'how_many_kitchen');
+                    @endphp
+                    @if($kgIndex !== false && $kgIndex !== null)
+                        this.activeGameIndex = {{ $kgIndex }};
+                    @endif
                     window.dispatchEvent(new CustomEvent('set-kitchen-student', { detail: slot }));
                 },
 
                 toggleKitchenAnswers() {
                     this.kitchenShowAnswers = !this.kitchenShowAnswers;
+                    @php
+                        $kgIndex = collect($games)->search(fn($g) => ($g['type'] ?? '') === 'how_many_kitchen');
+                    @endphp
+                    @if($kgIndex !== false && $kgIndex !== null)
+                        this.activeGameIndex = {{ $kgIndex }};
+                    @endif
                     window.dispatchEvent(new CustomEvent('toggle-kitchen-answers', { detail: this.kitchenShowAnswers }));
                 },
 
@@ -121,6 +194,39 @@
                     }
                     this.activeTab = 'game';
                     window.dispatchEvent(new CustomEvent('generic-slot-updated', { detail: slot }));
+                },
+
+                goToSubtopic(target, tab = null, materiIndex = 0, subTab = null) {
+                    if (typeof target === 'number') {
+                        this.activeSubtopicIndex = target;
+                        this.activeMateriIndex = target;
+                        this.activeGameIndex = target;
+                    } else if (typeof target === 'string') {
+                        this.activeSubtopicId = target;
+                        if (materiIndex !== undefined && materiIndex !== null) {
+                            this.activeSubtopicIndex = Number(materiIndex);
+                            this.activeMateriIndex = Number(materiIndex);
+                            this.activeGameIndex = Number(materiIndex);
+                        }
+                    }
+                    if (tab && this.activeTab !== tab) {
+                        this.activeTab = tab;
+                    }
+                    if (subTab) {
+                        window.dispatchEvent(new CustomEvent('set-pronoun-subtab', { detail: subTab }));
+                        window.dispatchEvent(new CustomEvent('set-time-tab', { detail: subTab }));
+                    }
+                    this.$nextTick(() => {
+                        const targetId = typeof target === 'string' ? target : ('sec-m' + (typeof meetingNumber !== 'undefined' ? meetingNumber : '') + '-sub-' + (Number(target) + 1));
+                        const el = document.getElementById(targetId) || (typeof target === 'string' ? document.getElementById(target) : null);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            el.classList.add('ring-4', 'ring-[#29a8f5]', 'ring-offset-4', 'transition-all', 'duration-500');
+                            setTimeout(() => {
+                                el.classList.remove('ring-4', 'ring-[#29a8f5]', 'ring-offset-4');
+                            }, 2500);
+                        }
+                    });
                 },
 
                 preloadVoices() {
@@ -190,11 +296,69 @@
                     return voices.find(v => v.lang.startsWith('en-US') || v.lang.startsWith('en-GB') || v.lang.startsWith('en')) || null;
                 },
 
+                audioPlayer: null,
+
                 stopAllAudio() {
+                    if (this.audioPlayer) {
+                        this.audioPlayer.pause();
+                        this.audioPlayer.currentTime = 0;
+                    }
                     if ('speechSynthesis' in window) {
                         window.speechSynthesis.cancel();
                     }
                     this.isPlaying = false;
+                },
+
+                playAudioUrl(audioUrl, fallbackScript) {
+                    if (this.isPlaying) {
+                        this.stopAllAudio();
+                        return;
+                    }
+                    this.stopAllAudio();
+                    if (audioUrl && audioUrl.length > 5) {
+                        if (!this.audioPlayer) {
+                            this.audioPlayer = new Audio();
+                        }
+                        this.audioPlayer.src = audioUrl;
+                        this.audioPlayer.playbackRate = this.speechRate;
+                        this.audioPlayer.onplay = () => { this.isPlaying = true; };
+                        this.audioPlayer.onended = () => { this.isPlaying = false; };
+                        this.audioPlayer.onerror = () => {
+                            this.isPlaying = false;
+                            this.playListeningDialogue(fallbackScript);
+                        };
+                        this.audioPlayer.play().catch(() => {
+                            this.playListeningDialogue(fallbackScript);
+                        });
+                    } else {
+                        this.playListeningDialogue(fallbackScript);
+                    }
+                },
+
+                playTurnAudio(audioUrl, text, gender = 'male') {
+                    if (this.isPlaying) {
+                        this.stopAllAudio();
+                        return;
+                    }
+                    this.stopAllAudio();
+                    if (audioUrl && audioUrl.length > 5) {
+                        if (!this.audioPlayer) {
+                            this.audioPlayer = new Audio();
+                        }
+                        this.audioPlayer.src = audioUrl;
+                        this.audioPlayer.playbackRate = this.speechRate;
+                        this.audioPlayer.onplay = () => { this.isPlaying = true; };
+                        this.audioPlayer.onended = () => { this.isPlaying = false; };
+                        this.audioPlayer.onerror = () => {
+                            this.isPlaying = false;
+                            this.speakText(text, gender);
+                        };
+                        this.audioPlayer.play().catch(() => {
+                            this.speakText(text, gender);
+                        });
+                    } else {
+                        this.speakText(text, gender);
+                    }
                 },
 
                 setSpeed(speed) {
@@ -209,7 +373,6 @@
                     // Convert any letter spelling pattern like "W. R. I. G. H. T" or "W.R.I.G.H.T" or "W-R-I-G-H-T"
                     // into comma-separated letters: "W, R, I, G, H, T." so the browser speech engine pauses on every single letter!
                     clean = clean.replace(/\b([A-Za-z](?:[\.\-\s]+[A-Za-z])+)\b/g, (match) => {
-                        // Skip common 2-letter English words like "is", "in", "to", "on", "at", "it", "he", "we", "as", "an", "am", "or", "by", "my", "me", "do", "go", "so", "no", "up", "if"
                         const letters = match.replace(/[^A-Za-z]/g, '');
                         if (match.includes('.') || match.includes('-') || (match.includes(' ') && letters.length >= 2 && letters === letters.toUpperCase())) {
                             const chars = letters.split('');
@@ -374,15 +537,10 @@
                     this.stopAllAudio();
                     if (!rawScript || !('speechSynthesis' in window)) return;
 
-                    // Detect dialogue speaker tags
-                    const hasDialoguePattern = /(?:Receptionist|Attendee|Student A|Student B|Speaker 1|Speaker 2|Interviewer|Candidate|Person A|Person B):/i.test(rawScript);
-                    let turns = [];
-
-                    if (hasDialoguePattern) {
-                        const pattern = /(?=(?:Receptionist|Attendee|Student A|Student B|Speaker 1|Speaker 2|Interviewer|Candidate|Person A|Person B):\s*)/i;
-                        turns = rawScript.split(pattern).filter(t => t.trim().length > 0);
-                    } else {
-                        turns = rawScript.split(/\n+/).filter(t => t.trim().length > 0);
+                    // Detect dialogue speaker turns
+                    let turns = rawScript.split(/\r?\n/).map(t => t.trim()).filter(t => t.length > 0);
+                    if (turns.length <= 1 && /(?:[A-Za-z0-9\.\s]{2,25}):/i.test(rawScript)) {
+                        turns = rawScript.split(/(?=(?:[A-Z][A-Za-z0-9\.\s]{1,25}):\s*)/i).map(t => t.trim()).filter(t => t.length > 0);
                     }
 
                     if (turns.length === 0) return;
@@ -413,14 +571,14 @@
                         }
 
                         // Clean text: strip role name and format spelled letters like W-R-I-G-H-T to W. R. I. G. H. T.
-                        const cleanText = this.prepareSpeechText(spokenText);
+                        const cleanText = this.prepareSpeechText(spokenText).replace(/\\'/g, "'");
                         if (!cleanText) {
                             playNextTurn();
                             return;
                         }
 
-                        // Determine voice gender: Receptionist / Female / Woman -> female; Attendee / Male -> male
-                        const isFemale = ['receptionist', 'female', 'woman', 'sophia', 'sarah', 'linda', 'mary', 'student b'].some(k => speaker.includes(k));
+                        // Determine voice gender:
+                        const isFemale = ['receptionist', 'female', 'woman', 'sophia', 'sarah', 'linda', 'mary', 'sari', 'maya', 'putri', 'dewi', 'anita', 'emma', 'jessica', 'student b', 'waitress', 'customer', 'shopper'].some(k => speaker.includes(k));
                         const gender = isFemale ? 'female' : 'male';
 
                         window.speechSynthesis.cancel();
@@ -508,10 +666,11 @@
                 getReportText() {
                     if (!this.selectedStudentCard) return 'Pilih atau acak kartu misi Anda terlebih dahulu.';
                     if (this.surveyResponses.length === 0) {
-                        return "In our class, my mission is: " + this.selectedStudentCard.title + " I am surveying my classmates right now.";
+                        return "In our class, my mission is: " + (this.selectedStudentCard.title || 'Classroom Survey') + ". I am surveying my classmates right now.";
                     }
-                    const summary = this.surveyResponses.map(r => r.name + ' answered ' + r.answer).join(', ');
-                    return "In our group, I asked " + this.surveyResponses.length + " classmates about " + this.selectedStudentCard.badge + ". " + summary + ". Based on my survey, " + this.surveyResponses[0].answer + " is a popular answer!";
+                    const summary = this.surveyResponses.map(r => r.name + ' answered: "' + r.answer + '"').join(', ');
+                    const topic = this.selectedStudentCard.badge || this.selectedStudentCard.title || 'our topic';
+                    return "In our group, I asked " + this.surveyResponses.length + " classmates about " + topic + ". " + summary + ". Based on my survey, " + this.surveyResponses[0].answer + " is a popular answer!";
                 },
 
                 // AI Voice Interview State
@@ -817,6 +976,781 @@
             };
         };
 
+        window.differentLivesGame = function differentLivesGame(gameData) {
+            return {
+                activeStudent: 'A',
+                gameSubTab: 'my_routine', // 'my_routine', 'partner_routine', 'differences', 'all_cards', 'guide'
+                timeStyle: 'british', // 'british', 'american'
+                sentencePerson: 'you', // 'you', 'i', 'third', 'past'
+                isZoomModalOpen: false,
+                zoomModalTarget: 'cards', // 'cards' or 'guide'
+                searchQuery: '',
+                partnerScrambled: false,
+                scrambledOrder: [],
+                revealedPartnerCard: {},
+                allCards: gameData.cards || [],
+                cardMap: {},
+
+                // Chosen card IDs for routine A & B
+                routineA: (gameData.default_routine_a && gameData.default_routine_a.length > 0) ? [...gameData.default_routine_a] : [1, 2, 4, 6, 8, 9, 12, 14, 19, 22],
+                routineB: (gameData.default_routine_b && gameData.default_routine_b.length > 0) ? [...gameData.default_routine_b] : [1, 2, 3, 21, 7, 10, 13, 16, 15, 18, 22],
+
+                // Times mapping: cardId -> 'HH:MM'
+                timesA: {},
+                timesB: {},
+
+                // Custom text for blank cards (23 & 24)
+                customTexts: {
+                    23: 'take an online English course',
+                    24: 'walk the dog in the park'
+                },
+
+                init() {
+                    // Populate cardMap and default times
+                    this.allCards.forEach(c => {
+                        this.cardMap[c.id] = c;
+                        this.timesA[c.id] = c.default_time_a || '07:00';
+                        this.timesB[c.id] = c.default_time_b || '07:30';
+                    });
+
+                    // Restore from localStorage
+                    try {
+                        const savedA = localStorage.getItem('TB_DIFF_LIVES_M2_A');
+                        if (savedA) {
+                            const pA = JSON.parse(savedA);
+                            if (pA.routine && Array.isArray(pA.routine) && pA.routine.length > 0) this.routineA = pA.routine;
+                            if (pA.times) Object.assign(this.timesA, pA.times);
+                            if (pA.customTexts) Object.assign(this.customTexts, pA.customTexts);
+                        }
+                        const savedB = localStorage.getItem('TB_DIFF_LIVES_M2_B');
+                        if (savedB) {
+                            const pB = JSON.parse(savedB);
+                            if (pB.routine && Array.isArray(pB.routine) && pB.routine.length > 0) this.routineB = pB.routine;
+                            if (pB.times) Object.assign(this.timesB, pB.times);
+                            if (pB.customTexts) Object.assign(this.customTexts, pB.customTexts);
+                        }
+                    } catch(e) {}
+
+                    // Role lock enforcement
+                    if (this.previewRole === 'student') {
+                        this.activeStudent = this.assignedStudentRole || 'A';
+                    }
+                    if (this.$watch) {
+                        this.$watch('previewRole', (val) => {
+                            if (val === 'student') {
+                                this.activeStudent = this.assignedStudentRole || 'A';
+                                if (this.gameSubTab === 'guide') this.gameSubTab = 'my_routine';
+                            }
+                        });
+                    }
+
+                    // Listen to global admin event
+                    window.addEventListener('set-different-lives-student', (e) => {
+                        if (this.previewRole === 'admin' && e.detail) {
+                            this.activeStudent = e.detail;
+                        }
+                    });
+
+                    this.sortRoutines();
+                    this.initScramble();
+                },
+
+                saveData() {
+                    try {
+                        localStorage.setItem('TB_DIFF_LIVES_M2_A', JSON.stringify({
+                            routine: this.routineA,
+                            times: this.timesA,
+                            customTexts: this.customTexts
+                        }));
+                        localStorage.setItem('TB_DIFF_LIVES_M2_B', JSON.stringify({
+                            routine: this.routineB,
+                            times: this.timesB,
+                            customTexts: this.customTexts
+                        }));
+                    } catch(e) {}
+                },
+
+                sortRoutines() {
+                    this.routineA.sort((a, b) => (this.timesA[a] || '00:00').localeCompare(this.timesA[b] || '00:00'));
+                    this.routineB.sort((a, b) => (this.timesB[a] || '00:00').localeCompare(this.timesB[b] || '00:00'));
+                },
+
+                initScramble() {
+                    const partnerIds = this.getPartnerRoutine();
+                    this.scrambledOrder = [...partnerIds].sort(() => Math.random() - 0.5);
+                },
+
+                toggleScramble() {
+                    this.partnerScrambled = !this.partnerScrambled;
+                    if (this.partnerScrambled) {
+                        this.initScramble();
+                    }
+                },
+
+                getMyRoutine() {
+                    return (this.activeStudent === 'A') ? this.routineA : this.routineB;
+                },
+
+                getPartnerRoutine() {
+                    return (this.activeStudent === 'A') ? this.routineB : this.routineA;
+                },
+
+                getMyTime(cardId) {
+                    return (this.activeStudent === 'A') ? (this.timesA[cardId] || '07:00') : (this.timesB[cardId] || '07:30');
+                },
+
+                getPartnerTime(cardId) {
+                    return (this.activeStudent === 'A') ? (this.timesB[cardId] || '07:30') : (this.timesA[cardId] || '07:00');
+                },
+
+                setCardTime(cardId, newTime, student = null) {
+                    const st = student || this.activeStudent;
+                    if (st === 'A') {
+                        this.timesA[cardId] = newTime;
+                    } else {
+                        this.timesB[cardId] = newTime;
+                    }
+                    this.sortRoutines();
+                    this.saveData();
+                },
+
+                adjustCardTime(cardId, deltaMinutes, student = null) {
+                    const current = (student || this.activeStudent) === 'A' ? (this.timesA[cardId] || '07:00') : (this.timesB[cardId] || '07:30');
+                    const parts = current.split(':');
+                    let h = parseInt(parts[0], 10) || 0;
+                    let m = parseInt(parts[1], 10) || 0;
+                    let total = h * 60 + m + deltaMinutes;
+                    if (total < 0) total += 24 * 60;
+                    total = total % (24 * 60);
+                    const nh = Math.floor(total / 60);
+                    const nm = total % 60;
+                    const newStr = String(nh).padStart(2, '0') + ':' + String(nm).padStart(2, '0');
+                    this.setCardTime(cardId, newStr, student);
+                },
+
+                isInRoutine(cardId, student = null) {
+                    const st = student || this.activeStudent;
+                    const r = (st === 'A') ? this.routineA : this.routineB;
+                    return r.includes(cardId);
+                },
+
+                toggleRoutineItem(cardId) {
+                    let r = (this.activeStudent === 'A') ? this.routineA : this.routineB;
+                    const idx = r.indexOf(cardId);
+                    if (idx >= 0) {
+                        if (r.length <= 3) {
+                            alert('Jadwal harian minimal memiliki 3 kartu aktivitas!');
+                            return;
+                        }
+                        r.splice(idx, 1);
+                    } else {
+                        r.push(cardId);
+                    }
+                    this.sortRoutines();
+                    this.saveData();
+                },
+
+                // Natural British telling time
+                toBritish(timeStr) {
+                    if (!timeStr) return '';
+                    const parts = timeStr.split(':');
+                    const h = parseInt(parts[0], 10) || 0;
+                    const m = parseInt(parts[1], 10) || 0;
+                    const hours = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+                    const h12 = (h % 12 === 0) ? 12 : (h % 12);
+                    const nextH = (h12 % 12) + 1;
+                    const hWord = hours[h12];
+                    const nextWord = hours[nextH];
+
+                    if (m === 0) return hWord + " o'clock";
+                    if (m === 15) return "a quarter past " + hWord;
+                    if (m === 30) return "half past " + hWord;
+                    if (m === 45) return "a quarter to " + nextWord;
+                    if (m === 5) return "five past " + hWord;
+                    if (m === 10) return "ten past " + hWord;
+                    if (m === 20) return "twenty past " + hWord;
+                    if (m === 25) return "twenty-five past " + hWord;
+                    if (m === 35) return "twenty-five to " + nextWord;
+                    if (m === 40) return "twenty to " + nextWord;
+                    if (m === 50) return "ten to " + nextWord;
+                    if (m === 55) return "five to " + nextWord;
+                    if (m < 30) return m + " minutes past " + hWord;
+                    return (60 - m) + " minutes to " + nextWord;
+                },
+
+                // Natural American telling time
+                toAmerican(timeStr) {
+                    if (!timeStr) return '';
+                    const parts = timeStr.split(':');
+                    const h = parseInt(parts[0], 10) || 0;
+                    const m = parseInt(parts[1], 10) || 0;
+                    const hours = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+                    const h12 = (h % 12 === 0) ? 12 : (h % 12);
+                    const hWord = hours[h12];
+                    if (m === 0) return hWord + " o'clock";
+                    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+                    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty'];
+                    let mWord = '';
+                    if (m < 10) {
+                        mWord = 'oh-' + ones[m];
+                    } else if (m < 20) {
+                        mWord = ones[m];
+                    } else {
+                        mWord = tens[Math.floor(m / 10)] + (m % 10 !== 0 ? '-' + ones[m % 10] : '');
+                    }
+                    return hWord + ' ' + mWord;
+                },
+
+                // Clock hand rotation angles for SVG
+                getClockAngles(timeStr) {
+                    if (!timeStr) return { hDeg: 0, mDeg: 0 };
+                    const parts = timeStr.split(':');
+                    const h = parseInt(parts[0], 10) || 0;
+                    const m = parseInt(parts[1], 10) || 0;
+                    return {
+                        hDeg: (h % 12) * 30 + m * 0.5,
+                        mDeg: m * 6
+                    };
+                },
+
+                // Build full sentence
+                buildSentence(card, timeStr, person = null) {
+                    if (!card) return '';
+                    const p = person || this.sentencePerson;
+                    const t = (this.timeStyle === 'british') ? this.toBritish(timeStr) : this.toAmerican(timeStr);
+                    const actName = (card.id >= 23 && this.customTexts[card.id]) ? this.customTexts[card.id] : card.name;
+                    
+                    if (p === 'you') return 'You ' + actName + ' at ' + t + '.';
+                    if (p === 'i') return 'I ' + actName + ' at ' + t + '.';
+                    if (p === 'third') {
+                        const tp = (card.id >= 23) ? actName + 's' : (card.third_person || (actName + 's'));
+                        return 'He/She ' + tp + ' at ' + t + '.';
+                    }
+                    if (p === 'past') {
+                        const pt = (card.id >= 23) ? actName : (card.past || actName);
+                        return 'Yesterday, you ' + pt + ' at ' + t + '.';
+                    }
+                    return 'You ' + actName + ' at ' + t + '.';
+                },
+
+                // Play Audio with Web Speech API
+                speakSentence(card, timeStr, person = null) {
+                    const text = this.buildSentence(card, timeStr, person);
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        const utt = new SpeechSynthesisUtterance(text);
+                        utt.lang = (this.timeStyle === 'british') ? 'en-GB' : 'en-US';
+                        utt.rate = 0.9;
+                        window.speechSynthesis.speak(utt);
+                    }
+                },
+
+                // Speak raw text
+                speakRaw(text) {
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        const utt = new SpeechSynthesisUtterance(text);
+                        utt.lang = (this.timeStyle === 'british') ? 'en-GB' : 'en-US';
+                        utt.rate = 0.9;
+                        window.speechSynthesis.speak(utt);
+                    }
+                },
+
+                getFilteredCards() {
+                    if (!this.searchQuery) return this.allCards;
+                    const q = this.searchQuery.toLowerCase().trim();
+                    return this.allCards.filter(c => {
+                        const name = c.name.toLowerCase();
+                        const idName = (c.id_name || '').toLowerCase();
+                        return name.includes(q) || idName.includes(q);
+                    });
+                }
+            };
+        };
+
+        window.happyBirthdayGame = function happyBirthdayGame(gameData) {
+            return {
+                gameSubTab: 'my_present', // 'my_present', 'interview_log', 'all_cards', 'guide'
+                dateStyle: 'uk', // 'uk' (the 28th of February), 'us' (February 28th)
+                isZoomModalOpen: false,
+                zoomModalTarget: 'cards', // 'cards', 'guide', 'language'
+                allCards: gameData.cards || [],
+                selectedCard: null,
+                revealedGift: false,
+                revealedCardGifts: {},
+                isDrawing: false,
+
+                // Custom Birthday creator
+                showCustomCreator: false,
+                customDate: {
+                    month: 'February',
+                    day: 28,
+                    gift: 'a box of chocolates'
+                },
+
+                // Search log table: classmates asked
+                searchLog: [],
+                newLog: {
+                    name: '',
+                    month: 'February',
+                    day: 28,
+                    matched: false
+                },
+
+                monthsList: [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ],
+
+                init() {
+                    if (this.allCards.length > 0) {
+                        this.selectedCard = this.allCards[0];
+                    }
+
+                    // Restore from localStorage
+                    try {
+                        const savedLog = localStorage.getItem('TB_HAPPY_BIRTHDAY_M3_LOG');
+                        if (savedLog) {
+                            this.searchLog = JSON.parse(savedLog);
+                        }
+                        const savedCard = localStorage.getItem('TB_HAPPY_BIRTHDAY_M3_CARD');
+                        if (savedCard) {
+                            this.selectedCard = JSON.parse(savedCard);
+                            if (this.selectedCard && this.selectedCard.image) {
+                                this.selectedCard.image = this.selectedCard.image.split('?')[0] + '?v=color_v2';
+                            }
+                        }
+                    } catch(e) {}
+                },
+
+                drawRandomCard() {
+                    if (!this.allCards.length) return;
+                    this.isDrawing = true;
+                    this.revealedGift = false;
+                    setTimeout(() => {
+                        const rand = Math.floor(Math.random() * this.allCards.length);
+                        this.selectedCard = this.allCards[rand];
+                        try {
+                            localStorage.setItem('TB_HAPPY_BIRTHDAY_M3_CARD', JSON.stringify(this.selectedCard));
+                        } catch(e) {}
+                        this.isDrawing = false;
+                    }, 400);
+                },
+
+                selectCard(card) {
+                    this.selectedCard = card;
+                    this.revealedGift = false;
+                    this.gameSubTab = 'my_present';
+                    try {
+                        localStorage.setItem('TB_HAPPY_BIRTHDAY_M3_CARD', JSON.stringify(this.selectedCard));
+                    } catch(e) {}
+                },
+
+                toggleCardGift(id) {
+                    this.revealedCardGifts[id] = !this.revealedCardGifts[id];
+                },
+
+                saveCustomCard() {
+                    if (!this.customDate.month) return;
+                    const ord = this.getOrdinalSuffix(this.customDate.day);
+                    const dayNum = this.customDate.day + ord;
+                    const card = {
+                        id: 'custom_' + Date.now(),
+                        image: '/images/speaking/happy_birthday/card_01.png?v=color_v2',
+                        date: this.customDate.day + ' ' + this.customDate.month,
+                        month: this.customDate.month,
+                        day_num: dayNum,
+                        date_uk: 'the ' + this.getSpokenOrdinal(this.customDate.day) + ' of ' + this.customDate.month,
+                        date_us: this.customDate.month + ' ' + this.getSpokenOrdinal(this.customDate.day),
+                        gift: this.customDate.gift || 'a mystery present',
+                        gift_id: 'hadiah spesial pilihanmu',
+                        gift_icon: '🎁',
+                        question: 'When is your birthday?',
+                        answer_in: "It's in " + this.customDate.month + ".",
+                        answer_on_uk: "It's on the " + this.getSpokenOrdinal(this.customDate.day) + " of " + this.customDate.month + ".",
+                        answer_on_us: "It's on " + this.customDate.month + " " + this.getSpokenOrdinal(this.customDate.day) + ".",
+                        handover: "Happy Birthday! This present is for you. It's " + (this.customDate.gift || 'a mystery present') + "!",
+                    };
+                    this.selectedCard = card;
+                    this.showCustomCreator = false;
+                    this.revealedGift = false;
+                    try {
+                        localStorage.setItem('TB_HAPPY_BIRTHDAY_M3_CARD', JSON.stringify(this.selectedCard));
+                    } catch(e) {}
+                },
+
+                addSearchLog() {
+                    if (!this.newLog.name.trim()) return;
+                    const ord = this.getOrdinalSuffix(this.newLog.day);
+                    this.searchLog.unshift({
+                        id: Date.now(),
+                        name: this.newLog.name.trim(),
+                        month: this.newLog.month,
+                        day: this.newLog.day ? (this.newLog.day + ord) : '',
+                        matched: this.newLog.matched
+                    });
+                    this.newLog.name = '';
+                    this.newLog.matched = false;
+                    this.persistLog();
+                },
+
+                removeLog(index) {
+                    this.searchLog.splice(index, 1);
+                    this.persistLog();
+                },
+
+                toggleMatch(index) {
+                    this.searchLog[index].matched = !this.searchLog[index].matched;
+                    this.persistLog();
+                },
+
+                persistLog() {
+                    try {
+                        localStorage.setItem('TB_HAPPY_BIRTHDAY_M3_LOG', JSON.stringify(this.searchLog));
+                    } catch(e) {}
+                },
+
+                getOrdinalSuffix(d) {
+                    const n = parseInt(d);
+                    if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+                    switch (n % 10) {
+                        case 1: return 'st';
+                        case 2: return 'nd';
+                        case 3: return 'rd';
+                        default: return 'th';
+                    }
+                },
+
+                getSpokenOrdinal(d) {
+                    const words = {
+                        1: 'first', 2: 'second', 3: 'third', 4: 'fourth', 5: 'fifth',
+                        6: 'sixth', 7: 'seventh', 8: 'eighth', 9: 'ninth', 10: 'tenth',
+                        11: 'eleventh', 12: 'twelfth', 13: 'thirteenth', 14: 'fourteenth', 15: 'fifteenth',
+                        16: 'sixteenth', 17: 'seventeenth', 18: 'eighteenth', 19: 'nineteenth', 20: 'twentieth',
+                        21: 'twenty-first', 22: 'twenty-second', 23: 'twenty-third', 24: 'twenty-fourth', 25: 'twenty-fifth',
+                        26: 'twenty-sixth', 27: 'twenty-seventh', 28: 'twenty-eighth', 29: 'twenty-ninth', 30: 'thirtieth',
+                        31: 'thirty-first'
+                    };
+                    return words[parseInt(d)] || d;
+                },
+
+                speak(text) {
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        const utt = new SpeechSynthesisUtterance(text);
+                        utt.lang = (this.dateStyle === 'uk') ? 'en-GB' : 'en-US';
+                        utt.rate = 0.9;
+                        window.speechSynthesis.speak(utt);
+                    }
+                }
+            };
+        };
+
+        window.whoWasFirstGame = function whoWasFirstGame(gameData) {
+            return {
+                gameSubTab: 'podium', // 'podium', 'worksheet', 'logic_guide', 'language'
+                viewMode: 'worksheet', // 'worksheet', 'solution', 'scan'
+                isZoomModalOpen: false,
+                zoomModalTarget: 'worksheet', // 'worksheet', 'solution', 'scan'
+                runners: gameData.runners || [],
+                logicSteps: gameData.logic_steps || [],
+                assets: gameData.assets || {},
+                structures: gameData.structures || {},
+
+                // 8 Podium slots (index 0..7 for 1st..8th)
+                slots: [null, null, null, null, null, null, null, null],
+                selectedRunnerId: null,
+
+                // Audio
+                isSpeaking: false,
+                currentAudioText: null,
+
+                // Validation
+                checked: false,
+                isAllCorrect: false,
+                score: 0,
+                feedbackMessage: '',
+
+                init() {
+                    try {
+                        const saved = localStorage.getItem('TB_WHO_WAS_FIRST_SLOTS');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            if (Array.isArray(parsed) && parsed.length === 8) {
+                                this.slots = parsed;
+                            }
+                        }
+                    } catch(e) {}
+                },
+
+                selectRunner(runner) {
+                    if (this.selectedRunnerId === runner.id) {
+                        this.selectedRunnerId = null;
+                    } else {
+                        this.selectedRunnerId = runner.id;
+                    }
+                },
+
+                placeRunnerInSlot(slotIndex) {
+                    if (!this.selectedRunnerId) {
+                        if (this.slots[slotIndex]) {
+                            this.slots[slotIndex] = null;
+                            this.checked = false;
+                            this.saveSlots();
+                        }
+                        return;
+                    }
+
+                    const runner = this.runners.find(r => r.id === this.selectedRunnerId);
+                    if (!runner) return;
+
+                    // If runner is in another slot, clear old slot
+                    const existingSlot = this.slots.findIndex(s => s && s.id === runner.id);
+                    if (existingSlot !== -1 && existingSlot !== slotIndex) {
+                        this.slots[existingSlot] = null;
+                    }
+
+                    this.slots[slotIndex] = runner;
+                    this.selectedRunnerId = null;
+                    this.checked = false;
+                    this.saveSlots();
+                },
+
+                removeFromSlot(slotIndex) {
+                    this.slots[slotIndex] = null;
+                    this.checked = false;
+                    this.saveSlots();
+                },
+
+                clearAllSlots() {
+                    this.slots = [null, null, null, null, null, null, null, null];
+                    this.selectedRunnerId = null;
+                    this.checked = false;
+                    this.isAllCorrect = false;
+                    this.score = 0;
+                    this.feedbackMessage = '';
+                    this.saveSlots();
+                },
+
+                saveSlots() {
+                    try {
+                        localStorage.setItem('TB_WHO_WAS_FIRST_SLOTS', JSON.stringify(this.slots));
+                    } catch(e) {}
+                },
+
+                fillSolution() {
+                    const sorted = [...this.runners].sort((a, b) => a.rank - b.rank);
+                    this.slots = sorted;
+                    this.checked = true;
+                    this.isAllCorrect = true;
+                    this.score = 8;
+                    this.feedbackMessage = 'Semua urutan pelari 100% tepat! Stripy = 1st, Spotted = 2nd, Lightning = 3rd, White = 4th, Black = 5th, No.5 = 6th, No.10 = 7th, Cat = 8th 🎉';
+                    this.saveSlots();
+                },
+
+                checkAnswer() {
+                    let correctCount = 0;
+                    let placedCount = 0;
+
+                    for (let i = 0; i < 8; i++) {
+                        const runner = this.slots[i];
+                        if (runner) {
+                            placedCount++;
+                            const targetRank = i + 1;
+                            // Special tie condition: rank 6 & rank 7 (No.5 and No.10) finished with identical times
+                            if (runner.rank === targetRank || ((targetRank === 6 || targetRank === 7) && (runner.rank === 6 || runner.rank === 7))) {
+                                correctCount++;
+                            }
+                        }
+                    }
+
+                    this.checked = true;
+                    this.score = correctCount;
+                    this.isAllCorrect = (correctCount === 8);
+
+                    if (this.isAllCorrect) {
+                        this.feedbackMessage = 'Luar biasa! 100% Sempurna! Anda berhasil memecahkan teka-teki urutan balapan dengan benar!';
+                        if (typeof confetti === 'function') {
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        }
+                    } else {
+                        this.feedbackMessage = `Anda menempatkan ${placedCount} pelari (${correctCount} benar dari 8). Silakan baca petunjuk kembali dan coba lagi!`;
+                    }
+                },
+
+                speak(text) {
+                    if (!window.speechSynthesis) return;
+                    window.speechSynthesis.cancel();
+                    const utt = new SpeechSynthesisUtterance(text);
+                    utt.lang = 'en-US';
+                    utt.rate = 0.92;
+                    this.isSpeaking = true;
+                    this.currentAudioText = text;
+                    utt.onend = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioText = null;
+                    };
+                    utt.onerror = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioText = null;
+                    };
+                    window.speechSynthesis.speak(utt);
+                },
+
+                isRunnerPlaced(runnerId) {
+                    return this.slots.some(s => s && s.id === runnerId);
+                }
+            };
+        };
+
+        window.whereAreMyGlassesGame = function whereAreMyGlassesGame(gameData) {
+            return {
+                gameSubTab: 'my_card', // 'my_card', 'practice', 'room_map', 'log', 'guide'
+                roles: gameData.roles || {},
+                activeRoleId: 'dad',
+                selectedLostItem: null,
+                foundStatus: {},
+                roomMode: 'color', // 'color', 'scan'
+                isZoomModalOpen: false,
+                zoomModalTarget: 'room_color',
+
+                // Practice simulator
+                practiceRole: 'dad',
+                practiceItemIndex: 0,
+                revealAnswer: false,
+
+                // Classroom search log
+                familyLog: [],
+                newLog: {
+                    classmateName: '',
+                    familyRole: 'Jenny',
+                    itemAsked: 'hairbrush',
+                    prepositionUsed: 'on',
+                    locationFound: 'on the floor between chair and TV',
+                    isFound: true
+                },
+
+                init() {
+                    const savedRole = localStorage.getItem('TB_WHERE_GLASSES_ROLE');
+                    if (savedRole && this.roles[savedRole]) {
+                        this.activeRoleId = savedRole;
+                    }
+                    try {
+                        const savedFound = localStorage.getItem('TB_WHERE_GLASSES_FOUND');
+                        if (savedFound) {
+                            this.foundStatus = JSON.parse(savedFound);
+                        }
+                        const savedLog = localStorage.getItem('TB_WHERE_GLASSES_LOG');
+                        if (savedLog) {
+                            this.familyLog = JSON.parse(savedLog);
+                        }
+                    } catch(e) {}
+
+                    this.initSelectedLostItem();
+                },
+
+                initSelectedLostItem() {
+                    const r = this.getCurrentRole();
+                    if (r && r.lost_items && r.lost_items.length > 0) {
+                        this.selectedLostItem = r.lost_items[0];
+                    }
+                },
+
+                getCurrentRole() {
+                    return this.roles[this.activeRoleId] || this.roles['dad'] || {};
+                },
+
+                selectRole(roleId) {
+                    if (this.roles[roleId]) {
+                        this.activeRoleId = roleId;
+                        this.initSelectedLostItem();
+                        try {
+                            localStorage.setItem('TB_WHERE_GLASSES_ROLE', roleId);
+                        } catch(e) {}
+                    }
+                },
+
+                randomRole() {
+                    const keys = Object.keys(this.roles);
+                    if (keys.length) {
+                        const r = keys[Math.floor(Math.random() * keys.length)];
+                        this.selectRole(r);
+                    }
+                },
+
+                selectLostItem(item) {
+                    this.selectedLostItem = item;
+                },
+
+                toggleFound(itemId) {
+                    this.foundStatus[itemId] = !this.foundStatus[itemId];
+                    try {
+                        localStorage.setItem('TB_WHERE_GLASSES_FOUND', JSON.stringify(this.foundStatus));
+                    } catch(e) {}
+                },
+
+                isFound(itemId) {
+                    return !!this.foundStatus[itemId];
+                },
+
+                getFoundCount() {
+                    const items = (this.getCurrentRole().lost_items) || [];
+                    return items.filter(i => this.isFound(i.id)).length;
+                },
+
+                resetFoundStatus() {
+                    const items = (this.getCurrentRole().lost_items) || [];
+                    items.forEach(i => {
+                        this.foundStatus[i.id] = false;
+                    });
+                    try {
+                        localStorage.setItem('TB_WHERE_GLASSES_FOUND', JSON.stringify(this.foundStatus));
+                    } catch(e) {}
+                },
+
+                addFamilyLog() {
+                    if (!this.newLog.locationFound.trim()) return;
+                    this.familyLog.unshift({
+                        id: Date.now(),
+                        classmateName: this.newLog.classmateName.trim() || 'Teman Sekelas',
+                        familyRole: this.newLog.familyRole,
+                        itemAsked: this.newLog.itemAsked,
+                        prepositionUsed: this.newLog.prepositionUsed,
+                        locationFound: this.newLog.locationFound.trim(),
+                        isFound: this.newLog.isFound
+                    });
+                    this.newLog.locationFound = '';
+                    this.persistFamilyLog();
+                },
+
+                removeFamilyLog(idx) {
+                    this.familyLog.splice(idx, 1);
+                    this.persistFamilyLog();
+                },
+
+                persistFamilyLog() {
+                    try {
+                        localStorage.setItem('TB_WHERE_GLASSES_LOG', JSON.stringify(this.familyLog));
+                    } catch(e) {}
+                },
+
+                openZoomModal(target) {
+                    this.zoomModalTarget = target;
+                    this.isZoomModalOpen = true;
+                },
+
+                speak(text) {
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        const utt = new SpeechSynthesisUtterance(text);
+                        utt.lang = 'en-GB';
+                        utt.rate = 0.9;
+                        window.speechSynthesis.speak(utt);
+                    }
+                }
+            };
+        };
+
         window.weddingPhotosGame = function weddingPhotosGame() {
             return {
                 gameTab: 'worksheet', // 'worksheet', 'student_a', 'student_b', 'phrases', 'guide'
@@ -869,6 +1803,22 @@
                 saveDebounceTimer: null,
                 
                 init() {
+                    if (this.previewRole === 'student') {
+                        if (this.gameTab === 'student_b' && this.assignedStudentRole === 'A') this.gameTab = 'student_a';
+                        if (this.gameTab === 'student_a' && this.assignedStudentRole === 'B') this.gameTab = 'student_b';
+                        if (this.gameTab === 'guide') this.gameTab = 'worksheet';
+                    }
+                    if (this.$watch) {
+                        this.$watch('previewRole', (val) => {
+                            if (val === 'student') {
+                                if (this.gameTab === 'student_b' && this.assignedStudentRole === 'A') this.gameTab = 'student_a';
+                                if (this.gameTab === 'student_a' && this.assignedStudentRole === 'B') this.gameTab = 'student_b';
+                                if (this.gameTab === 'guide') this.gameTab = 'worksheet';
+                                this.showSolutions = false;
+                            }
+                        });
+                    }
+
                     // 1. Load initial answers from localStorage
                     try {
                         const saved = localStorage.getItem('TB_WEDDING_PHOTOS_M5');
@@ -1082,6 +2032,76 @@
         @endif
 
         <main class="flex-1 min-w-0 md:ml-64 p-4 sm:p-6 lg:p-8 w-full transition-all duration-200">
+            @php
+                $meetingSubtopics = [];
+                if (!empty($subtopics)) {
+                    foreach ($subtopics as $sIdx => $st) {
+                        $meetingSubtopics[] = [
+                            'id' => $st['id'] ?? ('sec-m' . $meetingNumber . '-sub-' . ($sIdx + 1)),
+                            'num' => $st['num'] ?? sprintf('%02d', $sIdx + 1),
+                            'title' => $st['title'] ?? ('Subtopik ' . ($sIdx + 1)),
+                            'desc' => $st['desc'] ?? '',
+                            
+                            'tab' => $st['tab'] ?? 'materi',
+                            'subTab' => $st['subTab'] ?? null,
+                            'materiIndex' => $sIdx
+                        ];
+                    }
+                } elseif ($meetingNumber == 1) {
+                    $meetingSubtopics = [
+                        ['id' => 'sec-m1-1', 'num' => '01', 'title' => 'Greetings & Farewells', 'desc' => 'Salam formal, informal & perpisahan', 'tab' => 'materi'],
+                        ['id' => 'sec-m1-2', 'num' => '02', 'title' => 'Self-Introduction', 'desc' => '4 Pilar dasar perkenalan diri', 'tab' => 'materi'],
+                        ['id' => 'sec-m1-3', 'num' => '03', 'title' => 'Grammar: Pronouns & To Be', 'desc' => 'Subjek & kata kerja to be', 'tab' => 'materi'],
+                        ['id' => 'sec-m1-4', 'num' => '04', 'title' => 'Likes & Hobbies', 'desc' => 'Mengekspresikan kesukaan', 'tab' => 'materi'],
+                        ['id' => 'sec-m1-5', 'num' => '05', 'title' => 'Vocabulary & Dialogues', 'desc' => 'Kosa kata & percakapan perkenalan', 'tab' => 'materi'],
+                    ];
+                } elseif ($meetingNumber == 2) {
+                    $meetingSubtopics = [
+                        ['id' => 'sec-m2-sub-1', 'num' => '01', 'title' => 'Telling Cardinal Numbers', 'desc' => 'Cardinal numbers matrix (0 s.d. 45 Miliar+) & pelafalan', 'tab' => 'materi', 'materiIndex' => 0],
+                        ['id' => 'sec-m2-sub-2', 'num' => '02', 'title' => 'Telling Time', 'desc' => 'British past/to, American AM/PM & preposisi waktu (at, from...to)', 'tab' => 'materi', 'materiIndex' => 1],
+                    ];
+                } elseif ($meetingNumber == 3) {
+                    $meetingSubtopics = [
+                        ['id' => 'sec-m3-sub-1', 'num' => '01', 'title' => 'Telling Ordinal Numbers', 'desc' => 'Ordinal numbers matrix (1st s.d. 1.000.000th) & peringkat', 'tab' => 'materi', 'materiIndex' => 0],
+                        ['id' => 'sec-m3-sub-2', 'num' => '02', 'title' => 'Calendar & Dates', 'desc' => '12 bulan, 7 hari, tahun (BC/AD) & preposisi IN / ON', 'tab' => 'materi', 'materiIndex' => 1],
+                    ];
+                } elseif ($meetingNumber == 4) {
+                    $meetingSubtopics = [
+                        ['id' => 'sec-m4-2', 'num' => '01', 'title' => 'British Style', 'desc' => 'Past & To (Quarter, Half, O\'clock)', 'tab' => 'materi', 'subTab' => 'british'],
+                        ['id' => 'sec-m4-2', 'num' => '02', 'title' => 'American Style', 'desc' => 'AM, PM & Digital (Jam + Menit)', 'tab' => 'materi', 'subTab' => 'american'],
+                        ['id' => 'sec-m4-3', 'num' => '03', 'title' => 'Schedules & Prepositions', 'desc' => 'AT, FROM...TO, Sharp & Jadwal', 'tab' => 'materi', 'subTab' => 'other'],
+                    ];
+                } elseif ($meetingNumber == 5) {
+                    $meetingSubtopics = [
+                        ['id' => 'sec-m5-1', 'num' => '01', 'title' => 'Pronouns Masterclass', 'desc' => '5 Core forms kata ganti', 'tab' => 'materi', 'subTab' => 'matrix'],
+                        ['id' => 'sec-m5-2', 'num' => '02', 'title' => 'Master Matrix Table', 'desc' => 'Tabel lengkap 5 kategori kata ganti', 'tab' => 'materi', 'subTab' => 'matrix'],
+                        ['id' => 'sec-m5-3', 'num' => '03', 'title' => '5 Kategori Deep-Dive', 'desc' => 'Subject, Object, Possessive, Reflexive', 'tab' => 'materi', 'subTab' => 'categories'],
+                        ['id' => 'sec-m5-4', 'num' => '04', 'title' => 'Top 5 Jebakan Kalimat', 'desc' => 'Perbedaan me vs I, its vs it\'s, etc.', 'tab' => 'materi', 'subTab' => 'pitfalls'],
+                        ['id' => 'sec-m5-5', 'num' => '05', 'title' => 'Demonstratives (This/That)', 'desc' => 'Kata tunjuk tunggal & jamak', 'tab' => 'materi', 'subTab' => 'demonstratives'],
+                    ];
+                } elseif (count($materiBlocks) > 1) {
+                    foreach ($materiBlocks as $mi => $mb) {
+                        $meetingSubtopics[] = [
+                            'id' => 'materi-block-' . $mi,
+                            'num' => sprintf('%02d', $mi + 1),
+                            'title' => $mb['title'] ?? $mb['topic'] ?? ('Subtopik ' . ($mi + 1)),
+                            'desc' => $mb['focus'] ?? 'Materi Pembelajaran',
+                            'tab' => 'materi',
+                            'materiIndex' => $mi
+                        ];
+                    }
+                } else {
+                    $meetingSubtopics = [
+                        ['id' => 'materi-top', 'num' => '01', 'title' => 'Materi Pembelajaran', 'desc' => 'Penjelasan materi & topik', 'tab' => 'materi'],
+                        ['id' => 'tab-listening', 'num' => '02', 'title' => 'Short Listening', 'desc' => 'Latihan audio mendengarkan', 'tab' => 'listening'],
+                        ['id' => 'tab-shadowing', 'num' => '03', 'title' => 'Shadowing Practice', 'desc' => 'Latihan pelafalan suara', 'tab' => 'shadowing'],
+                        ['id' => 'tab-partnering', 'num' => '04', 'title' => 'Partnering Practice', 'desc' => 'Percakapan Student A & B', 'tab' => 'partnering'],
+                        ['id' => 'tab-vocabulary', 'num' => '05', 'title' => 'Kosa Kata (Vocab)', 'desc' => 'Flashcards & daftar kata', 'tab' => 'vocabulary'],
+                        ['id' => 'tab-game', 'num' => '06', 'title' => 'Game Speaking', 'desc' => 'Aktivitas game interaktif', 'tab' => 'game'],
+                        ['id' => 'tab-extended', 'num' => '07', 'title' => 'AI Interview', 'desc' => 'Simulasi wawancara AI', 'tab' => 'extended'],
+                    ];
+                }
+            @endphp
             <div class="max-w-6xl mx-auto w-full space-y-6">
 
                 <!-- TOP HEADER CARD (Clean & Compact) -->
@@ -1109,6 +2129,27 @@
                         </div>
 
                         <div class="flex items-center gap-3 self-start md:self-auto flex-wrap">
+                            @if(Auth::user()?->isAdmin() || Auth::user()?->isTeacher())
+                            <!-- Role View Switcher (Admin / Student Preview Mode) -->
+                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs text-xs font-bold">
+                                <span class="text-slate-400 px-1.5 font-semibold text-[11px] hidden sm:inline">Tampilan:</span>
+                                <button @click="setPreviewRole('admin')" type="button"
+                                    :style="previewRole === 'admin' ? 'background-color: #0f172a !important; color: #fbbf24 !important;' : ''" 
+                                    :class="previewRole === 'admin' ? 'shadow-xs font-black' : 'text-slate-600 hover:bg-slate-200'" 
+                                    class="px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+                                    <span>Admin / Guru</span>
+                                </button>
+                                <button @click="setPreviewRole('student')" type="button"
+                                    :style="previewRole === 'student' ? 'background-color: #2563eb !important; color: #ffffff !important;' : ''" 
+                                    :class="previewRole === 'student' ? 'shadow-xs font-black' : 'text-slate-600 hover:bg-slate-200'" 
+                                    class="px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                                    <span>Siswa</span>
+                                </button>
+                            </div>
+                            @endif
+
                             <!-- Audio Speed Controls (Pill Style) -->
                             <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 shadow-2xs text-xs font-bold text-slate-700">
                                 <span class="text-slate-400 px-2 font-medium">Speed:</span>
@@ -1128,47 +2169,64 @@
                     </div>
                 </div>
 
-                <!-- 7-TAB NAVIGATION CONTROLS (Alternating Blue & Orange Reference Style) -->
-                <div class="bg-white p-2 rounded-[1.75rem] border border-slate-200 shadow-sm flex flex-wrap items-center gap-1.5 sm:gap-2">
+                @if(Auth::user()?->isAdmin() || Auth::user()?->isTeacher())
+                <!-- NOTIFICATION BANNER: STUDENT PREVIEW MODE -->
+                <div x-show="previewRole === 'student'" x-transition x-cloak 
+                    class="p-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-md text-xs font-medium gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="px-2.5 py-0.5 rounded bg-white text-blue-700 font-black text-[10px] uppercase tracking-wider shadow-xs shrink-0">MODE PRATINJAU SISWA</span>
+                        <span class="text-white/95">Anda sedang melihat halaman ini dalam <strong>Tampilan Siswa</strong>. Kunci jawaban, panduan fasilitasi guru, tombol edit admin, dan floating dock admin dinonaktifkan.</span>
+                    </div>
+                    <button @click="setPreviewRole('admin')" type="button" class="px-3.5 py-1.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-black text-xs transition shrink-0 shadow-sm flex items-center gap-1.5">
+                        <span>Kembali ke Mode Admin</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+                @endif
+
+
+
+                <!-- 7-TAB NAVIGATION CONTROLS (Single Row Clean Layout) -->
+                <div class="bg-white p-1.5 sm:p-2 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-start lg:justify-between overflow-x-auto no-scrollbar gap-1 sm:gap-1.5">
                     <!-- Tab 1: Materi -->
-                    <button @click="activeTab = 'materi'" :style="activeTab === 'materi' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'materi' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <button @click="activeTab = 'materi'" :style="activeTab === 'materi' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'materi' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Materi</span>
                     </button>
 
                     <!-- Tab 2: Short Listening -->
-                    <button @click="activeTab = 'listening'" :style="activeTab === 'listening' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'listening' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <button @click="activeTab = 'listening'" :style="activeTab === 'listening' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'listening' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                         <span>Short Listening</span>
                     </button>
 
                     <!-- Tab 3: Practice (Shadowing) -->
-                    <button @click="activeTab = 'shadowing'" :style="activeTab === 'shadowing' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'shadowing' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        <span>Practice (Shadowing)</span>
+                    <button @click="activeTab = 'shadowing'" :style="activeTab === 'shadowing' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'shadowing' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span>Shadowing</span>
                     </button>
 
                     <!-- Tab 4: Practice (Partnering) -->
-                    <button @click="activeTab = 'partnering'" :style="activeTab === 'partnering' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'partnering' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        <span>Practice (Partnering)</span>
+                    <button @click="activeTab = 'partnering'" :style="activeTab === 'partnering' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'partnering' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Partnering</span>
                     </button>
 
-                    <!-- Tab 5: Kosa Kata (di kiri Game Speaking) -->
-                    <button @click="activeTab = 'vocabulary'" :style="activeTab === 'vocabulary' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'vocabulary' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <!-- Tab 5: Kosa Kata -->
+                    <button @click="activeTab = 'vocabulary'" :style="activeTab === 'vocabulary' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'vocabulary' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                         <span>Kosa Kata</span>
                     </button>
 
                     <!-- Tab 6: Game Speaking -->
-                    <button @click="activeTab = 'game'" :style="activeTab === 'game' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'game' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <button @click="activeTab = 'game'" :style="activeTab === 'game' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="activeTab === 'game' ? 'shadow-md font-black' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span>Game Speaking</span>
                     </button>
 
                     <!-- Tab 7: AI Interview -->
-                    <button @click="activeTab = 'extended'" :style="activeTab === 'extended' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'extended' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all duration-200 shrink-0 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    <button @click="activeTab = 'extended'" :style="activeTab === 'extended' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="activeTab === 'extended' ? 'shadow-md font-black' : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50 font-bold'" class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-xs+ transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                         <span>AI Interview</span>
                     </button>
                 </div>
@@ -1176,17 +2234,7 @@
                 <!-- ========================================== -->
                 <!-- TAB 1: MATERI (LESSON MATERIAL)         -->
                 <!-- ========================================== -->
-                @if(count($materiBlocks) > 1)
-                    <div x-show="activeTab === 'materi'" class="flex flex-wrap gap-2 mb-4">
-                        @foreach($materiBlocks as $mi => $mb)
-                            <button @click="activeMateriIndex = {{ $mi }}; @if($mi < count($games))activeGameIndex = {{ $mi }};@endif" type="button"
-                                :class="activeMateriIndex === {{ $mi }} ? 'bg-sky-500 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-sky-50'"
-                                class="px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all">
-                                {{ $mb['title'] ?? $mb['topic'] ?? ('Materi ' . ($mi + 1)) }}
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
+
                 @foreach($materiBlocks as $mi => $materiBlockData)
                 <div x-show="activeTab === 'materi' && activeMateriIndex === {{ $mi }}" class="space-y-8">
                     @if(isset($materiBlockData['alphabet_groups']))
@@ -1195,7 +2243,7 @@
                         <!-- ==================================================== -->
                         
                         <!-- Section 1: SIGNATURE HERO SHOWCASE BOX (Alphabet Phonetics) -->
-                        <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                        <div id="sec-m2-1" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
                             <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                     <span class="px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-extrabold uppercase tracking-wider text-blue-100">Modul 02 • Alphabet Phonetics</span>
@@ -1250,7 +2298,7 @@
                         </div>
 
                         <!-- Section 2: Interactive Real-Time Spell-Aloud Station -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90" x-data="{ spellInput: '', sampleWords: ['ACTOR', 'CARPENTER', 'DENTIST', 'ARCHITECT', 'JOURNALIST', 'TRAFFIC WARDEN', 'SECRETARY', 'LIBRARIAN'] }">
+                        <div id="sec-m2-2" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24" x-data="{ spellInput: '', sampleWords: ['ACTOR', 'CARPENTER', 'DENTIST', 'ARCHITECT', 'JOURNALIST', 'TRAFFIC WARDEN', 'SECRETARY', 'LIBRARIAN'] }">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
                                 <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">02</span>
                                 <div>
@@ -1285,32 +2333,29 @@
                                     <div class="space-y-2 text-xs font-medium text-amber-950">
                                         @foreach($materiBlockData['spelling_rules'] ?? [] as $sr)
                                             <div class="p-2.5 rounded-2xl bg-white border border-amber-100 shadow-2xs">
-                                                <span class="font-bold text-amber-800 text-[11px] block">{{ $sr['label'] }}:</span>
-                                                <p class="font-mono font-bold text-slate-900 text-xs">{{ $sr['pattern'] }}</p>
-                                                <p class="text-[11px] text-slate-500 italic mt-0.5">{{ $sr['example'] }}</p>
+                                                <span class="font-bold text-amber-800 text-[11px] block">{{ $sr['label'] ?? $sr['title'] ?? 'Rule' }}:</span>
+                                                <p class="font-mono font-bold text-slate-900 text-xs">{{ $sr['pattern'] ?? $sr['en'] ?? '' }}</p>
+                                                <p class="text-[11px] text-slate-500 italic mt-0.5">{{ $sr['example'] ?? $sr['id'] ?? '' }}</p>
                                             </div>
                                         @endforeach
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
-
-                    @elseif(isset($materiBlockData['cardinal_numbers']))
-                        <!-- ==================================================== -->
-                        <!-- MEETING 3: TELLING NUMBERS & DATES                   -->
-                        <!-- ==================================================== -->
+                    {{-- ==================================================== --}}
+                    {{-- 1. CARDINAL NUMBERS ONLY (MEETING 2 SUBTOPIC 01)     --}}
+                    {{-- ==================================================== --}}
+                    @elseif(($materiBlockData['type'] ?? '') === 'cardinal_numbers' || (isset($materiBlockData['cardinal_numbers']) && !isset($materiBlockData['ordinal_numbers']) && !isset($materiBlockData['telling_date'])))
                         
-                        <!-- Section 1: SIGNATURE HERO SHOWCASE BOX (Numbers & Dates Mastery) -->
-                        <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                        <!-- Section 1: HERO SHOWCASE BOX (Cardinal Numbers Mastery) -->
+                        <div id="sec-m2-sub-1-hero" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
                             <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
-                                    <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Modul 03 • Numbers &amp; Dates Mastery</span>
-                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-2 text-white">Telling Numbers &amp; Dates</h2>
-                                    <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">Panduan lengkap Cardinal &amp; Ordinal Numbers (0 s.d. 45 Miliar+), Kalender (12 Bulan &amp; 7 Hari), Cara Membaca Tahun &amp; Era (BC/AD), serta Preposisi Penanggalan (IN &amp; ON).</p>
+                                    <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Subtopik 01 • Cardinal Numbers Mastery</span>
+                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-2 text-white">Telling Cardinal Numbers</h2>
+                                    <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">Panduan lengkap membaca dan melafalkan angka nominal jumlah (0 s.d. 45 Miliar+), nomor telepon, harga mata uang, dan aturan perhitungan.</p>
                                 </div>
-                                <button @click="speakText('Telling numbers and dates. Cardinal numbers: zero, one, two, three, four, five. Ordinal numbers: first, second, third, fourth, fifth. When is your birthday? It is in January, on the twenty-ninth of January.')" type="button" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 shrink-0">
+                                <button @click="speakText('Telling Cardinal Numbers. Zero, one, two, three, four, five, ten, twenty, one hundred, one thousand, one million, one billion. The total price is forty-nine dollars and ninety-nine cents.')" type="button" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 shrink-0">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                                     <span>Putar Ringkasan Materi</span>
                                 </button>
@@ -1320,159 +2365,117 @@
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
                                 <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
                                     <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">1. Numbers Matrix</span>
-                                    <h3 class="text-lg font-black text-white mt-0.5">Cardinal &amp; Ordinal</h3>
-                                    <p class="text-[11px] text-sky-100 mt-1">0 s.d. 45 Miliar+ dan angka tingkatan 1st - 1,000,000th.</p>
+                                    <h3 class="text-lg font-black text-white mt-0.5">0 s.d. 45 Miliar+</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Satuan, puluhan, ratusan, ribuan, jutaan &amp; miliaran.</p>
                                 </div>
                                 <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
-                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">2. Calendar &amp; Dates</span>
-                                    <h3 class="text-lg font-black text-white mt-0.5">Months, Days &amp; Years</h3>
-                                    <p class="text-[11px] text-sky-100 mt-1">12 Bulan, 7 Hari, Cara Membaca Tahun, dan Era BC/AD.</p>
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">2. Counting Rules</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">Hyphen &amp; Rules</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Aturan tanda hubung (-), kata 'and', &amp; pembacaan no telp.</p>
                                 </div>
                                 <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
-                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">3. Date Prepositions</span>
-                                    <h3 class="text-lg font-black text-white mt-0.5">IN &amp; ON (Q&amp;A)</h3>
-                                    <p class="text-[11px] text-sky-100 mt-1">Penggunaan In vs On untuk tanggal, bulan, tahun &amp; ulang tahun.</p>
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">3. Prices &amp; Quantities</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">Harga &amp; Kuantitas</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Membaca mata uang Dollar, Rupiah, dan diskon.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Section 1: CARDINAL & ORDINAL NUMBERS MATRIX -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90" x-data="{ numCategory: 'all', searchNum: '' }">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-4">
+                        <!-- Section 2: CARDINAL NUMBERS MATRIX TABLE -->
+                        <div id="sec-m2-sub-1-matrix" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24" x-data="{ numCategory: 'all', searchNum: '' }">
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
                                 <div class="flex items-center gap-3">
-                                    <span style="background-color: #29a8f5 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20">01</span>
+                                    <span style="background-color: #29a8f5 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20 shrink-0">01</span>
                                     <div>
-                                        <h2 class="text-xl font-black text-slate-900 tracking-tight">Cardinal &amp; Ordinal Numbers Matrix</h2>
-                                        <p class="text-xs text-slate-500 font-medium">Perbedaan angka jumlah (Cardinal) vs angka urutan/peringkat/tanggal (Ordinal) dari 0 s.d. Ratusan, Ribuan, dan Jutaan/Miliaran.</p>
+                                        <h2 class="text-xl font-black text-slate-900 tracking-tight">Cardinal Numbers Matrix (0 s.d. 45 Miliar+)</h2>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">Klik tombol audio untuk mendengarkan lafal standar fonetik (IPA) setiap nominal angka.</p>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold shrink-0 flex-wrap gap-1">
-                                    <button @click="numCategory = 'all'" :style="numCategory === 'all' ? 'background-color: #0f172a !important; color: white !important;' : ''" :class="numCategory === 'all' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        Semua Angka
-                                    </button>
-                                    <button @click="numCategory = 'basic'" :style="numCategory === 'basic' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="numCategory === 'basic' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        0 - 20 (Dasar)
-                                    </button>
-                                    <button @click="numCategory = 'tens'" :style="numCategory === 'tens' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="numCategory === 'tens' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        21 - 99 (Puluhan)
-                                    </button>
-                                    <button @click="numCategory = 'hundreds'" :style="numCategory === 'hundreds' ? 'background-color: #10b981 !important; color: white !important;' : ''" :class="numCategory === 'hundreds' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        Ratusan (100 - 999)
-                                    </button>
-                                    <button @click="numCategory = 'thousands'" :style="numCategory === 'thousands' ? 'background-color: #0284c7 !important; color: white !important;' : ''" :class="numCategory === 'thousands' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        Ribuan (1.000 - 999.999)
-                                    </button>
-                                    <button @click="numCategory = 'millions'" :style="numCategory === 'millions' ? 'background-color: #8b5cf6 !important; color: white !important;' : ''" :class="numCategory === 'millions' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-xl transition">
-                                        Jutaan &amp; Miliaran (1M - 45B)
-                                    </button>
-                                </div>
+                            <div class="flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold mb-6 overflow-x-auto gap-1.5">
+                                <button @click="numCategory = 'all'" :style="numCategory === 'all' ? 'background: linear-gradient(135deg, #0284c7, #2563eb) !important; color: white !important;' : ''" :class="numCategory === 'all' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Semua Angka
+                                </button>
+                                <button @click="numCategory = 'basic'" :style="numCategory === 'basic' ? 'background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important;' : ''" :class="numCategory === 'basic' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    0 - 20 (Dasar)
+                                </button>
+                                <button @click="numCategory = 'tens'" :style="numCategory === 'tens' ? 'background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important;' : ''" :class="numCategory === 'tens' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    21 - 99 (Puluhan)
+                                </button>
+                                <button @click="numCategory = 'hundreds'" :style="numCategory === 'hundreds' ? 'background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important;' : ''" :class="numCategory === 'hundreds' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Ratusan (100 - 999)
+                                </button>
+                                <button @click="numCategory = 'thousands'" :style="numCategory === 'thousands' ? 'background: linear-gradient(135deg, #06b6d4, #0891b2) !important; color: white !important;' : ''" :class="numCategory === 'thousands' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Ribuan (1.000 - 999.999)
+                                </button>
+                                <button @click="numCategory = 'millions'" :style="numCategory === 'millions' ? 'background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; color: white !important;' : ''" :class="numCategory === 'millions' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Jutaan &amp; Miliaran (1M - 45B)
+                                </button>
                             </div>
 
                             @php
                                 $cardinals = $materiBlockData['cardinal_numbers'] ?? [];
-                                $ordinals = $materiBlockData['ordinal_numbers'] ?? [];
-                                $ordMap = [];
-                                foreach ($ordinals as $ord) {
-                                    $rawKey = preg_replace('/[^0-9]/', '', $ord['num']);
-                                    if ($rawKey) $ordMap[$rawKey] = $ord;
-                                }
                             @endphp
 
                             <!-- Numbers Display Table -->
-                            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs w-full">
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm w-full">
                                 <table class="w-full text-left border-collapse text-xs sm:text-sm">
                                     <thead>
-                                        <tr class="bg-slate-900 text-white font-black text-[11px] sm:text-xs uppercase tracking-wider">
-                                            <th class="p-3.5 sm:p-4 text-center w-28">ANGKA &amp; KATEGORI</th>
-                                            <th class="p-3.5 sm:p-4">CARDINAL NUMBER (JUMLAH &amp; ARTI)</th>
-                                            <th class="p-3.5 sm:p-4 font-mono">PRONUNCIATION / IPA</th>
-                                            <th class="p-3.5 sm:p-4">ORDINAL NUMBER (URUTAN &amp; ARTI)</th>
-                                            <th class="p-3.5 sm:p-4 text-center w-44">AUDIO / LAFALKAN</th>
+                                        <tr style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #4f46e5 100%) !important;" class="text-white font-black text-xs uppercase tracking-wider">
+                                            <th class="py-4 px-4 text-center w-28">Angka</th>
+                                            <th class="py-4 px-4">Cardinal Number</th>
+                                            <th class="py-4 px-4">Pronunciation (IPA)</th>
+                                            <th class="py-4 px-4 text-center w-36">Audio</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-800">
+                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-800 bg-white">
                                         @foreach($cardinals as $idx => $cn)
                                             @php
                                                 $cleanNum = preg_replace('/[^0-9]/', '', $cn['num']);
                                                 $intVal = (int) $cleanNum;
                                                 $cat = 'basic';
-                                                $catBadge = '0 - 20';
-                                                $catBadgeStyle = 'bg-slate-100 text-slate-700';
-
+                                                $badgeClass = 'bg-sky-50 text-sky-800 border-sky-200';
                                                 if ($intVal > 20 && $intVal < 100) {
                                                     $cat = 'tens';
-                                                    $catBadge = 'Puluhan';
-                                                    $catBadgeStyle = 'bg-amber-100 text-amber-800';
+                                                    $badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
                                                 } elseif ($intVal >= 100 && $intVal < 1000) {
                                                     $cat = 'hundreds';
-                                                    $catBadge = 'Ratusan';
-                                                    $catBadgeStyle = 'bg-emerald-100 text-emerald-800';
+                                                    $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
                                                 } elseif ($intVal >= 1000 && $intVal < 1000000) {
                                                     $cat = 'thousands';
-                                                    $catBadge = 'Ribuan';
-                                                    $catBadgeStyle = 'bg-sky-100 text-sky-800';
+                                                    $badgeClass = 'bg-cyan-50 text-cyan-800 border-cyan-200';
                                                 } elseif ($intVal >= 1000000) {
                                                     $cat = 'millions';
-                                                    $catBadge = 'Jutaan / M';
-                                                    $catBadgeStyle = 'bg-purple-100 text-purple-800';
+                                                    $badgeClass = 'bg-purple-50 text-purple-800 border-purple-200';
                                                 }
-
-                                                $matchingOrd = $ordMap[$cleanNum] ?? null;
                                             @endphp
-                                            <tr x-show="numCategory === 'all' || numCategory === '{{ $cat }}'" class="hover:bg-sky-50/50 transition">
-                                                <td class="p-3.5 sm:p-4 text-center">
-                                                    <span class="inline-block px-3 py-1 rounded-xl bg-slate-900 text-white font-mono font-black text-xs sm:text-sm shadow-2xs">
+                                            <tr x-show="numCategory === 'all' || numCategory === '{{ $cat }}'" class="hover:bg-sky-50/40 transition">
+                                                <td class="py-3.5 px-4 text-center">
+                                                    <span class="inline-flex items-center justify-center font-mono font-black text-sm sm:text-base px-3 py-1 rounded-xl border {{ $badgeClass }} shadow-2xs">
                                                         {{ $cn['num'] }}
                                                     </span>
-                                                    <span class="block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md {{ $catBadgeStyle }}">
-                                                        {{ $catBadge }}
-                                                    </span>
                                                 </td>
-                                                <td class="p-3.5 sm:p-4">
-                                                    <span class="font-black text-slate-900 text-sm sm:text-base capitalize block">
+                                                <td class="py-3.5 px-4">
+                                                    <span class="font-bold text-slate-900 text-sm sm:text-base capitalize block">
                                                         {{ $cn['words'] }}
                                                     </span>
                                                     @if(!empty($cn['id']))
-                                                        <span class="text-xs text-slate-500 font-semibold block mt-0.5">
-                                                            🇮🇩 {{ $cn['id'] }}
+                                                        <span class="text-xs text-slate-500 font-medium block mt-0.5">
+                                                            {{ $cn['id'] }}
                                                         </span>
                                                     @endif
                                                 </td>
-                                                <td class="p-3.5 sm:p-4 font-mono text-xs text-indigo-700">
-                                                    <span class="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 font-bold inline-block">
+                                                <td class="py-3.5 px-4">
+                                                    <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100 shadow-2xs inline-block">
                                                         {{ $cn['ipa'] }}
                                                     </span>
                                                 </td>
-                                                <td class="p-3.5 sm:p-4">
-                                                    @if($matchingOrd)
-                                                        <div>
-                                                            <span class="font-black text-amber-950 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200 text-xs sm:text-sm inline-block">
-                                                                {{ $matchingOrd['num'] }} - {{ $matchingOrd['words'] }}
-                                                            </span>
-                                                            @if(!empty($matchingOrd['id']))
-                                                                <span class="text-xs text-amber-800 font-semibold block mt-0.5">
-                                                                    🇮🇩 {{ $matchingOrd['id'] }}
-                                                                </span>
-                                                            @endif
-                                                        </div>
-                                                    @else
-                                                        <span class="text-slate-400 text-xs italic">-</span>
-                                                    @endif
-                                                </td>
-                                                <td class="p-3.5 sm:p-4 text-center">
-                                                    <div class="flex items-center justify-center gap-2">
-                                                        <button @click="speakText(@js($cn['words']))" class="px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 font-bold text-xs border border-sky-200 transition flex items-center gap-1 shadow-2xs" title="Lafalkan Cardinal">
-                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                                            <span>Cardinal</span>
-                                                        </button>
-                                                        @if($matchingOrd)
-                                                            <button @click="speakText(@js($matchingOrd['words']))" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 font-bold text-xs border border-amber-200 transition flex items-center gap-1 shadow-2xs" title="Lafalkan Ordinal">
-                                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                                                <span>Ordinal</span>
-                                                            </button>
-                                                        @endif
-                                                    </div>
+                                                <td class="py-3.5 px-4 text-center">
+                                                    <button @click="speakText(@js($cn['words']))" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-black text-xs shadow-xs hover:shadow-md transition inline-flex items-center gap-1.5" title="Lafalkan">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span>Lafalkan</span>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -1481,10 +2484,283 @@
                             </div>
                         </div>
 
+                        <!-- Section 3: COUNTING RULES & PRICE EXAMPLES -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Counting Rules -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100">
+                                    <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">02</span>
+                                    <div>
+                                        <h3 class="text-lg font-black text-slate-900">4 Aturan Ejaan &amp; Pelafalan Angka</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Kunci menghindari kesalahan umum dalam cardinal numbers.</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($materiBlockData['counting_rules'] ?? [] as $cr)
+                                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                            <h4 class="font-black text-xs sm:text-sm text-slate-900">{{ $cr['label'] ?? $cr['rule'] ?? 'Rule' }}</h4>
+                                            <p class="text-xs text-slate-600 mt-1">{{ $cr['rule'] ?? $cr['desc'] ?? '' }}</p>
+                                            @if(!empty($cr['example']))
+                                                <div class="mt-2 text-xs font-mono font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-xl border border-sky-100 inline-block">
+                                                    Contoh: {{ $cr['example'] }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Price Examples -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100">
+                                    <span style="background-color: #10b981 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">03</span>
+                                    <div>
+                                        <h3 class="text-lg font-black text-slate-900">Membaca Harga (Price Tags)</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Cara menyebutkan nominal harga barang dan desimal.</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($materiBlockData['price_examples'] ?? [] as $pe)
+                                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                                            <div>
+                                                <span class="text-base font-mono font-black text-slate-900 block">{{ $pe['price'] ?? '' }}</span>
+                                                <span class="text-xs text-slate-600 font-medium mt-0.5 block">&rarr; "{{ $pe['read'] ?? $pe['spoken'] ?? '' }}"</span>
+                                            </div>
+                                            <button @click="speakText(@js($pe['read'] ?? $pe['spoken'] ?? ''))" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold text-xs border border-emerald-200 transition shrink-0 flex items-center gap-1 shadow-2xs">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Audio</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    {{-- ==================================================== --}}
+                    {{-- 2. ORDINAL NUMBERS ONLY (MEETING 3 SUBTOPIC 01)      --}}
+                    {{-- ==================================================== --}}
+                    @elseif(($materiBlockData['type'] ?? '') === 'ordinal_numbers' || (isset($materiBlockData['ordinal_numbers']) && !isset($materiBlockData['cardinal_numbers']) && !isset($materiBlockData['telling_date'])))
+                        
+                        <!-- Section 1: HERO SHOWCASE BOX (Ordinal Numbers Mastery) -->
+                        <div id="sec-m3-sub-1-hero" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                            <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Subtopik 01 • Ordinal Numbers Mastery</span>
+                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-2 text-white">Telling Ordinal Numbers</h2>
+                                    <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">Panduan lengkap angka urutan/tingkatan (1st s.d. 1.000.000th), peringkat kejuaraan, lantai gedung, abad, dan aturan penulisan akhiran (-st, -nd, -rd, -th).</p>
+                                </div>
+                                <button @click="speakText('Telling Ordinal Numbers. First, second, third, fourth, fifth, tenth, twenty-first, one hundredth, one millionth. She won first place in the competition. My office is on the fifth floor.')" type="button" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 shrink-0">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                    <span>Putar Ringkasan Materi</span>
+                                </button>
+                            </div>
+
+                            <!-- 3 Mini Metric Cards inside Hero -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">1. Ordinal Matrix</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">1st - 1,000,000th</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Tabel lengkap angka urutan &amp; peringkat.</p>
+                                </div>
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">2. Suffix Rules</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">-st, -nd, -rd, -th</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Aturan akhiran singkatan angka tingkat.</p>
+                                </div>
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">3. Common Uses</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">Ranks &amp; Floors</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Penggunaan untuk juara, lantai gedung, &amp; abad.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: ORDINAL NUMBERS MATRIX TABLE -->
+                        <div id="sec-m3-sub-1-matrix" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24" x-data="{ ordCategory: 'all', searchOrd: '' }">
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">01</span>
+                                    <div>
+                                        <h2 class="text-xl font-black text-slate-900 tracking-tight">Ordinal Numbers Matrix (1st s.d. 1.000.000th)</h2>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">Perhatikan akhiran singkatan (-st, -nd, -rd, -th) dan simbol fonetik IPA.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold mb-6 overflow-x-auto gap-1.5">
+                                <button @click="ordCategory = 'all'" :style="ordCategory === 'all' ? 'background: linear-gradient(135deg, #f59e0b, #ea580c) !important; color: white !important;' : ''" :class="ordCategory === 'all' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Semua
+                                </button>
+                                <button @click="ordCategory = 'basic'" :style="ordCategory === 'basic' ? 'background: linear-gradient(135deg, #ff9800, #f57c00) !important; color: white !important;' : ''" :class="ordCategory === 'basic' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    1st - 20th (Dasar)
+                                </button>
+                                <button @click="ordCategory = 'tens'" :style="ordCategory === 'tens' ? 'background: linear-gradient(135deg, #0284c7, #2563eb) !important; color: white !important;' : ''" :class="ordCategory === 'tens' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    21st - 99th (Puluhan)
+                                </button>
+                                <button @click="ordCategory = 'hundreds'" :style="ordCategory === 'hundreds' ? 'background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important;' : ''" :class="ordCategory === 'hundreds' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'" class="px-3.5 py-2 rounded-xl transition shrink-0 whitespace-nowrap">
+                                    Ratusan &amp; Ribuan
+                                </button>
+                            </div>
+
+                            @php
+                                $ordinals = $materiBlockData['ordinal_numbers'] ?? [];
+                            @endphp
+
+                            <!-- Ordinals Display Table -->
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm w-full">
+                                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                    <thead>
+                                        <tr style="background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #e11d48 100%) !important;" class="text-white font-black text-xs uppercase tracking-wider">
+                                            <th class="py-4 px-4 text-center w-28">Urutan</th>
+                                            <th class="py-4 px-4">Ordinal Number</th>
+                                            <th class="py-4 px-4">Pronunciation (IPA)</th>
+                                            <th class="py-4 px-4 text-center w-36">Audio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-medium text-slate-800 bg-white">
+                                        @foreach($ordinals as $idx => $ord)
+                                            @php
+                                                $cleanNum = (int) preg_replace('/[^0-9]/', '', $ord['num']);
+                                                $cat = 'basic';
+                                                $badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
+                                                if ($cleanNum > 20 && $cleanNum < 100) {
+                                                    $cat = 'tens';
+                                                    $badgeClass = 'bg-sky-50 text-sky-800 border-sky-200';
+                                                } elseif ($cleanNum >= 100) {
+                                                    $cat = 'hundreds';
+                                                    $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                                                }
+                                            @endphp
+                                            <tr x-show="ordCategory === 'all' || ordCategory === '{{ $cat }}'" class="hover:bg-amber-50/40 transition">
+                                                <td class="py-3.5 px-4 text-center">
+                                                    <span class="inline-flex items-center justify-center font-mono font-black text-sm sm:text-base px-3 py-1 rounded-xl border {{ $badgeClass }} shadow-2xs">
+                                                        {{ $ord['num'] }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-3.5 px-4">
+                                                    <span class="font-bold text-slate-900 text-sm sm:text-base capitalize block">
+                                                        {{ $ord['words'] }}
+                                                    </span>
+                                                    @if(!empty($ord['id']))
+                                                        <span class="text-xs text-slate-500 font-medium block mt-0.5">
+                                                            {{ $ord['id'] }}
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3.5 px-4">
+                                                    <span class="font-mono text-xs font-bold text-amber-800 bg-amber-50/80 px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs inline-block">
+                                                        {{ $ord['ipa'] }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-3.5 px-4 text-center">
+                                                    <button @click="speakText(@js($ord['words']))" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs shadow-xs hover:shadow-md transition inline-flex items-center gap-1.5" title="Lafalkan">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span>Lafalkan</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: ORDINAL RULES & USAGE EXAMPLES -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Ordinal Rules -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100">
+                                    <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">02</span>
+                                    <div>
+                                        <h3 class="text-lg font-black text-slate-900">4 Aturan Penulisan Ordinal Numbers</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Aturan penambahan akhiran -st, -nd, -rd, dan -th.</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($materiBlockData['ordinal_rules'] ?? [] as $or)
+                                        <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
+                                            <h4 class="font-black text-xs sm:text-sm text-amber-950">{{ $or['label'] ?? $or['rule'] ?? 'Rule' }}</h4>
+                                            <p class="text-xs text-slate-600 mt-1">{{ $or['rule'] ?? $or['desc'] ?? '' }}</p>
+                                            @if(!empty($or['example']))
+                                                <div class="mt-2 text-xs font-mono font-bold text-amber-800 bg-white px-3 py-1 rounded-xl border border-amber-200 inline-block">
+                                                    Contoh: {{ $or['example'] }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Usage Examples -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100">
+                                    <span style="background-color: #10b981 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">03</span>
+                                    <div>
+                                        <h3 class="text-lg font-black text-slate-900">Konteks Penggunaan Sehari-hari</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Contoh percakapan ranking juara, lantai gedung &amp; abad.</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($materiBlockData['usage_examples'] ?? [] as $ue)
+                                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-md">{{ $ue['context'] }}</span>
+                                                <button @click="speakText(@js($ue['en']))" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    <span>Audio</span>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs sm:text-sm font-black text-slate-900 mt-1">"{{ $ue['en'] }}"</p>
+                                            <p class="text-xs text-slate-500 font-medium">{{ $ue['id'] }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    {{-- ==================================================== --}}
+                    {{-- 3. CALENDAR & DATES ONLY (MEETING 3 SUBTOPIC 02)     --}}
+                    {{-- ==================================================== --}}
+                    @elseif(($materiBlockData['type'] ?? '') === 'telling_date' || isset($materiBlockData['telling_date']))
+                        
+                        <!-- Section 1: HERO SHOWCASE BOX (Calendar & Dates Mastery) -->
+                        <div id="sec-m3-sub-2-hero" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                            <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Subtopik 02 • Calendar &amp; Dates Mastery</span>
+                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-2 text-white">Calendar, Dates, Years &amp; Eras (BC/AD)</h2>
+                                    <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">Panduan lengkap 12 bulan, 7 hari, membaca tahun, era sejarah (BC/AD), format tanggal British vs American, dan preposisi penanggalan (IN vs ON).</p>
+                                </div>
+                                <button @click="speakText('Calendar and Dates Mastery. January, February, March, April, May, June, July, August, September, October, November, December. Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday. When is your birthday? It is in January, on the twenty-ninth of January.')" type="button" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 shrink-0">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                    <span>Putar Ringkasan Materi</span>
+                                </button>
+                            </div>
+
+                            <!-- 3 Mini Metric Cards inside Hero -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">1. 12 Months &amp; 7 Days</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">Bulan &amp; Hari</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Lafal audio 12 bulan kalender &amp; 7 hari dalam seminggu.</p>
+                                </div>
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">2. Reading Years</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">Tahun &amp; Era BC/AD</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Membaca tahun 1999, 2000, 2024, serta Sebelum/Setelah Masehi.</p>
+                                </div>
+                                <div class="bg-white/15 p-4 rounded-2xl border border-white/25">
+                                    <span class="text-xs font-bold text-sky-100 block uppercase tracking-wider">3. Date Prepositions</span>
+                                    <h3 class="text-lg font-black text-white mt-0.5">IN vs ON</h3>
+                                    <p class="text-[11px] text-sky-100 mt-1">Preposisi untuk bulan/tahun (IN) dan hari/tanggal spesifik (ON).</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Section 2: CALENDAR, DATES, YEARS & ERAS (BC/AD) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                        <div id="sec-m3-sub-2-calendar" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
-                                <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">02</span>
+                                <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">01</span>
                                 <div>
                                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Calendar, Dates, Years &amp; Eras (BC/AD)</h2>
                                     <p class="text-xs text-slate-500 font-medium">Bulan, Hari, Cara Membaca Tahun, Format Tanggal British vs American, dan Era Sejarah.</p>
@@ -1496,7 +2772,7 @@
                                 <div class="p-5 rounded-3xl bg-slate-50 border-2 border-slate-200/80">
                                     <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
                                         <h4 class="font-black text-sm text-slate-900 flex items-center gap-1.5">
-                                            <span>📅 12 Months (Bulan)</span>
+                                            <span>12 Months (Bulan)</span>
                                         </h4>
                                         <button @click="speakText('January, February, March, April, May, June, July, August, September, October, November, December')" class="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
@@ -1505,12 +2781,12 @@
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 text-xs">
                                         @foreach($materiBlockData['telling_date']['months'] ?? [] as $m)
-                                            <button @click="speakText(@js($m['en']))" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-sky-400 text-left transition flex items-center justify-between group shadow-2xs">
+                                            <button @click="speakText(@js($m['name'] ?? $m['en'] ?? ''))" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-sky-400 text-left transition flex items-center justify-between group shadow-2xs">
                                                 <div>
-                                                    <span class="font-black text-slate-900 block">{{ $m['en'] }}</span>
-                                                    <span class="text-[10px] text-slate-400">{{ $m['id'] }}</span>
+                                                    <span class="font-black text-slate-900 block">{{ $m['name'] ?? $m['en'] ?? '' }}</span>
+                                                    <span class="text-[10px] text-slate-400">{{ $m['id'] ?? '' }}</span>
                                                 </div>
-                                                <span class="text-slate-300 group-hover:text-sky-600 text-xs">🔊</span>
+                                                <span class="text-slate-300 group-hover:text-sky-600"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></span>
                                             </button>
                                         @endforeach
                                     </div>
@@ -1521,7 +2797,7 @@
                                     <div>
                                         <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
                                             <h4 class="font-black text-sm text-slate-900 flex items-center gap-1.5">
-                                                <span>🗓️ 7 Days of the Week (Hari)</span>
+                                                <span>7 Days of the Week (Hari)</span>
                                             </h4>
                                             <button @click="speakText('Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday')" class="text-xs font-bold text-orange-600 hover:text-orange-800 flex items-center gap-1">
                                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
@@ -1530,12 +2806,12 @@
                                         </div>
                                         <div class="space-y-1.5 text-xs">
                                             @foreach($materiBlockData['telling_date']['days'] ?? [] as $d)
-                                                <button @click="speakText(@js($d['en']))" class="w-full p-2 rounded-xl bg-white border border-slate-200 hover:border-orange-400 text-left transition flex items-center justify-between group shadow-2xs">
+                                                <button @click="speakText(@js($d['day'] ?? $d['en'] ?? ''))" class="w-full p-2 rounded-xl bg-white border border-slate-200 hover:border-orange-400 text-left transition flex items-center justify-between group shadow-2xs">
                                                     <div class="flex items-center gap-2">
                                                         <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-                                                        <span class="font-black text-slate-900">{{ $d['en'] }}</span>
+                                                        <span class="font-black text-slate-900">{{ $d['day'] ?? $d['en'] ?? '' }}</span>
                                                     </div>
-                                                    <span class="text-xs text-slate-400 font-semibold">{{ $d['id'] }}</span>
+                                                    <span class="text-xs text-slate-400 font-semibold">{{ $d['id'] ?? '' }}</span>
                                                 </button>
                                             @endforeach
                                         </div>
@@ -1546,7 +2822,7 @@
                                 <div class="p-5 rounded-3xl bg-slate-50 border-2 border-slate-200/80 space-y-4">
                                     <div>
                                         <h4 class="font-black text-sm text-slate-900 mb-2 pb-1 border-b border-slate-200">
-                                            ⏳ Cara Membaca Tahun (Years)
+                                            Cara Membaca Tahun (Years)
                                         </h4>
                                         <div class="space-y-2 text-xs">
                                             @foreach($materiBlockData['telling_date']['years'] ?? [] as $yr)
@@ -1555,7 +2831,7 @@
                                                         <span class="font-black font-mono text-slate-900">{{ $yr['year'] }}</span>
                                                         <span class="text-slate-600 block text-[11px] font-medium">&rarr; "{{ $yr['read'] }}"</span>
                                                     </div>
-                                                    <button @click="speakText(@js($yr['read']))" class="text-xs text-sky-600 hover:text-sky-800 font-bold p-1">🔊</button>
+                                                    <button @click="speakText(@js($yr['read']))" class="text-xs text-sky-600 hover:text-sky-800 font-bold p-1" title="Play Audio"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -1563,7 +2839,7 @@
 
                                     <div>
                                         <h4 class="font-black text-sm text-slate-900 mb-2 pb-1 border-b border-slate-200">
-                                            🏛️ Era Sejarah (BC vs AD)
+                                            Era Sejarah (BC vs AD)
                                         </h4>
                                         <div class="space-y-1.5 text-xs">
                                             <div class="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs">
@@ -1579,9 +2855,9 @@
                         </div>
 
                         <!-- Section 3: PREPOSITIONS OF DATES (IN & ON) & Q&A -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                        <div id="sec-m3-sub-2-prepositions" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
-                                <span style="background-color: #10b981 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">03</span>
+                                <span style="background-color: #10b981 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">02</span>
                                 <div>
                                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Prepositions of Dates: IN &amp; ON (Penanggalan &amp; Q&amp;A)</h2>
                                     <p class="text-xs text-slate-500 font-medium">Kunci menggunakan preposisi waktu (IN &amp; ON) untuk bulan, tahun, hari, tanggal kalender, dan ulang tahun.</p>
@@ -1640,8 +2916,8 @@
                                     <div class="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
                                         <span class="font-bold text-slate-400 block mb-1">Tanya Tanggal &amp; Tahun Berdiri:</span>
                                         <p class="font-black text-slate-900">&ldquo;When was your company founded?&rdquo;</p>
-                                        <p class="font-bold text-emerald-700 mt-1">&rarr; &ldquo;It was founded in 1995.&rdquo;</p>
-                                        <button @click="speakText('When was your company founded? It was founded in nineteen ninety-five.')" class="mt-2 text-[11px] font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                                        <p class="font-bold text-emerald-700 mt-1">&rarr; &ldquo;It was founded in 1999.&rdquo;</p>
+                                        <button @click="speakText('When was your company founded? It was founded in nineteen ninety-nine.')" class="mt-2 text-[11px] font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                                             <span>Putar Audio</span>
                                         </button>
@@ -1650,13 +2926,16 @@
                             </div>
                         </div>
 
+
+
+
                     @elseif(isset($materiBlockData['telling_time']))
                         <!-- ==================================================== -->
                         <!-- MEETING 4: TELLING TIME & DAILY SCHEDULES            -->
                         <!-- ==================================================== -->
                         
                         <!-- Section 1: SIGNATURE HERO SHOWCASE BOX (Telling Time Mastery) -->
-                        <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                        <div id="sec-m4-1" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
                             <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                     <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Modul 04 • Time &amp; Schedules Mastery</span>
@@ -1689,34 +2968,310 @@
                             </div>
                         </div>
 
-                        <!-- Section 1: TELLING TIME MASTERCLASS (BRITISH VS AMERICAN) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90" x-data="{ timeTab: 'british' }">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-4">
+                        <!-- Section 1: TELLING TIME MASTERCLASS & INTERACTIVE VISUAL CLOCK -->
+                        <div id="sec-m4-2" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24 space-y-6" 
+                             x-data="{ 
+                                 timeTab: 'british',
+                                 clockHour: 4,
+                                 clockMinute: 40,
+                                 hourWords: ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'],
+                                 numToWord(n) {
+                                     n = parseInt(n) || 0;
+                                     const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+                                     const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty'];
+                                     if (n === 0) return 'zero';
+                                     if (n < 20) return ones[n];
+                                     const t = Math.floor(n / 10);
+                                     const o = n % 10;
+                                     return o === 0 ? tens[t] : tens[t] + '-' + ones[o];
+                                 },
+                                 setTime(h, m) {
+                                     this.clockHour = parseInt(h);
+                                     this.clockMinute = parseInt(m);
+                                 },
+                                 changeHour(delta) {
+                                     let h = parseInt(this.clockHour) + delta;
+                                     if (h > 12) h = 1;
+                                     if (h < 1) h = 12;
+                                     this.clockHour = h;
+                                 },
+                                 changeMinute(delta) {
+                                     let m = parseInt(this.clockMinute) + delta;
+                                     if (m >= 60) m = m % 60;
+                                     if (m < 0) m = 60 + (m % 60);
+                                     this.clockMinute = m;
+                                 },
+                                 getHourAngle() {
+                                     const h = parseInt(this.clockHour) || 12;
+                                     const m = parseInt(this.clockMinute) || 0;
+                                     return ((h % 12) * 30) + (m * 0.5);
+                                 },
+                                 getMinuteAngle() {
+                                     return (parseInt(this.clockMinute) || 0) * 6;
+                                 },
+                                 getFormattedDigital() {
+                                     const h = String(this.clockHour || 12).padStart(2, '0');
+                                     const m = String(this.clockMinute || 0).padStart(2, '0');
+                                     return h + ':' + m;
+                                 },
+                                 getBritishSpoken() {
+                                     const m = parseInt(this.clockMinute) || 0;
+                                     const h = parseInt(this.clockHour) || 12;
+                                     const nextH = (h % 12) + 1;
+                                     const curW = this.hourWords[h] || this.numToWord(h);
+                                     const nextW = this.hourWords[nextH] || this.numToWord(nextH);
+                                     
+                                     if (m === 0) return curW.charAt(0).toUpperCase() + curW.slice(1) + ' o\'clock';
+                                     if (m === 15) return 'A quarter past ' + curW;
+                                     if (m === 30) return 'Half past ' + curW;
+                                     if (m === 45) return 'A quarter to ' + nextW;
+                                     if (m < 30) {
+                                         const mw = this.numToWord(m);
+                                         const minSuffix = (m % 5 === 0) ? '' : (m === 1 ? ' minute' : ' minutes');
+                                         return (mw.charAt(0).toUpperCase() + mw.slice(1)) + minSuffix + ' past ' + curW;
+                                     } else {
+                                         const rem = 60 - m;
+                                         const mw = this.numToWord(rem);
+                                         const minSuffix = (rem % 5 === 0) ? '' : (rem === 1 ? ' minute' : ' minutes');
+                                         return (mw.charAt(0).toUpperCase() + mw.slice(1)) + minSuffix + ' to ' + nextW;
+                                     }
+                                 },
+                                 getAmericanSpoken() {
+                                     const m = parseInt(this.clockMinute) || 0;
+                                     const h = parseInt(this.clockHour) || 12;
+                                     const hw = this.hourWords[h] || this.numToWord(h);
+                                     const hwCap = hw.charAt(0).toUpperCase() + hw.slice(1);
+                                     if (m === 0) return hwCap + ' o\'clock';
+                                     if (m < 10) return hwCap + ' oh-' + this.numToWord(m);
+                                     return hwCap + ' ' + this.numToWord(m);
+                                 },
+                                 getIndonesianMeaning() {
+                                     const m = parseInt(this.clockMinute) || 0;
+                                     const h = parseInt(this.clockHour) || 12;
+                                     const nextH = (h % 12) + 1;
+                                     if (m === 0) return 'Jam ' + h + ' tepat';
+                                     if (m === 15) return 'Jam ' + h + ' lebih seperempat (15 mnt)';
+                                     if (m === 30) return 'Jam setengah ' + nextH + ' (lebih 30 mnt)';
+                                     if (m === 45) return 'Jam ' + nextH + ' kurang seperempat (15 mnt)';
+                                     if (m < 30) return 'Jam ' + h + ' lebih ' + m + ' menit';
+                                     return 'Jam ' + nextH + ' kurang ' + (60 - m) + ' menit';
+                                 },
+                                 getZoneInfo() {
+                                     const m = parseInt(this.clockMinute) || 0;
+                                     if (m === 0) return { label: 'Tepat (O\'clock)', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+                                     if (m <= 30) return { label: 'Zona PAST (Lebih)', bg: 'bg-sky-50 text-sky-700 border-sky-200' };
+                                     return { label: 'Zona TO (Kurang)', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+                                 },
+                                 speakCurrentTime() {
+                                     const text = 'British: ' + this.getBritishSpoken() + '. American: ' + this.getAmericanSpoken() + '.';
+                                     speakText(text);
+                                 }
+                             }" 
+                             @set-time-tab.window="timeTab = $event.detail">
+                            
+                            <!-- Header Top Row -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
                                 <div class="flex items-center gap-3">
                                     <span style="background-color: #29a8f5 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20">01</span>
                                     <div>
                                         <h2 class="text-xl font-black text-slate-900 tracking-tight">Telling Time Masterclass (Membaca Jam)</h2>
-                                        <p class="text-xs text-slate-500 font-medium">Pelajari perbedaan membaca jam dalam format British, American, dan International 24-Hour.</p>
+                                        <p class="text-xs text-slate-500 font-medium">Visualisasi jam interaktif dan panduan membaca waktu British &amp; American Style.</p>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold shrink-0">
-                                    <button @click="timeTab = 'british'" :style="timeTab === 'british' ? 'background-color: #29a8f5 !important; color: white !important;' : ''" :class="timeTab === 'british' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
-                                        🇬🇧 British Style
+                                    <button @click="timeTab = 'british'" :style="timeTab === 'british' ? 'background: linear-gradient(135deg, #0284c7, #2563eb) !important; color: white !important;' : ''" :class="timeTab === 'british' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
+                                        British Style
                                     </button>
-                                    <button @click="timeTab = 'american'" :style="timeTab === 'american' ? 'background-color: #ff9800 !important; color: white !important;' : ''" :class="timeTab === 'american' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
-                                        🇺🇸 American Style
+                                    <button @click="timeTab = 'american'" :style="timeTab === 'american' ? 'background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important;' : ''" :class="timeTab === 'american' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
+                                        American Style
                                     </button>
-                                    <button @click="timeTab = 'other'" :style="timeTab === 'other' ? 'background-color: #10b981 !important; color: white !important;' : ''" :class="timeTab === 'other' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
-                                        🌐 International / Sharp
+                                    <button @click="timeTab = 'other'" :style="timeTab === 'other' ? 'background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important;' : ''" :class="timeTab === 'other' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
+                                        International / Sharp
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- ========================================================= -->
+                            <!-- CLEAN WHITE INTERACTIVE ANALOG CLOCK SIMULATOR            -->
+                            <!-- ========================================================= -->
+                            <div class="rounded-3xl bg-slate-50/70 p-5 sm:p-7 border-2 border-slate-200/80">
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                    
+                                    <!-- Left: Interactive Analog Clock (SVG Visual Display) -->
+                                    <div class="md:col-span-5 flex flex-col items-center justify-center">
+                                        <div class="relative w-[240px] h-[240px] sm:w-[260px] sm:h-[260px] flex items-center justify-center bg-white rounded-full shadow-lg p-2 border-2 border-slate-200 select-none">
+                                            
+                                            <!-- SVG Clock Face -->
+                                            <svg viewBox="0 0 300 300" class="w-full h-full">
+                                                <!-- Outer Ring -->
+                                                <circle cx="150" cy="150" r="142" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+
+                                                <!-- Right Semi-Circle: PAST ZONE (0 to 30 min) -->
+                                                <path d="M 150 20 A 130 130 0 0 1 150 280 Z" fill="rgba(14, 165, 233, 0.08)" stroke="rgba(14, 165, 233, 0.2)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                                                <!-- Left Semi-Circle: TO ZONE (30 to 60 min) -->
+                                                <path d="M 150 280 A 130 130 0 0 1 150 20 Z" fill="rgba(245, 158, 11, 0.08)" stroke="rgba(245, 158, 11, 0.2)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                                                <!-- Center Axis Divider -->
+                                                <line x1="150" y1="20" x2="150" y2="280" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                                                <!-- Subtle Zone Labels inside Dial -->
+                                                <text x="200" y="154" fill="#0284c7" fill-opacity="0.25" font-size="16" font-weight="900" text-anchor="middle">PAST</text>
+                                                <text x="100" y="154" fill="#ea580c" fill-opacity="0.25" font-size="16" font-weight="900" text-anchor="middle">TO</text>
+
+                                                <!-- 4 Key Landmark Text Labels -->
+                                                <text x="150" y="36" fill="#0284c7" font-size="9" font-weight="900" text-anchor="middle">O'CLOCK</text>
+                                                <text x="272" y="154" fill="#0284c7" font-size="8" font-weight="800" text-anchor="middle">PAST (:15)</text>
+                                                <text x="150" y="274" fill="#059669" font-size="9" font-weight="900" text-anchor="middle">HALF PAST</text>
+                                                <text x="28" y="154" fill="#ea580c" font-size="8" font-weight="800" text-anchor="middle">TO (:45)</text>
+
+                                                <!-- 12 Hour Number Markers with Precise Trigonometric Coordinates -->
+                                                <text @click="setTime(12, 0)" class="cursor-pointer hover:fill-sky-600 transition font-black" x="150" y="58" fill="#0f172a" font-size="16" font-weight="800" text-anchor="middle">12</text>
+                                                <text @click="setTime(1, 5)" class="cursor-pointer hover:fill-sky-600 transition" x="200" y="70" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">1</text>
+                                                <text @click="setTime(2, 10)" class="cursor-pointer hover:fill-sky-600 transition" x="236" y="107" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">2</text>
+                                                <text @click="setTime(3, 15)" class="cursor-pointer hover:fill-sky-600 transition font-black" x="248" y="156" fill="#0284c7" font-size="16" font-weight="900" text-anchor="middle">3</text>
+                                                <text @click="setTime(4, 20)" class="cursor-pointer hover:fill-sky-600 transition" x="236" y="206" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">4</text>
+                                                <text @click="setTime(5, 25)" class="cursor-pointer hover:fill-sky-600 transition" x="200" y="243" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">5</text>
+                                                <text @click="setTime(6, 30)" class="cursor-pointer hover:fill-emerald-600 transition font-black" x="150" y="254" fill="#059669" font-size="16" font-weight="900" text-anchor="middle">6</text>
+                                                <text @click="setTime(7, 35)" class="cursor-pointer hover:fill-orange-600 transition" x="100" y="243" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">7</text>
+                                                <text @click="setTime(8, 40)" class="cursor-pointer hover:fill-orange-600 transition" x="64" y="206" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">8</text>
+                                                <text @click="setTime(9, 45)" class="cursor-pointer hover:fill-orange-600 transition font-black" x="52" y="156" fill="#ea580c" font-size="16" font-weight="900" text-anchor="middle">9</text>
+                                                <text @click="setTime(10, 50)" class="cursor-pointer hover:fill-orange-600 transition" x="64" y="107" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">10</text>
+                                                <text @click="setTime(11, 55)" class="cursor-pointer hover:fill-orange-600 transition" x="100" y="70" fill="#334155" font-size="14" font-weight="700" text-anchor="middle">11</text>
+
+                                                <!-- HOUR HAND (Rotates perfectly around center 150, 150) -->
+                                                <g :transform="'translate(150, 150) rotate(' + getHourAngle() + ')'" style="transition: transform 0.35s ease-out;">
+                                                    <line x1="0" y1="10" x2="0" y2="-62" stroke="#1e293b" stroke-width="6.5" stroke-linecap="round" />
+                                                </g>
+
+                                                <!-- MINUTE HAND (Rotates perfectly around center 150, 150) -->
+                                                <g :transform="'translate(150, 150) rotate(' + getMinuteAngle() + ')'" style="transition: transform 0.35s ease-out;">
+                                                    <line x1="0" y1="14" x2="0" y2="-90" stroke="#0284c7" stroke-width="4" stroke-linecap="round" />
+                                                    <circle cx="0" cy="-90" r="3" fill="#0284c7" />
+                                                </g>
+
+                                                <!-- Center Hub -->
+                                                <circle cx="150" cy="150" r="7" fill="#0284c7" stroke="#ffffff" stroke-width="2.5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Clean Result, Custom Input & Audio -->
+                                    <div class="md:col-span-7 space-y-3.5">
+                                        <!-- Digital Time & Zone Indicator -->
+                                        <div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 shadow-xs">
+                                            <div class="flex items-center gap-3">
+                                                <span class="px-3 py-1 rounded-xl bg-slate-900 text-white font-mono font-black text-xl tracking-wider">
+                                                    <span x-text="getFormattedDigital()"></span>
+                                                </span>
+                                                <span class="text-xs font-bold text-slate-600" x-text="getIndonesianMeaning()"></span>
+                                            </div>
+                                            <span :class="getZoneInfo().bg" class="px-2.5 py-1 rounded-lg text-xs font-black border">
+                                                <span x-text="getZoneInfo().label"></span>
+                                            </span>
+                                        </div>
+
+                                        <!-- British vs American Spoken Result -->
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <!-- British Card -->
+                                            <div class="p-3.5 rounded-2xl bg-white border-2 border-sky-100 shadow-2xs">
+                                                <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">1. British (Past / To)</span>
+                                                <p class="text-sm font-black text-slate-900 mt-2" x-text="'&ldquo;' + getBritishSpoken() + '&rdquo;'"></p>
+                                            </div>
+
+                                            <!-- American Card -->
+                                            <div class="p-3.5 rounded-2xl bg-white border-2 border-amber-100 shadow-2xs">
+                                                <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded">2. American (Direct)</span>
+                                                <p class="text-sm font-black text-slate-900 mt-2" x-text="'&ldquo;' + getAmericanSpoken() + '&rdquo;'"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- INPUT WAKTU SENDIRI (MANUAL TIME ADJUSTER & STEPPERS) -->
+                                        <div class="p-3 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[11px] font-black uppercase tracking-wider text-slate-600 flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    <span>Atur Waktu Sendiri:</span>
+                                                </span>
+                                                <span class="text-[10px] text-slate-400 font-medium">Bisa ketik atau klik tombol</span>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                                <!-- Hour Input -->
+                                                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200">
+                                                    <span class="font-bold text-slate-600">Jam:</span>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <button @click="changeHour(-1)" type="button" class="w-6 h-6 rounded-lg bg-white hover:bg-sky-500 hover:text-white text-slate-700 font-black border border-slate-200 transition flex items-center justify-center">-</button>
+                                                        <input type="number" min="1" max="12" x-model.number="clockHour" @input="if(clockHour > 12) clockHour = 12; if(clockHour < 1 && clockHour !== '') clockHour = 1;" class="w-12 text-center font-mono font-black text-sm bg-white border border-slate-200 rounded-lg py-0.5 text-slate-900 focus:ring-1 focus:ring-sky-400">
+                                                        <button @click="changeHour(1)" type="button" class="w-6 h-6 rounded-lg bg-white hover:bg-sky-500 hover:text-white text-slate-700 font-black border border-slate-200 transition flex items-center justify-center">+</button>
+                                                    </div>
+                                                </div>
+                                                <!-- Minute Input -->
+                                                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200">
+                                                    <span class="font-bold text-slate-600">Menit:</span>
+                                                    <div class="flex items-center gap-1">
+                                                        <button @click="changeMinute(-5)" type="button" class="px-1.5 py-0.5 rounded-lg bg-white hover:bg-amber-500 hover:text-white text-slate-700 font-bold text-[11px] border border-slate-200 transition">-5</button>
+                                                        <input type="number" min="0" max="59" x-model.number="clockMinute" @input="if(clockMinute > 59) clockMinute = 59; if(clockMinute < 0 && clockMinute !== '') clockMinute = 0;" class="w-12 text-center font-mono font-black text-sm bg-white border border-slate-200 rounded-lg py-0.5 text-slate-900 focus:ring-1 focus:ring-amber-400">
+                                                        <button @click="changeMinute(5)" type="button" class="px-1.5 py-0.5 rounded-lg bg-white hover:bg-amber-500 hover:text-white text-slate-700 font-bold text-[11px] border border-slate-200 transition">+5</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 1 Audio Button -->
+                                        <button @click="speakCurrentTime()" type="button" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                            <span>Putar Audio Pengucapan</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Presets Row -->
+                                <div class="mt-4 pt-3 border-t border-slate-200">
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2">
+                                        Contoh Waktu Penting (Klik Untuk Menggerakkan Jarum Jam):
+                                    </span>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                                        <button @click="setTime(4, 0)" :class="(clockHour === 4 && clockMinute === 0) ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:00</span>
+                                            <span class="text-[10px] opacity-80 block">4 o'clock</span>
+                                        </button>
+                                        <button @click="setTime(4, 5)" :class="(clockHour === 4 && clockMinute === 5) ? 'bg-sky-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:05</span>
+                                            <span class="text-[10px] opacity-80 block">5 past 4</span>
+                                        </button>
+                                        <button @click="setTime(4, 15)" :class="(clockHour === 4 && clockMinute === 15) ? 'bg-sky-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:15</span>
+                                            <span class="text-[10px] opacity-80 block">Quarter past</span>
+                                        </button>
+                                        <button @click="setTime(4, 20)" :class="(clockHour === 4 && clockMinute === 20) ? 'bg-sky-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:20</span>
+                                            <span class="text-[10px] opacity-80 block">20 past 4</span>
+                                        </button>
+                                        <button @click="setTime(4, 30)" :class="(clockHour === 4 && clockMinute === 30) ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:30</span>
+                                            <span class="text-[10px] opacity-80 block">Half past 4</span>
+                                        </button>
+                                        <button @click="setTime(4, 40)" :class="(clockHour === 4 && clockMinute === 40) ? 'bg-amber-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:40</span>
+                                            <span class="text-[10px] opacity-80 block">20 to 5</span>
+                                        </button>
+                                        <button @click="setTime(4, 45)" :class="(clockHour === 4 && clockMinute === 45) ? 'bg-orange-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:45</span>
+                                            <span class="text-[10px] opacity-80 block">Quarter to 5</span>
+                                        </button>
+                                        <button @click="setTime(4, 55)" :class="(clockHour === 4 && clockMinute === 55) ? 'bg-orange-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'" class="p-2 rounded-xl text-xs text-center transition">
+                                            <span class="font-mono font-bold block">04:55</span>
+                                            <span class="text-[10px] opacity-80 block">5 to 5</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- British Style Grid -->
                             <div x-show="timeTab === 'british'" x-transition class="space-y-4">
                                 <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-950 font-medium">
-                                    <p><strong>💡 Rumus British:</strong> Mengucapkan menit terlebih dahulu, baru diikuti jam. Gunakan <span class="font-bold text-sky-700">"past"</span> untuk menit 1 s.d. 30 (lebih), dan <span class="font-bold text-orange-700">"to"</span> untuk menit 31 s.d. 59 (kurang menuju jam berikutnya).</p>
+                                    <p><strong>Rumus British:</strong> Mengucapkan menit terlebih dahulu, baru diikuti jam. Gunakan <span class="font-bold text-sky-700">"past"</span> untuk menit 1 s.d. 30 (lebih), dan <span class="font-bold text-orange-700">"to"</span> untuk menit 31 s.d. 59 (kurang menuju jam berikutnya).</p>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div class="p-5 rounded-3xl bg-white border-2 border-sky-100 hover:border-sky-400 transition shadow-2xs flex flex-col justify-between">
@@ -1728,9 +3283,9 @@
                                                 <span class="font-black text-sky-800">04:15</span> &rarr; "A quarter past four"
                                             </div>
                                         </div>
-                                        <button @click="speakText('04:15. It is a quarter past four.')" class="mt-3 w-full py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                                        <button @click="setTime(4, 15); speakText('04:15. It is a quarter past four.')" class="mt-3 w-full py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar</span>
                                         </button>
                                     </div>
 
@@ -1743,9 +3298,9 @@
                                                 <span class="font-black text-orange-800">04:45</span> &rarr; "A quarter to five"
                                             </div>
                                         </div>
-                                        <button @click="speakText('04:45. It is a quarter to five.')" class="mt-3 w-full py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                                        <button @click="setTime(4, 45); speakText('04:45. It is a quarter to five.')" class="mt-3 w-full py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar</span>
                                         </button>
                                     </div>
 
@@ -1758,9 +3313,9 @@
                                                 <span class="font-black text-emerald-800">06:30</span> &rarr; "Half past six"
                                             </div>
                                         </div>
-                                        <button @click="speakText('06:30. It is half past six.')" class="mt-3 w-full py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                                        <button @click="setTime(6, 30); speakText('06:30. It is half past six.')" class="mt-3 w-full py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar</span>
                                         </button>
                                     </div>
 
@@ -1773,9 +3328,9 @@
                                                 <span class="font-black text-indigo-800">07:00</span> &rarr; "Seven o'clock"
                                             </div>
                                         </div>
-                                        <button @click="speakText('07:00. It is seven o\'clock.')" class="mt-3 w-full py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                                        <button @click="setTime(7, 0); speakText('07:00. It is seven o\'clock.')" class="mt-3 w-full py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar</span>
                                         </button>
                                     </div>
                                 </div>
@@ -1784,7 +3339,7 @@
                             <!-- American Style Grid -->
                             <div x-show="timeTab === 'american'" x-transition class="space-y-4">
                                 <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 font-medium">
-                                    <p><strong>💡 Rumus American:</strong> Membaca jam lalu menit secara langsung (*Digital Direct Form*), dan menggunakan sistem 12 jam dengan penanda <span class="font-bold text-amber-800">AM</span> dan <span class="font-bold text-amber-800">PM</span>.</p>
+                                    <p><strong>Rumus American:</strong> Membaca jam lalu menit secara langsung (*Digital Direct Form*), dan menggunakan sistem 12 jam dengan penanda <span class="font-bold text-amber-800">AM</span> dan <span class="font-bold text-amber-800">PM</span>.</p>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                                     <div class="p-5 rounded-3xl bg-white border-2 border-sky-100 hover:border-sky-300 transition shadow-2xs">
@@ -1797,9 +3352,9 @@
                                         <div class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 font-mono text-xs">
                                             <p class="font-bold text-slate-800">07:30 AM &rarr; "Seven thirty in the morning"</p>
                                         </div>
-                                        <button @click="speakText('07:30 AM. It is seven thirty in the morning.')" class="mt-3 text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1">
+                                        <button @click="setTime(7, 30); speakText('07:30 AM. It is seven thirty in the morning.')" class="mt-3 text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar Audio</span>
                                         </button>
                                     </div>
 
@@ -1813,9 +3368,9 @@
                                         <div class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 font-mono text-xs">
                                             <p class="font-bold text-slate-800">07:30 PM &rarr; "Seven thirty in the evening"</p>
                                         </div>
-                                        <button @click="speakText('07:30 PM. It is seven thirty in the evening.')" class="mt-3 text-xs font-bold text-orange-600 hover:text-orange-800 flex items-center gap-1">
+                                        <button @click="setTime(7, 30); speakText('07:30 PM. It is seven thirty in the evening.')" class="mt-3 text-xs font-bold text-orange-600 hover:text-orange-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar Audio</span>
                                         </button>
                                     </div>
 
@@ -1845,9 +3400,9 @@
                                         <div class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 font-mono text-xs">
                                             <p class="font-black text-emerald-900">"The meeting starts at 4 sharp." (Tepat jam 4.00)</p>
                                         </div>
-                                        <button @click="speakText('The meeting starts at four sharp. Please do not be late.')" class="mt-3 text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                                        <button @click="setTime(4, 0); speakText('The meeting starts at four sharp. Please do not be late.')" class="mt-3 text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar Audio</span>
                                         </button>
                                     </div>
 
@@ -1859,9 +3414,9 @@
                                             <p class="font-black text-blue-900">13:00 &rarr; "Thirteen hundred" (Jam 1 Siang)</p>
                                             <p class="font-black text-blue-900">14:00 &rarr; "Fourteen hundred" (Jam 2 Siang)</p>
                                         </div>
-                                        <button @click="speakText('Flight departure is at fourteen hundred hours.')" class="mt-3 text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                        <button @click="setTime(2, 0); speakText('Flight departure is at fourteen hundred hours.')" class="mt-3 text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                            <span>Putar Audio</span>
+                                            <span>Lihat di Jam &amp; Putar Audio</span>
                                         </button>
                                     </div>
                                 </div>
@@ -1869,7 +3424,7 @@
                         </div>
 
                         <!-- Section 2: PREPOSITIONS OF CLOCK TIME (AT, FROM...TO, UNTIL) & Q&A -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                        <div id="sec-m4-3" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
                                 <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">02</span>
                                 <div>
@@ -1956,7 +3511,7 @@
                         <!-- ==================================================== -->
                         
                         <!-- Section 1: SIGNATURE ELECTRIC BLUE SHOWCASE BOX (Reference Style) -->
-                        <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                        <div id="sec-m1-1" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
                             <div class="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                     <span class="px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-extrabold uppercase tracking-wider text-blue-100">Modul 01</span>
@@ -2053,7 +3608,7 @@
                         </div>
 
                         <!-- Section 2: Self-Introduction (Basic Templates) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                        <div id="sec-m1-2" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
                                 <span class="w-8 h-8 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/20">02</span>
                                 <div>
@@ -2091,7 +3646,7 @@
                         <!-- Section 3 & 4: Grammar Basics & Likes/Hobbies -->
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <!-- Grammar Basics: Personal Pronouns & To Be -->
-                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                            <div id="sec-m1-3" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                                 <div class="flex items-center gap-3 pb-4 mb-5 border-b border-slate-100">
                                     <span style="background-color: #29a8f5 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20">03</span>
                                     <div>
@@ -2151,7 +3706,7 @@
                             </div>
 
                             <!-- Likes & Hobbies (A2 Focus) -->
-                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                            <div id="sec-m1-4" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                                 <div class="flex items-center gap-3 pb-4 mb-5 border-b border-slate-100">
                                     <span style="background-color: #ff9800 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-orange-500/20">04</span>
                                     <div>
@@ -2200,7 +3755,7 @@
                         </div>
 
                         <!-- Section 5: Complete Self-Introduction Example (Template & Example) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                        <div id="sec-m1-5" class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 scroll-mt-24">
                             <div class="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
                                 <span style="background-color: #29a8f5 !important;" class="w-8 h-8 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20">05</span>
                                 <div>
@@ -2292,10 +3847,10 @@
                         <!-- ==================================================== -->
                         <!-- MEETING 5: PRONOUNS MASTERY (ALL 5 CATEGORIES)       -->
                         <!-- ==================================================== -->
-                        <div class="space-y-8" x-data="{ pronounSubTab: 'matrix', activeRowIdx: null }">
+                        <div class="space-y-8" x-data="{ pronounSubTab: 'matrix', activeRowIdx: null, init() { window.addEventListener('set-pronoun-subtab', (e) => { if (e.detail) this.pronounSubTab = e.detail; }); } }">
                             
                             <!-- 1. SIGNATURE HERO SHOWCASE BOX -->
-                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                            <div id="sec-m5-1" style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
                                 <div class="relative z-10 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
                                         <div class="flex items-center gap-2 flex-wrap mb-1">
@@ -2323,34 +3878,34 @@
                                     <button @click="pronounSubTab = 'matrix'"
                                         :class="pronounSubTab === 'matrix' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>📊</span> <span>1. Master Matrix Chart</span>
+                                        <span>1. Master Matrix Chart</span>
                                     </button>
                                     <button @click="pronounSubTab = 'categories'"
                                         :class="pronounSubTab === 'categories' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>🗂️</span> <span>2. 5 Kategori Deep-Dive</span>
+                                        <span>2. 5 Kategori Deep-Dive</span>
                                     </button>
                                     <button @click="pronounSubTab = 'pitfalls'"
                                         :class="pronounSubTab === 'pitfalls' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>⚡</span> <span>3. Top 5 Jebakan Percakapan</span>
+                                        <span>3. Top 5 Jebakan Percakapan</span>
                                     </button>
                                     <button @click="pronounSubTab = 'demonstratives'"
                                         :class="pronounSubTab === 'demonstratives' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>👉</span> <span>4. Demonstratives (This/That)</span>
+                                        <span>4. Demonstratives (This/That)</span>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- SUB-TAB 1: MASTER MATRIX TABLE -->
-                            <div x-show="pronounSubTab === 'matrix'" class="space-y-6">
+                            <div id="sec-m5-2" x-show="pronounSubTab === 'matrix'" class="space-y-6 scroll-mt-24">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 overflow-hidden">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-3">
                                         <div>
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black">Interactive Chart</span>
-                                                <span class="text-xs text-slate-400 font-medium">• Klik icon 🔊 pada setiap kata untuk mendengar pelafalannya</span>
+                                                <span class="text-xs text-slate-400 font-medium">• Klik audio pada setiap kata untuk mendengar pelafalannya</span>
                                             </div>
                                             <h3 class="text-xl sm:text-2xl font-black text-slate-900">Tabel Komparasi Master Pronoun (7 Orang / Persons)</h3>
                                         </div>
@@ -2481,7 +4036,7 @@
                                     <!-- Quick Summary Formula Banner -->
                                     <div class="mt-6 p-5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-2xl">💡</span>
+                                            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-xs">TIP</span>
                                             <div class="text-xs sm:text-sm text-slate-700">
                                                 <strong>Rumus Cepat:</strong> <em>Subject</em> melakukan tindakan, <em>Object</em> menerima tindakan, <em>Possessive Adj</em> menempel di depan benda (my bag), <em>Possessive Pronoun</em> menggantikan benda (the bag is mine), dan <em>Reflexive</em> merujuk ke diri sendiri (myself).
                                             </div>
@@ -2491,7 +4046,7 @@
                             </div>
 
                             <!-- SUB-TAB 2: 5 CATEGORIES DEEP DIVE -->
-                            <div x-show="pronounSubTab === 'categories'" class="space-y-6">
+                            <div id="sec-m5-3" x-show="pronounSubTab === 'categories'" class="space-y-6 scroll-mt-24">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     @foreach($materiBlockData['categories'] ?? [] as $cat)
                                         @php
@@ -2556,7 +4111,7 @@
 
                                             <!-- Golden Rule Footer -->
                                             <div class="pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-semibold text-slate-600 flex items-start gap-2">
-                                                <span class="text-amber-500 font-bold shrink-0">📌 Note:</span>
+                                                <span class="text-amber-500 font-bold shrink-0">Note:</span>
                                                 <span>{{ $cat['rule'] }}</span>
                                             </div>
                                         </div>
@@ -2565,7 +4120,7 @@
                             </div>
 
                             <!-- SUB-TAB 3: TOP 5 SPOKEN PITFALLS -->
-                            <div x-show="pronounSubTab === 'pitfalls'" class="space-y-6">
+                            <div id="sec-m5-4" x-show="pronounSubTab === 'pitfalls'" class="space-y-6 scroll-mt-24">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
                                     <div class="pb-6 mb-6 border-b border-slate-100">
                                         <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black uppercase">Spoken Pitfalls</span>
@@ -2588,7 +4143,7 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                                     <!-- Wrong Box -->
                                                     <div class="p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2">
-                                                        <span class="text-red-600 font-black text-base shrink-0">❌</span>
+                                                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700 uppercase shrink-0">Salah</span>
                                                         <div>
                                                             <div class="text-[10px] font-black uppercase text-red-600 tracking-wider">Kurang Tepat / Salah:</div>
                                                             <div class="text-xs sm:text-sm font-semibold text-red-950 line-through decoration-red-500">{{ $pitfall['wrong'] }}</div>
@@ -2598,7 +4153,7 @@
                                                     <!-- Correct Box -->
                                                     <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start justify-between gap-2">
                                                         <div class="flex items-start gap-2">
-                                                            <span class="text-emerald-600 font-black text-base shrink-0">✅</span>
+                                                            <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 uppercase shrink-0">Benar</span>
                                                             <div>
                                                                 <div class="text-[10px] font-black uppercase text-emerald-700 tracking-wider">Tepat / Alami:</div>
                                                                 <div class="text-xs sm:text-sm font-bold text-emerald-950">{{ $pitfall['correct'] }}</div>
@@ -2616,7 +4171,7 @@
                             </div>
 
                             <!-- SUB-TAB 4: DEMONSTRATIVE PRONOUNS -->
-                            <div x-show="pronounSubTab === 'demonstratives'" class="space-y-6">
+                            <div id="sec-m5-5" x-show="pronounSubTab === 'demonstratives'" class="space-y-6 scroll-mt-24">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
                                     <div class="pb-6 mb-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div>
@@ -2650,9 +4205,1050 @@
                                 </div>
                             </div>
                         </div>
+                    @elseif(($materiBlockData['type'] ?? '') === 'preposition_place' || isset($materiBlockData['rules']) && ($materiBlockData['type'] ?? '') === 'preposition_place')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 4 SUB 1: PREPOSITIONS OF PLACE & SPATIAL     -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <!-- Hero Showcase -->
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 04 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Prepositions of Place Matrix' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Preposisi tempat, posisi benda dalam ruangan, arah letak gedung, dan denah spasial.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Prepositions Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                                    @foreach($materiBlockData['rules'] ?? [] as $rule)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100 hover:shadow-lg transition-all">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-black font-mono tracking-wider">{{ $rule['prep'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-sm font-bold text-slate-800 mb-3">{{ $rule['meaning'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($rule['example']))
+                                                <div class="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-semibold text-sky-950 italic leading-relaxed">"{{ $rule['example'] }}"</span>
+                                                    <button @click="speakText(@js($rule['example']))" class="p-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white transition shrink-0 shadow-sm" title="Dengarkan pengucapan">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'there_is_are_imperatives')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 4 SUB 2: THERE IS / ARE & IMPERATIVES        -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 04 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'There is / There are & Imperatives' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Menyatakan keberadaan benda tunggal/jamak serta memberikan instruksi dan perintah (Imperatives).</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                    @foreach($materiBlockData['rules'] ?? [] as $rule)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black tracking-wide">{{ $rule['pattern'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-sm font-semibold text-slate-700 mb-3">{{ $rule['usage'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($rule['example']))
+                                                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-slate-900 italic">"{{ $rule['example'] }}"</span>
+                                                    <button @click="speakText(@js($rule['example']))" class="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition shrink-0 shadow-sm" title="Dengarkan pengucapan">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'prohibitions_rules')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 5 SUB 1: PROHIBITIONS & PUBLIC RULES         -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 05 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Prohibition & Public Rules Framework' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Mengungkapkan larangan resmi, aturan tempat umum, rambu peringatan, dan keselamatan.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                                    @foreach($materiBlockData['rules'] ?? [] as $rule)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black tracking-wide">{{ $rule['structure'] ?? '' }}</span>
+                                                </div>
+                                                <span class="inline-block px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-2xs font-extrabold uppercase mb-2">{{ $rule['level'] ?? '' }}</span>
+                                            </div>
+                                            @if(!empty($rule['example']))
+                                                <div class="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-rose-950 italic">"{{ $rule['example'] }}"</span>
+                                                    <button @click="speakText(@js($rule['example']))" class="p-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition shrink-0 shadow-sm" title="Dengarkan pengucapan">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'pronouns_possessives' || ($materiBlockData['type'] ?? '') === 'pronouns_mastery' || (isset($materiBlockData['matrix']) && isset($materiBlockData['possessive_noun_rules'])))
+                        <!-- ==================================================== -->
+                        <!-- MEETING 5 SUB 2: PRONOUNS & POSSESSIVE NOUNS TABLE   -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <!-- Hero Showcase Header -->
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">
+                                                Modul 05 • Sub-Topik 02
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase shadow-xs">
+                                                Tabel Referensi Lengkap
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black text-white">
+                                                5 Kategori Kata Ganti &amp; Aturan Apostrof ('s)
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                                            {{ $materiBlockData['title'] ?? "Tabel Referensi: Pronouns & Possessive Nouns ('s)" }}
+                                        </h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-1 max-w-3xl leading-relaxed">
+                                            Panduan tabel referensi lengkap perbandingan 5 bentuk kata ganti (Subject, Object, Possessive Adjective, Possessive Pronoun, &amp; Reflexive) serta aturan kepemilikan nama orang ('s vs s') dan frasa identifikasi foto keluarga.
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0 self-start md:self-auto">
+                                        <button @click="speakText('I, me, my, mine, myself. You, you, your, yours, yourself. He, him, his, his, himself. She, her, her, hers, herself. It, it, its, itself. We, us, our, ours, ourselves. They, them, their, theirs, themselves.')"
+                                            type="button" class="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                            <span>Lafalkan Semua Pronoun</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TABEL 1: MASTER PRONOUNS MATRIX TABLE -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 overflow-hidden">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-xs">01</span>
+                                            <h3 class="text-xl sm:text-2xl font-black text-slate-900">Tabel Referensi 1: 5 Kategori Pronouns (Kata Ganti)</h3>
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-slate-500 font-medium ml-9">
+                                            Perbandingan 7 subjek pelaku (Persons). Klik tombol audio pada setiap baris untuk mendengarkan pelafalan kalimat contoh.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Responsive Table Wrapper -->
+                                <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
+                                    <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-[880px]">
+                                        <thead>
+                                            <tr class="bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                                                <th class="py-4 px-4 border-r border-slate-800 w-44">Person / Subjek</th>
+                                                <th class="py-4 px-4 border-r border-slate-800 bg-indigo-950/90 text-indigo-200">
+                                                    <div class="flex flex-col">
+                                                        <span>Subject</span>
+                                                        <span class="text-[10px] text-indigo-300 font-normal lowercase">(sebelum verb)</span>
+                                                    </div>
+                                                </th>
+                                                <th class="py-4 px-4 border-r border-slate-800 bg-emerald-950/90 text-emerald-200">
+                                                    <div class="flex flex-col">
+                                                        <span>Object</span>
+                                                        <span class="text-[10px] text-emerald-300 font-normal lowercase">(setelah verb/prep)</span>
+                                                    </div>
+                                                </th>
+                                                <th class="py-4 px-4 border-r border-slate-800 bg-amber-950/90 text-amber-200">
+                                                    <div class="flex flex-col">
+                                                        <span>Possessive Adj</span>
+                                                        <span class="text-[10px] text-amber-300 font-normal lowercase">(+ Noun wajib)</span>
+                                                    </div>
+                                                </th>
+                                                <th class="py-4 px-4 border-r border-slate-800 bg-purple-950/90 text-purple-200">
+                                                    <div class="flex flex-col">
+                                                        <span>Possessive Pronoun</span>
+                                                        <span class="text-[10px] text-purple-300 font-normal lowercase">(tanpa Noun)</span>
+                                                    </div>
+                                                </th>
+                                                <th class="py-4 px-4 border-r border-slate-800 bg-rose-950/90 text-rose-200">
+                                                    <div class="flex flex-col">
+                                                        <span>Reflexive</span>
+                                                        <span class="text-[10px] text-rose-300 font-normal lowercase">(diri sendiri)</span>
+                                                    </div>
+                                                </th>
+                                                <th class="py-4 px-4 bg-slate-800 text-slate-200 min-w-[260px]">
+                                                    <div class="flex flex-col">
+                                                        <span>Contoh Spoken &amp; Audio</span>
+                                                        <span class="text-[10px] text-slate-400 font-normal lowercase">(praktek percakapan)</span>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 font-medium text-slate-800 bg-white">
+                                            @php
+                                                $matrixRows = $materiBlockData['matrix'] ?? [];
+                                                $personDefaults = [
+                                                    0 => ['label' => '1st Person (Singular)', 'meaning' => 'Saya / Aku', 'ex' => "I love my car; it is mine, and I bought it myself."],
+                                                    1 => ['label' => '2nd Person (Sing./Plural)', 'meaning' => 'Kamu / Anda / Kalian', 'ex' => "You forgot your jacket, but this blue jacket is yours; wear it yourself."],
+                                                    2 => ['label' => '3rd Person (Male)', 'meaning' => 'Dia (Laki-laki)', 'ex' => "He repaired his laptop; that silver computer is his, he fixed it himself."],
+                                                    3 => ['label' => '3rd Person (Female)', 'meaning' => 'Dia (Perempuan)', 'ex' => "She designed her own dress; that stylish gown is hers, she made it herself."],
+                                                    4 => ['label' => '3rd Person (Neutral)', 'meaning' => 'Benda / Hewan / Hal', 'ex' => "The kitten drank its warm milk and cleaned its fur itself."],
+                                                    5 => ['label' => '1st Person (Plural)', 'meaning' => 'Kami / Kita', 'ex' => "We prepared our presentation; the victory is ours, we won it ourselves."],
+                                                    6 => ['label' => '3rd Person (Plural)', 'meaning' => 'Mereka', 'ex' => "They parked their new bicycles; those bikes are theirs, they bought them themselves."],
+                                                ];
+                                            @endphp
+                                            @foreach($matrixRows as $rIdx => $row)
+                                                @php
+                                                    $pDef = $personDefaults[$rIdx] ?? ['label' => ($row['subject'] ?? 'Person'), 'meaning' => '', 'ex' => ''];
+                                                    $pLabel = $row['person'] ?? $pDef['label'];
+                                                    $pMeaning = $row['meaning'] ?? $pDef['meaning'];
+                                                    $example = $row['example'] ?? $pDef['ex'];
+                                                    $subj = $row['subject'] ?? '';
+                                                    $obj = $row['object'] ?? '';
+                                                    $possAdj = $row['poss_adj'] ?? ($row['possessive_adj'] ?? '');
+                                                    $possPron = $row['poss_pron'] ?? ($row['possessive_pron'] ?? ($row['possessive_pro'] ?? ''));
+                                                    $refl = $row['reflexive'] ?? '';
+                                                @endphp
+                                                <tr class="hover:bg-sky-50/40 transition">
+                                                    <!-- Person / Meaning -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-slate-50/70">
+                                                        <div class="font-black text-slate-900 text-xs sm:text-sm">{{ $pLabel }}</div>
+                                                        @if(!empty($pMeaning))
+                                                            <div class="text-[11px] font-bold text-sky-700 mt-0.5">{{ $pMeaning }}</div>
+                                                        @endif
+                                                    </td>
+
+                                                    <!-- Subject -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-indigo-50/20">
+                                                        <span class="px-2.5 py-1 rounded-xl bg-indigo-100 text-indigo-900 font-black text-xs sm:text-sm inline-block shadow-2xs">
+                                                            {{ $subj }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Object -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-emerald-50/20">
+                                                        <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 font-black text-xs sm:text-sm inline-block shadow-2xs">
+                                                            {{ $obj }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Possessive Adj -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-amber-50/20">
+                                                        <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-900 font-black text-xs sm:text-sm inline-block shadow-2xs">
+                                                            {{ $possAdj }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Possessive Pronoun -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-purple-50/20">
+                                                        <span class="px-2.5 py-1 rounded-xl bg-purple-100 text-purple-900 font-black text-xs sm:text-sm inline-block shadow-2xs">
+                                                            {{ $possPron }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Reflexive -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-rose-50/20">
+                                                        <span class="px-2.5 py-1 rounded-xl bg-rose-100 text-rose-900 font-black text-xs sm:text-sm inline-block shadow-2xs">
+                                                            {{ $refl }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Example Sentence & Audio -->
+                                                    <td class="py-3.5 px-4">
+                                                        <div class="flex items-center justify-between gap-3">
+                                                            <div class="text-xs text-slate-700 italic font-medium leading-relaxed">
+                                                                "{{ $example }}"
+                                                            </div>
+                                                            @if(!empty($example))
+                                                                <button @click="speakText(@js($example))"
+                                                                    type="button"
+                                                                    class="p-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-600 hover:text-white transition shrink-0 shadow-2xs"
+                                                                    title="Dengarkan contoh kalimat">
+                                                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- TABEL 2: POSSESSIVE NOUNS RULES & PHOTO IDENTIFICATION -->
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 overflow-hidden">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-xs">02</span>
+                                            <h3 class="text-xl sm:text-2xl font-black text-slate-900">Tabel Referensi 2: Aturan Kepemilikan Nama Orang ('s / s') &amp; Foto Keluarga</h3>
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-slate-500 font-medium ml-9">
+                                            Formula kepemilikan apostrof dalam bahasa Inggris serta frasa identifikasi anggota keluarga pada foto pernikahan.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Rules Reference Table -->
+                                <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
+                                    <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-[760px]">
+                                        <thead>
+                                            <tr class="bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                                                <th class="py-4 px-4 border-r border-slate-800 w-52">Kategori / Kasus</th>
+                                                <th class="py-4 px-4 border-r border-slate-800 w-44 bg-indigo-950/90 text-indigo-200">Formula / Rumus</th>
+                                                <th class="py-4 px-4 border-r border-slate-800">Aturan Penggunaan</th>
+                                                <th class="py-4 px-4 bg-emerald-950/90 text-emerald-200 w-72">Contoh Nyata</th>
+                                                <th class="py-4 px-3 text-center w-20">Audio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 font-medium text-slate-800 bg-white">
+                                            @php
+                                                $rawRules = $materiBlockData['possessive_noun_rules'] ?? [];
+                                                $ruleDefaults = [
+                                                    0 => [
+                                                        'category' => "Singular Nouns (Nama / Benda Tunggal)",
+                                                        'formula' => "Noun + 's",
+                                                        'rule' => "Tambahkan 's untuk menyatakan kepemilikan oleh satu orang atau satu benda tunggal.",
+                                                        'example' => "Ann's sister, John's laptop, the teacher's desk.",
+                                                    ],
+                                                    1 => [
+                                                        'category' => "Plural Nouns ending in -s (Jamak Berakhiran -s)",
+                                                        'formula' => "Plural Noun (-s) + '",
+                                                        'rule' => "Hanya tambahkan tanda petik tunggal (') di ujung kata jika kata benda jamak sudah berakhiran huruf 's' (tidak perlu menambah s lagi).",
+                                                        'example' => "The students' classroom, the parents' house, the teachers' room.",
+                                                    ],
+                                                    2 => [
+                                                        'category' => "Irregular Plural Nouns (Jamak Tak Beraturan)",
+                                                        'formula' => "Irregular Plural + 's",
+                                                        'rule' => "Kata benda jamak yang bentuknya berubah dan tidak berakhiran 's' (children, women, people) tetap ditambahkan 's.",
+                                                        'example' => "The children's toys, the women's team, people's choice.",
+                                                    ],
+                                                    3 => [
+                                                        'category' => "Photo Identification Phrases (Identifikasi Foto)",
+                                                        'rule_title' => "Frasa Ciri Fisik & Pakaian",
+                                                        'formula' => "Noun + with / wearing + [detail]",
+                                                        'rule' => "Digunakan dalam percakapan untuk mengenali dan menunjuk seseorang pada foto keluarga besar saat namanya belum diketahui.",
+                                                        'example' => "The man with the glasses, the woman wearing the wide hat, the boy in the blue suit.",
+                                                    ],
+                                                ];
+                                            @endphp
+                                            @foreach($rawRules as $idx => $rItem)
+                                                @php
+                                                    $rDef = $ruleDefaults[$idx] ?? [];
+                                                    $rCat = $rItem['category'] ?? ($rDef['category'] ?? ($rItem['rule'] ?? 'Aturan'));
+                                                    $rFormula = $rItem['formula'] ?? ($rDef['formula'] ?? "+ 's");
+                                                    $rExpl = $rItem['explanation'] ?? ($rDef['rule'] ?? ($rItem['rule'] ?? ''));
+                                                    $rEx = stripslashes(str_replace("\\'", "'", $rItem['example'] ?? ($rDef['example'] ?? '')));
+                                                @endphp
+                                                <tr class="hover:bg-sky-50/40 transition">
+                                                    <!-- Category -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-slate-50/70 font-black text-slate-900">
+                                                        {{ $rCat }}
+                                                    </td>
+
+                                                    <!-- Formula -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 bg-indigo-50/20 font-mono font-black text-indigo-700 text-xs">
+                                                        <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-900 border border-indigo-200 block text-center">
+                                                            {{ $rFormula }}
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Explanation -->
+                                                    <td class="py-3.5 px-4 border-r border-slate-100 text-xs text-slate-600 leading-relaxed">
+                                                        {{ $rExpl }}
+                                                    </td>
+
+                                                    <!-- Real Examples -->
+                                                    <td class="py-3.5 px-4 bg-emerald-50/20 text-xs font-bold text-emerald-950 italic">
+                                                        "{{ $rEx }}"
+                                                    </td>
+
+                                                    <!-- Audio -->
+                                                    <td class="py-3.5 px-3 text-center">
+                                                        <button @click="speakText(@js($rEx))"
+                                                            type="button"
+                                                            class="p-2 rounded-xl bg-emerald-100 hover:bg-emerald-600 hover:text-white text-emerald-700 transition shadow-2xs"
+                                                            title="Dengarkan pelafalan">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- CARD 3: GOLDEN COMPARISON & PITFALLS -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gradient-to-br from-amber-50 to-orange-50/40 rounded-3xl p-6 border-2 border-amber-200/80 shadow-sm">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="w-7 h-7 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center">💡</span>
+                                        <h4 class="text-base font-black text-amber-950">Perbedaan Kunci: Possessive Adj vs Possessive Pronoun</h4>
+                                    </div>
+                                    <ul class="text-xs text-amber-900/90 space-y-2 leading-relaxed">
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-black text-amber-600 mt-0.5">•</span>
+                                            <span><strong>Possessive Adjective</strong> (<em>my, your, his, her, our, their</em>) <u>WAJIB</u> diikuti kata benda. Contoh: <em>"This is <strong>my</strong> car."</em></span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-black text-amber-600 mt-0.5">•</span>
+                                            <span><strong>Possessive Pronoun</strong> (<em>mine, yours, his, hers, ours, theirs</em>) <u>BERDIRI SENDIRI</u> tanpa kata benda di belakangnya. Contoh: <em>"This car is <strong>mine</strong>."</em></span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-sky-50 to-indigo-50/40 rounded-3xl p-6 border-2 border-sky-200/80 shadow-sm">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="w-7 h-7 rounded-xl bg-sky-500 text-white font-black text-xs flex items-center justify-center">⚠️</span>
+                                        <h4 class="text-base font-black text-sky-950">Jebakan Umum: It's vs Its</h4>
+                                    </div>
+                                    <ul class="text-xs text-sky-900/90 space-y-2 leading-relaxed">
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-black text-sky-600 mt-0.5">•</span>
+                                            <span><strong>It's</strong> (dengan tanda petik) = Singkatan dari <strong>It is</strong> atau <strong>It has</strong>. Contoh: <em>"<strong>It's</strong> a wonderful wedding celebration!"</em></span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-black text-sky-600 mt-0.5">•</span>
+                                            <span><strong>Its</strong> (tanpa tanda petik) = Kata ganti kepemilikan untuk hewan/benda. Contoh: <em>"The cat wagged <strong>its</strong> tail."</em></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'to_be_statements')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 6 SUB 1: TO BE STATEMENTS & CONTRACTIONS     -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 06 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'To Be Statements & Spoken Contractions' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Pola kalimat nominal To Be (Am, Is, Are) bentuk positif/negatif dan singkatan lisan (Contractions).</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['rules'] ?? [] as $tbr)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3.5 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black">{{ $tbr['subject'] ?? '' }} + {{ $tbr['to_be'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-xs font-bold text-slate-500 mb-1">Contraction: <span class="text-indigo-600 font-mono font-black">{{ $tbr['contraction'] ?? '' }}</span></div>
+                                            </div>
+                                            @if(!empty($tbr['example']))
+                                                <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between gap-2 mt-3">
+                                                    <span class="text-xs sm:text-sm font-bold text-indigo-950 italic">"{{ $tbr['example'] }}"</span>
+                                                    <button @click="speakText(@js($tbr['example']))" class="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['complement_rules']))
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                                        @foreach($materiBlockData['complement_rules'] as $cr)
+                                            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-4 text-slate-900 border border-white/40 shadow-sm">
+                                                <div class="text-xs font-black uppercase text-sky-700 tracking-wider mb-1">{{ $cr['type'] ?? '' }}</div>
+                                                <div class="text-xs font-bold text-slate-700 italic">"{{ $cr['example'] ?? '' }}"</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'to_be_questions')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 6 SUB 2: TO BE QUESTIONS (YES/NO & WH)       -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 06 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'To Be Question Forms & Inversion' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Menyusun pertanyaan Yes/No dengan To Be beserta jawaban pendek, dan pertanyaan informasi WH-Questions.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                    @foreach($materiBlockData['rules'] ?? [] as $qr)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <span class="inline-block px-3 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-black mb-2">{{ $qr['question_type'] ?? '' }}</span>
+                                                <div class="text-xs font-bold text-slate-600 mb-2 font-mono">{{ $qr['pattern'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($qr['example']))
+                                                <div class="p-3.5 rounded-2xl bg-violet-50/60 border border-violet-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-violet-950 italic">"{{ $qr['example'] }}"</span>
+                                                    <button @click="speakText(@js($qr['example']))" class="p-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'simple_present_positive')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 7 SUB 1: SIMPLE PRESENT POSITIVE & SPELLING  -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 07 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Simple Present Verb Conjugation & Spelling Rules' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Kaidah kalimat positif Simple Present Tense dan penambahan akhiran -s, -es, -ies pada subjek orang ketiga tunggal.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Subject Rules -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['subject_rules'] ?? [] as $sr)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md border border-slate-100 flex flex-col justify-between">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-black">{{ $sr['subjects'] ?? '' }}</span>
+                                                <div class="text-sm font-bold text-slate-700 mt-2">Verb Form: <span class="text-sky-700 font-mono">{{ $sr['verb_form'] ?? '' }}</span></div>
+                                            </div>
+                                            @if(!empty($sr['example']))
+                                                <div class="p-3.5 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-2 mt-3">
+                                                    <span class="text-xs sm:text-sm font-bold text-sky-950 italic">"{{ $sr['example'] }}"</span>
+                                                    <button @click="speakText(@js($sr['example']))" class="p-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Spelling Rules -->
+                                <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                    <h3 class="text-base font-black text-slate-900 mb-4 flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                        Kaidah Perubahan Akhiran Kata Kerja (-s, -es, -ies)
+                                    </h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        @foreach($materiBlockData['spelling_rules'] ?? [] as $spr)
+                                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                                                <div>
+                                                    <div class="text-xs font-black uppercase text-amber-800 mb-1">{{ $spr['rule'] ?? '' }}</div>
+                                                    <div class="text-2xs font-mono font-bold text-slate-600 mb-2">{{ $spr['verbs'] ?? '' }}</div>
+                                                </div>
+                                                <div class="text-xs font-semibold text-slate-800 italic mt-2">"{{ $spr['example'] ?? '' }}"</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'adverbs_frequency')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 7 SUB 2: ADVERBS OF FREQUENCY & ROUTINES     -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 07 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Adverbs of Frequency Spectrum & Placement' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Tingkat frekuensi kegiatan (Always s.d. Never), aturan posisi dalam kalimat, dan deskripsi rutinitas.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Frequency Spectrum Cards -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['frequency_scale'] ?? [] as $fs)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-black">{{ $fs['adverb'] ?? '' }}</span>
+                                                    <span class="text-xs font-extrabold font-mono text-teal-600">{{ $fs['percentage'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-xs font-bold text-slate-600 mb-2">{{ $fs['meaning'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($fs['example']))
+                                                <div class="p-3 rounded-2xl bg-teal-50/60 border border-teal-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-teal-950 italic">"{{ $fs['example'] }}"</span>
+                                                    <button @click="speakText(@js($fs['example']))" class="p-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Placement Rules -->
+                                <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                    <h3 class="text-base font-black text-slate-900 mb-4">Aturan Posisi Adverb of Frequency dalam Kalimat</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        @foreach($materiBlockData['placement_rules'] ?? [] as $pr)
+                                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                                <div class="text-xs font-black uppercase text-indigo-700 mb-1">{{ $pr['position'] ?? '' }}</div>
+                                                <div class="text-2xs font-mono font-extrabold text-slate-600 mb-2">{{ $pr['formula'] ?? '' }}</div>
+                                                <div class="text-xs font-semibold text-slate-800 italic">"{{ $pr['example'] ?? '' }}"</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'simple_present_negative')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 8 SUB 1: SIMPLE PRESENT NEGATIVE             -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 08 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Negative Sentence Structure & Auxiliary Rules' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Pola kalimat negatif Simple Present (don't vs doesn't + Verb 1 Base Form) dan jebakan kesalahan umum.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['rules'] ?? [] as $nr)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md border border-slate-100 flex flex-col justify-between">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black">{{ $nr['subjects'] ?? '' }}</span>
+                                                <div class="text-sm font-bold text-slate-700 mt-2">Auxiliary: <span class="text-rose-700 font-mono font-black">{{ $nr['auxiliary'] ?? '' }}</span> + {{ $nr['main_verb'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($nr['example']))
+                                                <div class="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-100 flex items-center justify-between gap-2 mt-3">
+                                                    <span class="text-xs sm:text-sm font-bold text-rose-950 italic">"{{ $nr['example'] }}"</span>
+                                                    <button @click="speakText(@js($nr['example']))" class="p-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Error Traps -->
+                                @if(!empty($materiBlockData['error_traps']))
+                                    <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                        <h3 class="text-base font-black text-rose-700 mb-4 flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                            Error Traps: Jangan Lakukan Kesalahan Ini!
+                                        </h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            @foreach($materiBlockData['error_traps'] as $et)
+                                                <div class="p-4 rounded-2xl bg-rose-50/50 border border-rose-200">
+                                                    <div class="text-xs font-black text-rose-600 line-through mb-1">❌ {{ $et['incorrect'] ?? '' }}</div>
+                                                    <div class="text-xs font-black text-emerald-700 mb-2">✅ {{ $et['correct'] ?? '' }}</div>
+                                                    <div class="text-2xs font-semibold text-slate-600">{{ $et['note'] ?? '' }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'spoken_expressions')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 8 SUB 2: EVERYDAY SPOKEN EXPRESSIONS         -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 08 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Everyday Spoken Phrases Matrix' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Ungkapan lisan sehari-hari berbasis Simple Present: It doesn't matter, That makes sense, It takes time.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                                    @foreach($materiBlockData['expressions'] ?? [] as $exp)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black">{{ $exp['phrase'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-xs font-bold text-slate-800 mb-1">{{ $exp['meaning'] ?? '' }}</div>
+                                                <div class="text-2xs font-medium text-slate-500 mb-3">{{ $exp['usage'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($exp['example']))
+                                                <div class="p-3 rounded-2xl bg-amber-50/60 border border-amber-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-amber-950 italic">"{{ $exp['example'] }}"</span>
+                                                    <button @click="speakText(@js($exp['example']))" class="p-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'to_infinitive_verbs')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 9 SUB 1: TO-INFINITIVE & VERBAL COMPLEMENTS  -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 09 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Common Verbs Followed by To-Infinitive' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Pola penggabungan dua kata kerja menggunakan To-Infinitive (want to, need to, plan to, hope to, decide to).</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['verbs'] ?? [] as $tiv)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-black">{{ $tiv['verb'] ?? '' }}</span>
+                                                <div class="text-xs font-bold text-slate-600 mt-2 mb-2">{{ $tiv['meaning'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($tiv['example']))
+                                                <div class="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-sky-950 italic">"{{ $tiv['example'] }}"</span>
+                                                    <button @click="speakText(@js($tiv['example']))" class="p-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['key_rules']))
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                        @foreach($materiBlockData['key_rules'] as $kr)
+                                            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-4 text-slate-900 border border-white/40 shadow-sm">
+                                                <div class="text-xs font-black uppercase text-indigo-700 tracking-wider mb-1">{{ $kr['rule'] ?? '' }}</div>
+                                                <div class="text-2xs font-semibold text-slate-600 mb-2">{{ $kr['note'] ?? '' }}</div>
+                                                <div class="text-xs font-bold text-slate-800 italic">"{{ $kr['example'] ?? '' }}"</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'question_masterclass')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 9 SUB 2: QUESTIONS MASTERCLASS               -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 09 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Simple Present Question Archetypes & Formulas' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Yes/No Questions, WH-Information Questions, serta Subject Questions yang tidak menggunakan do/does.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['types'] ?? [] as $qt)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-black">{{ $qt['type'] ?? '' }}</span>
+                                                <div class="text-xs font-bold text-slate-600 font-mono mt-2 mb-2">{{ $qt['formula'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($qt['example']))
+                                                <div class="p-3 rounded-2xl bg-purple-50/60 border border-purple-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-purple-950 italic">"{{ $qt['example'] }}"</span>
+                                                    <button @click="speakText(@js($qt['example']))" class="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['subject_question_guide']))
+                                    <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                        <h3 class="text-base font-black text-purple-800 mb-3">Panduan Khusus: Subject Questions (Who / What)</h3>
+                                        @foreach($materiBlockData['subject_question_guide'] as $sqg)
+                                            <div class="text-xs font-semibold text-slate-700 mb-1.5 leading-relaxed">{{ $sqg['note'] ?? ($sqg['contrast_1'] ?? ($sqg['contrast_2'] ?? '')) }}</div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'linking_verbs')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 10 SUB 1: LINKING VERBS & SENSORY            -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 10 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Linking Verbs & Sensory Descriptors Matrix' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Kata kerja penghubung (Look, Sound, Feel, Taste, Smell, Seem, Become) yang diikuti kata sifat (Adjective).</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['verbs'] ?? [] as $lv)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black">{{ $lv['verb'] ?? '' }}</span>
+                                                    <span class="text-2xs font-extrabold uppercase text-slate-400">{{ $lv['sense'] ?? '' }}</span>
+                                                </div>
+                                                <div class="text-xs font-bold text-slate-700 mb-2">{{ $lv['meaning'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($lv['example']))
+                                                <div class="p-3 rounded-2xl bg-amber-50/60 border border-amber-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-amber-950 italic">"{{ $lv['example'] }}"</span>
+                                                    <button @click="speakText(@js($lv['example']))" class="p-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['golden_rule']))
+                                    <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                        <h3 class="text-base font-black text-amber-900 mb-3">Aturan Emas: Linking Verb + ADJECTIVE (Bukan Adverb)</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            @foreach($materiBlockData['golden_rule'] as $gr)
+                                                @if(isset($gr['incorrect']))
+                                                    <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+                                                        <div class="text-xs font-bold text-rose-700 line-through">❌ {{ $gr['incorrect'] }}</div>
+                                                        <div class="text-xs font-bold text-emerald-700 mt-1">✅ {{ $gr['correct'] }}</div>
+                                                    </div>
+                                                @elseif(isset($gr['rule']))
+                                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 md:col-span-2">
+                                                        <div class="text-xs font-black text-slate-800">{{ $gr['rule'] }}</div>
+                                                        <div class="text-2xs text-slate-600 mt-1">{{ $gr['note'] }}</div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'complex_transitive_vtc')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 10 SUB 2: COMPLEX TRANSITIVE (SVOC)          -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 10 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Complex Transitive Verbs (SVOC) Matrix' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Pola Subject + Verb + Object + Complement (Make, Call, Name, Consider, Keep, Find).</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['patterns'] ?? [] as $pat)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black">{{ $pat['verb'] ?? '' }}</span>
+                                                <div class="text-xs font-bold text-slate-700 mt-2 mb-2">{{ $pat['usage'] ?? '' }}</div>
+                                            </div>
+                                            @if(!empty($pat['example']))
+                                                <div class="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between gap-2 mt-2">
+                                                    <span class="text-xs sm:text-sm font-bold text-indigo-950 italic">"{{ $pat['example'] }}"</span>
+                                                    <button @click="speakText(@js($pat['example']))" class="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition shrink-0 shadow-sm">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['structure_comparison']))
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                        @foreach($materiBlockData['structure_comparison'] as $sc)
+                                            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-4 text-slate-900 border border-white/40 shadow-sm">
+                                                <div class="text-xs font-bold text-slate-800">{{ $sc['svo'] ?? ($sc['svoc'] ?? '') }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'comprehensive_review')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 11 SUB 1: COMPREHENSIVE REVIEW               -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 11 • Sub-Topik 01</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'First Point Curriculum Complete Mastery Blueprint' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Rangkuman terpadu seluruh 10 modul pembelajaran Bahasa Inggris First Point Speaking.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['pillars'] ?? [] as $pil)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                            <div>
+                                                <span class="px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-black">{{ $pil['meeting'] ?? '' }}</span>
+                                                <div class="text-xs sm:text-sm font-bold text-slate-800 mt-2.5 leading-relaxed">{{ $pil['core'] ?? '' }}</div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if(!empty($materiBlockData['speaking_exam_tips']))
+                                    <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                        <h3 class="text-base font-black text-sky-900 mb-4">Strategic Speaking Exam Tips</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            @foreach($materiBlockData['speaking_exam_tips'] as $tip)
+                                                <div class="p-4 rounded-2xl bg-sky-50/50 border border-sky-100">
+                                                    <div class="text-xs font-black text-sky-800 mb-1">💡 {{ $tip['tip'] ?? '' }}</div>
+                                                    <div class="text-2xs font-semibold text-slate-700 leading-relaxed">{{ $tip['explanation'] ?? '' }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                    @elseif(($materiBlockData['type'] ?? '') === 'final_oral_assessment')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 11 SUB 2: FINAL ORAL SPEAKING ASSESSMENT     -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Modul 11 • Sub-Topik 02</span>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Official Speaking Assessment Framework & Scoring Rubrics' }}</h2>
+                                        <p class="text-xs sm:text-sm text-blue-100 font-medium mt-0.5">Ujian lisan akhir, kriteria rubrik penilaian kelulusan resmi, dan tahapan wawancara penguji.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Rubric Criteria -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mb-6">
+                                    @foreach($materiBlockData['rubric_criteria'] ?? [] as $rub)
+                                        <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md border border-slate-100">
+                                            <span class="px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">{{ $rub['criterion'] ?? '' }}</span>
+                                            <div class="text-xs sm:text-sm font-semibold text-slate-700 mt-2.5 leading-relaxed">{{ $rub['standard'] ?? '' }}</div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Exam Phases -->
+                                @if(!empty($materiBlockData['exam_phases']))
+                                    <div class="bg-white rounded-3xl p-6 text-slate-900 shadow-md relative z-10 border border-slate-100">
+                                        <h3 class="text-base font-black text-slate-900 mb-4">Tahapan Ujian Wawancara Lisan (Oral Exam Phases)</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            @foreach($materiBlockData['exam_phases'] as $ep)
+                                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                                    <div class="text-xs font-black text-indigo-700 mb-1">{{ $ep['phase'] ?? '' }}</div>
+                                                    <div class="text-2xs font-semibold text-slate-600">{{ $ep['focus'] ?? '' }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
                     @else
-                        <div class="p-6 rounded-3xl bg-white border border-slate-200 text-center">
-                            <p class="text-slate-600 font-medium">Materi pembelajaran interaktif tersedia pada meeting ini.</p>
+                        <!-- ==================================================== -->
+                        <!-- UNIVERSAL DYNAMIC MATERI CARD RENDERER               -->
+                        <!-- ==================================================== -->
+                        <div class="space-y-8">
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden scroll-mt-24">
+                                <div class="relative z-10 mb-6">
+                                    <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-white">Materi Pembelajaran</span>
+                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $materiBlockData['title'] ?? 'Materi Pembelajaran Interaktif' }}</h2>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                                    @foreach($materiBlockData as $mKey => $mVal)
+                                        @if(is_array($mVal) && !empty($mVal))
+                                            @foreach($mVal as $item)
+                                                @if(is_array($item))
+                                                    <div class="bg-white rounded-3xl p-5 text-slate-900 shadow-md flex flex-col justify-between border border-slate-100">
+                                                        <div>
+                                                            @if(!empty($item['title']) || !empty($item['name']) || !empty($item['header']))
+                                                                <span class="px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-black mb-2 inline-block">{{ $item['title'] ?? ($item['name'] ?? ($item['header'] ?? '')) }}</span>
+                                                            @endif
+                                                            @foreach($item as $ik => $iv)
+                                                                @if(is_string($iv) && $ik !== 'example' && $ik !== 'title' && $ik !== 'name')
+                                                                    <div class="text-xs font-semibold text-slate-700 mb-1"><span class="font-bold text-slate-400 uppercase text-2xs">{{ $ik }}:</span> {{ $iv }}</div>
+                                                                @endif
+                                                            @endforeach
+                                                        </div>
+                                                        @if(!empty($item['example']))
+                                                            <div class="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-2 mt-2">
+                                                                <span class="text-xs sm:text-sm font-bold text-sky-950 italic">"{{ $item['example'] }}"</span>
+                                                                <button @click="speakText(@js($item['example']))" class="p-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white transition shrink-0 shadow-sm">
+                                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                                </button>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -2662,430 +5258,914 @@
                 <!-- TAB 2: SHORT LISTENING & QUIZ           -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'listening'" class="space-y-6">
-                    <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-3 py-0.5 rounded-full text-xs font-black bg-blue-600 text-white shadow-2xs">
-                                        Short Listening Practice
-                                    </span>
-                                </div>
-                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
-                                    {{ $meetingData['listening']['title'] ?? 'Listening Audio Practice' }}
-                                </h2>
-                                <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Dengarkan audio penutur asli berikut, lalu ikuti pelafalannya untuk melatih pendengaran dan intonasi.</p>
-                            </div>
-
-                            <!-- Big Audio Player Button -->
-                            <div class="flex items-center gap-3">
-                                <button @click="playListeningDialogue(@js($meetingData['listening']['audio_script'] ?? ''))"
-                                    type="button"
-                                    class="px-6 py-3 rounded-2xl font-bold text-sm shadow-md transition flex items-center gap-2.5 text-white"
-                                    :class="isPlaying ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'">
-                                    <span x-show="!isPlaying">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                    </span>
-                                    <span x-show="isPlaying">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                                    </span>
-                                    <span x-text="isPlaying ? 'Stop Audio' : 'Putar Audio Listening'"></span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Audio Wave & Transcript Box -->
-                        @php
-                            $rawScript = $meetingData['listening']['audio_script'] ?? '';
-                            
-                            // Split transcript by double newlines or by dialogue speaker patterns
-                            $hasDialoguePattern = preg_match('/(?:Receptionist|Attendee|Student A|Student B|Speaker 1|Speaker 2|Interviewer|Candidate|Person A|Person B):/i', $rawScript);
-                            
-                            if ($hasDialoguePattern) {
-                                // Split on speaker name prefixes
-                                $pattern = '/(?=(?:Receptionist|Attendee|Student A|Student B|Speaker 1|Speaker 2|Interviewer|Candidate|Person A|Person B):\s*)/i';
-                                $scriptTurns = preg_split($pattern, $rawScript, -1, PREG_SPLIT_NO_EMPTY);
-                            } else {
-                                $scriptTurns = array_filter(explode("\n", $rawScript));
-                            }
-                        @endphp
-                        <div class="p-6 rounded-2xl bg-blue-50/60 border border-blue-200 mb-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-blue-600" :class="isPlaying ? 'animate-ping' : ''"></span>
-                                    <h4 class="font-black text-xs text-blue-950 uppercase tracking-wider">Audio Transcript &amp; Shadowing Text</h4>
-                                </div>
-                                <button @click="showTranscript = !showTranscript" class="text-xs font-bold text-blue-600 hover:text-blue-800 underline">
-                                    <span x-text="showTranscript ? 'Sembunyikan Naskah' : 'Tampilkan Naskah'"></span>
-                                </button>
-                            </div>
-
-                            <div x-show="showTranscript" x-transition class="space-y-3">
-                                @if(!empty($scriptTurns) && (count($scriptTurns) > 1 || $hasDialoguePattern))
-                                    @foreach($scriptTurns as $tIdx => $turn)
-                                        @php
-                                            $turn = trim($turn);
-                                            if (empty($turn)) continue;
-                                            
-                                            // Check if turn starts with "Speaker:"
-                                            $parts = explode(':', $turn, 2);
-                                            $hasSpeaker = count($parts) === 2 && strlen($parts[0]) <= 25;
-                                            $speaker = $hasSpeaker ? trim($parts[0]) : '';
-                                            $dialogueText = $hasSpeaker ? trim($parts[1]) : $turn;
-                                            
-                                            $speakerLower = strtolower($speaker);
-                                            $isFemaleSpeaker = in_array($speakerLower, ['receptionist', 'female', 'woman', 'sophia', 'sarah', 'mary', 'linda', 'student b']);
-                                            $turnGender = $isFemaleSpeaker ? 'female' : 'male';
-                                            
-                                            $badgeBg = $isFemaleSpeaker ? 'bg-sky-600 text-white' : 'bg-amber-500 text-white';
-                                        @endphp
-                                        <div class="p-4 rounded-2xl bg-white border border-blue-100/90 shadow-2xs hover:border-blue-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                            <div class="flex items-start gap-3 flex-1">
-                                                @if($hasSpeaker)
-                                                    <span class="px-3 py-1 rounded-xl {{ $badgeBg }} text-xs font-black shrink-0 shadow-2xs">
-                                                        {{ $speaker }}
-                                                    </span>
-                                                @else
-                                                    <span class="w-6 h-6 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold flex items-center justify-center shrink-0">
-                                                        {{ $tIdx + 1 }}
-                                                    </span>
-                                                @endif
-                                                <p class="text-sm sm:text-base text-slate-900 font-bold leading-relaxed">
-                                                    {{ $dialogueText }}
-                                                </p>
+                    @if(!empty($subtopics))
+                        @foreach($subtopics as $sIdx => $st)
+                            @php
+                                $subListening = $st['listening'] ?? ($meetingData['listening'] ?? []);
+                                $rawScript = $subListening['audio_script'] ?? '';
+                                $rawScript = str_replace(['\\r\\n', '\\r', '\\n', '\r\n', '\r'], "\n", $rawScript);
+                                $scriptTurns = preg_split('/\r\n|\r|\n/', $rawScript);
+                                $scriptTurns = array_values(array_filter(array_map('trim', $scriptTurns)));
+                                if (count($scriptTurns) <= 1 && preg_match('/(?:[A-Z][A-Za-z0-9\.\s]{1,25}):/i', $rawScript)) {
+                                    $scriptTurns = preg_split('/(?=(?:[A-Z][A-Za-z0-9\.\s]{1,25}):\s*)/', $rawScript, -1, PREG_SPLIT_NO_EMPTY);
+                                    $scriptTurns = array_values(array_filter(array_map('trim', $scriptTurns)));
+                                }
+                                $hasDialoguePattern = !empty($scriptTurns);
+                            @endphp
+                            <div x-show="activeSubtopicIndex === {{ $sIdx }}" class="space-y-6">
+                                <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="px-3 py-0.5 rounded-full text-xs font-black bg-blue-600 text-white shadow-2xs">
+                                                    Subtopik {{ $st['num'] ?? sprintf('%02d', $sIdx + 1) }} • Short Listening
+                                                </span>
                                             </div>
-                                            <button @click="speakText(@js($dialogueText), @js($turnGender))" type="button" class="self-end sm:self-center w-8 h-8 rounded-full bg-slate-50 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen Line">
-                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                            <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                                                {{ $subListening['title'] ?? ($st['title'] . ' • Listening Practice') }}
+                                            </h2>
+                                            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Dengarkan audio penutur asli untuk subtopik <strong>{{ $st['title'] }}</strong>, lalu ikuti pelafalannya untuk melatih pendengaran dan intonasi.</p>
+                                        </div>
+
+                                        <!-- Big Audio Player Button -->
+                                        <div class="flex items-center gap-3">
+                                            <button @click="playListeningDialogue(@js($rawScript))"
+                                                type="button"
+                                                class="px-6 py-3 rounded-2xl font-bold text-sm shadow-md transition flex items-center gap-2.5 text-white"
+                                                :class="isPlaying ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'">
+                                                <span x-show="!isPlaying">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                </span>
+                                                <span x-show="isPlaying">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                                </span>
+                                                <span x-text="isPlaying ? 'Stop Audio' : 'Putar Audio Listening'"></span>
                                             </button>
                                         </div>
-                                    @endforeach
-                                @else
-                                    <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-2xs">
-                                        <p class="text-sm sm:text-base text-slate-800 leading-relaxed font-semibold whitespace-pre-line">
-                                            {{ $rawScript }}
-                                        </p>
                                     </div>
-                                @endif
-                            </div>
-                        </div>
 
-                        <!-- Listening Comprehension Questions -->
-                        <div>
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">Q</span>
-                                <h3 class="font-bold text-base text-slate-900">Listening Comprehension Questions</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mb-4">Pilih jawaban yang paling tepat berdasarkan rekaman audio yang Anda dengarkan:</p>
+                                    <!-- Audio Wave & Transcript Box -->
+                                    <div class="p-6 rounded-2xl bg-blue-50/60 border border-blue-200 mb-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-blue-600" :class="isPlaying ? 'animate-ping' : ''"></span>
+                                                <h4 class="font-black text-xs text-blue-950 uppercase tracking-wider">Audio Transcript &amp; Shadowing Text</h4>
+                                            </div>
+                                            <button @click="showTranscript = !showTranscript" class="text-xs font-bold text-blue-600 hover:text-blue-800 underline">
+                                                <span x-text="showTranscript ? 'Sembunyikan Naskah' : 'Tampilkan Naskah'"></span>
+                                            </button>
+                                        </div>
 
-                            <div class="space-y-4">
-                                @php
-                                    $qColorBadges = [
-                                        0 => 'bg-blue-600',
-                                        1 => 'bg-emerald-600',
-                                        2 => 'bg-purple-600',
-                                        3 => 'bg-rose-600',
-                                    ];
-                                @endphp
-                                @foreach($meetingData['listening']['questions'] ?? [] as $qIdx => $lq)
-                                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs" x-data="{ selectedOpt: null, correctOpt: @js($lq['answer']) }">
-                                        <p class="font-bold text-slate-900 text-sm sm:text-base mb-3 flex items-center gap-2">
-                                            <span class="w-5 h-5 rounded-full {{ $qColorBadges[$qIdx % 4] }} text-white text-[11px] font-black flex items-center justify-center shrink-0">{{ $qIdx + 1 }}</span>
-                                            <span>{{ $lq['q'] }}</span>
-                                        </p>
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            @foreach($lq['options'] as $opt)
-                                                <button @click="selectedOpt = @js($opt)"
-                                                    type="button"
-                                                    :class="{
-                                                        'bg-blue-50 border-blue-500 text-blue-900 font-bold': selectedOpt === @js($opt) && selectedOpt !== correctOpt,
-                                                        'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold ring-2 ring-emerald-400': selectedOpt && @js($opt) === correctOpt,
-                                                        'bg-white border-slate-200 text-slate-700 hover:bg-slate-100': selectedOpt !== @js($opt)
-                                                    }"
-                                                    class="p-3 rounded-xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between">
-                                                    <span>{{ $opt }}</span>
-                                                    <span x-show="selectedOpt && @js($opt) === correctOpt" class="text-emerald-600 font-bold text-xs">✓ Benar</span>
-                                                </button>
+                                        <div x-show="showTranscript" x-transition class="space-y-3">
+                                            @if(!empty($scriptTurns) && (count($scriptTurns) > 1 || $hasDialoguePattern))
+                                                @foreach($scriptTurns as $tIdx => $turn)
+                                                    @php
+                                                        $turn = trim($turn);
+                                                        if (empty($turn)) continue;
+                                                        $parts = explode(':', $turn, 2);
+                                                        $hasSpeaker = count($parts) === 2 && strlen(trim($parts[0])) <= 30;
+                                                        $speaker = $hasSpeaker ? trim($parts[0]) : '';
+                                                        $dialogueText = $hasSpeaker ? trim($parts[1]) : $turn;
+                                                        $dialogueText = stripslashes(str_replace("\\'", "'", $dialogueText));
+                                                        $speakerLower = strtolower(trim($speaker));
+                                                        $isFemaleSpeaker = in_array($speakerLower, ['receptionist', 'female', 'woman', 'sophia', 'sarah', 'mary', 'linda', 'sari', 'maya', 'putri', 'dewi', 'anita', 'emma', 'jessica', 'student b', 'traveler', 'tourist', 'waitress', 'shopper', 'lisa', 'rachel', 'siti', 'gita', 'sophie']);
+                                                        $turnGender = $isFemaleSpeaker ? 'female' : 'male';
+                                                        $isIndonesian = in_array($speakerLower, ['dimas', 'putri', 'maya', 'rizky', 'budi', 'dewi', 'bagus', 'rian', 'hendra', 'sari', 'arif', 'gita', 'siti', 'anita', 'kevin']);
+                                                        if ($isIndonesian) {
+                                                            $badgeBg = 'bg-gradient-to-r from-amber-500 to-orange-500 text-white';
+                                                        } else {
+                                                            $badgeBg = 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white';
+                                                        }
+                                                    @endphp
+                                                    <div class="p-4 rounded-2xl bg-white border border-blue-100/90 shadow-2xs hover:border-blue-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                        <div class="flex items-start gap-3 flex-1">
+                                                            @if($hasSpeaker)
+                                                                <span class="px-3 py-1 rounded-xl {{ $badgeBg }} text-xs font-black shrink-0 shadow-2xs">
+                                                                    {{ $speaker }}
+                                                                </span>
+                                                            @else
+                                                                <span class="w-6 h-6 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold flex items-center justify-center shrink-0">
+                                                                    {{ $tIdx + 1 }}
+                                                                </span>
+                                                            @endif
+                                                            <p class="text-sm sm:text-base text-slate-900 font-bold leading-relaxed">
+                                                                {{ $dialogueText }}
+                                                            </p>
+                                                        </div>
+                                                        <button @click="speakText(@js($dialogueText), @js($turnGender))" type="button" class="self-end sm:self-center w-8 h-8 rounded-full bg-slate-50 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen Line">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-2xs">
+                                                    <p class="text-sm sm:text-base text-slate-800 leading-relaxed font-semibold whitespace-pre-line">
+                                                        {{ $rawScript }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Listening Comprehension Questions -->
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">Q</span>
+                                            <h3 class="font-bold text-base text-slate-900">Listening Comprehension Questions</h3>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-4">Pilih jawaban yang paling tepat berdasarkan rekaman audio yang Anda dengarkan:</p>
+
+                                        <div class="space-y-4">
+                                            @php
+                                                $qColorBadges = [
+                                                    0 => 'bg-blue-600',
+                                                    1 => 'bg-emerald-600',
+                                                    2 => 'bg-purple-600',
+                                                    3 => 'bg-rose-600',
+                                                ];
+                                            @endphp
+                                            @foreach($subListening['questions'] ?? [] as $qIdx => $lq)
+                                                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs" x-data="{ selectedOpt: null, correctOpt: @js($lq['answer']) }">
+                                                    <p class="font-bold text-slate-900 text-sm sm:text-base mb-3 flex items-center gap-2">
+                                                        <span class="w-5 h-5 rounded-full {{ $qColorBadges[$qIdx % 4] }} text-white text-[11px] font-black flex items-center justify-center shrink-0">{{ $qIdx + 1 }}</span>
+                                                        <span>{{ $lq['q'] }}</span>
+                                                    </p>
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        @foreach($lq['options'] as $opt)
+                                                            <button @click="selectedOpt = @js($opt)"
+                                                                type="button"
+                                                                :class="{
+                                                                    'bg-blue-50 border-blue-500 text-blue-900 font-bold': selectedOpt === @js($opt) && selectedOpt !== correctOpt,
+                                                                    'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold ring-2 ring-emerald-400': selectedOpt && @js($opt) === correctOpt,
+                                                                    'bg-white border-slate-200 text-slate-700 hover:bg-slate-100': selectedOpt !== @js($opt)
+                                                                }"
+                                                                class="p-3 rounded-xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between">
+                                                                <span>{{ $opt }}</span>
+                                                                <span x-show="selectedOpt && @js($opt) === correctOpt" class="text-emerald-600 font-bold text-xs">✓ Benar</span>
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                             @endforeach
                                         </div>
                                     </div>
-                                @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Original single listening container fallback -->
+                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-3 py-0.5 rounded-full text-xs font-black bg-blue-600 text-white shadow-2xs">
+                                            Short Listening Practice
+                                        </span>
+                                    </div>
+                                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                                        {{ $meetingData['listening']['title'] ?? 'Listening Audio Practice' }}
+                                    </h2>
+                                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Dengarkan audio penutur asli berikut, lalu ikuti pelafalannya untuk melatih pendengaran dan intonasi.</p>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <button @click="playListeningDialogue(@js($meetingData['listening']['audio_script'] ?? ''))"
+                                        type="button"
+                                        class="px-6 py-3 rounded-2xl font-bold text-sm shadow-md transition flex items-center gap-2.5 text-white"
+                                        :class="isPlaying ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'">
+                                        <span x-show="!isPlaying">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        </span>
+                                        <span x-show="isPlaying">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                        </span>
+                                        <span x-text="isPlaying ? 'Stop Audio' : 'Putar Audio Listening'"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            @php
+                                $rawScript = $meetingData['listening']['audio_script'] ?? '';
+                                $scriptTurns = preg_split('/\r\n|\r|\n/', $rawScript);
+                                $scriptTurns = array_values(array_filter(array_map('trim', $scriptTurns)));
+                                if (count($scriptTurns) <= 1 && preg_match('/(?:[A-Z][A-Za-z0-9\.\s]{1,25}):/i', $rawScript)) {
+                                    $scriptTurns = preg_split('/(?=(?:[A-Z][A-Za-z0-9\.\s]{1,25}):\s*)/', $rawScript, -1, PREG_SPLIT_NO_EMPTY);
+                                    $scriptTurns = array_values(array_filter(array_map('trim', $scriptTurns)));
+                                }
+                                $hasDialoguePattern = !empty($scriptTurns);
+                            @endphp
+                            <div class="p-6 rounded-2xl bg-blue-50/60 border border-blue-200 mb-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600" :class="isPlaying ? 'animate-ping' : ''"></span>
+                                        <h4 class="font-black text-xs text-blue-950 uppercase tracking-wider">Audio Transcript &amp; Shadowing Text</h4>
+                                    </div>
+                                    <button @click="showTranscript = !showTranscript" class="text-xs font-bold text-blue-600 hover:text-blue-800 underline">
+                                        <span x-text="showTranscript ? 'Sembunyikan Naskah' : 'Tampilkan Naskah'"></span>
+                                    </button>
+                                </div>
+
+                                <div x-show="showTranscript" x-transition class="space-y-3">
+                                    @if(!empty($scriptTurns) && (count($scriptTurns) > 1 || $hasDialoguePattern))
+                                        @foreach($scriptTurns as $tIdx => $turn)
+                                            @php
+                                                $turn = trim($turn);
+                                                if (empty($turn)) continue;
+                                                $parts = explode(':', $turn, 2);
+                                                $hasSpeaker = count($parts) === 2 && strlen($parts[0]) <= 25;
+                                                $speaker = $hasSpeaker ? trim($parts[0]) : '';
+                                                $dialogueText = $hasSpeaker ? trim($parts[1]) : $turn;
+                                                $speakerLower = strtolower($speaker);
+                                                $isIndonesianSpeaker = in_array($speakerLower, ['dimas', 'sari', 'maya', 'rian', 'putri', 'dewi', 'budi', 'anita', 'kevin', 'rizky', 'guest', 'candidate', 'passenger']);
+                                                $isFemaleSpeaker = in_array($speakerLower, ['receptionist', 'female', 'woman', 'sophia', 'sarah', 'mary', 'linda', 'sari', 'maya', 'putri', 'dewi', 'anita', 'emma', 'jessica', 'student b']);
+                                                $turnGender = $isFemaleSpeaker ? 'female' : 'male';
+                                                $turnAccent = $isIndonesianSpeaker ? 'indonesian' : ($speakerLower === 'sarah' ? 'australian' : 'native');
+                                                $badgeBg = $isFemaleSpeaker ? 'bg-sky-600 text-white' : 'bg-amber-500 text-white';
+                                            @endphp
+                                            <div class="p-4 rounded-2xl bg-white border border-blue-100/90 shadow-2xs hover:border-blue-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div class="flex items-start gap-3 flex-1">
+                                                    @if($hasSpeaker)
+                                                        <span class="px-3 py-1 rounded-xl {{ $badgeBg }} text-xs font-black shrink-0 shadow-2xs">
+                                                            {{ $speaker }}
+                                                        </span>
+                                                    @else
+                                                        <span class="w-6 h-6 rounded-lg bg-sky-100 text-sky-800 text-xs font-bold flex items-center justify-center shrink-0">
+                                                            {{ $tIdx + 1 }}
+                                                        </span>
+                                                    @endif
+                                                    <p class="text-sm sm:text-base text-slate-900 font-bold leading-relaxed">
+                                                        {{ $dialogueText }}
+                                                    </p>
+                                                </div>
+                                                <button @click="speakText(@js($dialogueText), @js($turnGender))" type="button" class="self-end sm:self-center w-8 h-8 rounded-full bg-slate-50 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen Line">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-2xs">
+                                            <p class="text-sm sm:text-base text-slate-800 leading-relaxed font-semibold whitespace-pre-line">
+                                                {{ $rawScript }}
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">Q</span>
+                                    <h3 class="font-bold text-base text-slate-900">Listening Comprehension Questions</h3>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4">Pilih jawaban yang paling tepat berdasarkan rekaman audio yang Anda dengarkan:</p>
+
+                                <div class="space-y-4">
+                                    @php
+                                        $qColorBadges = [
+                                            0 => 'bg-blue-600',
+                                            1 => 'bg-emerald-600',
+                                            2 => 'bg-purple-600',
+                                            3 => 'bg-rose-600',
+                                        ];
+                                    @endphp
+                                    @foreach($meetingData['listening']['questions'] ?? [] as $qIdx => $lq)
+                                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs" x-data="{ selectedOpt: null, correctOpt: @js($lq['answer']) }">
+                                            <p class="font-bold text-slate-900 text-sm sm:text-base mb-3 flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-full {{ $qColorBadges[$qIdx % 4] }} text-white text-[11px] font-black flex items-center justify-center shrink-0">{{ $qIdx + 1 }}</span>
+                                                <span>{{ $lq['q'] }}</span>
+                                            </p>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                @foreach($lq['options'] as $opt)
+                                                    <button @click="selectedOpt = @js($opt)"
+                                                        type="button"
+                                                        :class="{
+                                                            'bg-blue-50 border-blue-500 text-blue-900 font-bold': selectedOpt === @js($opt) && selectedOpt !== correctOpt,
+                                                            'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold ring-2 ring-emerald-400': selectedOpt && @js($opt) === correctOpt,
+                                                            'bg-white border-slate-200 text-slate-700 hover:bg-slate-100': selectedOpt !== @js($opt)
+                                                        }"
+                                                        class="p-3 rounded-xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between">
+                                                        <span>{{ $opt }}</span>
+                                                        <span x-show="selectedOpt && @js($opt) === correctOpt" class="text-emerald-600 font-bold text-xs">✓ Benar</span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
-                <!-- ========================================== -->
                 <!-- TAB 3: PRACTICE SPEAKING (SHADOWING)     -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'shadowing'" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Shadowing Part 1 (Blue Accent - Persiapan Ronde 1 Partnering) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
-                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-                                <div class="flex items-center gap-2.5">
-                                    <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">1</span>
-                                    <div>
-                                        <h2 class="text-base font-bold text-slate-900">{{ $meetingData['drilling1_title'] ?? 'Drilling: Persiapan Ronde 1' }}</h2>
-                                        <p class="text-[11px] text-sky-700 font-bold">{{ $meetingData['drilling1_subtitle'] ?? 'Latihan Pelafalan Kalimat Praktis' }}</p>
+                    @if(!empty($subtopics))
+                        @foreach($subtopics as $sIdx => $st)
+                            @php
+                                $subDrill1 = $st['drilling1'] ?? ($meetingData['drilling1'] ?? []);
+                                $subDrill2 = $st['drilling2'] ?? ($meetingData['drilling2'] ?? []);
+                            @endphp
+                            <div x-show="activeSubtopicIndex === {{ $sIdx }}" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Shadowing Part 1 (Blue Accent) -->
+                                    <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                            <div class="flex items-center gap-2.5">
+                                                <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">1</span>
+                                                <div>
+                                                    <h2 class="text-base font-bold text-slate-900">{{ $st['drilling1_title'] ?? ('Drilling: ' . ($st['title'] ?? 'Subtopik ' . ($sIdx+1)) . ' • Sesi 1') }}</h2>
+                                                    <p class="text-[11px] text-sky-700 font-bold">{{ $st['drilling1_subtitle'] ?? 'Latihan Pelafalan Kalimat Praktis' }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200">Sesi 1</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-4 font-medium">{{ $st['drilling1_desc'] ?? 'Latih pelafalan kalimat sebelum masuk ke sesi dialog berpasangan:' }}</p>
+                                        <div class="space-y-3">
+                                            @foreach($subDrill1 as $drill)
+                                                @php
+                                                    $drillEn = e($drill['en'] ?? '');
+                                                    $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
+                                                    $drillId = e($drill['id'] ?? '');
+                                                    $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
+                                                @endphp
+                                                <div class="p-3.5 rounded-2xl bg-sky-50/30 border border-sky-200/80 hover:bg-sky-50/70 hover:border-sky-300 transition flex items-start justify-between gap-3 shadow-2xs">
+                                                    <div>
+                                                        <p class="font-black text-sky-950 text-sm leading-snug">
+                                                            • {!! $drillEn !!}
+                                                        </p>
+                                                        <p class="text-xs text-sky-700 mt-0.5 font-semibold italic">
+                                                            ({!! $drillId !!})
+                                                        </p>
+                                                    </div>
+                                                    <button @click="speakText(@js($drill['en'] ?? ''))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#29a8f5] hover:text-white text-[#29a8f5] border border-sky-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Shadowing Part 2 (Orange Accent) -->
+                                    <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                            <div class="flex items-center gap-2.5">
+                                                <span style="background-color: #ff9800 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">2</span>
+                                                <div>
+                                                    <h2 class="text-base font-bold text-slate-900">{{ $st['drilling2_title'] ?? ('Drilling: ' . ($st['title'] ?? 'Subtopik ' . ($sIdx+1)) . ' • Sesi 2') }}</h2>
+                                                    <p class="text-[11px] text-orange-700 font-bold">{{ $st['drilling2_subtitle'] ?? 'Latihan Pelafalan & Variasi Kalimat' }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">Sesi 2</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-4 font-medium">{{ $st['drilling2_desc'] ?? 'Latih pelafalan kalimat untuk persiapan tukar peran:' }}</p>
+                                        <div class="space-y-3">
+                                            @foreach($subDrill2 as $drill)
+                                                @php
+                                                    $drillEn = e($drill['en'] ?? '');
+                                                    $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
+                                                    $drillId = e($drill['id'] ?? '');
+                                                    $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
+                                                @endphp
+                                                <div class="p-3.5 rounded-2xl bg-orange-50/30 border border-orange-200/80 hover:bg-orange-50/70 hover:border-orange-300 transition flex items-start justify-between gap-3 shadow-2xs">
+                                                    <div>
+                                                        <p class="font-black text-orange-950 text-sm leading-snug">
+                                                            • {!! $drillEn !!}
+                                                        </p>
+                                                        <p class="text-xs text-orange-700 mt-0.5 font-semibold italic">
+                                                            ({!! $drillId !!})
+                                                        </p>
+                                                    </div>
+                                                    <button @click="speakText(@js($drill['en'] ?? ''))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#ff9800] hover:text-white text-[#ff9800] border border-orange-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    </button>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
-                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200">Persiapan Ronde 1</span>
                             </div>
-                            <p class="text-xs text-slate-500 mb-4 font-medium">{{ $meetingData['drilling1_desc'] ?? 'Latih pelafalan kalimat sebelum masuk ke sesi dialog berpasangan:' }}</p>
-                            <div class="space-y-3">
-                                @foreach($meetingData['drilling1'] ?? [] as $drill)
-                                    @php
-                                        $drillEn = e($drill['en']);
-                                        $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
-                                        $drillId = e($drill['id']);
-                                        $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
-                                    @endphp
-                                    <div class="p-3.5 rounded-2xl bg-sky-50/30 border border-sky-200/80 hover:bg-sky-50/70 hover:border-sky-300 transition flex items-start justify-between gap-3 shadow-2xs">
+                        @endforeach
+                    @else
+                        <!-- Original single shadowing fallback -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">1</span>
                                         <div>
-                                            <p class="font-black text-sky-950 text-sm leading-snug">
-                                                • {!! $drillEn !!}
-                                            </p>
-                                            <p class="text-xs text-sky-700 mt-0.5 font-semibold italic">
-                                                ({!! $drillId !!})
-                                            </p>
+                                            <h2 class="text-base font-bold text-slate-900">{{ $meetingData['drilling1_title'] ?? 'Drilling: Persiapan Ronde 1' }}</h2>
+                                            <p class="text-[11px] text-sky-700 font-bold">{{ $meetingData['drilling1_subtitle'] ?? 'Latihan Pelafalan Kalimat Praktis' }}</p>
                                         </div>
-                                        <button @click="speakText(@js($drill['en']))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#29a8f5] hover:text-white text-[#29a8f5] border border-sky-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                        </button>
                                     </div>
-                                @endforeach
+                                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200">Persiapan Ronde 1</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 font-medium">{{ $meetingData['drilling1_desc'] ?? 'Latih pelafalan kalimat sebelum masuk ke sesi dialog berpasangan:' }}</p>
+                                <div class="space-y-3">
+                                    @foreach($meetingData['drilling1'] ?? [] as $drill)
+                                        @php
+                                            $drillEn = e($drill['en']);
+                                            $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
+                                            $drillId = e($drill['id']);
+                                            $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
+                                        @endphp
+                                        <div class="p-3.5 rounded-2xl bg-sky-50/30 border border-sky-200/80 hover:bg-sky-50/70 hover:border-sky-300 transition flex items-start justify-between gap-3 shadow-2xs">
+                                            <div>
+                                                <p class="font-black text-sky-950 text-sm leading-snug">
+                                                    • {!! $drillEn !!}
+                                                </p>
+                                                <p class="text-xs text-sky-700 mt-0.5 font-semibold italic">
+                                                    ({!! $drillId !!})
+                                                </p>
+                                            </div>
+                                            <button @click="speakText(@js($drill['en']))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#29a8f5] hover:text-white text-[#29a8f5] border border-sky-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <span style="background-color: #ff9800 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">2</span>
+                                        <div>
+                                            <h2 class="text-base font-bold text-slate-900">{{ $meetingData['drilling2_title'] ?? 'Drilling: Persiapan Ronde 2' }}</h2>
+                                            <p class="text-[11px] text-orange-700 font-bold">{{ $meetingData['drilling2_subtitle'] ?? 'Latihan Pelafalan & Variasi Kalimat' }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">Persiapan Ronde 2</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 font-medium">{{ $meetingData['drilling2_desc'] ?? 'Latih pelafalan kalimat untuk persiapan tukar peran:' }}</p>
+                                <div class="space-y-3">
+                                    @foreach($meetingData['drilling2'] ?? [] as $drill)
+                                        @php
+                                            $drillEn = e($drill['en']);
+                                            $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
+                                            $drillId = e($drill['id']);
+                                            $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
+                                        @endphp
+                                        <div class="p-3.5 rounded-2xl bg-orange-50/30 border border-orange-200/80 hover:bg-orange-50/70 hover:border-orange-300 transition flex items-start justify-between gap-3 shadow-2xs">
+                                            <div>
+                                                <p class="font-black text-orange-950 text-sm leading-snug">
+                                                    • {!! $drillEn !!}
+                                                </p>
+                                                <p class="text-xs text-orange-700 mt-0.5 font-semibold italic">
+                                                    ({!! $drillId !!})
+                                                </p>
+                                            </div>
+                                            <button @click="speakText(@js($drill['en']))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#ff9800] hover:text-white text-[#ff9800] border border-orange-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Shadowing Part 2 (Orange Accent - Persiapan Ronde 2 Partnering) -->
-                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
-                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-                                <div class="flex items-center gap-2.5">
-                                    <span style="background-color: #ff9800 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-2xs">2</span>
-                                    <div>
-                                        <h2 class="text-base font-bold text-slate-900">{{ $meetingData['drilling2_title'] ?? 'Drilling: Persiapan Ronde 2' }}</h2>
-                                        <p class="text-[11px] text-orange-700 font-bold">{{ $meetingData['drilling2_subtitle'] ?? 'Latihan Pelafalan & Variasi Kalimat' }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">Persiapan Ronde 2</span>
-                            </div>
-                            <p class="text-xs text-slate-500 mb-4 font-medium">{{ $meetingData['drilling2_desc'] ?? 'Latih pelafalan kalimat untuk persiapan tukar peran:' }}</p>
-                            <div class="space-y-3">
-                                @foreach($meetingData['drilling2'] ?? [] as $drill)
-                                    @php
-                                        $drillEn = e($drill['en']);
-                                        $drillEn = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillEn);
-                                        $drillId = e($drill['id']);
-                                        $drillId = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2 py-0.5 rounded-md bg-amber-300 text-slate-950 font-black text-xs shadow-2xs">[$1]</span>', $drillId);
-                                    @endphp
-                                    <div class="p-3.5 rounded-2xl bg-orange-50/30 border border-orange-200/80 hover:bg-orange-50/70 hover:border-orange-300 transition flex items-start justify-between gap-3 shadow-2xs">
-                                        <div>
-                                            <p class="font-black text-orange-950 text-sm leading-snug">
-                                                • {!! $drillEn !!}
-                                            </p>
-                                            <p class="text-xs text-orange-700 mt-0.5 font-semibold italic">
-                                                ({!! $drillId !!})
-                                            </p>
-                                        </div>
-                                        <button @click="speakText(@js($drill['en']))" type="button" class="w-8 h-8 rounded-full bg-white hover:bg-[#ff9800] hover:text-white text-[#ff9800] border border-orange-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                        </button>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            @if(!empty($meetingData['grammar_note']))
-                                <div class="mt-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-2.5">
-                                    <span class="text-xs font-black text-amber-900 uppercase tracking-wide px-2 py-0.5 bg-amber-100 rounded-md">Catatan:</span>
-                                    <p class="text-xs text-amber-950 font-bold">{{ $meetingData['grammar_note'] }}</p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+                    @endif
                 </div>
 
-                <!-- ========================================== -->
                 <!-- TAB 4: PRACTICE (PARTNERING)             -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'partnering'" class="space-y-6">
-                    <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-100 gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span style="background-color: #29a8f5 !important;" class="px-2.5 py-0.5 rounded-full text-xs font-black text-white shadow-2xs">
-                                        Translate &amp; Roleplay Practice
-                                    </span>
-                                </div>
-                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Partnering Dialogue Practice</h2>
-                                @if(!empty($meetingData['dialogue_setting']))
-                                    <p class="text-xs sm:text-sm text-slate-600 font-semibold mt-1"><strong>Skenario:</strong> {{ $meetingData['dialogue_setting'] }}</p>
-                                @endif
-                                <p class="text-xs text-sky-900 font-bold mt-1 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-200 inline-block">
-                                    Instruksi: Baca kalimat Bahasa Indonesia di bawah, terjemahkan dan ucapkan ke teman pasanganmu dalam Bahasa Inggris. Buka kunci jawaban &amp; dengarkan audio untuk memeriksa pelafalan!
-                                </p>
-                            </div>
-
-                            <!-- Header Controls (Toggle All & Play Full) -->
-                            <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto shrink-0">
-                                <button @click="showAllPartneringEn = !showAllPartneringEn" type="button" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    <span x-text="showAllPartneringEn ? 'Sembunyikan Semua English' : 'Tampilkan Semua English'"></span>
-                                </button>
-
-                                <button @click="playFullDialogue()" type="button" style="background-color: #29a8f5 !important;" class="px-5 py-2.5 rounded-2xl hover:opacity-90 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                    <span>Putar Seluruh Percakapan</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-7 max-w-3xl mx-auto">
-                            @foreach($meetingData['dialogue'] ?? [] as $index => $d)
-                                @if(!empty($d['section_badge']))
-                                    <div style="background-color: #29a8f5 !important;" class="my-6 p-4 rounded-2xl text-white shadow-md flex items-center justify-between gap-3 border border-white/20">
-                                        <div class="flex items-center gap-2.5">
-                                            <span class="w-8 h-8 rounded-xl bg-white/20 text-white font-black text-xs flex items-center justify-center shadow-xs">🔄</span>
-                                            <div>
-                                                <span class="text-[10px] font-bold text-sky-100 block uppercase tracking-wider">Roleplay Practice • Target Bahasa</span>
-                                                <h4 class="font-black text-xs sm:text-sm tracking-wide text-white">{{ $d['section_badge'] }}</h4>
-                                            </div>
-                                        </div>
-                                        <span class="px-3 py-1 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider text-white shrink-0">Switch Roles</span>
-                                    </div>
-                                @endif
-
-                                @php
-                                    $isSpeakerA = (isset($d['speaker']) && $d['speaker'] === 'Student A');
-                                    $speakerName = $isSpeakerA ? 'STUDENT A' : 'STUDENT B';
-                                    $gender = $isSpeakerA ? 'male' : 'female';
-                                    $bubbleBg = $isSpeakerA ? '#29a8f5' : '#ff9800';
-                                    
-                                    // Main text is pure white for all bubbles
-                                    $mainTextColor = '#ffffff';
-                                    $labelColor = 'text-white/80';
-                                    $subtextColor = 'text-white/90';
-                                    
-                                    // Student A text/badge is Red, Student B text/badge is Pink
-                                    $badgeTextColor = $isSpeakerA ? '#ff2a2a' : '#ff2d78';
-                                    $badgeStyle = 'background-color: #ffffff; color: ' . $badgeTextColor . ';';
-                                    $borderClass = 'border-white/30';
-                                    $counterClass = 'bg-black/20 text-white border border-white/30';
-
-                                    // Replace Student A with Red text and Student B with Pink text
-                                    $idSentence = e($d['id'] ?? $d['text'] ?? $d['en']);
-                                    $idSentence = str_replace(
-                                        ['Student A', 'Student B'],
-                                        [
-                                            '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
-                                            '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
-                                        ],
-                                        $idSentence
-                                    );
-                                    $idSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $idSentence);
-
-                                    $enSentence = e($d['en'] ?? $d['text']);
-                                    $enSentence = str_replace(
-                                        ['Student A', 'Student B'],
-                                        [
-                                            '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
-                                            '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
-                                        ],
-                                        $enSentence
-                                    );
-                                    $enSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $enSentence);
-                                @endphp
-                                <div x-data="{ showEn: false }" class="flex items-start gap-4 {{ $isSpeakerA ? '' : 'flex-row-reverse' }}">
-                                    <!-- Avatar (Round Bubble Avatar: A for Student A, B for Student B) -->
-                                    <div style="background-color: {{ $bubbleBg }} !important;" class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg text-white shrink-0 shadow-lg border-2 border-white">
-                                        {{ $isSpeakerA ? 'A' : 'B' }}
-                                    </div>
-
-                                    <!-- Dialogue Chat Bubble Container (Organic Rounded Speech Bubble - Blue / Orange) -->
-                                    <div style="background-color: {{ $bubbleBg }} !important;" class="relative w-full sm:max-w-[85%] rounded-[2.5rem] p-6 sm:p-7 shadow-xl {{ $isSpeakerA ? 'rounded-tl-sm text-white' : 'rounded-tr-sm text-white' }}">
-                                        <!-- Speech Bubble Tail Pointer -->
-                                        @if($isSpeakerA)
-                                            <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -left-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
-                                        @else
-                                            <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -right-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
-                                        @endif
-
-                                        <!-- Card Header: Speaker Name Badge (STUDENT A in RED / STUDENT B in PINK) -->
-                                        <div class="relative z-10 flex items-center justify-between gap-4 mb-3 pb-2.5 border-b {{ $borderClass }}">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <span style="{{ $badgeStyle }}" class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-xs">
-                                                    {{ $speakerName }}
-                                                </span>
-                                                <span class="text-xs font-bold {{ $subtextColor }}">
-                                                    ({{ !empty($d['role_label']) ? $d['role_label'] : ($isSpeakerA ? 'Peran Siswa A' : 'Peran Siswa B') }})
+                    @if(!empty($subtopics))
+                        @foreach($subtopics as $sIdx => $st)
+                            @php
+                                $subDialogue = $st['dialogue'] ?? ($meetingData['dialogue'] ?? []);
+                            @endphp
+                            <div x-show="activeSubtopicIndex === {{ $sIdx }}" class="space-y-6">
+                                <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-100 gap-4">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span style="background-color: #29a8f5 !important;" class="px-2.5 py-0.5 rounded-full text-xs font-black text-white shadow-2xs">
+                                                    Subtopik {{ $st['num'] ?? sprintf('%02d', $sIdx + 1) }} • Roleplay Practice
                                                 </span>
                                             </div>
-                                            <span class="text-[10px] font-black px-3 py-0.5 rounded-full {{ $counterClass }}">
-                                                Kalimat #{{ $index + 1 }}
-                                            </span>
-                                        </div>
-
-                                        <!-- MAIN SENTENCE: BAHASA INDONESIA (Pure White text with Red Student A & Pink Student B) -->
-                                        <div class="relative z-10 mb-4">
-                                            <span class="text-[10px] font-black uppercase tracking-wider {{ $labelColor }} block mb-1">
-                                                Kalimat Utama (Bahasa Indonesia):
-                                            </span>
-                                            <p style="color: {{ $mainTextColor }} !important;" class="text-base sm:text-lg font-black leading-relaxed">
-                                                &ldquo;{!! $idSentence !!}&rdquo;
+                                            <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Partnering Dialogue: {{ $st['title'] }}</h2>
+                                            @if(!empty($st['dialogue_setting']))
+                                                <p class="text-xs sm:text-sm text-slate-600 font-semibold mt-1"><strong>Skenario:</strong> {{ $st['dialogue_setting'] }}</p>
+                                            @endif
+                                            <p class="text-xs text-sky-900 font-bold mt-1 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-200 inline-block">
+                                                Instruksi: Baca kalimat Bahasa Indonesia di bawah, terjemahkan dan ucapkan ke teman pasanganmu dalam Bahasa Inggris. Buka kunci jawaban &amp; dengarkan audio untuk memeriksa pelafalan!
                                             </p>
                                         </div>
 
-                                        <!-- ACTION BUTTONS ROW: Toggle English -->
-                                        <div class="relative z-10 flex flex-wrap items-center gap-2 pt-2.5 border-t {{ $borderClass }}">
-                                            <!-- Button: Toggle English Translation -->
-                                            <button @click="showEn = !showEn" type="button"
-                                                class="px-4 py-2 rounded-full text-xs font-black transition flex items-center gap-1.5 shadow-sm {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }}"
-                                                :class="(showEn || showAllPartneringEn) ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-white hover:bg-slate-50'">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
-                                                <span x-text="(showEn || showAllPartneringEn) ? 'Sembunyikan Kunci Jawaban' : 'Tampilkan Jawaban English'"></span>
+                                        <!-- Header Controls -->
+                                        <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto shrink-0">
+                                            <button @click="showAllPartneringEn = !showAllPartneringEn" type="button" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                <span x-text="showAllPartneringEn ? 'Sembunyikan Semua English' : 'Tampilkan Semua English'"></span>
+                                            </button>
+
+                                            <button @click="playFullDialogue()" type="button" style="background-color: #29a8f5 !important;" class="px-5 py-2.5 rounded-2xl hover:opacity-90 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                <span>Putar Seluruh Percakapan</span>
                                             </button>
                                         </div>
+                                    </div>
 
-                                        <!-- REVEALED TARGET ENGLISH BOX (Audio Button is inside here) -->
-                                        <div x-show="showEn || showAllPartneringEn" x-transition class="relative z-10 mt-4 p-5 rounded-[2rem] bg-white text-slate-900 border-2 {{ $isSpeakerA ? 'border-sky-300' : 'border-orange-300' }} shadow-xl">
-                                            <div class="flex items-center justify-between mb-2 pb-1.5 border-b {{ $isSpeakerA ? 'border-sky-100' : 'border-orange-100' }}">
-                                                <span class="text-[10px] font-black uppercase {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }} tracking-wider flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                                    Kunci Jawaban Bahasa Inggris:
-                                                </span>
-                                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full {{ $isSpeakerA ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800' }}">English Target</span>
+                                    <div class="space-y-7 max-w-3xl mx-auto">
+                                        @foreach($subDialogue as $index => $d)
+                                            @if(!empty($d['section_badge']))
+                                                <div style="background-color: #29a8f5 !important;" class="my-6 p-4 rounded-2xl text-white shadow-md flex items-center justify-between gap-3 border border-white/20">
+                                                    <div class="flex items-center gap-2.5">
+                                                        <span class="w-8 h-8 rounded-xl bg-white/20 text-white font-black text-xs flex items-center justify-center shadow-xs"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></span>
+                                                        <div>
+                                                            <span class="text-[10px] font-bold text-sky-100 block uppercase tracking-wider">Roleplay Practice • Target Bahasa</span>
+                                                            <h4 class="font-black text-xs sm:text-sm tracking-wide text-white">{{ $d['section_badge'] }}</h4>
+                                                        </div>
+                                                    </div>
+                                                    <span class="px-3 py-1 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider text-white shrink-0">Switch Roles</span>
+                                                </div>
+                                            @endif
+
+                                            @php
+                                                $isSpeakerA = (isset($d['speaker']) && $d['speaker'] === 'Student A');
+                                                $speakerName = $isSpeakerA ? 'STUDENT A' : 'STUDENT B';
+                                                $gender = $isSpeakerA ? 'male' : 'female';
+                                                $bubbleBg = $isSpeakerA ? '#29a8f5' : '#ff9800';
+                                                
+                                                $mainTextColor = '#ffffff';
+                                                $labelColor = 'text-white/80';
+                                                $subtextColor = 'text-white/90';
+                                                
+                                                $badgeTextColor = $isSpeakerA ? '#ff2a2a' : '#ff2d78';
+                                                $badgeStyle = 'background-color: #ffffff; color: ' . $badgeTextColor . ';';
+                                                $borderClass = 'border-white/30';
+                                                $counterClass = 'bg-black/20 text-white border border-white/30';
+
+                                                $idSentence = e($d['id'] ?? $d['text'] ?? $d['en'] ?? '');
+                                                $idSentence = str_replace(
+                                                    ['Student A', 'Student B'],
+                                                    [
+                                                        '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
+                                                        '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
+                                                    ],
+                                                    $idSentence
+                                                );
+                                                $idSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $idSentence);
+
+                                                $enSentence = e($d['en'] ?? $d['text'] ?? '');
+                                                $enSentence = str_replace(
+                                                    ['Student A', 'Student B'],
+                                                    [
+                                                        '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
+                                                        '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
+                                                    ],
+                                                    $enSentence
+                                                );
+                                                $enSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $enSentence);
+                                            @endphp
+                                            <div x-data="{ showEn: false }" class="flex items-start gap-4 {{ $isSpeakerA ? '' : 'flex-row-reverse' }}">
+                                                <div style="background-color: {{ $bubbleBg }} !important;" class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg text-white shrink-0 shadow-lg border-2 border-white">
+                                                    {{ $isSpeakerA ? 'A' : 'B' }}
+                                                </div>
+
+                                                <div style="background-color: {{ $bubbleBg }} !important;" class="relative w-full sm:max-w-[85%] rounded-[2.5rem] p-6 sm:p-7 shadow-xl {{ $isSpeakerA ? 'rounded-tl-sm text-white' : 'rounded-tr-sm text-white' }}">
+                                                    @if($isSpeakerA)
+                                                        <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -left-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
+                                                    @else
+                                                        <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -right-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
+                                                    @endif
+
+                                                    <div class="relative z-10 flex items-center justify-between gap-4 mb-3 pb-2.5 border-b {{ $borderClass }}">
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            <span style="{{ $badgeStyle }}" class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-xs">
+                                                                {{ $speakerName }}
+                                                            </span>
+                                                            <span class="text-xs font-bold {{ $subtextColor }}">
+                                                                ({{ !empty($d['role_label']) ? $d['role_label'] : ($isSpeakerA ? 'Peran Siswa A' : 'Peran Siswa B') }})
+                                                            </span>
+                                                        </div>
+                                                        <span class="text-[10px] font-black px-3 py-0.5 rounded-full {{ $counterClass }}">
+                                                            Kalimat #{{ $index + 1 }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="relative z-10 mb-4">
+                                                        <span class="text-[10px] font-black uppercase tracking-wider {{ $labelColor }} block mb-1">
+                                                            Kalimat Utama (Bahasa Indonesia):
+                                                        </span>
+                                                        <p style="color: {{ $mainTextColor }} !important;" class="text-base sm:text-lg font-black leading-relaxed">
+                                                            &ldquo;{!! $idSentence !!}&rdquo;
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="relative z-10 flex flex-wrap items-center gap-2 pt-2.5 border-t {{ $borderClass }}">
+                                                        <button @click="showEn = !showEn" type="button"
+                                                            class="px-4 py-2 rounded-full text-xs font-black transition flex items-center gap-1.5 shadow-sm {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }}"
+                                                            :class="(showEn || showAllPartneringEn) ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-white hover:bg-slate-50'">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                                                            <span x-text="(showEn || showAllPartneringEn) ? 'Sembunyikan Kunci Jawaban' : 'Tampilkan Jawaban English'"></span>
+                                                        </button>
+                                                    </div>
+
+                                                    <div x-show="showEn || showAllPartneringEn" x-transition class="relative z-10 mt-4 p-5 rounded-[2rem] bg-white text-slate-900 border-2 {{ $isSpeakerA ? 'border-sky-300' : 'border-orange-300' }} shadow-xl">
+                                                        <div class="flex items-center justify-between mb-2 pb-1.5 border-b {{ $isSpeakerA ? 'border-sky-100' : 'border-orange-100' }}">
+                                                            <span class="text-[10px] font-black uppercase {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }} tracking-wider flex items-center gap-1">
+                                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                                                Kunci Jawaban Bahasa Inggris:
+                                                            </span>
+                                                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full {{ $isSpeakerA ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800' }}">English Target</span>
+                                                        </div>
+                                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                                                            <p class="text-sm sm:text-base font-black text-slate-900 leading-relaxed">
+                                                                &ldquo;{!! $enSentence !!}&rdquo;
+                                                            </p>
+                                                            <button @click="speakText(@js($d['en'] ?? $d['text'] ?? ''), '{{ $gender }}')" type="button"
+                                                                style="background-color: {{ $bubbleBg }} !important; color: #ffffff !important;"
+                                                                class="px-4 py-2.5 rounded-2xl text-white text-xs font-black shadow-md transition flex items-center justify-center gap-2 shrink-0 hover:opacity-95 hover:scale-105 border border-white/20">
+                                                                <svg class="w-4 h-4 text-white shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                                <span class="text-white font-black tracking-wide">Dengarkan Audio</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                                                <p class="text-sm sm:text-base font-black text-slate-900 leading-relaxed">
-                                                    &ldquo;{!! $enSentence !!}&rdquo;
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Original single dialogue fallback -->
+                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-100 gap-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span style="background-color: #29a8f5 !important;" class="px-2.5 py-0.5 rounded-full text-xs font-black text-white shadow-2xs">
+                                            Translate &amp; Roleplay Practice
+                                        </span>
+                                    </div>
+                                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Partnering Dialogue Practice</h2>
+                                    @if(!empty($meetingData['dialogue_setting']))
+                                        <p class="text-xs sm:text-sm text-slate-600 font-semibold mt-1"><strong>Skenario:</strong> {{ $meetingData['dialogue_setting'] }}</p>
+                                    @endif
+                                    <p class="text-xs text-sky-900 font-bold mt-1 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-200 inline-block">
+                                        Instruksi: Baca kalimat Bahasa Indonesia di bawah, terjemahkan dan ucapkan ke teman pasanganmu dalam Bahasa Inggris. Buka kunci jawaban &amp; dengarkan audio untuk memeriksa pelafalan!
+                                    </p>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto shrink-0">
+                                    <button @click="showAllPartneringEn = !showAllPartneringEn" type="button" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <span x-text="showAllPartneringEn ? 'Sembunyikan Semua English' : 'Tampilkan Semua English'"></span>
+                                    </button>
+
+                                    <button @click="playFullDialogue()" type="button" style="background-color: #29a8f5 !important;" class="px-5 py-2.5 rounded-2xl hover:opacity-90 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        <span>Putar Seluruh Percakapan</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-7 max-w-3xl mx-auto">
+                                @foreach($meetingData['dialogue'] ?? [] as $index => $d)
+                                    @php
+                                        $isSpeakerA = (isset($d['speaker']) && $d['speaker'] === 'Student A');
+                                        $speakerName = $isSpeakerA ? 'STUDENT A' : 'STUDENT B';
+                                        $gender = $isSpeakerA ? 'male' : 'female';
+                                        $bubbleBg = $isSpeakerA ? '#29a8f5' : '#ff9800';
+                                        
+                                        $mainTextColor = '#ffffff';
+                                        $labelColor = 'text-white/80';
+                                        $subtextColor = 'text-white/90';
+                                        
+                                        $badgeTextColor = $isSpeakerA ? '#ff2a2a' : '#ff2d78';
+                                        $badgeStyle = 'background-color: #ffffff; color: ' . $badgeTextColor . ';';
+                                        $borderClass = 'border-white/30';
+                                        $counterClass = 'bg-black/20 text-white border border-white/30';
+
+                                        $idSentence = e($d['id'] ?? $d['text'] ?? $d['en']);
+                                        $idSentence = str_replace(
+                                            ['Student A', 'Student B'],
+                                            [
+                                                '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
+                                                '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
+                                            ],
+                                            $idSentence
+                                        );
+                                        $idSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $idSentence);
+
+                                        $enSentence = e($d['en'] ?? $d['text']);
+                                        $enSentence = str_replace(
+                                            ['Student A', 'Student B'],
+                                            [
+                                                '<span style="color: #ff2a2a !important; font-weight: 900;">Student A</span>',
+                                                '<span style="color: #ff2d78 !important; font-weight: 900;">Student B</span>'
+                                            ],
+                                            $enSentence
+                                        );
+                                        $enSentence = preg_replace('/\[(.*?)\]/', '<span class="inline-block px-2.5 py-0.5 mx-1 rounded-lg bg-amber-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xs border border-amber-400/80">[$1]</span>', $enSentence);
+                                    @endphp
+                                    <div x-data="{ showEn: false }" class="flex items-start gap-4 {{ $isSpeakerA ? '' : 'flex-row-reverse' }}">
+                                        <div style="background-color: {{ $bubbleBg }} !important;" class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg text-white shrink-0 shadow-lg border-2 border-white">
+                                            {{ $isSpeakerA ? 'A' : 'B' }}
+                                        </div>
+
+                                        <div style="background-color: {{ $bubbleBg }} !important;" class="relative w-full sm:max-w-[85%] rounded-[2.5rem] p-6 sm:p-7 shadow-xl {{ $isSpeakerA ? 'rounded-tl-sm text-white' : 'rounded-tr-sm text-white' }}">
+                                            @if($isSpeakerA)
+                                                <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -left-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
+                                            @else
+                                                <div style="background-color: {{ $bubbleBg }} !important;" class="absolute -right-2 top-5 w-4 h-4 transform rotate-45 rounded-xs pointer-events-none"></div>
+                                            @endif
+
+                                            <div class="relative z-10 flex items-center justify-between gap-4 mb-3 pb-2.5 border-b {{ $borderClass }}">
+                                                <div class="flex items-center gap-2 flex-wrap">
+                                                    <span style="{{ $badgeStyle }}" class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-xs">
+                                                        {{ $speakerName }}
+                                                    </span>
+                                                    <span class="text-xs font-bold {{ $subtextColor }}">
+                                                        ({{ !empty($d['role_label']) ? $d['role_label'] : ($isSpeakerA ? 'Peran Siswa A' : 'Peran Siswa B') }})
+                                                    </span>
+                                                </div>
+                                                <span class="text-[10px] font-black px-3 py-0.5 rounded-full {{ $counterClass }}">
+                                                    Kalimat #{{ $index + 1 }}
+                                                </span>
+                                            </div>
+
+                                            <div class="relative z-10 mb-4">
+                                                <span class="text-[10px] font-black uppercase tracking-wider {{ $labelColor }} block mb-1">
+                                                    Kalimat Utama (Bahasa Indonesia):
+                                                </span>
+                                                <p style="color: {{ $mainTextColor }} !important;" class="text-base sm:text-lg font-black leading-relaxed">
+                                                    &ldquo;{!! $idSentence !!}&rdquo;
                                                 </p>
-                                                <!-- Audio Button Revealed with English Target -->
-                                                <button @click="speakText(@js($d['en'] ?? $d['text']), '{{ $gender }}')" type="button"
-                                                    style="background-color: {{ $bubbleBg }} !important; color: #ffffff !important;"
-                                                    class="px-4 py-2.5 rounded-2xl text-white text-xs font-black shadow-md transition flex items-center justify-center gap-2 shrink-0 hover:opacity-95 hover:scale-105 border border-white/20">
-                                                    <svg class="w-4 h-4 text-white shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                                    <span class="text-white font-black tracking-wide">Dengarkan Audio</span>
+                                            </div>
+
+                                            <div class="relative z-10 flex flex-wrap items-center gap-2 pt-2.5 border-t {{ $borderClass }}">
+                                                <button @click="showEn = !showEn" type="button"
+                                                    class="px-4 py-2 rounded-full text-xs font-black transition flex items-center gap-1.5 shadow-sm {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }}"
+                                                    :class="(showEn || showAllPartneringEn) ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-white hover:bg-slate-50'">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                                                    <span x-text="(showEn || showAllPartneringEn) ? 'Sembunyikan Kunci Jawaban' : 'Tampilkan Jawaban English'"></span>
                                                 </button>
+                                            </div>
+
+                                            <div x-show="showEn || showAllPartneringEn" x-transition class="relative z-10 mt-4 p-5 rounded-[2rem] bg-white text-slate-900 border-2 {{ $isSpeakerA ? 'border-sky-300' : 'border-orange-300' }} shadow-xl">
+                                                <div class="flex items-center justify-between mb-2 pb-1.5 border-b {{ $isSpeakerA ? 'border-sky-100' : 'border-orange-100' }}">
+                                                    <span class="text-[10px] font-black uppercase {{ $isSpeakerA ? 'text-sky-700' : 'text-orange-700' }} tracking-wider flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                                        Kunci Jawaban Bahasa Inggris:
+                                                    </span>
+                                                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full {{ $isSpeakerA ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800' }}">English Target</span>
+                                                </div>
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                                                    <p class="text-sm sm:text-base font-black text-slate-900 leading-relaxed">
+                                                        &ldquo;{!! $enSentence !!}&rdquo;
+                                                    </p>
+                                                    <button @click="speakText(@js($d['en'] ?? $d['text']), '{{ $gender }}')" type="button"
+                                                        style="background-color: {{ $bubbleBg }} !important; color: #ffffff !important;"
+                                                        class="px-4 py-2.5 rounded-2xl text-white text-xs font-black shadow-md transition flex items-center justify-center gap-2 shrink-0 hover:opacity-95 hover:scale-105 border border-white/20">
+                                                        <svg class="w-4 h-4 text-white shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span class="text-white font-black tracking-wide">Dengarkan Audio</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
-                <!-- ========================================== -->
                 <!-- TAB 5: KOSA KATA (VOCABULARY & SPELLING) -->
                 <!-- ========================================== -->
-                <div x-show="activeTab === 'vocabulary'" class="space-y-6" 
-                     x-data="{ 
-                         vocabFilter: 'all', 
-                         vocabSearch: '',
-                         playAllVocab(jobsList) {
-                             if (!jobsList || jobsList.length === 0) return;
-                             let words = jobsList.map(j => j.job);
-                             this.speakText(words.join(', '), 'female');
-                         }
-                     }">
+                <div x-show="activeTab === 'vocabulary'" class="space-y-6">
+                    @if(!empty($subtopics))
+                        @foreach($subtopics as $sIdx => $st)
+                            @php
+                                $subVocab = $st['vocabulary'] ?? [];
+                                if (empty($subVocab) && !empty($st['materi'])) {
+                                    if (!empty($st['materi']['vocabulary_jobs'])) {
+                                        foreach ($st['materi']['vocabulary_jobs'] as $vj) {
+                                            $subVocab[] = [
+                                                'word' => $vj['job'] ?? ($vj['word'] ?? ''),
+                                                'ipa' => $vj['ipa'] ?? '',
+                                                'meaning' => $vj['id'] ?? ($vj['meaning'] ?? ''),
+                                                'example' => $vj['desc'] ?? ($vj['example'] ?? ($vj['context'] ?? '')),
+                                            ];
+                                        }
+                                    } elseif (!empty($st['materi']['cardinal_numbers'])) {
+                                        foreach ($st['materi']['cardinal_numbers'] as $cn) {
+                                            $subVocab[] = [
+                                                'word' => $cn['words'] ?? ($cn['num'] ?? ''),
+                                                'ipa' => $cn['ipa'] ?? '',
+                                                'meaning' => ($cn['id'] ?? '') . ' (' . ($cn['num'] ?? '') . ')',
+                                                'example' => 'Number: ' . ($cn['num'] ?? '') . ' = ' . ($cn['words'] ?? ''),
+                                            ];
+                                        }
+                                    } elseif (!empty($st['materi']['ordinal_numbers'])) {
+                                        foreach ($st['materi']['ordinal_numbers'] as $on) {
+                                            $subVocab[] = [
+                                                'word' => $on['words'] ?? ($on['num'] ?? ''),
+                                                'ipa' => $on['ipa'] ?? '',
+                                                'meaning' => ($on['id'] ?? '') . ' (' . ($on['num'] ?? '') . ')',
+                                                'example' => 'Rank: ' . ($on['num'] ?? '') . ' = ' . ($on['words'] ?? ''),
+                                            ];
+                                        }
+                                    } elseif (!empty($st['materi']['telling_time'])) {
+                                        $tt = $st['materi']['telling_time'];
+                                        if (!empty($tt['british_rules'])) {
+                                            foreach ($tt['british_rules'] as $br) {
+                                                $subVocab[] = [
+                                                    'word' => $br['pattern'] ?? '',
+                                                    'ipa' => '',
+                                                    'meaning' => $br['meaning'] ?? '',
+                                                    'example' => $br['example'] ?? '',
+                                                ];
+                                            }
+                                        }
+                                        if (!empty($tt['american_rules'])) {
+                                            foreach ($tt['american_rules'] as $ar) {
+                                                $subVocab[] = [
+                                                    'word' => $ar['term'] ?? '',
+                                                    'ipa' => '',
+                                                    'meaning' => $ar['meaning'] ?? '',
+                                                    'example' => $ar['example'] ?? '',
+                                                ];
+                                            }
+                                        }
+                                    }
+                                }
+                            @endphp
+                            <div x-show="activeSubtopicIndex === {{ $sIdx }}" class="space-y-6" x-data="{ subVocabSearch: '' }">
+                                <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                                    <div class="relative z-10 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white backdrop-blur-md">
+                                                    Subtopik {{ $st['num'] ?? sprintf('%02d', $sIdx + 1) }} • Vocabulary Bank
+                                                </span>
+                                                <span class="px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase">
+                                                    {{ count($subVocab) }} Kosakata
+                                                </span>
+                                            </div>
+                                            <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-2 text-white">{{ $st['title'] }} Vocabulary</h2>
+                                            <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">Daftar kosakata kunci, pelafalan IPA, arti Bahasa Indonesia, dan contoh penggunaannya dalam kalimat.</p>
+                                        </div>
+                                        @if(!empty($subVocab))
+                                            <button @click="speakText(@js(implode(', ', array_map(fn($v) => $v['word'] ?? ($v['job'] ?? ''), $subVocab))))"
+                                                type="button" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 shrink-0 self-start md:self-auto">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Lafalkan Semua Kosakata</span>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <div class="relative z-10 max-w-md">
+                                        <input type="text" x-model="subVocabSearch" placeholder="Cari kata atau arti..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder:text-white/70 text-xs focus:outline-none focus:bg-white focus:text-slate-900 focus:placeholder:text-slate-400 transition shadow-inner">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    @foreach($subVocab as $vItem)
+                                        @php
+                                            $vWord = $vItem['word'] ?? ($vItem['job'] ?? '');
+                                            $vMeaning = $vItem['meaning'] ?? ($vItem['id'] ?? '');
+                                            $vExample = $vItem['example'] ?? ($vItem['desc'] ?? ($vItem['context'] ?? ''));
+                                            $vIpa = $vItem['ipa'] ?? '';
+                                        @endphp
+                                        <div x-show="!subVocabSearch || '{{ strtolower(addslashes($vWord)) }}'.includes(subVocabSearch.toLowerCase()) || '{{ strtolower(addslashes($vMeaning)) }}'.includes(subVocabSearch.toLowerCase())"
+                                             class="p-5 rounded-3xl bg-white border-2 border-slate-100 hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-sky-100 text-sky-800">
+                                                        {{ $st['num'] ?? 'Vocab' }}
+                                                    </span>
+                                                    @if(!empty($vIpa))
+                                                        <span class="text-[10px] font-mono font-bold text-slate-500">/{{ trim($vIpa, '/') }}/</span>
+                                                    @endif
+                                                </div>
+                                                <h3 class="text-base font-black text-slate-900 mt-1">{{ $vWord }}</h3>
+                                                <p class="text-xs font-bold text-slate-600 mt-0.5">{{ $vMeaning }}</p>
+                                                @if(!empty($vExample))
+                                                    <div class="mt-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 font-mono text-[11px] text-slate-800">
+                                                        {{ $vExample }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <button @click="speakText(@js($vWord . ($vExample ? '. ' . $vExample : '')))" class="mt-3 w-full py-1.5 rounded-xl bg-slate-100 hover:bg-sky-600 hover:text-white text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Lafalkan</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div x-data="{
+                            vocabFilter: 'all',
+                            vocabSearch: '',
+                            playAllVocab(jobs) {
+                                let words = jobs.map(j => j.job || j.word);
+                                this.speakText(words.join(', '), 'female');
+                            }
+                        }" class="space-y-6">
                     
                     @php
                         $jobsGroupA = $meetingData['materi']['jobs_group_a'] ?? [];
@@ -3189,7 +6269,7 @@
                                         <!-- Spelling Section -->
                                         <div class="p-2.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 mb-4">
                                             <div class="flex items-center justify-between mb-1">
-                                                <span class="text-[10px] font-black uppercase text-amber-900 tracking-wider">🔤 Ejaan (Spelling):</span>
+                                                <span class="text-[10px] font-black uppercase text-amber-900 tracking-wider">Ejaan (Spelling):</span>
                                                 <button @click.stop="spellWordAloud('{{ $j['job'] }}')" type="button" class="text-[10px] font-black text-amber-800 hover:text-amber-950 flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-amber-300 shadow-2xs">
                                                     <svg class="w-3 h-3 text-amber-600" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                                                     <span>Eja Huruf</span>
@@ -3224,7 +6304,7 @@
                             <!-- Clue Patterns Box -->
                             <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200">
                                 <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                                    <span class="w-7 h-7 rounded-xl bg-blue-100 text-blue-600 font-black text-xs flex items-center justify-center">💡</span>
+                                    <span class="w-7 h-7 rounded-xl bg-blue-100 text-blue-600 font-black text-xs flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
                                     <h4 class="font-black text-base text-slate-900">Pola Menjelaskan Profesi (How to Describe Jobs)</h4>
                                 </div>
                                 <div class="space-y-3">
@@ -3260,7 +6340,7 @@
                             <!-- Spelling Rules Box -->
                             <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200">
                                 <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                                    <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 font-black text-xs flex items-center justify-center">🔤</span>
+                                    <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 font-black text-xs flex items-center justify-center">ABC</span>
                                     <h4 class="font-black text-base text-slate-900">Aturan &amp; Pola Tanya Jawab Pengejaan (Spelling Rules)</h4>
                                 </div>
                                 <div class="space-y-3">
@@ -3318,16 +6398,16 @@
                                             Semua
                                         </button>
                                         <button @click="numVocabFilter = 'cardinal'" :class="numVocabFilter === 'cardinal' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🔢 Cardinal Numbers
+                                            Cardinal Numbers
                                         </button>
                                         <button @click="numVocabFilter = 'ordinal'" :class="numVocabFilter === 'ordinal' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🥇 Ordinal Numbers
+                                            Ordinal Numbers
                                         </button>
                                         <button @click="numVocabFilter = 'calendar'" :class="numVocabFilter === 'calendar' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            📅 Months &amp; Days
+                                            Months &amp; Days
                                         </button>
                                         <button @click="numVocabFilter = 'era'" :class="numVocabFilter === 'era' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🏛️ Eras &amp; Time Units
+                                            Eras &amp; Time Units
                                         </button>
                                     </div>
                                 </div>
@@ -3431,13 +6511,13 @@
                                             Semua
                                         </button>
                                         <button @click="timeVocabFilter = 'clock'" :class="timeVocabFilter === 'clock' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            ⏰ Clock Expressions
+                                            Clock Expressions
                                         </button>
                                         <button @click="timeVocabFilter = 'schedules'" :class="timeVocabFilter === 'schedules' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            ✈️ Schedules &amp; Transport
+                                            Schedules &amp; Transport
                                         </button>
                                         <button @click="timeVocabFilter = 'routines'" :class="timeVocabFilter === 'routines' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🏃 Daily Routines
+                                            Daily Routines
                                         </button>
                                     </div>
                                 </div>
@@ -3546,19 +6626,19 @@
                                             Semua ({{ count($meetingData['vocabulary'] ?? []) }})
                                         </button>
                                         <button @click="pronounFilter = 'subject'" :class="pronounFilter === 'subject' ? 'bg-white text-indigo-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🔵 Subject
+                                            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1.5"></span>Subject
                                         </button>
                                         <button @click="pronounFilter = 'object'" :class="pronounFilter === 'object' ? 'bg-white text-emerald-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🟢 Object
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5"></span>Object
                                         </button>
                                         <button @click="pronounFilter = 'possessive_adj'" :class="pronounFilter === 'possessive_adj' ? 'bg-white text-amber-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🟡 Possessive Adj
+                                            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-1.5"></span>Possessive Adj
                                         </button>
                                         <button @click="pronounFilter = 'possessive_pro'" :class="pronounFilter === 'possessive_pro' ? 'bg-white text-purple-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🟣 Possessive Pro
+                                            <span class="w-2 h-2 rounded-full bg-purple-500 inline-block mr-1.5"></span>Possessive Pron
                                         </button>
                                         <button @click="pronounFilter = 'reflexive'" :class="pronounFilter === 'reflexive' ? 'bg-white text-rose-900 font-black shadow-xs' : 'text-white hover:bg-white/15 font-bold'" class="px-3.5 py-1.5 rounded-xl text-xs transition">
-                                            🔴 Reflexive
+                                            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block mr-1.5"></span>Reflexive
                                         </button>
                                     </div>
                                     <div class="relative min-w-[200px]">
@@ -3617,49 +6697,2706 @@
                             <p class="text-sm text-slate-600 font-medium">{{ $meetingData['vocabulary'] ?? 'Kosakata untuk topik meeting ini.' }}</p>
                         </div>
                     @endif
+                
+                    @endif
                 </div>
 
-                <!-- ========================================== -->
                 <!-- TAB 6: GAME SPEAKING (CLASSROOM GAME) -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'game'" class="space-y-6">
+                    @if(count($games) > 1)
+                        <div class="flex items-center gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-xs overflow-x-auto mb-6">
+                            @foreach($games as $gi => $g)
+                                <button type="button" @click="activeGameIndex = {{ $gi }}; if (typeof activeSubtopicIndex !== 'undefined') activeSubtopicIndex = {{ $gi }};"
+                                    :class="activeGameIndex === {{ $gi }} ? 'bg-white text-slate-950 font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
+                                    class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 whitespace-nowrap">
+                                    <span style="background-color: {{ $gi === 0 ? '#29a8f5' : '#ff9800' }} !important;" class="w-5 h-5 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                        {{ $gi + 1 }}
+                                    </span>
+                                    <span>{{ $g['title'] ?? ('Game ' . ($gi + 1)) }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div>
-                        @if(count($games) > 1)
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                @foreach($games as $i => $g)
-                                    <button @click="activeGameIndex = {{ $i }}; @if($i < count($materiBlocks))activeMateriIndex = {{ $i }};@endif" type="button"
-                                        :class="activeGameIndex === {{ $i }} ? 'bg-orange-500 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-orange-50'"
-                                        class="px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all">
-                                        {{ $g['title'] ?? ('Game ' . ($i + 1)) }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        @endif
+
                         @foreach($games as $i => $gameData)
                             <div x-show="activeGameIndex === {{ $i }}">
                                 @php
                                     $gameStudentGroups = $meetingStudentGroups->filter(fn ($grp) => $grp->game_index === null || $grp->game_index === $i)->values();
                                     $participationBadge = match($gameData['participation_type'] ?? 'pair') {
-                                        'individual' => ['icon' => '🧍', 'label' => 'Individu'],
-                                        'group' => ['icon' => '👨‍👩‍👧‍👦', 'label' => 'Berkelompok'],
-                                        default => ['icon' => '👥', 'label' => 'Berpasangan (Student A & B)'],
+                                        'individual' => [ 'label' => 'Individu'],
+                                        'group' => [ 'label' => 'Berkelompok'],
+                                        default => [ 'label' => 'Berpasangan (Student A & B)'],
                                     };
                                 @endphp
 
-                    @if(isset($gameData['type']) && $gameData['type'] === 'half_a_crossword')
+                                                            @if(isset($gameData['type']) && $gameData['type'] === 'cardinal_survey')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 2: CARDINAL NUMBERS & PRICE TAG SURVEY       -->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden"
+                             x-data="{
+                                 surveyCards: @js($gameData['cards'] ?? []),
+                                 revealedCards: {},
+                                 toggleCard(idx) {
+                                     this.revealedCards[idx] = !this.revealedCards[idx];
+                                 },
+                                 revealAll() {
+                                     this.surveyCards.forEach((_, idx) => this.revealedCards[idx] = true);
+                                 },
+                                 hideAll() {
+                                     this.revealedCards = {};
+                                 }
+                             }">
+                            <!-- Header Box -->
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                Cardinal Numbers Game • {{ $participationBadge['label'] ?? 'Berpasangan' }}
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $gameData['title'] }}</h2>
+                                        <p class="text-xs sm:text-sm text-sky-100 font-medium mt-1">{{ $gameData['aim'] ?? 'Latihan melafalkan angka besar, harga, dan kuantitas barang secara lancar.' }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <button @click="revealAll()" type="button" class="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-sm transition">
+                                            Buka Semua Jawaban
+                                        </button>
+                                        <button @click="hideAll()" type="button" class="px-4 py-2 rounded-xl bg-white/20 text-white hover:bg-white/30 font-bold text-xs transition">
+                                            Tutup Semua
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Price Cards Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                @foreach($gameData['cards'] ?? [] as $cIdx => $card)
+                                    <div class="bg-white rounded-3xl p-6 shadow-sm border-2 border-slate-200 hover:border-sky-400 transition duration-200 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-3">
+                                                <span class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-200">
+                                                    Item #{{ $cIdx + 1 }}
+                                                </span>
+                                                <span class="text-xs font-bold text-slate-400">{{ $card['qty'] ?? 'Kuantitas' }}</span>
+                                            </div>
+
+                                            <h3 class="font-black text-lg text-slate-900 mb-3">{{ $card['item'] }}</h3>
+
+                                            <div class="text-center py-4 bg-slate-900 rounded-2xl text-amber-400 font-mono text-2xl sm:text-3xl font-black tracking-wider mb-4 shadow-inner">
+                                                {{ $card['price'] }}
+                                            </div>
+
+                                            <div x-show="revealedCards[{{ $cIdx }}]" x-transition class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center mb-4">
+                                                <span class="text-[10px] font-black uppercase text-emerald-800 tracking-wider block mb-1">Cara Melafalkan (In Words):</span>
+                                                <p class="font-black text-sm text-emerald-950">&ldquo;{{ $card['read'] }}&rdquo;</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                                            <button @click="toggleCard({{ $cIdx }})" type="button" class="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition text-center">
+                                                <span x-text="revealedCards[{{ $cIdx }}] ? 'Sembunyikan' : 'Buka Cara Baca'"></span>
+                                            </button>
+                                            <button @click="speakText(@js($card['item'] . ': ' . $card['read']))" type="button" style="background-color: #29a8f5 !important;" class="py-2 px-3 rounded-xl text-white font-bold text-xs shadow-sm hover:opacity-90 transition flex items-center justify-center gap-1" title="Dengarkan Pengucapan">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Audio</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+@elseif(isset($gameData['type']) && $gameData['type'] === 'different_lives')
+                        <!-- ==================================================== -->
+                        <!-- WORKSHEET 20: DIFFERENT LIVES (PAIRWORK SPEAKING)    -->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-4 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden"
+                             x-data="differentLivesGame(@js($gameData))">
+
+                            <!-- Header Box -->
+                            <div style="background-color: #0284c7 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div class="space-y-2">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                Worksheet 20 • Pairwork Speaking
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold text-sky-100">
+                                                {{ $participationBadge['label'] ?? 'Berpasangan' }}
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">{{ $gameData['title'] ?? 'Different Lives: Daily Routines & Telling Time' }}</h2>
+                                        <p class="text-xs sm:text-sm text-sky-100 font-medium max-w-2xl leading-relaxed">
+                                            {{ $gameData['aim'] ?? 'Mendeskripsikan rutinitas harian dengan kartu bergambar, membaca jam analog (British & American time), dan menyusun kalimat present simple & simple past.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Role Status / Switcher -->
+                                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                                        <!-- Student View: Role Locked -->
+                                        <template x-if="previewRole === 'student'">
+                                            <div class="px-4 py-2.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 text-white flex items-center gap-3 shadow-sm">
+                                                <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black text-sm">
+                                                    <span x-text="activeStudent"></span>
+                                                </div>
+                                                <div>
+                                                    <div class="text-[10px] font-black uppercase tracking-wider text-sky-200">Peran Anda</div>
+                                                    <div class="text-xs sm:text-sm font-extrabold flex items-center gap-1.5">
+                                                        <span>Siswa <span x-text="activeStudent"></span></span>
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-400 text-slate-900">Terkunci</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Admin View: Role Switcher -->
+                                        <template x-if="previewRole === 'admin'">
+                                            <div class="p-1.5 rounded-2xl bg-sky-950/40 backdrop-blur-md border border-white/20 flex items-center gap-1">
+                                                <button type="button"
+                                                        @click="activeStudent = 'A'"
+                                                        :class="activeStudent === 'A' ? 'bg-white text-sky-900 shadow-md' : 'text-white hover:bg-white/10'"
+                                                        class="px-4 py-2 rounded-xl text-xs font-black transition">
+                                                    Siswa A
+                                                </button>
+                                                <button type="button"
+                                                        @click="activeStudent = 'B'"
+                                                        :class="activeStudent === 'B' ? 'bg-white text-sky-900 shadow-md' : 'text-white hover:bg-white/10'"
+                                                        class="px-4 py-2 rounded-xl text-xs font-black transition">
+                                                    Siswa B
+                                                </button>
+                                            </div>
+                                        </template>
+
+                                        <!-- Original Worksheet Lightbox Buttons -->
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'cards'; isZoomModalOpen = true"
+                                                    class="px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                    title="Lihat scan lembar kartu Worksheet 20">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span>Scan Kartu Asli</span>
+                                            </button>
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'guide'; isZoomModalOpen = true"
+                                                    class="px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                    title="Lihat Teacher's Notes Worksheet 20">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                                <span>Panduan Guru</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Sub Tabs Navigation -->
+                            <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin border-b border-slate-200">
+                                <button type="button"
+                                        @click="gameSubTab = 'my_routine'"
+                                        :class="gameSubTab === 'my_routine' ? 'bg-sky-600 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>Rutinitas Saya (Siswa <span x-text="activeStudent"></span>)</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'my_routine' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                                          x-text="getMyRoutine().length + ' Kartu'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'partner_routine'"
+                                        :class="gameSubTab === 'partner_routine' ? 'bg-sky-600 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>Tebak &amp; Susun Jadwal Pasangan (Siswa <span x-text="activeStudent === 'A' ? 'B' : 'A'"></span>)</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'partner_routine' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                                          x-text="getPartnerRoutine().length + ' Kartu'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'differences'"
+                                        :class="gameSubTab === 'differences' ? 'bg-sky-600 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition">
+                                    Bandingkan Jadwal (Find Differences)
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'all_cards'"
+                                        :class="gameSubTab === 'all_cards' ? 'bg-sky-600 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition">
+                                    Galeri 24 Kartu Aktivitas
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'guide'"
+                                        :class="gameSubTab === 'guide' ? 'bg-sky-600 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition">
+                                    Panduan Guru (Prosedur)
+                                </button>
+                            </div>
+
+                            <!-- Grammar & Style Controls Bar -->
+                            <div class="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <!-- Time Telling Style -->
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black uppercase tracking-wider text-sky-950">Gaya Jam:</span>
+                                    <div class="inline-flex p-1 rounded-xl bg-sky-200/60">
+                                        <button type="button"
+                                                @click="timeStyle = 'british'"
+                                                :class="timeStyle === 'british' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-3 py-1.5 rounded-lg text-xs transition">
+                                            British (half past seven)
+                                        </button>
+                                        <button type="button"
+                                                @click="timeStyle = 'american'"
+                                                :class="timeStyle === 'american' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-3 py-1.5 rounded-lg text-xs transition">
+                                            American (seven thirty)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Sentence Person / Tense Mode -->
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black uppercase tracking-wider text-sky-950">Bentuk Kalimat:</span>
+                                    <div class="inline-flex p-1 rounded-xl bg-sky-200/60 flex-wrap gap-1">
+                                        <button type="button"
+                                                @click="sentencePerson = 'you'"
+                                                :class="sentencePerson === 'you' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-2.5 py-1 rounded-lg text-xs transition"
+                                                title="You [verb] at [time]">
+                                            You ...
+                                        </button>
+                                        <button type="button"
+                                                @click="sentencePerson = 'i'"
+                                                :class="sentencePerson === 'i' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-2.5 py-1 rounded-lg text-xs transition"
+                                                title="I [verb] at [time]">
+                                            I ...
+                                        </button>
+                                        <button type="button"
+                                                @click="sentencePerson = 'third'"
+                                                :class="sentencePerson === 'third' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-2.5 py-1 rounded-lg text-xs transition"
+                                                title="He/She [verb-s] at [time]">
+                                            He/She ...
+                                        </button>
+                                        <button type="button"
+                                                @click="sentencePerson = 'past'"
+                                                :class="sentencePerson === 'past' ? 'bg-white text-sky-900 font-black shadow-sm' : 'text-sky-800 font-bold'"
+                                                class="px-2.5 py-1 rounded-lg text-xs transition"
+                                                title="Yesterday, you [verb-ed] at [time]">
+                                            Yesterday ...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- TAB 1: MY ROUTINE                              -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'my_routine'" x-transition class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                    <div>
+                                        <h3 class="text-sm font-black text-slate-800">
+                                            Jadwal Aktivitas Siswa <span x-text="activeStudent"></span>
+                                        </h3>
+                                        <p class="text-xs text-slate-500 mt-0.5">
+                                            Kartu di bawah ini diurutkan secara otomatis dari pagi hingga malam sesuai jam yang Anda tetapkan.
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button"
+                                                @click="gameSubTab = 'all_cards'"
+                                                class="px-3.5 py-2 rounded-xl bg-sky-600 text-white font-bold text-xs hover:bg-sky-700 transition flex items-center gap-1.5 shadow-sm">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            <span>Tambah/Ubah Kartu</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Cards Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                    <template x-for="(cardId, index) in getMyRoutine()" :key="'my-' + cardId">
+                                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border-2 border-slate-200 hover:border-sky-400 transition flex flex-col justify-between group">
+                                            <div>
+                                                <!-- Top meta -->
+                                                <div class="flex items-center justify-between gap-2 mb-3">
+                                                    <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-200">
+                                                        Urutan #<span x-text="index + 1"></span>
+                                                    </span>
+                                                    <button type="button"
+                                                            @click="toggleRoutineItem(cardId)"
+                                                            class="text-xs text-slate-400 hover:text-rose-600 transition font-bold"
+                                                            title="Hapus kartu dari jadwal saya">
+                                                        Hapus
+                                                    </button>
+                                                </div>
+
+                                                <!-- Authentic Card Image with Dynamic SVG Clock Overlay -->
+                                                <div class="relative w-full aspect-[170/161] rounded-2xl overflow-hidden bg-amber-50/50 border border-amber-200/60 mb-3 shadow-inner">
+                                                    <img :src="cardMap[cardId] ? cardMap[cardId].image : ''"
+                                                         :alt="cardMap[cardId] ? cardMap[cardId].name : ''"
+                                                         class="w-full h-full object-cover select-none" />
+
+                                                    <!-- SVG Clock Dial & Hands Overlay -->
+                                                    <svg class="absolute pointer-events-none drop-shadow-md"
+                                                         style="top: 5%; left: 5%; width: 31%; height: 31%;"
+                                                         viewBox="0 0 100 100">
+                                                        <!-- Clock Dial Face -->
+                                                        <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#0f172a" stroke-width="4" />
+                                                        <circle cx="50" cy="50" r="41" fill="#ffffff" stroke="#f1f5f9" stroke-width="1.5" />
+                                                        <!-- Hour Tick Marks -->
+                                                        <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(30 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(60 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(90 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(120 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(150 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(180 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(210 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(240 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(270 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(300 50 50)" />
+                                                        <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(330 50 50)" />
+                                                        <!-- Hour Hand -->
+                                                        <line x1="50" y1="50" x2="50" y2="26"
+                                                              stroke="#0f172a" stroke-width="5" stroke-linecap="round"
+                                                              :transform="'rotate(' + getClockAngles(getMyTime(cardId)).hDeg + ' 50 50)'" />
+                                                        <!-- Minute Hand -->
+                                                        <line x1="50" y1="50" x2="50" y2="16"
+                                                              stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"
+                                                              :transform="'rotate(' + getClockAngles(getMyTime(cardId)).mDeg + ' 50 50)'" />
+                                                        <!-- Center Dot -->
+                                                        <circle cx="50" cy="50" r="4.5" fill="#0f172a" />
+                                                    </svg>
+                                                </div>
+
+                                                <!-- Activity Name & Translation -->
+                                                <div class="mb-3">
+                                                    <h4 class="font-black text-sm text-slate-900 leading-tight capitalize"
+                                                        x-text="cardId >= 23 ? customTexts[cardId] : (cardMap[cardId] ? cardMap[cardId].name : '')"></h4>
+                                                    <p class="text-[11px] text-slate-500 font-medium mt-0.5"
+                                                       x-text="cardMap[cardId] ? cardMap[cardId].id_name : ''"></p>
+                                                </div>
+
+                                                <!-- Time Adjuster Controls -->
+                                                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 mb-3 space-y-2">
+                                                    <div class="flex items-center justify-between gap-1">
+                                                        <button type="button"
+                                                                @click="adjustCardTime(cardId, -15)"
+                                                                class="px-2 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition">
+                                                            -15m
+                                                        </button>
+                                                        <input type="time"
+                                                               :value="getMyTime(cardId)"
+                                                               @change="setCardTime(cardId, $event.target.value)"
+                                                               class="px-2 py-1 rounded-lg bg-white border border-slate-300 font-mono text-xs font-black text-center text-slate-900 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+                                                        <button type="button"
+                                                                @click="adjustCardTime(cardId, 15)"
+                                                                class="px-2 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition">
+                                                            +15m
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Spoken Time Pill -->
+                                                    <div class="text-center py-1 px-2 rounded-lg bg-sky-100/70 border border-sky-200">
+                                                        <span class="text-[11px] font-black text-sky-900"
+                                                              x-text="timeStyle === 'british' ? toBritish(getMyTime(cardId)) : toAmerican(getMyTime(cardId))"></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Generated Sentence Box -->
+                                                <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 mb-3">
+                                                    <div class="text-[9px] font-black uppercase tracking-wider text-amber-800 mb-1">
+                                                        Target Kalimat Bicara:
+                                                    </div>
+                                                    <p class="text-xs font-extrabold text-amber-950 leading-snug"
+                                                       x-text="buildSentence(cardMap[cardId], getMyTime(cardId))"></p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Audio Button -->
+                                            <button type="button"
+                                                    @click="speakSentence(cardMap[cardId], getMyTime(cardId))"
+                                                    style="background-color: #0284c7 !important;"
+                                                    class="w-full py-2.5 px-3 rounded-xl text-white font-bold text-xs shadow-sm hover:opacity-95 transition flex items-center justify-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Dengarkan Pelafalan</span>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- TAB 2: PARTNER ROUTINE (GUESS & ORDER)         -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'partner_routine'" x-transition class="space-y-6">
+                                <div class="p-5 rounded-2xl bg-sky-50/70 border border-sky-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <h3 class="text-sm font-black text-sky-950">
+                                            Aktivitas Pasangan (Siswa <span x-text="activeStudent === 'A' ? 'B' : 'A'"></span>)
+                                        </h3>
+                                        <p class="text-xs text-sky-800 font-medium mt-1 max-w-2xl leading-relaxed">
+                                            Tanyakan kepada pasangan Anda kapan ia melakukan setiap aktivitas! Anda dapat mengacak kartu untuk latihan menyusun urutan kronologis berdasarkan jawaban pasangan.
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="toggleScramble()"
+                                                :class="partnerScrambled ? 'bg-amber-500 text-white' : 'bg-white text-slate-700 border border-slate-300'"
+                                                class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span x-text="partnerScrambled ? 'Urutan Teracak (Klik untuk Normal)' : 'Acak Urutan Kartu'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Partner Cards Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                    <template x-for="(cardId, pIdx) in (partnerScrambled ? scrambledOrder : getPartnerRoutine())" :key="'partner-' + cardId">
+                                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border-2 border-slate-200 hover:border-sky-400 transition flex flex-col justify-between">
+                                            <div>
+                                                <!-- Top status -->
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
+                                                        Kartu #<span x-text="pIdx + 1"></span>
+                                                    </span>
+                                                    <button type="button"
+                                                            @click="revealedPartnerCard[cardId] = !revealedPartnerCard[cardId]"
+                                                            class="text-xs font-bold text-sky-600 hover:text-sky-800 transition">
+                                                        <span x-text="revealedPartnerCard[cardId] ? 'Sembunyikan Jam' : 'Kunci Jawaban'"></span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Authentic Card Image with Partner Clock Overlay -->
+                                                <div class="relative w-full aspect-[170/161] rounded-2xl overflow-hidden bg-amber-50/50 border border-amber-200/60 mb-3 shadow-inner">
+                                                    <img :src="cardMap[cardId] ? cardMap[cardId].image : ''"
+                                                         :alt="cardMap[cardId] ? cardMap[cardId].name : ''"
+                                                         class="w-full h-full object-cover select-none" />
+
+                                                    <!-- Clock hands (shown if revealed OR if admin) -->
+                                                    <template x-if="revealedPartnerCard[cardId] || previewRole === 'admin'">
+                                                        <svg class="absolute pointer-events-none drop-shadow-md"
+                                                             style="top: 5%; left: 5%; width: 31%; height: 31%;"
+                                                             viewBox="0 0 100 100">
+                                                            <!-- Clock Dial Face -->
+                                                            <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#0f172a" stroke-width="4" />
+                                                            <circle cx="50" cy="50" r="41" fill="#ffffff" stroke="#f1f5f9" stroke-width="1.5" />
+                                                            <!-- Hour Tick Marks -->
+                                                            <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(30 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(60 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(90 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(120 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(150 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(180 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(210 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(240 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="15" stroke="#0f172a" stroke-width="3" stroke-linecap="round" transform="rotate(270 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(300 50 50)" />
+                                                            <line x1="50" y1="8" x2="50" y2="13" stroke="#64748b" stroke-width="2" stroke-linecap="round" transform="rotate(330 50 50)" />
+                                                            <!-- Hour Hand -->
+                                                            <line x1="50" y1="50" x2="50" y2="26"
+                                                                  stroke="#0f172a" stroke-width="5" stroke-linecap="round"
+                                                                  :transform="'rotate(' + getClockAngles(getPartnerTime(cardId)).hDeg + ' 50 50)'" />
+                                                            <!-- Minute Hand -->
+                                                            <line x1="50" y1="50" x2="50" y2="16"
+                                                                  stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"
+                                                                  :transform="'rotate(' + getClockAngles(getPartnerTime(cardId)).mDeg + ' 50 50)'" />
+                                                            <!-- Center Dot -->
+                                                            <circle cx="50" cy="50" r="4.5" fill="#0f172a" />
+                                                        </svg>
+                                                    </template>
+                                                </div>
+
+                                                <!-- Activity Name -->
+                                                <div class="mb-3">
+                                                    <h4 class="font-black text-sm text-slate-900 leading-tight capitalize"
+                                                        x-text="cardId >= 23 ? customTexts[cardId] : (cardMap[cardId] ? cardMap[cardId].name : '')"></h4>
+                                                    <p class="text-[11px] text-slate-500 font-medium mt-0.5"
+                                                       x-text="cardMap[cardId] ? cardMap[cardId].id_name : ''"></p>
+                                                </div>
+
+                                                <!-- Revealable Time Box -->
+                                                <div class="mb-3">
+                                                    <template x-if="revealedPartnerCard[cardId] || previewRole === 'admin'">
+                                                        <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
+                                                            <div class="font-mono text-lg font-black text-emerald-950" x-text="getPartnerTime(cardId)"></div>
+                                                            <div class="text-[11px] font-bold text-emerald-800"
+                                                                 x-text="timeStyle === 'british' ? toBritish(getPartnerTime(cardId)) : toAmerican(getPartnerTime(cardId))"></div>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!revealedPartnerCard[cardId] && previewRole !== 'admin'">
+                                                        <div class="p-3 rounded-2xl bg-slate-100 border border-slate-200 text-center">
+                                                            <span class="text-xs font-bold text-slate-500">Tanyakan jam ke pasangan</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <!-- Partner Sentence Practice -->
+                                            <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                                                <button type="button"
+                                                        @click="speakSentence(cardMap[cardId], getPartnerTime(cardId))"
+                                                        style="background-color: #0284c7 !important;"
+                                                        class="w-full py-2.5 px-3 rounded-xl text-white font-bold text-xs shadow-sm hover:opacity-95 transition flex items-center justify-center gap-1.5">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                    <span>Dengarkan Jawaban Pasangan</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- TAB 3: FIND DIFFERENCES                        -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'differences'" x-transition class="space-y-6">
+                                <div class="p-5 rounded-2xl bg-amber-50/70 border border-amber-200">
+                                    <h3 class="text-sm font-black text-amber-950 uppercase tracking-wider mb-1">
+                                        Perbandingan Jadwal Siswa A &amp; Siswa B (Procedure Step 5)
+                                    </h3>
+                                    <p class="text-xs text-amber-900 font-medium leading-relaxed">
+                                        Bandingkan aktivitas antara Siswa A dan Siswa B. Sebutkan perbedaan waktu pelaksanaan maupun aktivitas yang hanya dilakukan oleh salah satu siswa!
+                                        Contoh: <em>&ldquo;Student A gets up at 07:00, but Student B gets up at 07:30.&rdquo;</em>
+                                    </p>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <template x-for="card in allCards.filter(c => isInRoutine(c.id, 'A') || isInRoutine(c.id, 'B'))" :key="'diff-' + card.id">
+                                        <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-sky-300 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                                                    <img :src="card.image" :alt="card.name" class="w-full h-full object-cover" />
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-black text-slate-900 capitalize"
+                                                        x-text="card.id >= 23 ? customTexts[card.id] : card.name"></h4>
+                                                    <p class="text-xs text-slate-500 font-medium" x-text="card.id_name"></p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Comparison times -->
+                                            <div class="flex flex-wrap items-center gap-3">
+                                                <!-- Siswa A Pill -->
+                                                <div class="px-3.5 py-2 rounded-xl text-xs font-bold"
+                                                     :class="isInRoutine(card.id, 'A') ? 'bg-sky-50 text-sky-900 border border-sky-200' : 'bg-slate-100 text-slate-400'">
+                                                    <span class="font-black">Siswa A:</span>
+                                                    <span x-text="isInRoutine(card.id, 'A') ? (timesA[card.id] + ' (' + (timeStyle === 'british' ? toBritish(timesA[card.id]) : toAmerican(timesA[card.id])) + ')') : 'Tidak ada jadwal'"></span>
+                                                </div>
+
+                                                <!-- Siswa B Pill -->
+                                                <div class="px-3.5 py-2 rounded-xl text-xs font-bold"
+                                                     :class="isInRoutine(card.id, 'B') ? 'bg-indigo-50 text-indigo-900 border border-indigo-200' : 'bg-slate-100 text-slate-400'">
+                                                    <span class="font-black">Siswa B:</span>
+                                                    <span x-text="isInRoutine(card.id, 'B') ? (timesB[card.id] + ' (' + (timeStyle === 'british' ? toBritish(timesB[card.id]) : toAmerican(timesB[card.id])) + ')') : 'Tidak ada jadwal'"></span>
+                                                </div>
+
+                                                <!-- Speak Comparison Button -->
+                                                <button type="button"
+                                                        @click="speakRaw('Student A ' + (card.third_person || card.name) + ' at ' + toBritish(timesA[card.id]) + ', but Student B does at ' + toBritish(timesB[card.id]))"
+                                                        class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                                                        title="Dengarkan kalimat perbandingan">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- TAB 4: ALL 24 CARDS GALLERY                    -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'all_cards'" x-transition class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                    <div>
+                                        <h3 class="text-sm font-black text-slate-900">Galeri Lengkap 24 Kartu Worksheet 20</h3>
+                                        <p class="text-xs text-slate-500 mt-0.5">Pilih kartu mana saja yang ingin dimasukkan ke dalam rutinitas harian Siswa A atau Siswa B.</p>
+                                    </div>
+                                    <div class="w-full sm:w-64">
+                                        <input type="text"
+                                               x-model="searchQuery"
+                                               placeholder="Cari aktivitas..."
+                                               class="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                                    <template x-for="card in getFilteredCards()" :key="'gallery-' + card.id">
+                                        <div class="bg-white rounded-3xl p-4 shadow-sm border-2 transition flex flex-col justify-between"
+                                             :class="isInRoutine(card.id) ? 'border-sky-500 shadow-md ring-2 ring-sky-100' : 'border-slate-200 hover:border-slate-300'">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-slate-100 text-slate-700">
+                                                        #<span x-text="card.id"></span>
+                                                    </span>
+                                                    <span x-show="isInRoutine(card.id)" class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-sky-100 text-sky-800">
+                                                        Aktif di Siswa <span x-text="activeStudent"></span>
+                                                    </span>
+                                                </div>
+
+                                                <div class="relative w-full aspect-[170/161] rounded-2xl overflow-hidden bg-amber-50/50 border border-amber-200/60 mb-3">
+                                                    <img :src="card.image" :alt="card.name" class="w-full h-full object-cover select-none" />
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <template x-if="card.id < 23">
+                                                        <div>
+                                                            <h4 class="font-black text-xs text-slate-900 capitalize" x-text="card.name"></h4>
+                                                            <p class="text-[10px] text-slate-500 font-medium mt-0.5" x-text="card.id_name"></p>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="card.id >= 23">
+                                                        <div class="space-y-1">
+                                                            <span class="text-[10px] font-black uppercase text-amber-800">Kartu Kustom:</span>
+                                                            <input type="text"
+                                                                   x-model="customTexts[card.id]"
+                                                                   @change="saveData()"
+                                                                   class="w-full px-2 py-1 rounded-lg border border-slate-300 text-xs font-bold text-slate-900" />
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <button type="button"
+                                                    @click="toggleRoutineItem(card.id)"
+                                                    :class="isInRoutine(card.id) ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100' : 'bg-sky-600 text-white hover:bg-sky-700'"
+                                                    class="w-full py-2 px-3 rounded-xl font-bold text-xs transition">
+                                                <span x-text="isInRoutine(card.id) ? 'Keluarkan dari Jadwal' : '+ Masukkan ke Jadwal'"></span>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- TAB 5: TEACHER'S GUIDE                         -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'guide'" x-transition class="space-y-6">
+                                <div class="p-6 rounded-3xl bg-sky-50/70 border border-sky-200 space-y-6">
+                                    <div class="border-b border-sky-200 pb-4">
+                                        <h3 class="text-base font-black text-sky-950 uppercase tracking-wider mb-1">
+                                            Worksheet 20: Different Lives — Teacher's Notes
+                                        </h3>
+                                        <p class="text-xs sm:text-sm text-sky-900 font-medium">
+                                            A pairwork activity to describe a typical day using picture cards and telling the time.
+                                        </p>
+                                    </div>
+
+                                    <!-- Procedure Steps -->
+                                    <div>
+                                        <h4 class="text-xs font-black uppercase tracking-wider text-sky-950 mb-3">6-Step Classroom Procedure:</h4>
+                                        <div class="space-y-3">
+                                            @foreach($gameData['teacher_guide']['procedure'] ?? [] as $stepIdx => $step)
+                                                <div class="p-3.5 rounded-2xl bg-white border border-sky-200/80 flex items-start gap-3">
+                                                    <span class="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-black shrink-0">
+                                                        {{ $stepIdx + 1 }}
+                                                    </span>
+                                                    <p class="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed">
+                                                        {{ $step }}
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Options -->
+                                    <div>
+                                        <h4 class="text-xs font-black uppercase tracking-wider text-sky-950 mb-3">Variasi &amp; Opsi Aktivitas (Options 1–4):</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            @foreach($gameData['teacher_guide']['options'] ?? [] as $optKey => $option)
+                                                <div class="p-4 rounded-2xl bg-white border border-sky-200/80">
+                                                    <h5 class="text-xs font-black text-sky-900 uppercase tracking-wider mb-1">{{ ucfirst(str_replace('_', ' ', $optKey)) }}</h5>
+                                                    <p class="text-xs text-slate-700 font-medium leading-relaxed">{{ $option }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Original Scans Preview Cards -->
+                                    <div class="pt-4 border-t border-sky-200 flex flex-wrap gap-4">
+                                        <div @click="zoomModalTarget = 'cards'; isZoomModalOpen = true" class="cursor-pointer p-3 rounded-2xl bg-white border border-sky-300 hover:border-sky-500 transition group flex items-center gap-3">
+                                            <div class="w-12 h-16 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                                                <img src="{{ asset('images/speaking/different_lives/worksheet_20_cards.png') }}" class="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <div class="text-xs font-black text-slate-900 group-hover:text-sky-600 transition">Buka Lembar Kartu Asli</div>
+                                                <div class="text-[10px] text-slate-500">Klik untuk zoom resolusi tinggi</div>
+                                            </div>
+                                        </div>
+                                        <div @click="zoomModalTarget = 'guide'; isZoomModalOpen = true" class="cursor-pointer p-3 rounded-2xl bg-white border border-sky-300 hover:border-sky-500 transition group flex items-center gap-3">
+                                            <div class="w-12 h-16 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                                                <img src="{{ asset('images/speaking/different_lives/worksheet_20_guide.png') }}" class="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <div class="text-xs font-black text-slate-900 group-hover:text-sky-600 transition">Buka Lembar Guide Asli</div>
+                                                <div class="text-[10px] text-slate-500">Klik untuk zoom resolusi tinggi</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- HD ZOOM LIGHTBOX MODAL                         -->
+                            <!-- ============================================== -->
+                            <div x-show="isZoomModalOpen"
+                                 x-transition.opacity
+                                 class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+                                 style="display: none;"
+                                 @keydown.escape.window="isZoomModalOpen = false">
+                                <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200"
+                                     @click.away="isZoomModalOpen = false">
+                                    <!-- Modal Header -->
+                                    <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'cards'"
+                                                    :class="zoomModalTarget === 'cards' ? 'bg-sky-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                    class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                                Scan Kartu (24 Gambar)
+                                            </button>
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'guide'"
+                                                    :class="zoomModalTarget === 'guide' ? 'bg-sky-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                    class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                                Scan Teacher's Guide
+                                            </button>
+                                        </div>
+                                        <button type="button"
+                                                @click="isZoomModalOpen = false"
+                                                class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-black text-sm transition">
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body (Scrollable Image) -->
+                                    <div class="p-4 overflow-auto flex-1 bg-slate-900/5 flex items-center justify-center">
+                                        <img :src="zoomModalTarget === 'cards' ? '{{ asset('images/speaking/different_lives/worksheet_20_cards.png') }}' : '{{ asset('images/speaking/different_lives/worksheet_20_guide.png') }}'"
+                                             alt="Worksheet 20 Original Scan"
+                                             class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                    </div>
+                                </div>
+                            </div>
+
+                                        @elseif(isset($gameData['type']) && $gameData['type'] === 'who_was_first')
+                        <!-- ==================================================== -->
+                        <!-- ACTIVITY: WHO WAS FIRST? (100M RACE ORDINAL CHALLENGE)-->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-4 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden"
+                             x-data="whoWasFirstGame(@js($gameData))">
+
+                            <!-- Header Box -->
+                            <div style="background-color: #29a8f5 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div class="space-y-2">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                Teka-Teki Logika • 100m Race
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold text-sky-100">
+                                                Topik 1: Telling Ordinal Numbers
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase">
+                                                Pairwork &amp; Class
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/10 text-xs font-semibold text-white">
+                                                ⏱️ 15-20 Menit
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                                            {{ $gameData['title'] ?? 'Logic Puzzle: Who Was First? (100m Race Ordinal Logic Challenge)' }}
+                                        </h2>
+                                        <p class="text-xs sm:text-sm text-sky-100 font-medium max-w-3xl leading-relaxed">
+                                            {{ $gameData['aim'] ?? 'To master expressing finishing positions (1st to 8th), relative position words (in front of, behind, after, before, between, next to), and fluent ordinal pronunciation.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Lightbox Scan Buttons -->
+                                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'worksheet'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                                                title="Lihat lembar soal berwarna resolusi tinggi">
+                                            <span class="text-sm">🎨</span>
+                                            <span>Lembar Soal HD</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'solution'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-sm"
+                                                title="Lihat lembar kunci jawaban lengkap">
+                                            <span class="text-sm">🏆</span>
+                                            <span>Kunci Jawaban</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'scan'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat scan asli hitam putih">
+                                            <span class="text-sm">📄</span>
+                                            <span>Scan Asli B&amp;W</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Tab Navigation Switcher -->
+                            <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-slate-200 pb-3">
+                                <button type="button"
+                                        @click="gameSubTab = 'podium'"
+                                        :class="gameSubTab === 'podium' ? 'bg-[#29a8f5] text-white shadow-md font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <span>🏁</span>
+                                    <span>Papan Urutan Balapan (1st - 8th)</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'worksheet'"
+                                        :class="gameSubTab === 'worksheet' ? 'bg-[#29a8f5] text-white shadow-md font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <span>🖼️</span>
+                                    <span>Lembar Soal &amp; Komik HD</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'logic_guide'"
+                                        :class="gameSubTab === 'logic_guide' ? 'bg-[#29a8f5] text-white shadow-md font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <span>💡</span>
+                                    <span>Panduan Logika Bertahap</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'language'"
+                                        :class="gameSubTab === 'language' ? 'bg-[#29a8f5] text-white shadow-md font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <span>🗣️</span>
+                                    <span>Pola Kalimat Ordinal</span>
+                                </button>
+                            </div>
+
+                            <!-- SUB-TAB 1: INTERACTIVE RACE RANKING PODIUM -->
+                            <div x-show="gameSubTab === 'podium'" class="space-y-6">
+
+                                <!-- Instructions Alert -->
+                                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-2xl">🏃‍♂️</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-sm sm:text-base">
+                                                Instruksi Tantangan 100m Race:
+                                            </h4>
+                                            <p class="text-xs sm:text-sm text-slate-600 mt-0.5 leading-relaxed">
+                                                8 pelari mengikuti balapan 100m. Baca atau dengarkan petunjuk di balon percakapan mereka, lalu klik pelari dan tempatkan pada posisi podium (1st s.d. 8th) yang tepat!
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="checkAnswer()"
+                                                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm transition shadow-sm flex items-center gap-1.5">
+                                            <span>✓</span>
+                                            <span>Periksa Jawaban</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="fillSolution()"
+                                                class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition shadow-sm"
+                                                title="Lihat kunci jawaban di papan">
+                                            Kunci Jawaban
+                                        </button>
+                                        <button type="button"
+                                                @click="clearAllSlots()"
+                                                class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition"
+                                                title="Reset semua posisi">
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Feedback Message Banner (if checked) -->
+                                <div x-show="checked"
+                                     x-transition
+                                     :class="isAllCorrect ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-amber-50 text-amber-900 border-amber-300'"
+                                     class="p-4 rounded-2xl border text-sm font-bold flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xl" x-text="isAllCorrect ? '🎉' : '⚠️'"></span>
+                                        <span x-text="feedbackMessage"></span>
+                                    </div>
+                                    <div class="text-xs font-black px-3 py-1 rounded-full"
+                                         :class="isAllCorrect ? 'bg-white text-emerald-700' : 'bg-amber-200 text-amber-900'">
+                                        Skor: <span x-text="score"></span> / 8
+                                    </div>
+                                </div>
+
+                                <!-- 8 PODIUM SLOTS (Athletic Finish Line Board) -->
+                                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-xs">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xl">🏆</span>
+                                            <h3 class="font-black text-slate-900 text-sm sm:text-base">
+                                                Garis Finish &amp; Peringkat Juara (1st s.d. 8th Place)
+                                            </h3>
+                                        </div>
+                                        <span class="text-xs text-slate-500 font-medium">
+                                            Klik kotak untuk menaruh pelari terpilih
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
+                                        @php
+                                            $ordinals = [
+                                                1 => ['num' => '1st', 'word' => 'First', 'color' => 'amber', 'badge' => '🥇 Juara 1'],
+                                                2 => ['num' => '2nd', 'word' => 'Second', 'color' => 'slate', 'badge' => '🥈 Juara 2'],
+                                                3 => ['num' => '3rd', 'word' => 'Third', 'color' => 'orange', 'badge' => '🥉 Juara 3'],
+                                                4 => ['num' => '4th', 'word' => 'Fourth', 'color' => 'sky', 'badge' => '🏅 Ke-4'],
+                                                5 => ['num' => '5th', 'word' => 'Fifth', 'color' => 'indigo', 'badge' => '🏅 Ke-5'],
+                                                6 => ['num' => '6th', 'word' => 'Sixth', 'color' => 'emerald', 'badge' => '🏅 Ke-6 (Tie)'],
+                                                7 => ['num' => '7th', 'word' => 'Seventh', 'color' => 'emerald', 'badge' => '🏅 Ke-7 (Tie)'],
+                                                8 => ['num' => '8th', 'word' => 'Eighth', 'color' => 'rose', 'badge' => '🏁 Terakhir (Last)'],
+                                            ];
+                                        @endphp
+
+                                        @foreach($ordinals as $pos => $meta)
+                                            <div class="flex flex-col h-full">
+                                                <!-- Rank Header -->
+                                                <div class="text-center py-1.5 px-2 rounded-t-2xl font-black text-xs uppercase tracking-wider
+                                                    @if($pos === 1) bg-amber-500 text-white shadow-xs
+                                                    @elseif($pos === 2) bg-slate-400 text-white
+                                                    @elseif($pos === 3) bg-amber-700 text-white
+                                                    @else bg-slate-200 text-slate-700 @endif">
+                                                    {{ $meta['num'] }} Place
+                                                </div>
+
+                                                <!-- Slot Drop Area -->
+                                                <div @click="placeRunnerInSlot({{ $pos - 1 }})"
+                                                     :class="{
+                                                         'ring-2 ring-sky-500 bg-sky-50/50': selectedRunnerId !== null && !slots[{{ $pos - 1 }}],
+                                                         'border-emerald-500 bg-emerald-50/40': checked && slots[{{ $pos - 1 }}] && (slots[{{ $pos - 1 }}].rank === {{ $pos }} || (({{ $pos }} === 6 || {{ $pos }} === 7) && (slots[{{ $pos - 1 }}].rank === 6 || slots[{{ $pos - 1 }}].rank === 7))),
+                                                         'border-rose-400 bg-rose-50/40': checked && slots[{{ $pos - 1 }}] && !(slots[{{ $pos - 1 }}].rank === {{ $pos }} || (({{ $pos }} === 6 || {{ $pos }} === 7) && (slots[{{ $pos - 1 }}].rank === 6 || slots[{{ $pos - 1 }}].rank === 7))),
+                                                         'border-slate-300 hover:border-sky-400 bg-white': !checked || !slots[{{ $pos - 1 }}]
+                                                     }"
+                                                     class="border-2 border-dashed rounded-b-2xl p-2.5 flex-1 flex flex-col items-center justify-between min-h-[160px] cursor-pointer transition relative group">
+
+                                                    <!-- Filled State -->
+                                                    <template x-if="slots[{{ $pos - 1 }}]">
+                                                        <div class="w-full flex flex-col items-center text-center">
+                                                            <!-- Remove Button -->
+                                                            <button type="button"
+                                                                    @click.stop="removeFromSlot({{ $pos - 1 }})"
+                                                                    class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white text-slate-600 text-xs flex items-center justify-center transition"
+                                                                    title="Hapus dari posisi ini">
+                                                                ✕
+                                                            </button>
+
+                                                            <!-- Runner Image -->
+                                                            <div class="w-16 h-20 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center p-1 mb-1.5 border border-slate-200">
+                                                                <img :src="slots[{{ $pos - 1 }}].image"
+                                                                     :alt="slots[{{ $pos - 1 }}].shirt_name"
+                                                                     class="max-w-full max-h-full object-contain" />
+                                                            </div>
+
+                                                            <!-- Shirt Name -->
+                                                            <div class="font-black text-slate-900 text-xs leading-tight line-clamp-1"
+                                                                 x-text="slots[{{ $pos - 1 }}].shirt_name"></div>
+
+                                                            <!-- Status Tag after Check -->
+                                                            <template x-if="checked">
+                                                                <span class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase"
+                                                                      :class="(slots[{{ $pos - 1 }}].rank === {{ $pos }} || (({{ $pos }} === 6 || {{ $pos }} === 7) && (slots[{{ $pos - 1 }}].rank === 6 || slots[{{ $pos - 1 }}].rank === 7))) ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
+                                                                    <span x-text="(slots[{{ $pos - 1 }}].rank === {{ $pos }} || (({{ $pos }} === 6 || {{ $pos }} === 7) && (slots[{{ $pos - 1 }}].rank === 6 || slots[{{ $pos - 1 }}].rank === 7))) ? '✓ Benar' : '✕ Salah'"></span>
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+
+                                                    <!-- Empty State -->
+                                                    <template x-if="!slots[{{ $pos - 1 }}]">
+                                                        <div class="w-full flex-1 flex flex-col items-center justify-center text-center p-2">
+                                                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-sky-100 group-hover:text-sky-600 transition mb-1 text-sm font-bold">
+                                                                +
+                                                            </div>
+                                                            <span class="text-[11px] text-slate-400 group-hover:text-sky-600 font-semibold leading-tight">
+                                                                Pilih Pelari
+                                                            </span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- RUNNER POOL (8 Runners with Clues & Audio) -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xl">👕</span>
+                                            <h3 class="font-black text-slate-900 text-sm sm:text-base">
+                                                Daftar 8 Pelari &amp; Petunjuk Balapan (Klik untuk memilih):
+                                            </h3>
+                                        </div>
+                                        <span class="text-xs text-slate-500">
+                                            Tekan 🔊 untuk mendengarkan lafal petunjuk
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <template x-for="runner in runners" :key="runner.id">
+                                            <div @click="selectRunner(runner)"
+                                                 :class="{
+                                                     'ring-3 ring-[#29a8f5] shadow-lg border-[#29a8f5] bg-sky-50/40': selectedRunnerId === runner.id,
+                                                     'opacity-50 grayscale bg-slate-50 border-slate-200': isRunnerPlaced(runner.id) && selectedRunnerId !== runner.id,
+                                                     'hover:border-sky-300 hover:shadow-md bg-white border-slate-200': !isRunnerPlaced(runner.id) && selectedRunnerId !== runner.id
+                                                 }"
+                                                 class="border-2 rounded-2xl p-4 transition cursor-pointer flex flex-col justify-between relative group">
+
+                                                <!-- Top Row: Thumb + Title -->
+                                                <div class="flex items-start gap-3 mb-3">
+                                                    <!-- Runner Bust Image -->
+                                                    <div class="w-16 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center p-1">
+                                                        <img :src="runner.image"
+                                                             :alt="runner.shirt_name"
+                                                             class="max-w-full max-h-full object-contain" />
+                                                    </div>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center justify-between gap-1">
+                                                            <h4 class="font-black text-slate-900 text-sm truncate"
+                                                                x-text="runner.shirt_name"></h4>
+                                                            <!-- Placed Indicator -->
+                                                            <template x-if="isRunnerPlaced(runner.id)">
+                                                                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase shrink-0">
+                                                                    Terpasang
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                        <p class="text-[11px] text-slate-500 mt-0.5" x-text="runner.pattern"></p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Clue Speech Bubble -->
+                                                <div class="bg-slate-50 border border-sky-200 rounded-xl p-3 relative text-xs text-slate-800 leading-relaxed mb-3 flex-1 flex flex-col justify-between">
+                                                    <p class="italic font-medium text-slate-700" x-text="'“' + runner.clue + '”'"></p>
+                                                </div>
+
+                                                <!-- Bottom Action Bar: Audio + Select -->
+                                                <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                                                    <!-- Audio TTS -->
+                                                    <button type="button"
+                                                            @click.stop="speak(runner.speech_clue)"
+                                                            class="px-2.5 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold transition flex items-center gap-1.5">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                                        <span>Dengar</span>
+                                                    </button>
+
+                                                    <!-- Select / Place Prompt -->
+                                                    <div class="text-right">
+                                                        <span x-show="selectedRunnerId === runner.id" class="text-xs font-black text-[#29a8f5]">
+                                                            Pilih posisi ➔
+                                                        </span>
+                                                        <span x-show="selectedRunnerId !== runner.id && !isRunnerPlaced(runner.id)" class="text-xs font-bold text-slate-400 group-hover:text-slate-600">
+                                                            Klik pilih
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 2: WORKSHEET & COMIC VIEWER -->
+                            <div x-show="gameSubTab === 'worksheet'" class="space-y-6">
+                                <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <!-- Mode Switcher -->
+                                    <div class="flex items-center gap-2">
+                                        <button type="button"
+                                                @click="viewMode = 'worksheet'"
+                                                :class="viewMode === 'worksheet' ? 'bg-[#29a8f5] text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-xs">
+                                            <span>🎨</span>
+                                            <span>Lembar Soal Siswa (Worksheet)</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="viewMode = 'solution'"
+                                                :class="viewMode === 'solution' ? 'bg-amber-500 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-xs">
+                                            <span>🏆</span>
+                                            <span>Kunci Jawaban Lengkap (Answer Key)</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="viewMode = 'scan'"
+                                                :class="viewMode === 'scan' ? 'bg-slate-700 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-xs">
+                                            <span>📄</span>
+                                            <span>Scan Asli B&amp;W</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="flex items-center gap-2">
+                                        <button type="button"
+                                                @click="zoomModalTarget = viewMode; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                            <span>Perbesar HD</span>
+                                        </button>
+                                        <a :href="viewMode === 'solution' ? assets.solution_color : (viewMode === 'scan' ? assets.scan_bw : assets.worksheet_color)"
+                                           target="_blank"
+                                           download
+                                           class="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            <span>Download Gambar</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Image Display Card -->
+                                <div class="bg-slate-900/5 rounded-3xl p-4 sm:p-8 flex items-center justify-center border border-slate-200">
+                                    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                                        <img :src="viewMode === 'solution' ? assets.solution_color : (viewMode === 'scan' ? assets.scan_bw : assets.worksheet_color)"
+                                             :alt="viewMode === 'solution' ? 'Who Was First Answer Key' : 'Who Was First Worksheet'"
+                                             class="w-full h-auto object-contain cursor-zoom-in"
+                                             @click="zoomModalTarget = viewMode; isZoomModalOpen = true" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 3: STEP-BY-STEP LOGIC DEDUCTION GUIDE -->
+                            <div x-show="gameSubTab === 'logic_guide'" class="space-y-6">
+                                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🧠</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-base">
+                                                Langkah Penalaran Deduktif (Step-by-Step Logic):
+                                            </h4>
+                                            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+                                                Bagaimana memecahkan urutan juara 1st s.d. 8th dari petunjuk teks tanpa menebak:
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <template x-for="step in logicSteps" :key="step.step">
+                                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-sky-300 transition">
+                                            <div class="flex items-start gap-4">
+                                                <div class="w-10 h-10 rounded-2xl bg-[#29a8f5] text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
+                                                     x-text="'#' + step.step"></div>
+                                                <div class="flex-1 space-y-2">
+                                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                                        <h4 class="font-black text-slate-900 text-base" x-text="step.target"></h4>
+                                                        <button type="button"
+                                                                @click="speak(step.clue)"
+                                                                class="px-2.5 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold transition flex items-center gap-1">
+                                                            <span>🔊</span>
+                                                            <span>Dengar Clue</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Clue Quote -->
+                                                    <div class="bg-slate-50 border-l-4 border-amber-400 p-3 rounded-r-xl text-xs sm:text-sm font-semibold text-slate-700 italic">
+                                                        “<span x-text="step.clue"></span>”
+                                                    </div>
+
+                                                    <!-- Explanation EN & ID -->
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs sm:text-sm">
+                                                        <div class="bg-sky-50/60 p-3 rounded-xl border border-sky-100 text-slate-700 leading-relaxed">
+                                                            <strong class="text-sky-900 font-bold block mb-1">🇬🇧 English Logic:</strong>
+                                                            <span x-text="step.explanation_en"></span>
+                                                        </div>
+                                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-700 leading-relaxed">
+                                                            <strong class="text-slate-900 font-bold block mb-1">🇮🇩 Penjelasan Bahasa Indonesia:</strong>
+                                                            <span x-text="step.explanation_id"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 4: TARGET ORDINAL LANGUAGE & SPEAKING EXPONENTS -->
+                            <div x-show="gameSubTab === 'language'" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    <!-- Question & Answer Patterns -->
+                                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+                                        <div class="flex items-center gap-2 text-slate-900 font-black text-base border-b border-slate-100 pb-3">
+                                            <span>💬</span>
+                                            <span>Pola Tanya-Jawab Berbicara (Speaking Patterns)</span>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            <div class="bg-sky-50 rounded-2xl p-4 border border-sky-200">
+                                                <span class="text-xs font-black text-sky-800 uppercase tracking-wider block mb-1">Tanya Juara Pertama:</span>
+                                                <p class="font-bold text-slate-900 text-sm">"Who was first in the 100-metre race?"</p>
+                                                <p class="text-xs text-slate-600 mt-1">Jawaban: "The runner in the stripy shirt was first."</p>
+                                            </div>
+
+                                            <div class="bg-rose-50 rounded-2xl p-4 border border-rose-200">
+                                                <span class="text-xs font-black text-rose-800 uppercase tracking-wider block mb-1">Tanya Pelari Terakhir:</span>
+                                                <p class="font-bold text-slate-900 text-sm">"Who was last in the race?"</p>
+                                                <p class="text-xs text-slate-600 mt-1">Jawaban: "The runner in the cat shirt finished last (in eighth place)."</p>
+                                            </div>
+
+                                            <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                                                <span class="text-xs font-black text-amber-800 uppercase tracking-wider block mb-1">Tanya Posisi Spesifik:</span>
+                                                <p class="font-bold text-slate-900 text-sm">"Which position did the runner in the spotted shirt finish in?"</p>
+                                                <p class="text-xs text-slate-600 mt-1">Jawaban: "He finished in second (2nd) place."</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prepositions of Relative Position -->
+                                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+                                        <div class="flex items-center gap-2 text-slate-900 font-black text-base border-b border-slate-100 pb-3">
+                                            <span>📐</span>
+                                            <span>Preposisi Posisi &amp; Urutan (Order Prepositions)</span>
+                                        </div>
+
+                                        <div class="space-y-2 text-xs sm:text-sm">
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">in front of</strong>
+                                                <span class="text-slate-600">di depan (Stripy came in front of Spotted)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">behind</strong>
+                                                <span class="text-slate-600">di belakang (Spotted came behind Stripy)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">before</strong>
+                                                <span class="text-slate-600">sebelum / lebih awal (I came before five runners)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">after</strong>
+                                                <span class="text-slate-600">setelah / lebih lambat (I came after Spotted)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">in between ... and ...</strong>
+                                                <span class="text-slate-600">di antara dua pihak (between White and No.5)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">next to</strong>
+                                                <span class="text-slate-600">tepat di sebelah / berdampingan (next to No.10)</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <strong class="text-sky-700">at the same time</strong>
+                                                <span class="text-slate-600">waktu yang persis sama / seri (our times were the same)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- HD ZOOM LIGHTBOX MODAL                         -->
+                            <!-- ============================================== -->
+                            <div x-show="isZoomModalOpen"
+                                 x-transition.opacity
+                                 class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+                                 style="display: none;"
+                                 @keydown.escape.window="isZoomModalOpen = false">
+                                <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200"
+                                     @click.away="isZoomModalOpen = false">
+                                    <!-- Modal Header -->
+                                    <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'worksheet'"
+                                                    :class="zoomModalTarget === 'worksheet' ? 'bg-[#29a8f5] text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                    class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                                🎨 Lembar Soal Berwarna
+                                            </button>
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'solution'"
+                                                    :class="zoomModalTarget === 'solution' ? 'bg-amber-500 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                    class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                                🏆 Kunci Jawaban Lengkap
+                                            </button>
+                                            <button type="button"
+                                                    @click="zoomModalTarget = 'scan'"
+                                                    :class="zoomModalTarget === 'scan' ? 'bg-slate-700 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                                                    class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                                📄 Scan Asli B&amp;W
+                                            </button>
+                                        </div>
+                                        <button type="button"
+                                                @click="isZoomModalOpen = false"
+                                                class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-black text-sm transition">
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body (Scrollable Image) -->
+                                    <div class="p-4 overflow-auto flex-1 bg-slate-900/5 flex items-center justify-center">
+                                        <img :src="zoomModalTarget === 'solution' ? assets.solution_color : (zoomModalTarget === 'scan' ? assets.scan_bw : assets.worksheet_color)"
+                                             :alt="zoomModalTarget === 'solution' ? 'Who Was First Solution' : 'Who Was First Worksheet'"
+                                             class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+@elseif(isset($gameData['type']) && $gameData['type'] === 'happy_birthday')
+                        <!-- ==================================================== -->
+                        <!-- ACTIVITY 13: HAPPY BIRTHDAY (SEARCH GAME & PARCEL)   -->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-4 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden"
+                             x-data="happyBirthdayGame(@js($gameData))">
+
+                            <!-- Header Box -->
+                            <div style="background-color: #ff9800 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div class="space-y-2">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                Activity 13 • Whole Class Search Game
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold text-amber-100">
+                                                Topik 2: Calendar &amp; Dates
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase">
+                                                {{ $participationBadge['label'] ?? 'Seluruh Kelas' }}
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                                            {{ $gameData['title'] ?? 'Activity 13: Happy Birthday (The Present Hunt & Search Game)' }}
+                                        </h2>
+                                        <p class="text-xs sm:text-sm text-amber-100 font-medium max-w-3xl leading-relaxed">
+                                            {{ $gameData['aim'] ?? 'To practice asking and saying when birthdays are fluently using "When is your birthday?", "It\'s in (Month)", and "It\'s on (Date)".' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Lightbox Scan Buttons -->
+                                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'cards'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat lembar kartu kado asli (Presents Cards)">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span>Scan 12 Kado Asli</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'guide'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat lembar instruksi guru Activity 13">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                            <span>Panduan Guru</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="zoomModalTarget = 'language'; isZoomModalOpen = true"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat Classroom Language asli">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                            <span>Bahasa Kelas</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-tabs Navigation -->
+                            <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin border-b border-slate-200">
+                                <button type="button"
+                                        @click="gameSubTab = 'my_present'"
+                                        :class="gameSubTab === 'my_present' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>🎁 Misi Kado Saya (My Present)</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'interview_log'"
+                                        :class="gameSubTab === 'interview_log' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>📝 Catatan Temuan Tanya Jawab</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'interview_log' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                                          x-text="searchLog.length + ' Teman'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'all_cards'"
+                                        :class="gameSubTab === 'all_cards' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>🎴 Galeri 12 Kartu Kado</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'all_cards' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                                          x-text="allCards.length + ' Kartu'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'guide'"
+                                        :class="gameSubTab === 'guide' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition">
+                                    📖 Panduan Guru &amp; Bahasa Kelas
+                                </button>
+                            </div>
+
+                            <!-- Grammar & Style Controls Bar -->
+                            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black uppercase tracking-wider text-amber-950">Format Pengucapan Tanggal:</span>
+                                    <div class="inline-flex p-1 rounded-xl bg-amber-200/60">
+                                        <button type="button"
+                                                @click="dateStyle = 'uk'"
+                                                :class="dateStyle === 'uk' ? 'bg-white text-amber-950 font-black shadow-sm' : 'text-amber-900 font-bold'"
+                                                class="px-3 py-1.5 rounded-lg text-xs transition">
+                                            British (the 28th of February)
+                                        </button>
+                                        <button type="button"
+                                                @click="dateStyle = 'us'"
+                                                :class="dateStyle === 'us' ? 'bg-white text-amber-950 font-black shadow-sm' : 'text-amber-900 font-bold'"
+                                                class="px-3 py-1.5 rounded-lg text-xs transition">
+                                            American (February 28th)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Fokus Preposisi: <strong>IN</strong> + Bulan (in July) &bull; <strong>ON</strong> + Tanggal (on July 15th)</span>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- SUBTAB 1: MISI KADO SAYA (MY PRESENT CARD)     -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'my_present'" class="space-y-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                    
+                                    <!-- Left Column: Present Card Graphic & Action -->
+                                    <div class="lg:col-span-5 flex flex-col items-center">
+                                        <template x-if="selectedCard">
+                                            <div class="w-full max-w-sm bg-gradient-to-b from-amber-50 to-orange-50 rounded-3xl p-6 border-2 border-amber-300 shadow-xl relative overflow-hidden flex flex-col items-center text-center">
+                                                <!-- Top Badge -->
+                                                <div class="flex items-center justify-between w-full mb-3">
+                                                    <span class="px-3 py-1 rounded-full bg-amber-200/80 text-amber-950 text-2xs font-black uppercase tracking-wider">
+                                                        Kado Misteri Anda
+                                                    </span>
+                                                    <span class="px-2.5 py-1 rounded-lg bg-white/90 border border-amber-200 text-xs font-black text-amber-900">
+                                                        Item #<span x-text="selectedCard.id"></span>
+                                                    </span>
+                                                </div>
+
+                                                <!-- Present Box Illustration with Stamp Tag -->
+                                                <div class="relative w-56 h-56 my-2 flex items-center justify-center">
+                                                    <img :src="selectedCard.image || '{{ asset('images/speaking/happy_birthday/card_01.png') }}?v=color_v2'" 
+                                                         alt="Present Box"
+                                                         class="w-full h-full object-contain filter drop-shadow-md hover:scale-105 transition duration-300">
+                                                    
+                                                    <!-- Dynamic Tag Overlay over the Blank Label Tag -->
+                                                    <div class="absolute bottom-4 left-6 right-6 bg-white/95 backdrop-blur-xs border-2 border-slate-900 rounded-xl p-2 shadow-md transform -rotate-2">
+                                                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Target Birthday:</span>
+                                                        <span class="text-sm sm:text-base font-black text-slate-950 font-mono block leading-tight"
+                                                              x-text="dateStyle === 'uk' ? selectedCard.date_uk : selectedCard.date_us"></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Mystery Gift Reveal Box -->
+                                                <div class="w-full mt-4 p-4 rounded-2xl bg-white border border-amber-200 shadow-xs text-left">
+                                                    <div class="flex items-center justify-between mb-1.5">
+                                                        <span class="text-2xs font-extrabold uppercase text-amber-800 tracking-wider">Tebakan Isi Hadiah (Gift Item):</span>
+                                                        <button type="button" @click="revealedGift = !revealedGift" class="text-2xs font-bold text-amber-600 hover:text-amber-800 underline">
+                                                            <span x-text="revealedGift ? 'Tutup Rahasia' : 'Intip Isi Kado 🎁'"></span>
+                                                        </button>
+                                                    </div>
+
+                                                    <div x-show="!revealedGift" class="text-xs text-slate-400 font-medium italic flex items-center gap-1.5 py-1">
+                                                        <span>🔒 Tersembunyi di dalam bingkisan kado...</span>
+                                                    </div>
+
+                                                    <div x-show="revealedGift" x-transition class="space-y-1">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-2xl" x-text="selectedCard.gift_icon || '🎁'"></span>
+                                                            <div>
+                                                                <p class="text-sm font-black text-slate-900" x-text="selectedCard.gift"></p>
+                                                                <p class="text-2xs font-semibold text-slate-500" x-text="selectedCard.gift_id"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Controls underneath card -->
+                                                <div class="w-full mt-4 flex items-center gap-2">
+                                                    <button type="button"
+                                                            @click="drawRandomCard()"
+                                                            :disabled="isDrawing"
+                                                            style="background-color: #ff9800 !important;"
+                                                            class="flex-1 py-3 px-4 rounded-2xl text-white font-black text-xs shadow-md hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                                                        <svg class="w-4 h-4" :class="isDrawing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                        <span>Acak Kado Baru</span>
+                                                    </button>
+                                                    <button type="button"
+                                                            @click="showCustomCreator = !showCustomCreator"
+                                                            class="py-3 px-3.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs transition"
+                                                            title="Buat kado dengan tanggal lahirmu sendiri">
+                                                        ✏️ Kustom
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Custom Birthday Maker Box (Collapsible) -->
+                                        <div x-show="showCustomCreator" x-transition class="w-full max-w-sm mt-4 p-5 rounded-3xl bg-slate-50 border border-slate-200 shadow-sm space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">Buat Kado Ulang Tahunmu Sendiri</h4>
+                                                <button @click="showCustomCreator = false" class="text-slate-400 hover:text-slate-600 text-xs font-bold">✕</button>
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Bulan Lahir:</label>
+                                                <select x-model="customDate.month" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800">
+                                                    <template x-for="m in monthsList" :key="m">
+                                                        <option :value="m" x-text="m"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Tanggal Lahir (1 - 31):</label>
+                                                <input type="number" min="1" max="31" x-model.number="customDate.day" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800">
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Hadiah Impian (Bahasa Inggris):</label>
+                                                <input type="text" x-model="customDate.gift" placeholder="e.g. a new smartphone, a cute puppy" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-800">
+                                            </div>
+                                            <button type="button" @click="saveCustomCard()" style="background-color: #29a8f5 !important;" class="w-full py-2.5 rounded-xl text-white font-black text-xs transition">
+                                                Simpan Kartu Kado Saya
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column: Step-by-Step Speaking Guide & Audio Prompts -->
+                                    <div class="lg:col-span-7 space-y-4">
+                                        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+                                            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                                                <div>
+                                                    <span class="text-2xs font-extrabold uppercase text-amber-700 tracking-wider block">Misi Kelas Interaktif</span>
+                                                    <h3 class="text-lg font-black text-slate-900">Panduan Praktik Berbicara di Kelas</h3>
+                                                </div>
+                                                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black">Search Game</span>
+                                            </div>
+
+                                            <!-- Step 1: Ask Classmate -->
+                                            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">1</span>
+                                                        <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Tanyakan kepada teman di kelas:</span>
+                                                    </div>
+                                                    <button type="button" @click="speak('When is your birthday?')" class="text-xs text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span>Audio</span>
+                                                    </button>
+                                                </div>
+                                                <p class="text-base sm:text-lg font-black text-slate-900 font-serif pl-8">&ldquo;When is your birthday?&rdquo;</p>
+                                                <p class="text-xs text-slate-500 pl-8">Artinya: &ldquo;Kapan hari ulang tahunmu?&rdquo;</p>
+                                            </div>
+
+                                            <!-- Step 2: Listen & Answer Patterns -->
+                                            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-6 h-6 rounded-full bg-sky-500 text-white font-black text-xs flex items-center justify-center">2</span>
+                                                    <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Pola Jawaban yang Mungkin Kamu Dengar:</span>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-8">
+                                                    <!-- Pattern IN (Month only) -->
+                                                    <div class="p-3 rounded-xl bg-sky-50/70 border border-sky-200">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <span class="text-[10px] font-black uppercase text-sky-800">Preposisi IN (Bulan Saja):</span>
+                                                            <button type="button" @click="speak(selectedCard ? selectedCard.answer_in : 'It is in February')" class="text-sky-600 hover:text-sky-800">
+                                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                            </button>
+                                                        </div>
+                                                        <p class="text-xs font-black text-sky-950" x-text="selectedCard ? selectedCard.answer_in : 'It\'s in February.'"></p>
+                                                    </div>
+
+                                                    <!-- Pattern ON (Specific date) -->
+                                                    <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <span class="text-[10px] font-black uppercase text-emerald-800">Preposisi ON (Tanggal Spesifik):</span>
+                                                            <button type="button" @click="speak(dateStyle === 'uk' ? (selectedCard ? selectedCard.answer_on_uk : '') : (selectedCard ? selectedCard.answer_on_us : ''))" class="text-emerald-600 hover:text-emerald-800">
+                                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                            </button>
+                                                        </div>
+                                                        <p class="text-xs font-black text-emerald-950" x-text="dateStyle === 'uk' ? (selectedCard ? selectedCard.answer_on_uk : '') : (selectedCard ? selectedCard.answer_on_us : '')"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Step 3: Check Match & Handover -->
+                                            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-6 h-6 rounded-full bg-emerald-500 text-white font-black text-xs flex items-center justify-center">3</span>
+                                                    <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Cek Kecocokan &amp; Serahkan Kado:</span>
+                                                </div>
+                                                
+                                                <div class="space-y-2 pl-8">
+                                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                                                        <span class="font-extrabold text-red-600">❌ Jika Tanggal Tidak Cocok:</span>
+                                                        <p class="font-bold text-slate-700 mt-0.5">&ldquo;Oh, it's not you! Happy searching!&rdquo; (Lanjutkan mencari teman lain)</p>
+                                                    </div>
+
+                                                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <span class="font-extrabold text-emerald-700">🎉 Jika Tanggal Cocok (Serahkan Kado!):</span>
+                                                            <button type="button" @click="speak(selectedCard ? selectedCard.handover : 'Happy Birthday! This present is for you!')" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1">
+                                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                                <span>Audio</span>
+                                                            </button>
+                                                        </div>
+                                                        <p class="text-sm font-black text-emerald-950 font-serif leading-snug"
+                                                           x-text="selectedCard ? selectedCard.handover : 'Happy Birthday! This present is for you. It\'s a box of chocolates!'"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Quick Shortcut to Log -->
+                                            <div class="pt-2 flex justify-end">
+                                                <button type="button" @click="gameSubTab = 'interview_log'" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold text-xs transition flex items-center gap-2">
+                                                    <span>Catat Jawaban Teman ke Tabel</span>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- SUBTAB 2: CATATAN TEMUAN TANYA JAWAB           -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'interview_log'" class="space-y-6">
+                                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                        <div>
+                                            <h3 class="text-base font-black text-slate-900">Catat Temuan Wawancara di Kelas</h3>
+                                            <p class="text-xs text-slate-500">Tanyakan &ldquo;When is your birthday?&rdquo; kepada teman-teman dan catat jawabannya di bawah ini.</p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-black text-slate-800">
+                                                Total Teman: <span x-text="searchLog.length"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form to Add -->
+                                    <form @submit.prevent="addSearchLog()" class="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 bg-white rounded-2xl border border-slate-200 shadow-xs mb-6">
+                                        <div class="sm:col-span-4">
+                                            <label class="text-2xs font-black uppercase text-slate-500 block mb-1">Nama Teman:</label>
+                                            <input type="text" x-model="newLog.name" placeholder="e.g. Budi, Sarah, Rio" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+                                        </div>
+                                        <div class="sm:col-span-3">
+                                            <label class="text-2xs font-black uppercase text-slate-500 block mb-1">Bulan Lahir (It's in...):</label>
+                                            <select x-model="newLog.month" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+                                                <template x-for="m in monthsList" :key="m">
+                                                    <option :value="m" x-text="m"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="text-2xs font-black uppercase text-slate-500 block mb-1">Tanggal (1 - 31):</label>
+                                            <input type="number" min="1" max="31" x-model.number="newLog.day" placeholder="28" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+                                        </div>
+                                        <div class="sm:col-span-3 flex items-end">
+                                            <button type="submit" style="background-color: #ff9800 !important;" class="w-full py-2.5 px-4 rounded-xl text-white font-black text-xs shadow-sm hover:opacity-90 transition flex items-center justify-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Catat Teman</span>
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Table of Logs -->
+                                    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-xs">
+                                        <table class="w-full text-left text-xs">
+                                            <thead class="bg-slate-100/80 text-slate-600 font-black uppercase tracking-wider text-2xs border-b border-slate-200">
+                                                <tr>
+                                                    <th class="py-3 px-4 w-12 text-center">#</th>
+                                                    <th class="py-3 px-4">Nama Teman</th>
+                                                    <th class="py-3 px-4">Bulan Lahir (Preposisi IN)</th>
+                                                    <th class="py-3 px-4">Tanggal Lahir (Preposisi ON)</th>
+                                                    <th class="py-3 px-4 text-center">Kecocokan Kado</th>
+                                                    <th class="py-3 px-4 text-right">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100">
+                                                <template x-for="(log, idx) in searchLog" :key="log.id || idx">
+                                                    <tr class="hover:bg-amber-50/40 transition">
+                                                        <td class="py-3 px-4 text-center font-bold text-slate-400" x-text="idx + 1"></td>
+                                                        <td class="py-3 px-4 font-black text-slate-900" x-text="log.name"></td>
+                                                        <td class="py-3 px-4 font-bold text-sky-700">
+                                                            <span>&ldquo;It's in <span x-text="log.month"></span>&rdquo;</span>
+                                                        </td>
+                                                        <td class="py-3 px-4 font-bold text-emerald-700">
+                                                            <template x-if="log.day">
+                                                                <span>&ldquo;It's on <span x-text="log.month + ' ' + log.day"></span>&rdquo;</span>
+                                                            </template>
+                                                            <template x-if="!log.day">
+                                                                <span class="text-slate-400 italic">(belum spesifik)</span>
+                                                            </template>
+                                                        </td>
+                                                        <td class="py-3 px-4 text-center">
+                                                            <button type="button" @click="toggleMatch(idx)" 
+                                                                    :class="log.matched ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-200'"
+                                                                    class="px-3 py-1 rounded-full text-2xs font-extrabold border transition inline-flex items-center gap-1">
+                                                                <span x-text="log.matched ? '🎁 Cocok & Diserahkan!' : 'Belum Cocok'"></span>
+                                                            </button>
+                                                        </td>
+                                                        <td class="py-3 px-4 text-right">
+                                                            <button type="button" @click="removeLog(idx)" class="text-red-500 hover:text-red-700 font-bold text-xs p-1" title="Hapus catatan">
+                                                                Hapus
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                                <template x-if="searchLog.length === 0">
+                                                    <tr>
+                                                        <td colspan="6" class="py-8 text-center text-slate-400 font-medium italic">
+                                                            Belum ada teman yang dicatat. Tanyakan &ldquo;When is your birthday?&rdquo; lalu catat hasilnya di formulir atas!
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- SUBTAB 3: GALERI 12 KARTU KADO (ALL CARDS)     -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'all_cards'" class="space-y-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-base font-black text-slate-900">Galeri 12 Kartu Kado Buku Teks</h3>
+                                        <p class="text-xs text-slate-500">Klik &ldquo;Pilih Kado Ini&rdquo; untuk menjadikannya kartu misimu, atau buka rahasia hadiah di baliknya.</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-xl">
+                                        Total 12 Kartu
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    <template x-for="(c, cIdx) in allCards" :key="c.id">
+                                        <div class="bg-white rounded-2xl p-4 border-2 border-slate-200 hover:border-amber-400 transition shadow-sm hover:shadow-md flex flex-col justify-between group">
+                                            <div>
+                                                <!-- Card Header -->
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider">
+                                                        Kado #<span x-text="c.id"></span>
+                                                    </span>
+                                                    <span class="text-xs font-black text-slate-800" x-text="c.month"></span>
+                                                </div>
+
+                                                <!-- Present Image with Dynamic Tag -->
+                                                <div class="relative w-full h-40 bg-amber-50/50 rounded-xl p-2 mb-3 flex items-center justify-center overflow-hidden">
+                                                    <img :src="c.image || '{{ asset('images/speaking/happy_birthday/card_01.png') }}'" 
+                                                         alt="Present Box" 
+                                                         class="w-full h-full object-contain group-hover:scale-105 transition duration-200">
+                                                    
+                                                    <!-- Attached Label Tag -->
+                                                    <div class="absolute bottom-2 left-3 right-3 bg-white/95 backdrop-blur-xs border border-slate-900 rounded-lg p-1.5 shadow-xs text-center transform -rotate-1">
+                                                        <span class="text-[9px] font-black uppercase text-slate-400 block leading-none">Target:</span>
+                                                        <span class="text-xs font-black text-slate-900 block leading-tight font-mono"
+                                                              x-text="dateStyle === 'uk' ? c.date_uk : c.date_us"></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Hidden / Revealed Gift -->
+                                                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 mb-3">
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-[10px] font-bold text-slate-500 uppercase">Isi Kado:</span>
+                                                        <button type="button" @click="toggleCardGift(c.id)" class="text-[10px] font-bold text-amber-600 hover:text-amber-800">
+                                                            <span x-text="revealedCardGifts[c.id] ? 'Tutup' : 'Buka 🎁'"></span>
+                                                        </button>
+                                                    </div>
+                                                    <div x-show="revealedCardGifts[c.id]" x-transition class="mt-1 flex items-center gap-1.5">
+                                                        <span class="text-lg" x-text="c.gift_icon || '🎁'"></span>
+                                                        <span class="text-xs font-black text-slate-800" x-text="c.gift"></span>
+                                                    </div>
+                                                    <div x-show="!revealedCardGifts[c.id]" class="text-[11px] text-slate-400 italic">
+                                                        Rahasia...
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card Actions -->
+                                            <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                                                <button type="button" @click="selectCard(c)" class="flex-1 py-1.5 px-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition text-center shadow-2xs">
+                                                    Pilih Kado Ini
+                                                </button>
+                                                <button type="button" @click="speak(dateStyle === 'uk' ? c.answer_on_uk : c.answer_on_us)" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700" title="Dengarkan pengucapan tanggal">
+                                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- ============================================== -->
+                            <!-- SUBTAB 4: PANDUAN GURU & BAHASA KELAS          -->
+                            <!-- ============================================== -->
+                            <div x-show="gameSubTab === 'guide'" class="space-y-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                                    
+                                    <!-- Left: Activity Procedure -->
+                                    <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+                                        <div class="flex items-center gap-2 border-b border-slate-200 pb-3">
+                                            <span class="w-7 h-7 rounded-lg bg-amber-500 text-white font-black text-xs flex items-center justify-center">13</span>
+                                            <h3 class="text-base font-black text-slate-900">Prosedur &amp; Langkah Permainan (How to use the game)</h3>
+                                        </div>
+
+                                        <ul class="space-y-2.5 text-xs text-slate-700 leading-relaxed list-disc list-inside">
+                                            <li><strong>Bagikan Kado:</strong> Berikan setiap siswa satu kartu kado (present card).</li>
+                                            <li><strong>Tulis Tanggal Lahir:</strong> Minta siswa menuliskan tanggal lahir mereka pada label kartu kado.</li>
+                                            <li><strong>Kumpulkan &amp; Acak Ulang:</strong> Kumpulkan semua kado dari siswa, lalu acak dan bagikan kembali secara acak sehingga setiap siswa memegang kado orang lain.</li>
+                                            <li><strong>Tebak Isi Kado:</strong> Minta siswa membayangkan apa isi barang di dalam bingkisan (contoh: <em>a book, a box of chocolates, a parrot in a cage, a cat</em>) dan menuliskannya di belakang kartu.</li>
+                                            <li><strong>Tujuan Permainan:</strong> Setiap siswa harus mencari tahu siapa pemilik asli kado yang mereka pegang berdasarkan tanggal di label dan menyerahkannya!</li>
+                                            <li><strong>Praktik Berbicara:</strong> Siswa berdiri dan berkeliling kelas sambil bertanya: <em>&ldquo;When is your birthday?&rdquo;</em> sampai menemukan tanggal yang cocok.</li>
+                                            <li><strong>Serah Terima:</strong> Ketika menemukan pemiliknya, serahkan kadonya sambil mengucapkan: <em>&ldquo;Happy Birthday! It's a [hadiah]!&rdquo;</em></li>
+                                        </ul>
+
+                                        <div class="p-3.5 rounded-2xl bg-amber-100/60 border border-amber-200 text-xs text-amber-950">
+                                            <span class="font-black block mb-1">Demonstrasi Guru:</span>
+                                            Peragakan terlebih dahulu cara mencari pemilik kado dengan memegang satu kartu dan bertanya kepada 2 siswa: <em>&ldquo;When is your birthday?&rdquo;</em>. Gelengkan kepala dengan ekspresi kecewa jika tanggalnya tidak cocok untuk memberi contoh kepada siswa.
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Classroom Language Script -->
+                                    <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+                                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-7 h-7 rounded-lg bg-sky-600 text-white font-black text-xs flex items-center justify-center">💬</span>
+                                                <h3 class="text-base font-black text-slate-900">Bahasa Kelas (Classroom Language)</h3>
+                                            </div>
+                                            <span class="text-2xs font-extrabold uppercase text-slate-400">Audio Tersedia</span>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            @foreach(($gameData['classroom_language'] ?? []) as $clIdx => $cl)
+                                                <div class="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
+                                                    <div class="flex items-start justify-between gap-2">
+                                                        <p class="text-xs font-black text-slate-900 font-serif leading-snug">&ldquo;{{ $cl['en'] }}&rdquo;</p>
+                                                        <button type="button" @click="speak(@js($cl['en']))" class="text-sky-600 hover:text-sky-800 shrink-0 p-1" title="Dengarkan audio">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        </button>
+                                                    </div>
+                                                    <p class="text-2xs font-bold text-amber-800 italic">{{ $cl['note'] ?? '' }}</p>
+                                                    <p class="text-2xs text-slate-500">{{ $cl['id'] ?? '' }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LIGHTBOX MODAL FOR ORIGINAL ASSET SCANS -->
+                            <div x-show="isZoomModalOpen" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+                                 style="display: none;">
+                                <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                                    <!-- Modal Header -->
+                                    <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                            <h4 class="text-sm font-black text-slate-900"
+                                                x-text="zoomModalTarget === 'cards' ? 'Lembar 12 Kartu Kado Bewarna (Presents Cards)' : (zoomModalTarget === 'guide' ? 'Scan Panduan Guru Activity 13' : 'Scan Bahasa Kelas (Classroom Language)')"></h4>
+                                        </div>
+                                        <button type="button" @click="isZoomModalOpen = false" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-black text-sm transition">
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body (Scrollable Image) -->
+                                    <div class="p-4 overflow-auto flex-1 bg-slate-900/5 flex items-center justify-center">
+                                        <img :src="zoomModalTarget === 'cards' ? '{{ asset('images/speaking/happy_birthday/presents_cards_sheet_color.png') }}?v=color_v2' : (zoomModalTarget === 'guide' ? '{{ asset('images/speaking/happy_birthday/activity_guide.png') }}' : '{{ asset('images/speaking/happy_birthday/classroom_language.png') }}')"
+                                             alt="Happy Birthday Original Scan"
+                                             class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    @elseif(isset($gameData['type']) && $gameData['type'] === 'where_are_my_glasses')
+                        <!-- ==================================================== -->
+                        <!-- ACTIVITY: WHERE ARE MY GLASSES? (THE UNTIDY HOUSE)   -->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-4 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden"
+                             x-data="whereAreMyGlassesGame(@js($gameData))">
+
+                            <!-- Header Box -->
+                            <div style="background-color: #ff9800 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div class="space-y-2">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                Information Gap • Untidy Family Game
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold text-amber-100">
+                                                Topik 1: Preposition of Place
+                                            </span>
+                                            <span class="px-3.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase">
+                                                3 - 4 Siswa / Kelompok
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                                            {{ $gameData['title'] ?? 'Activity: Where Are My Glasses? (The Untidy House)' }}
+                                        </h2>
+                                        <p class="text-xs sm:text-sm text-amber-100 font-medium max-w-3xl leading-relaxed">
+                                            {{ $gameData['aim'] ?? 'Keluarga yang selalu kehilangan barang di rumah berantakan! Tanyakan letak 6 barang hilangmu ke anggota keluarga lain menggunakan preposisi tempat (in, on, under, behind, next to, dll).' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Lightbox Quick Links -->
+                                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="openZoomModal(activeRoleId)"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                                                title="Lihat Lembar Kerja Karakter Aktif Resolusi Tinggi">
+                                            <span>🔍 Lembar Karakter Saya</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="openZoomModal('room_color')"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat Peta Ruang Tamu Penuh Warna (24 Benda)">
+                                            <span>🎨 Peta Bewarna (24 Benda)</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="openZoomModal('guide')"
+                                                class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition flex items-center gap-1.5"
+                                                title="Lihat Lembar Panduan Asli Guru">
+                                            <span>📋 Panduan Guru</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CHARACTER SELECTOR BAR (4 Family Members) -->
+                            <div class="mb-6 p-4 rounded-3xl bg-amber-50/60 border border-amber-200/80">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-lg bg-amber-500 text-white font-black text-xs flex items-center justify-center">👨‍👩‍👧‍👦</span>
+                                        <h3 class="text-sm font-black text-slate-900">Pilih Karakter Anggota Keluarga Anda:</h3>
+                                    </div>
+                                    <button type="button"
+                                            @click="randomRole()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-amber-300 hover:bg-amber-100/60 text-amber-900 text-xs font-bold transition shadow-2xs">
+                                        <span>🎲 Acak Peran Saya</span>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <template x-for="(r, rKey) in roles" :key="rKey">
+                                        <button type="button"
+                                                @click="selectRole(rKey)"
+                                                :class="activeRoleId === rKey ? 'ring-2 ring-amber-500 bg-white shadow-md border-amber-400' : 'bg-white/80 hover:bg-white border-slate-200 hover:border-amber-300'"
+                                                class="p-3 rounded-2xl border text-left transition flex items-center justify-between gap-2 group">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="text-2xl shrink-0" x-text="r.icon"></span>
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-black text-slate-900 truncate" x-text="r.label"></p>
+                                                    <p class="text-[10px] font-bold text-slate-400" x-text="r.badge"></p>
+                                                </div>
+                                            </div>
+                                            <div class="shrink-0">
+                                                <span x-show="activeRoleId === rKey" class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-black">✓</span>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Sub-tabs Navigation -->
+                            <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin border-b border-slate-200">
+                                <button type="button"
+                                        @click="gameSubTab = 'my_card'"
+                                        :class="gameSubTab === 'my_card' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>🎴 Kartu Ruangan &amp; 6 Barang Hilang</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'my_card' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900 font-bold'"
+                                          x-text="getFoundCount() + '/6 Ditemukan'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'practice'"
+                                        :class="gameSubTab === 'practice' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>💬 Latihan Bicara Spasial</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'room_map'"
+                                        :class="gameSubTab === 'room_map' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>🛋️ Peta Ruang Tamu Bewarna (24 Benda)</span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'log'"
+                                        :class="gameSubTab === 'log' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>📝 Catatan Temuan Kelas</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px]"
+                                          :class="gameSubTab === 'log' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                                          x-text="familyLog.length + ' Catatan'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="gameSubTab = 'guide'"
+                                        :class="gameSubTab === 'guide' ? 'bg-amber-500 text-white font-black shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold'"
+                                        class="px-4 py-2.5 rounded-2xl text-xs whitespace-nowrap transition flex items-center gap-2">
+                                    <span>📖 Panduan Guru &amp; Scan Asli</span>
+                                </button>
+                            </div>
+
+                            <!-- SUB-TAB 1: KARTU RUANGAN & 6 BARANG HILANG -->
+                            <div x-show="gameSubTab === 'my_card'" x-transition class="space-y-6">
+                                
+                                <!-- Role Description Banner -->
+                                <div class="p-4 rounded-2xl bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-3xl" x-text="getCurrentRole().icon"></span>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="text-base font-black text-white" x-text="'Peran Anda: ' + getCurrentRole().label"></h3>
+                                                <span class="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase">Aktif</span>
+                                            </div>
+                                            <p class="text-xs text-slate-300 italic" x-text="getCurrentRole().desc"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <button type="button"
+                                                @click="roomMode = (roomMode === 'color' ? 'scan' : 'color')"
+                                                class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold text-white transition flex items-center gap-1.5">
+                                            <span x-text="roomMode === 'color' ? '📄 Lihat Scan Hitam-Putih' : '🎨 Lihat Versi Bewarna'"></span>
+                                        </button>
+                                        <button type="button"
+                                                @click="resetFoundStatus()"
+                                                class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+                                            Reset Checklist
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Vertical Stacked Layout: Gambar Di Atas (Full & Besar) & Misi Karakter Di Bawah -->
+                                <div class="space-y-6">
+                                    
+                                    <!-- 1. Top Section: Ruang Tamu Besar (Enlarged Living Room Image) -->
+                                    <div class="w-full bg-slate-50 rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-2xs">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                                <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800"
+                                                    x-text="'Ruang Tamu Karakter: ' + getCurrentRole().label">
+                                                </h4>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-bold text-amber-900 bg-amber-100/80 px-3 py-1 rounded-xl"
+                                                      x-text="(roomMode === 'scan' ? 'Scan Lembar: ' : 'Lembar Warna: ') + getCurrentRole().name"></span>
+                                                <button type="button"
+                                                        @click="openZoomModal('room_color')"
+                                                        class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-[11px] font-bold text-slate-700 transition flex items-center gap-1 shadow-2xs">
+                                                    <span>🎨 Peta Warna Lengkap</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="relative rounded-2xl overflow-hidden border border-slate-300/80 bg-white shadow-sm flex items-center justify-center p-2 sm:p-3">
+                                            <img :src="roomMode === 'scan' ? (getCurrentRole().scan_image || getCurrentRole().card_image) : getCurrentRole().card_image"
+                                                 :alt="getCurrentRole().name + ' Living Room Worksheet'"
+                                                 class="w-full h-auto max-h-[760px] object-contain hover:scale-[1.01] transition duration-300 cursor-pointer rounded-xl"
+                                                 @click="openZoomModal(activeRoleId)" />
+
+                                            <button type="button"
+                                                    @click="openZoomModal(activeRoleId)"
+                                                    class="absolute bottom-4 right-4 px-3.5 py-2 rounded-xl bg-slate-950/85 backdrop-blur-xs text-white text-xs font-bold flex items-center gap-2 shadow-lg hover:bg-slate-900 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                                <span x-text="roomMode === 'scan' ? 'Perbesar Scan Hitam-Putih (HD)' : 'Perbesar Lembar Peran (HD)'"></span>
+                                            </button>
+                                        </div>
+
+                                        <div class="mt-4 p-3.5 rounded-2xl bg-amber-100/70 border border-amber-200 text-xs text-amber-950 flex items-start gap-2.5">
+                                            <span class="text-lg shrink-0">💡</span>
+                                            <p class="leading-relaxed">
+                                                <strong>Petunjuk Permainan:</strong> Pada gambar di atas, ke-6 barang milikmu telah hilang dari ruangan! Namun, barang milik anggota keluargamu yang lain tersebar di ruangan ini. Tugasmu adalah bertanya kepada mereka untuk menemukan letak barang-barangmu!
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Bottom Section: Misi Karakter (6 Barang Milikmu yang Hilang) -->
+                                    <div class="p-5 sm:p-6 rounded-3xl bg-white border-2 border-amber-400 shadow-sm space-y-4">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2.5 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider">Misi Karakter</span>
+                                                    <h3 class="text-base font-black text-slate-900">6 Barang Milikmu yang Hilang</h3>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mt-0.5">Tanyakan kepada anggota keluarga di mana letak barang-barang ini, lalu tandai jika sudah ditemukan.</p>
+                                            </div>
+                                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                                <div class="text-right">
+                                                    <span class="text-xs font-black text-amber-900" x-text="getFoundCount() + '/6 Selesai'"></span>
+                                                </div>
+                                                <button type="button"
+                                                        @click="resetFoundStatus()"
+                                                        class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition">
+                                                    Reset Checklist
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress Bar -->
+                                        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-amber-500 transition-all duration-300"
+                                                 :style="'width: ' + ((getFoundCount() / 6) * 100) + '%;'"></div>
+                                        </div>
+
+                                        <!-- Lost Items Grid: 2 rows of 3 on desktop, 3 rows of 2 on tablet, 1 on mobile -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                            <template x-for="(item, idx) in (getCurrentRole().lost_items || [])" :key="item.id">
+                                                <div :class="isFound(item.id) ? 'bg-emerald-50/80 border-emerald-300 shadow-2xs' : 'bg-slate-50 hover:bg-amber-50/50 border-slate-200 hover:border-amber-300'"
+                                                     class="p-3.5 rounded-2xl border transition flex flex-col justify-between gap-3">
+                                                    
+                                                    <!-- Top: Item info & action buttons -->
+                                                    <div class="flex items-start justify-between gap-2">
+                                                        <div class="flex items-center gap-2.5 min-w-0">
+                                                            <span class="text-2xl sm:text-3xl shrink-0" x-text="item.icon"></span>
+                                                            <div class="min-w-0">
+                                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                                    <h4 class="text-xs sm:text-sm font-black text-slate-900 capitalize" x-text="item.name"></h4>
+                                                                    <span class="text-[10px] text-slate-500" x-text="'(' + item.name_id + ')'"></span>
+                                                                </div>
+                                                                <p class="text-[11px] sm:text-xs font-bold text-amber-900 font-serif leading-snug mt-1" x-text="'&ldquo;' + item.question + '&rdquo;'"></p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-1.5 shrink-0">
+                                                            <button type="button"
+                                                                    @click="speak(item.question)"
+                                                                    class="p-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 transition"
+                                                                    title="Dengarkan cara bertanya">
+                                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                            </button>
+                                                            <button type="button"
+                                                                    @click="toggleFound(item.id)"
+                                                                    :class="isFound(item.id) ? 'bg-emerald-600 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'"
+                                                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition flex items-center gap-1">
+                                                                <span x-text="isFound(item.id) ? '✓ Ditemukan' : 'Hilang?'"></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Bottom: Location Clue Box -->
+                                                    <div class="pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs">
+                                                        <div class="text-slate-600 flex items-center gap-1.5">
+                                                            <span class="font-bold text-amber-800 text-[11px]">Preposisi:</span>
+                                                            <span class="font-mono bg-white px-2 py-0.5 rounded-md border border-slate-200 font-bold text-slate-800 text-[11px]" x-text="item.preposition"></span>
+                                                        </div>
+                                                        <button type="button"
+                                                                @click="speak(item.answer)"
+                                                                class="text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1 text-[11px] transition">
+                                                            <span>🔊 Dengar Jawaban</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 2: LATIHAN BICARA SPASIAL -->
+                            <div x-show="gameSubTab === 'practice'" x-transition class="space-y-6">
+                                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200">
+                                    <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
+                                        <div>
+                                            <h3 class="text-base font-black text-slate-900">Simulasi Praktik Berbicara Spasial (Speaking Practice)</h3>
+                                            <p class="text-xs text-slate-500">Pilih salah satu barang untuk melatih formulasi pertanyaan dan respon preposisi yang tepat.</p>
+                                        </div>
+                                        <span class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-xl">Preposisi Tempat</span>
+                                    </div>
+
+                                    <!-- Formula Explanations -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                                            <span class="px-2.5 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase">Pola Singular (1 Benda)</span>
+                                            <p class="text-sm font-black text-slate-900 mt-2">Where is / Where's my [benda]?</p>
+                                            <p class="text-xs text-slate-600 mt-1">Jawaban: <code class="text-amber-900 font-bold">It's in / on / under / next to the [tempat].</code></p>
+                                            <p class="text-2xs text-slate-500 mt-1 italic">Contoh: &ldquo;Where's my radio?&rdquo; &rarr; &ldquo;It's on the small table beside the sofa.&rdquo;</p>
+                                        </div>
+                                        <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200">
+                                            <span class="px-2.5 py-0.5 rounded-md bg-sky-600 text-white text-[10px] font-black uppercase">Pola Plural (Jamak / Sepasang)</span>
+                                            <p class="text-sm font-black text-slate-900 mt-2">Where are my [benda]?</p>
+                                            <p class="text-xs text-slate-600 mt-1">Jawaban: <code class="text-sky-900 font-bold">They're in / on / under / next to the [tempat].</code></p>
+                                            <p class="text-2xs text-slate-500 mt-1 italic">Contoh: &ldquo;Where are my glasses?&rdquo; &rarr; &ldquo;They're on the table next to the lamp.&rdquo;</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Interactive Lost Item Practice Card -->
+                                    <div class="p-6 rounded-3xl bg-white border-2 border-slate-900 shadow-md">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <span class="text-xs font-black uppercase tracking-wider text-amber-800">
+                                                Latihan Karakter: <span x-text="getCurrentRole().label"></span>
+                                            </span>
+                                            <span class="text-2xs font-bold text-slate-400">Klik barang di bawah untuk ganti dialog</span>
+                                        </div>
+
+                                        <div class="flex flex-wrap gap-2 mb-6">
+                                            <template x-for="it in (getCurrentRole().lost_items || [])" :key="it.id">
+                                                <button type="button"
+                                                        @click="selectLostItem(it)"
+                                                        :class="selectedLostItem && selectedLostItem.id === it.id ? 'bg-amber-500 text-white font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold'"
+                                                        class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-2xs">
+                                                    <span x-text="it.icon"></span>
+                                                    <span x-text="it.name"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        <template x-if="selectedLostItem">
+                                            <div class="space-y-4">
+                                                <!-- Step 1: Question -->
+                                                <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div>
+                                                        <span class="text-[10px] font-black uppercase text-amber-800">1. Pertanyaan yang Anda Ucapkan:</span>
+                                                        <p class="text-lg font-black text-slate-950 font-serif leading-tight mt-1" x-text="'&ldquo;' + selectedLostItem.question + '&rdquo;'"></p>
+                                                        <p class="text-xs text-slate-600 mt-0.5" x-text="'Artinya: Di mana ' + selectedLostItem.name_id + ' milikku?'"></p>
+                                                    </div>
+                                                    <button type="button"
+                                                            @click="speak(selectedLostItem.question)"
+                                                            class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition flex items-center gap-2 shrink-0">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span>Ucapkan Pertanyaan</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Step 2: Answer -->
+                                                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div>
+                                                        <span class="text-[10px] font-black uppercase text-emerald-800">2. Jawaban dari Anggota Keluarga Lain:</span>
+                                                        <p class="text-lg font-black text-emerald-950 font-serif leading-tight mt-1" x-text="'&ldquo;' + selectedLostItem.answer + '&rdquo;'"></p>
+                                                        <p class="text-xs text-emerald-800 mt-0.5">
+                                                            <span>Preposisi: </span>
+                                                            <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-200" x-text="selectedLostItem.preposition"></strong>
+                                                            <span class="ml-2 text-slate-500" x-text="'(Lokasi: ' + selectedLostItem.place + ')'"></span>
+                                                        </p>
+                                                    </div>
+                                                    <button type="button"
+                                                            @click="speak(selectedLostItem.answer)"
+                                                            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-2 shrink-0">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        <span>Dengar Jawaban</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 3: PETA RUANG TAMU BEWARNA (24 BENDA) -->
+                            <div x-show="gameSubTab === 'room_map'" x-transition class="space-y-6">
+                                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4 mb-4">
+                                        <div>
+                                            <h3 class="text-base font-black text-slate-900">Peta Ruang Tamu Penuh Warna &amp; Direktori 24 Benda</h3>
+                                            <p class="text-xs text-slate-500">Semua posisi barang di rumah berantakan ini dikelompokkan berdasarkan preposisi tempat.</p>
+                                        </div>
+                                        <button type="button"
+                                                @click="openZoomModal('room_color')"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white border border-slate-300 hover:bg-amber-50 text-slate-800 text-xs font-bold transition shadow-2xs">
+                                            <span>🔍 Buka Lightbox Penuh</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Full Room Picture Banner -->
+                                    <div class="relative rounded-2xl overflow-hidden border border-slate-300 bg-white shadow-md mb-6 flex items-center justify-center">
+                                        <img src="{{ asset('images/speaking/where_are_my_glasses/untidy_living_room_color.png') }}?v=color_20260925"
+                                             alt="The Untidy Living Room Full Color"
+                                             class="w-full max-h-[480px] object-contain cursor-pointer hover:scale-101 transition duration-300"
+                                             @click="openZoomModal('room_color')" />
+                                    </div>
+
+                                    <!-- Preposition Groups Breakdown -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        
+                                        <!-- Group 1: ON Furniture -->
+                                        <div class="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs space-y-3">
+                                            <div class="flex items-center gap-2 border-b border-amber-100 pb-2">
+                                                <span class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">ON</span>
+                                                <h4 class="text-xs font-black text-amber-950 uppercase">Di Atas Mebel</h4>
+                                            </div>
+                                            <ul class="text-xs space-y-2 text-slate-700">
+                                                <li><strong>On the sofa:</strong> cushion, knitting, handbag</li>
+                                                <li><strong>On the armchair:</strong> gloves, comb, purse</li>
+                                                <li><strong>On the small table:</strong> radio, pipe, glasses</li>
+                                                <li><strong>On the chair:</strong> socks, hat</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Group 2: ON the Floor -->
+                                        <div class="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs space-y-3">
+                                            <div class="flex items-center gap-2 border-b border-amber-100 pb-2">
+                                                <span class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">ON</span>
+                                                <h4 class="text-xs font-black text-amber-950 uppercase">Di Atas Lantai</h4>
+                                            </div>
+                                            <ul class="text-xs space-y-2 text-slate-700">
+                                                <li><strong>In front of sofa:</strong> book, slippers, shopping basket</li>
+                                                <li><strong>Near armchair:</strong> record, newspaper</li>
+                                                <li><strong>Near table:</strong> drinking glass</li>
+                                                <li><strong>Between sofa &amp; chair:</strong> football, hairbrush</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Group 3: ON TOP OF -->
+                                        <div class="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs space-y-3">
+                                            <div class="flex items-center gap-2 border-b border-amber-100 pb-2">
+                                                <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-black text-xs flex items-center justify-center">TOP</span>
+                                                <h4 class="text-xs font-black text-sky-950 uppercase">On Top Of &amp; Above</h4>
+                                            </div>
+                                            <ul class="text-xs space-y-2 text-slate-700">
+                                                <li><strong>On top of the TV:</strong> pen, teacup</li>
+                                                <li><strong>On the mantlepiece:</strong> cigarettes packet</li>
+                                                <li><strong>Above the fireplace:</strong> mantlepiece shelf</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Group 4: IN & BEHIND -->
+                                        <div class="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs space-y-3">
+                                            <div class="flex items-center gap-2 border-b border-amber-100 pb-2">
+                                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center">IN</span>
+                                                <h4 class="text-xs font-black text-emerald-950 uppercase">In, Behind, Next to</h4>
+                                            </div>
+                                            <ul class="text-xs space-y-2 text-slate-700">
+                                                <li><strong>In the fireplace:</strong> teapot</li>
+                                                <li><strong>In the basket:</strong> waste-paper basket</li>
+                                                <li><strong>Behind the sofa:</strong> umbrella (next to bookcase)</li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 4: CATATAN TEMUAN KELAS -->
+                            <div x-show="gameSubTab === 'log'" x-transition class="space-y-6">
+                                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200">
+                                    <div class="border-b border-slate-200 pb-4 mb-4">
+                                        <h3 class="text-base font-black text-slate-900">Catatan Temuan Tanya Jawab di Kelas (Classroom Search Log)</h3>
+                                        <p class="text-xs text-slate-500">Catat jawaban dari teman-temanmu ketika mereka memberi tahu letak barangmu.</p>
+                                    </div>
+
+                                    <!-- Form to add entry -->
+                                    <div class="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs mb-6">
+                                        <form @submit.prevent="addFamilyLog()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                                            <div>
+                                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Teman:</label>
+                                                <input type="text"
+                                                       x-model="newLog.classmateName"
+                                                       placeholder="e.g. Budi / Sarah"
+                                                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Karakter Teman:</label>
+                                                <select x-model="newLog.familyRole" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                                    <option value="Dad">Dad (Ayah)</option>
+                                                    <option value="Jenny">Jenny</option>
+                                                    <option value="Mum">Mum (Ibu)</option>
+                                                    <option value="Tom">Tom</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Barang Ditanyakan:</label>
+                                                <input type="text"
+                                                       x-model="newLog.itemAsked"
+                                                       placeholder="e.g. glasses / radio / umbrella"
+                                                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Jawaban Lokasi &amp; Preposisi:</label>
+                                                <input type="text"
+                                                       x-model="newLog.locationFound"
+                                                       placeholder="e.g. on the small table next to the lamp"
+                                                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <button type="submit"
+                                                        class="w-full py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs transition shadow-sm">
+                                                    + Simpan Temuan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Table of records -->
+                                    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+                                        <table class="w-full text-xs text-left">
+                                            <thead class="bg-slate-100 text-slate-700 uppercase font-black text-[10px] tracking-wider border-b border-slate-200">
+                                                <tr>
+                                                    <th class="p-3">Teman / Karakter</th>
+                                                    <th class="p-3">Barang Ditanyakan</th>
+                                                    <th class="p-3">Lokasi / Preposisi</th>
+                                                    <th class="p-3 text-center">Status</th>
+                                                    <th class="p-3 text-right">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100">
+                                                <template x-if="familyLog.length === 0">
+                                                    <tr>
+                                                        <td colspan="5" class="p-6 text-center text-slate-400 italic">
+                                                            Belum ada catatan temuan. Tanyakan posisi barangmu ke teman sekelas dan catat di sini!
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                                <template x-for="(log, idx) in familyLog" :key="log.id">
+                                                    <tr class="hover:bg-amber-50/40 transition">
+                                                        <td class="p-3 font-bold text-slate-900">
+                                                            <span x-text="log.classmateName"></span>
+                                                            <span class="text-slate-400 text-[10px] block" x-text="'(' + log.familyRole + ')'"></span>
+                                                        </td>
+                                                        <td class="p-3 font-mono font-bold text-amber-900" x-text="log.itemAsked"></td>
+                                                        <td class="p-3 text-slate-800" x-text="log.locationFound"></td>
+                                                        <td class="p-3 text-center">
+                                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                                                                Ditemukan ✓
+                                                            </span>
+                                                        </td>
+                                                        <td class="p-3 text-right">
+                                                            <button type="button" @click="removeFamilyLog(idx)" class="text-rose-500 hover:text-rose-700 font-bold text-xs">
+                                                                Hapus
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 5: PANDUAN GURU & SCAN ASLI -->
+                            <div x-show="gameSubTab === 'guide'" x-transition class="space-y-6">
+                                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200">
+                                    <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+                                        <div>
+                                            <h3 class="text-base font-black text-slate-900">Panduan Guru: Prepositional Phrase &ndash; Where are my glasses?</h3>
+                                            <p class="text-xs text-slate-500">Instruksi terstruktur sesuai lembar kerja buku ajar otentik.</p>
+                                        </div>
+                                        <button type="button" @click="openZoomModal('guide')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-800 text-xs font-bold transition shadow-2xs">
+                                            <span>📋 Buka Scan Asli HD</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        @if(isset($gameData['teacher_guide']))
+                                            @foreach($gameData['teacher_guide'] as $tg)
+                                                <div class="p-4 rounded-2xl bg-white border border-amber-200">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <span class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">{{ $tg['step'] }}</span>
+                                                        <h4 class="text-xs font-black text-slate-900">{{ $tg['title'] }}</h4>
+                                                    </div>
+                                                    <p class="text-xs text-slate-600 leading-relaxed">{{ $tg['desc'] }}</p>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+
+                                    <!-- Scans Preview Grid -->
+                                    <div class="pt-6 border-t border-slate-200">
+                                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-3">Dokumen Lembar Scan Buku Asli:</h4>
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            <button type="button" @click="openZoomModal('room_color')" class="p-3 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md transition text-left">
+                                                <p class="text-xs font-black text-slate-900">🎨 Ruang Tamu Bewarna</p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">Ilustrasi HD 24 Benda</p>
+                                            </button>
+                                            <button type="button" @click="openZoomModal('guide')" class="p-3 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md transition text-left">
+                                                <p class="text-xs font-black text-slate-900">📋 Teacher's Guide</p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">Activity Procedure</p>
+                                            </button>
+                                            <button type="button" @click="openZoomModal('dad_jenny')" class="p-3 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md transition text-left">
+                                                <p class="text-xs font-black text-slate-900">📄 Dad &amp; Jenny Sheet</p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">Authentic Card Sheet 1</p>
+                                            </button>
+                                            <button type="button" @click="openZoomModal('mum_tom')" class="p-3 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md transition text-left">
+                                                <p class="text-xs font-black text-slate-900">📄 Mum &amp; Tom Sheet</p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">Authentic Card Sheet 2</p>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- HIGH RESOLUTION LIGHTBOX MODAL -->
+                            <div x-show="isZoomModalOpen" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                                 style="display: none;">
+                                <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                                    <!-- Modal Header -->
+                                    <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                            <h4 class="text-sm font-black text-slate-900"
+                                                 x-text="zoomModalTarget === 'dad' ? (roomMode === 'scan' ? 'Scan Lembar: Dad (Ayah)' : 'Lembar Warna: Dad (Ayah)') : (zoomModalTarget === 'jenny' ? (roomMode === 'scan' ? 'Scan Lembar: Jenny (Anak Perempuan)' : 'Lembar Warna: Jenny (Anak Perempuan)') : (zoomModalTarget === 'mum' ? (roomMode === 'scan' ? 'Scan Lembar: Mum (Ibu)' : 'Lembar Warna: Mum (Ibu)') : (zoomModalTarget === 'tom' ? (roomMode === 'scan' ? 'Scan Lembar: Tom (Anak Laki-Laki)' : 'Lembar Warna: Tom (Anak Laki-Laki)') : (zoomModalTarget === 'room_color' ? 'Peta Ruang Tamu Lengkap Bewarna (Untidy Living Room)' : (zoomModalTarget === 'guide' ? 'Panduan Guru: Activity Where Are My Glasses?' : (zoomModalTarget === 'dad_jenny' ? 'Scan Lembar Asli: Dad & Jenny' : 'Scan Lembar Asli: Mum & Tom'))))))"></h4>
+                                        </div>
+                                        <button type="button" @click="isZoomModalOpen = false" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-black text-sm transition">
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body -->
+                                    <div class="p-4 overflow-auto flex-1 bg-slate-900/5 flex items-center justify-center">
+                                        <template x-if="zoomModalTarget === 'dad'">
+                                            <img :src="roomMode === 'scan' ? '{{ asset('images/speaking/where_are_my_glasses/card_dad_bw.png') }}?v=color_20260925' : '{{ asset('images/speaking/where_are_my_glasses/card_dad.png') }}?v=color_20260925'"
+                                                 alt="Dad Worksheet"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'jenny'">
+                                            <img :src="roomMode === 'scan' ? '{{ asset('images/speaking/where_are_my_glasses/card_jenny_bw.png') }}?v=color_20260925' : '{{ asset('images/speaking/where_are_my_glasses/card_jenny.png') }}?v=color_20260925'"
+                                                 alt="Jenny Worksheet"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'mum'">
+                                            <img :src="roomMode === 'scan' ? '{{ asset('images/speaking/where_are_my_glasses/card_mum_bw.png') }}?v=color_20260925' : '{{ asset('images/speaking/where_are_my_glasses/card_mum.png') }}?v=color_20260925'"
+                                                 alt="Mum Worksheet"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'tom'">
+                                            <img :src="roomMode === 'scan' ? '{{ asset('images/speaking/where_are_my_glasses/card_tom_bw.png') }}?v=color_20260925' : '{{ asset('images/speaking/where_are_my_glasses/card_tom.png') }}?v=color_20260925'"
+                                                 alt="Tom Worksheet"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'room_color'">
+                                            <img src="{{ asset('images/speaking/where_are_my_glasses/untidy_living_room_color.png') }}?v=color_20260925"
+                                                 alt="Untidy Living Room Color"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'guide'">
+                                            <img src="{{ asset('images/speaking/where_are_my_glasses/activity_guide.png') }}"
+                                                 alt="Activity Guide Scan"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'dad_jenny'">
+                                            <img src="{{ asset('images/speaking/where_are_my_glasses/card_dad_jenny.png') }}"
+                                                 alt="Dad and Jenny Scan"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                        <template x-if="zoomModalTarget === 'mum_tom'">
+                                            <img src="{{ asset('images/speaking/where_are_my_glasses/card_mum_tom.png') }}"
+                                                 alt="Mum and Tom Scan"
+                                                 class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-slate-200" />
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    @elseif(isset($gameData['type']) && $gameData['type'] === 'american_schedule_relay')
+                        <!-- ==================================================== -->
+                        <!-- MEETING 4: AMERICAN AIRPORT SCHEDULE RELAY           -->
+                        <!-- ==================================================== -->
+                        <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden">
+                            <!-- Header Box -->
+                            <div style="background-color: #ff9800 !important;" class="rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden mb-6">
+                                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">
+                                                American Style Game • {{ $participationBadge['label'] ?? 'Berpasangan' }}
+                                            </span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">{{ $gameData['title'] }}</h2>
+                                        <p class="text-xs sm:text-sm text-amber-100 font-medium mt-1">{{ $gameData['aim'] ?? '' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Teacher Guide & Instructions -->
+                            <div class="p-5 rounded-2xl bg-orange-50/60 border border-orange-200 mb-6">
+                                <h4 class="font-black text-xs text-orange-950 uppercase tracking-wider mb-2">Panduan Aktivitas Roleplay Bandara:</h4>
+                                <p class="text-xs sm:text-sm text-slate-700 font-medium mb-3">{{ $gameData['teacher_guide']['how_to_use'] ?? '' }}</p>
+                                <div class="space-y-1">
+                                    @foreach($gameData['teacher_guide']['game_rules'] ?? [] as $rule)
+                                        <p class="text-xs text-orange-900 font-bold">• {{ $rule }}</p>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Airport Departure Flight Board Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                @foreach($gameData['cards'] ?? [] as $cIdx => $card)
+                                    <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-lg border-2 border-amber-400/40 relative overflow-hidden flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-4 border-b border-slate-700/80 pb-3">
+                                                <div class="flex items-center gap-2">
+                                                    
+                                                    <span class="font-mono text-sm font-black text-amber-400 tracking-wider">{{ $card['flight'] }}</span>
+                                                </div>
+                                                <span class="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-mono text-xs font-bold border border-amber-400/30">
+                                                    {{ $card['gate'] }}
+                                                </span>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                                <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700">
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Departure Time:</span>
+                                                    <p class="font-mono text-lg font-black text-white">{{ $card['time'] }}</p>
+                                                </div>
+                                                <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700">
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Boarding Starts:</span>
+                                                    <p class="font-mono text-lg font-black text-amber-400">{{ $card['boarding'] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+                                            <span class="text-xs text-slate-400 font-medium">Ucapkan dalam gaya American: <em>"Flight leaves at {{ $card['time'] }}"</em></span>
+                                            <button @click="speakText('Flight ' + @js($card['flight']) + ' departs at ' + @js($card['time']) + ' from ' + @js($card['gate']))" type="button" class="py-2 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-sm transition flex items-center gap-1.5 shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Announcement</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @elseif(isset($gameData['type']) && $gameData['type'] === 'half_a_crossword')
                         <!-- ==================================================== -->
                         <!-- MEETING 2: HALF A CROSSWORD (JOBS & OCCUPATIONS)     -->
                         <!-- ==================================================== -->
                         <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 relative overflow-hidden" 
                              x-data="{ 
-                                 crosswordTab: 'A', 
+                                 crosswordTab: (previewRole === 'admin') ? 'A' : '{{ $myAssignedRole }}', 
+                                 assignedStudentRole: '{{ $myAssignedRole }}',
                                  sideTab: 'missing', 
                                  gridInputs: {}, 
                                  lastDir: 'down',
                                  activeWordKey: null,
                                  wordMap: @js($gameData['words'] ?? []),
                                  cellToWords: {},
+                                 solvedWords: [],
+                                 numberInput: '',
+                                 guessInput: '',
                                  init() {
+                                     if (this.previewRole === 'student') {
+                                         this.crosswordTab = this.assignedStudentRole;
+                                     }
+                                     if (this.$watch) {
+                                         this.$watch('previewRole', val => {
+                                             if (val === 'student') {
+                                                 this.crosswordTab = this.assignedStudentRole;
+                                             }
+                                         });
+                                     }
                                      let mapping = {};
                                      for (let wKey in this.wordMap) {
                                          let cells = this.wordMap[wKey].cells || [];
@@ -3838,7 +9575,7 @@
                                             Waktu: {{ $gameData['time'] ?? '20-25 Menit' }}
                                         </span>
                                         <span style="background-color: #f0f9ff !important; color: #0284c7 !important; border: 1px solid #bae6fd !important;" class="px-3 py-1 rounded-full text-xs font-black">
-                                            {{ $participationBadge['icon'] }} {{ $participationBadge['label'] }}
+                                            {{ $participationBadge['label'] }}
                                         </span>
                                     </div>
                                     <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -3850,134 +9587,127 @@
                                 </div>
 
                                 <!-- Group Selector Switcher -->
-                                <div class="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold shrink-0 shadow-2xs">
-                                    <button @click="crosswordTab = 'A'" :style="crosswordTab === 'A' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" :class="crosswordTab === 'A' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" class="px-5 py-2.5 rounded-xl transition flex items-center gap-2">
-                                        <span>Player A (Group A Sheet)</span>
-                                    </button>
-                                    <button @click="crosswordTab = 'B'" :style="crosswordTab === 'B' ? 'background-color: #ff9800 !important; color: #ffffff !important;' : ''" :class="crosswordTab === 'B' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" class="px-5 py-2.5 rounded-xl transition flex items-center gap-2">
-                                        <span>Player B (Group B Sheet)</span>
-                                    </button>
+                                <div class="flex items-center gap-2">
+                                    <div x-show="previewRole === 'admin'" class="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold shrink-0 shadow-2xs">
+                                        <button @click="crosswordTab = 'A'" :style="crosswordTab === 'A' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" :class="crosswordTab === 'A' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" class="px-5 py-2.5 rounded-xl transition flex items-center gap-2">
+                                            <span>Player A (Group A Sheet)</span>
+                                        </button>
+                                        <button @click="crosswordTab = 'B'" :style="crosswordTab === 'B' ? 'background-color: #ff9800 !important; color: #ffffff !important;' : ''" :class="crosswordTab === 'B' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" class="px-5 py-2.5 rounded-xl transition flex items-center gap-2">
+                                            <span>Player B (Group B Sheet)</span>
+                                        </button>
+                                    </div>
+                                    <div x-show="previewRole === 'student'" class="flex items-center gap-2 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold text-slate-700">
+                                        <span class="w-2.5 h-2.5 rounded-full" :class="assignedStudentRole === 'A' ? 'bg-sky-500' : 'bg-orange-500'"></span>
+                                        <span>Peran: <strong x-text="assignedStudentRole === 'A' ? 'Player A (Group A Sheet)' : 'Player B (Group B Sheet)'"></strong></span>
+                                        @if($myPartner)
+                                            <span class="text-slate-400 font-normal">| Partner: <strong>{{ $myPartner->name }}</strong></span>
+                                        @endif
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-black">Terkunci</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Dedicated Practice (Game Shadowing & Drilling Khusus Game) -->
-                            <div class="bg-sky-50 border-2 border-sky-200/90 rounded-[2rem] p-6 sm:p-7 mb-8 shadow-sm">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-sky-200/60 gap-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="w-8 h-8 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">🎯</span>
+                            <!-- 1. COMPACT DYNAMIC ROLE BANNER (Contextual per active Player tab) -->
+                            <div class="mb-5">
+                                <div x-show="crosswordTab === 'A'" style="background-color: #f0f9ff !important; border-color: #bae6fd !important;" class="p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                                    <div class="flex items-start sm:items-center gap-3">
+                                        <span style="background-color: #29a8f5 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">A</span>
                                         <div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-600 text-white shadow-2xs">Khusus Game Crossword</span>
-                                                <h3 class="text-sm sm:text-base font-black text-slate-900">Practice (Game Shadowing &amp; Clue Drilling)</h3>
-                                            </div>
-                                            <p class="text-xs text-slate-600 font-semibold mt-0.5">Latihlah kalimat tanya-jawab posisi puzzle dan pemberian petunjuk profesi berikut sebelum memainkan game:</p>
+                                            <h4 style="color: #0284c7 !important;" class="text-xs font-black uppercase tracking-wider">Peran Anda: Pemain A (Group A Sheet)</h4>
+                                            <p class="text-xs text-sky-950 font-medium mt-0.5">Lembar Anda berisi 11 profesi (terisi). Berikan petunjuk definisi saat ditanya, dan tanyakan kotak kosong Anda ke Player B.</p>
                                         </div>
+                                    </div>
+                                    <div class="px-3 py-1.5 bg-white rounded-xl border border-sky-200 text-xs font-bold text-sky-800 shrink-0 self-start sm:self-auto shadow-2xs">
+                                        Tanya B: <span class="italic text-sky-950">"What is [nomor] across/down?"</span>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    @foreach($meetingData['games']['drilling_game'] ?? [] as $gDrill)
-                                        <div class="p-3.5 rounded-2xl bg-white border border-sky-100/90 hover:border-sky-300 shadow-2xs transition flex items-start justify-between gap-3">
+                                <div x-show="crosswordTab === 'B'" style="background-color: #fff7ed !important; border-color: #fed7aa !important;" class="p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                                    <div class="flex items-start sm:items-center gap-3">
+                                        <span style="background-color: #ff9800 !important;" class="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">B</span>
+                                        <div>
+                                            <h4 style="color: #c2410c !important;" class="text-xs font-black uppercase tracking-wider">Peran Anda: Pemain B (Group B Sheet)</h4>
+                                            <p class="text-xs text-orange-950 font-medium mt-0.5">Lembar Anda berisi 11 profesi (terisi). Berikan petunjuk definisi saat ditanya, dan tanyakan kotak kosong Anda ke Player A.</p>
+                                        </div>
+                                    </div>
+                                    <div class="px-3 py-1.5 bg-white rounded-xl border border-orange-200 text-xs font-bold text-orange-800 shrink-0 self-start sm:self-auto shadow-2xs">
+                                        Tanya A: <span class="italic text-orange-950">"What is [nomor] across/down?"</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. COLLAPSIBLE DIALOGUE GUIDE & AUDIO DRILLING -->
+                            <div x-data="{ showGameplayGuide: false }" class="mb-6">
+                                <button @click="showGameplayGuide = !showGameplayGuide" type="button" 
+                                    class="w-full py-2.5 px-4 sm:px-5 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 transition flex items-center justify-between shadow-2xs group">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="w-6 h-6 rounded-lg bg-sky-600 text-white font-black text-xs flex items-center justify-center group-hover:scale-105 transition">💬</span>
+                                        <span class="text-xs sm:text-sm font-black text-slate-800 group-hover:text-sky-900">Panduan Percakapan 4 Langkah & Latihan Audio (Clue Drilling)</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-sky-600 flex items-center gap-1 group-hover:text-sky-800" x-text="showGameplayGuide ? 'Tutup Panduan ▲' : 'Buka Panduan ▼'"></span>
+                                </button>
+
+                                <div x-show="showGameplayGuide" x-collapse class="mt-3 space-y-4">
+                                    <!-- 4-Step Gameplay Dialogue Guide -->
+                                    <div class="bg-sky-50/80 border-2 border-sky-200/80 rounded-3xl p-5 sm:p-6 shadow-xs">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-blue-200/60 gap-3">
                                             <div>
-                                                @if(!empty($gDrill['category']))
-                                                    <span class="text-[10px] font-black text-blue-700 uppercase tracking-wide block mb-1">{{ $gDrill['category'] }}</span>
-                                                @endif
-                                                <p class="font-black text-slate-900 text-xs sm:text-sm leading-snug">
-                                                    • {{ $gDrill['en'] }}
-                                                </p>
-                                                <p class="text-xs text-slate-600 mt-0.5 font-semibold italic">
-                                                    ({{ $gDrill['id'] }})
-                                                </p>
+                                                <h3 class="text-xs sm:text-sm font-black text-slate-900">Alur Percakapan 4 Langkah (Gameplay Dialogue)</h3>
+                                                <p class="text-[11px] text-slate-600 font-medium">Lakukan langkah ini secara bergantian untuk setiap nomor teka-teki silang:</p>
                                             </div>
-                                            <button @click="speakText(@js($gDrill['en']))" type="button" class="w-8 h-8 rounded-full bg-sky-50 hover:bg-blue-600 hover:text-white text-blue-600 border border-sky-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                            <button @click="speakText('Student A: What is 3 across? Student B: 3 across is farmer. Student A: How do you spell it? Student B: It is F. A. R. M. E. R. Student B: What is 8 down? Student A: 8 down is waiter. Student B: How do you spell it? Student A: It is W. A. I. T. E. R.')" type="button" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
                                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                <span>Dengarkan Contoh Dialog</span>
                                             </button>
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
 
-                            <!-- Game Instructions Box (Dual Role Instructions) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-                                <div style="background-color: #f0f9ff !important; border-color: #bae6fd !important;" class="p-6 rounded-[2rem] border-2 flex flex-col justify-between shadow-xs">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span style="background-color: #29a8f5 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">A</span>
-                                            <h4 style="color: #0284c7 !important;" class="text-xs font-black uppercase tracking-wider">Aturan Main Pemain A (Group A)</h4>
-                                        </div>
-                                        <p class="text-xs text-sky-950 font-medium leading-relaxed mb-3">
-                                             Anda memiliki <strong>Lembar Crossword A</strong> yang sudah terisi 11 profesi (<em>actor, carpenter, dentist, hairdresser, vet, baker, chef, doctor, librarian, waiter, butcher</em>). Tugas Anda: jelaskan profesi tersebut saat pasangan Anda bertanya!
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-white rounded-2xl border border-sky-200 text-xs font-bold text-sky-800">
-                                        Tanya Pasangan: <em>"What's 3 across in your puzzle?"</em>
-                                    </div>
-                                </div>
-
-                                <div style="background-color: #fff7ed !important; border-color: #fed7aa !important;" class="p-6 rounded-[2rem] border-2 flex flex-col justify-between shadow-xs">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span style="background-color: #ff9800 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">B</span>
-                                            <h4 style="color: #c2410c !important;" class="text-xs font-black uppercase tracking-wider">Aturan Main Pemain B (Group B)</h4>
-                                        </div>
-                                        <p class="text-xs text-orange-950 font-medium leading-relaxed mb-3">
-                                            Anda memiliki <strong>Lembar Crossword B</strong> yang sudah terisi 11 profesi (<em>architect, farmer, miner, pilot, secretary, barber, journalist, nurse, salesman, traffic warden, dustman</em>). Jelaskan definisinya tanpa menyebutkan kata kuncinya!
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-white rounded-2xl border border-orange-200 text-xs font-bold text-orange-800">
-                                        Tanya Pasangan: <em>"What's 4 across in your puzzle?"</em>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Dedicated Crossword Gameplay Dialogue Guide -->
-                            <div class="bg-sky-50 border-2 border-sky-200/80 rounded-3xl p-6 mb-8 shadow-xs">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-blue-200/60 gap-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="w-8 h-8 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">💬</span>
-                                        <div>
-                                            <h3 class="text-sm sm:text-base font-black text-slate-900">Panduan Dialog Percakapan Saat Memainkan Game (Gameplay Dialogue)</h3>
-                                            <p class="text-[11px] text-slate-600 font-medium">Gunakan alur dialog 4 langkah berikut secara bergiliran untuk mengisi kotak-kotak yang kosong:</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                            <div class="p-3.5 bg-white rounded-2xl border border-blue-100 shadow-2xs">
+                                                <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 uppercase">1. Tanya Nomor</span>
+                                                <p class="text-xs font-black text-slate-900 mt-1.5">"What is [3 across]?"</p>
+                                                <p class="text-[10px] text-slate-500 mt-1 italic font-medium">Tanyakan nomor yang kosong</p>
+                                            </div>
+                                            <div class="p-3.5 bg-white rounded-2xl border border-blue-100 shadow-2xs">
+                                                <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 uppercase">2. Jawab Profesi</span>
+                                                <p class="text-xs font-black text-slate-900 mt-1.5">"[3 across] is [farmer]."</p>
+                                                <p class="text-[10px] text-slate-500 mt-1 italic font-medium">Partner menjawab namanya</p>
+                                            </div>
+                                            <div class="p-3.5 bg-white rounded-2xl border border-blue-100 shadow-2xs">
+                                                <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 uppercase">3. Minta Ejaan</span>
+                                                <p class="text-xs font-black text-slate-900 mt-1.5">"How do you spell it?"</p>
+                                                <p class="text-[10px] text-slate-500 mt-1 italic font-medium">Minta dieja per huruf</p>
+                                            </div>
+                                            <div class="p-3.5 bg-white rounded-2xl border border-blue-100 shadow-2xs">
+                                                <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 uppercase">4. Eja & Tulis</span>
+                                                <p class="text-xs font-black text-slate-900 mt-1.5">"It is [F. A. R. M. E. R.]"</p>
+                                                <p class="text-[10px] text-slate-500 mt-1 italic font-medium">Eja huruf & tulis di grid</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button @click="speakText('Student A: What is 3 across? Student B: 3 across is farmer. Student A: How do you spell it? Student B: It is F. A. R. M. E. R. Student B: What is 8 down? Student A: 8 down is waiter. Student B: How do you spell it? Student A: It is W. A. I. T. E. R.')" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
-                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                                        <span>Dengarkan Contoh Dialog Lengkap</span>
-                                    </button>
-                                </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                                    <div class="p-4 bg-white rounded-2xl border border-blue-100 shadow-2xs flex flex-col justify-between">
-                                        <div>
-                                            <span class="text-[10px] font-black px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 uppercase">Langkah 1 • Tanya Nomor Kosong</span>
-                                            <p class="text-xs sm:text-sm font-black text-slate-900 mt-2">"What is [3 across / 8 down]?"</p>
+                                    <!-- Dedicated Practice Drilling Cards -->
+                                    @if(!empty($meetingData['games']['drilling_game']))
+                                        <div class="bg-white border-2 border-sky-100 rounded-3xl p-5 shadow-xs">
+                                            <h4 class="text-xs font-black uppercase text-slate-800 tracking-wider mb-3">Latihan Pengucapan Kalimat Tanya & Petunjuk:</h4>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                @foreach($meetingData['games']['drilling_game'] as $gDrill)
+                                                    <div class="p-3 rounded-2xl bg-slate-50/70 border border-slate-200/70 hover:border-sky-300 shadow-2xs transition flex items-start justify-between gap-2.5">
+                                                        <div>
+                                                            <p class="font-black text-slate-900 text-xs leading-snug">
+                                                                • {{ $gDrill['en'] }}
+                                                            </p>
+                                                            <p class="text-[11px] text-slate-600 mt-0.5 font-medium italic">
+                                                                ({{ $gDrill['id'] }})
+                                                            </p>
+                                                        </div>
+                                                        <button @click="speakText(@js($gDrill['en']))" type="button" class="w-7 h-7 rounded-full bg-white hover:bg-blue-600 hover:text-white text-blue-600 border border-sky-200 shadow-2xs transition flex items-center justify-center shrink-0" title="Listen">
+                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
-                                        <p class="text-[11px] text-slate-500 mt-2 italic font-medium">(Pemain menanyakan nomor kotak yang masih kosong di lembarnya)</p>
-                                    </div>
-
-                                    <div class="p-4 bg-white rounded-2xl border border-blue-100 shadow-2xs flex flex-col justify-between">
-                                        <div>
-                                            <span class="text-[10px] font-black px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 uppercase">Langkah 2 • Jawab Nama Profesi</span>
-                                            <p class="text-xs sm:text-sm font-black text-slate-900 mt-2">"[3 across] is [farmer / waiter]."</p>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-2 italic font-medium">(Partner yang punya kuncinya langsung menjawab nama profesinya)</p>
-                                    </div>
-
-                                    <div class="p-4 bg-white rounded-2xl border border-blue-100 shadow-2xs flex flex-col justify-between">
-                                        <div>
-                                            <span class="text-[10px] font-black px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-800 uppercase">Langkah 3 • Minta Ejaan</span>
-                                            <p class="text-xs sm:text-sm font-black text-slate-900 mt-2">"How do you spell it?"</p>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-2 italic font-medium">(Meminta dieja huruf demi huruf agar bisa ditulis di kotak silang)</p>
-                                    </div>
-
-                                    <div class="p-4 bg-white rounded-2xl border border-blue-100 shadow-2xs flex flex-col justify-between">
-                                        <div>
-                                            <span class="text-[10px] font-black px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 uppercase">Langkah 4 • Eja &amp; Tulis</span>
-                                            <p class="text-xs sm:text-sm font-black text-slate-900 mt-2">"It is [W. A. I. T. E. R. / F. A. R. M. E. R.]"</p>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-2 italic font-medium">(Eja huruf demi huruf dengan jelas dan tulis ke dalam kotak puzzle)</p>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -3995,7 +9725,7 @@
                                     <!-- Actions & Reset -->
                                     <div class="flex items-center gap-2">
                                         <button @click="gridInputs = {}" type="button" class="px-4 py-2 bg-slate-100 hover:bg-rose-50 text-rose-600 border border-slate-200 rounded-xl font-bold text-xs shadow-2xs transition flex items-center gap-1.5">
-                                            <span>🔄 Reset Grid</span>
+                                            <span>Reset Grid</span>
                                         </button>
                                     </div>
                                 </div>
@@ -4098,13 +9828,13 @@
                                                 :style="sideTab === 'missing' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" 
                                                 :class="sideTab === 'missing' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" 
                                                 class="px-4 py-2 rounded-xl transition flex items-center gap-1.5">
-                                            <span>❓ 11 Kotak Kosong Ditanyakan</span>
+                                            <span>11 Kotak Kosong Ditanyakan</span>
                                         </button>
                                         <button @click="sideTab = 'answers'" 
                                                 :style="sideTab === 'answers' ? 'background-color: #ff9800 !important; color: #ffffff !important;' : ''" 
                                                 :class="sideTab === 'answers' ? 'shadow-md font-black' : 'text-slate-600 hover:text-slate-900'" 
                                                 class="px-4 py-2 rounded-xl transition flex items-center gap-1.5">
-                                            <span>💡 Jawaban di Lembar</span>
+                                            <span>Jawaban di Lembar</span>
                                         </button>
                                     </div>
                                 </div>
@@ -4145,7 +9875,7 @@
                                                     <!-- English Revealed on Click -->
                                                     <div x-show="showEnglish" x-transition class="mt-3 pt-3 border-t border-sky-200/80 bg-sky-100/40 p-2.5 rounded-xl">
                                                         <div class="flex items-center justify-between mb-1">
-                                                            <span class="text-[10px] font-black uppercase tracking-wider text-sky-800">🇬🇧 Kalimat Bahasa Inggris:</span>
+                                                            <span class="text-[10px] font-black uppercase tracking-wider text-sky-800">Kalimat Bahasa Inggris:</span>
                                                             <button @click.stop="speakText(@js($m['question']))" type="button" class="text-[11px] font-bold text-sky-600 hover:text-sky-900 flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-sky-200 shadow-2xs">
                                                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                                                                 <span>Putar Audio</span>
@@ -4190,7 +9920,7 @@
                                                     <!-- English Revealed on Click -->
                                                     <div x-show="showEnglish" x-transition class="mt-3 pt-3 border-t border-orange-200/80 bg-orange-100/40 p-2.5 rounded-xl">
                                                         <div class="flex items-center justify-between mb-1">
-                                                            <span class="text-[10px] font-black uppercase tracking-wider text-orange-800">🇬🇧 Kalimat Bahasa Inggris:</span>
+                                                            <span class="text-[10px] font-black uppercase tracking-wider text-orange-800">Kalimat Bahasa Inggris:</span>
                                                             <button @click.stop="speakText(@js($m['question']))" type="button" class="text-[11px] font-bold text-orange-600 hover:text-orange-900 flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-orange-200 shadow-2xs">
                                                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                                                                 <span>Putar Audio</span>
@@ -4307,7 +10037,8 @@
                         <!-- MEETING 3: HOW MANY? (KITCHEN OBJECTS & SPIDER GAME) -->
                         <!-- ==================================================== -->
                         <div class="space-y-6 w-full" x-data="{
-                            activeStudent: 'A',
+                            activeStudent: (previewRole === 'admin') ? 'A' : '{{ $myAssignedRole }}',
+                            assignedStudentRole: '{{ $myAssignedRole }}',
                             selectedGroupPreview: null,
                             showAnswers: false,
                             isZoomModalOpen: false,
@@ -4316,11 +10047,26 @@
                             itemsList: @js($gameData['items'] ?? []),
                             questionsList: @js($gameData['questions'] ?? []),
                             init() {
+                                if (this.previewRole === 'student') {
+                                    this.activeStudent = this.assignedStudentRole;
+                                }
+                                if (this.$watch) {
+                                    this.$watch('previewRole', val => {
+                                        if (val === 'student') {
+                                            this.activeStudent = this.assignedStudentRole;
+                                            this.showAnswers = false;
+                                        }
+                                    });
+                                }
                                 window.addEventListener('set-kitchen-student', (e) => {
-                                    if (e.detail) this.activeStudent = e.detail;
+                                    if (this.previewRole === 'admin' && e.detail) {
+                                        this.activeStudent = e.detail;
+                                    }
                                 });
                                 window.addEventListener('toggle-kitchen-answers', (e) => {
-                                    this.showAnswers = e.detail;
+                                    if (this.previewRole === 'admin') {
+                                        this.showAnswers = e.detail;
+                                    }
                                 });
                                 if (this.$watch) {
                                     this.$watch('activeStudent', val => {
@@ -4366,7 +10112,7 @@
                                 <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <div class="max-w-2xl">
                                         <div class="flex items-center gap-2 mb-2.5 flex-wrap">
-                                            <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">{{ $participationBadge['icon'] }} {{ $participationBadge['label'] }} • Information Gap</span>
+                                            <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">{{ $participationBadge['label'] }} • Information Gap</span>
                                             <span class="px-3.5 py-1 rounded-full text-xs font-black text-slate-950 shadow-xs" style="background-color: #fbbf24 !important;">Counting Game (1 - 20+)</span>
                                             <span class="px-3.5 py-1 rounded-full text-xs font-black text-white shadow-xs" style="background-color: #10b981 !important;">Find Who Has The Most!</span>
                                         </div>
@@ -4376,10 +10122,15 @@
                                         </p>
                                     </div>
 
-                                    <!-- Student A / Student B Switcher -->
-                                    <div class="bg-white/20 p-2 rounded-3xl border border-white/30 shrink-0 flex flex-col gap-2 shadow-xs">
-                                        <span class="text-[11px] font-black uppercase tracking-wider text-white px-2 text-center">Pilih Peran Belajar Anda:</span>
-                                        <div class="flex items-center gap-2">
+                                    <!-- Student A / Student B Role Panel -->
+                                    <div class="bg-white/20 p-2.5 rounded-3xl border border-white/30 shrink-0 flex flex-col gap-2 shadow-xs">
+                                        <span class="text-[11px] font-black uppercase tracking-wider text-white px-2 text-center">
+                                            <span x-show="previewRole === 'admin'">Pilih Peran Belajar (Admin):</span>
+                                            <span x-show="previewRole === 'student'">Peran Belajar Anda:</span>
+                                        </span>
+                                        
+                                        <!-- ADMIN / TEACHER: Free to switch roles to inspect both pictures -->
+                                        <div x-show="previewRole === 'admin'" class="flex items-center gap-2">
                                             <button @click="activeStudent = 'A'" 
                                                     :class="activeStudent === 'A' ? 'bg-white text-blue-900 font-black shadow-lg scale-105 ring-2 ring-sky-200' : 'text-white hover:bg-white/10 font-bold'" 
                                                     class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 text-xs sm:text-sm">
@@ -4392,6 +10143,24 @@
                                                 <span class="w-2.5 h-2.5 rounded-full" :class="activeStudent === 'B' ? 'bg-orange-500' : 'bg-white'"></span>
                                                 <span>Saya Siswa B (Dapur B)</span>
                                             </button>
+                                        </div>
+
+                                        <!-- STUDENT: Role is LOCKED. Student CANNOT switch! -->
+                                        <div x-show="previewRole === 'student'" class="flex items-center gap-2.5 px-4 py-2.5 bg-white/25 rounded-2xl border border-white/30 shadow-inner">
+                                            <span class="w-3 h-3 rounded-full animate-pulse" :class="activeStudent === 'A' ? 'bg-sky-400 ring-2 ring-white' : 'bg-amber-400 ring-2 ring-white'"></span>
+                                            <div class="flex flex-col">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs sm:text-sm font-black text-white" x-text="activeStudent === 'A' ? 'Siswa A (Dapur A)' : 'Siswa B (Dapur B)'"></span>
+                                                    <span class="px-2 py-0.5 rounded-md bg-slate-900/40 text-[10px] font-black uppercase text-white/90">Terkunci</span>
+                                                </div>
+                                                <span class="text-[11px] text-white/85 font-medium">
+                                                    @if($myPartner)
+                                                        Pasangan: <strong class="text-white">{{ $myPartner->name }}</strong> (Siswa {{ $myAssignedRole === 'A' ? 'B' : 'A' }})
+                                                    @else
+                                                        Peran telah ditentukan oleh pengajar
+                                                    @endif
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -4430,7 +10199,7 @@
                                         <span class="px-4 py-2 rounded-2xl text-xs sm:text-sm font-black text-white shadow-sm flex items-center gap-2"
                                               :class="activeStudent === 'A' ? 'bg-sky-600' : 'bg-orange-600'">
                                             <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                                            <span x-text="activeStudent === 'A' ? '🖼️ Gambar Dapur Anda: DAPUR A (Siswa A)' : '🖼️ Gambar Dapur Anda: DAPUR B (Siswa B)'"></span>
+                                            <span x-text="activeStudent === 'A' ? 'Gambar Dapur Anda: DAPUR A (Siswa A)' : 'Gambar Dapur Anda: DAPUR B (Siswa B)'"></span>
                                         </span>
                                         <span class="text-xs text-slate-500 font-bold hidden sm:inline">• Hitung teko, panci, garpu, pisau, sendok, cangkir, tatakan, gelas, piring, mangkuk, &amp; laba-laba!</span>
                                     </div>
@@ -4467,7 +10236,7 @@
                                 <div class="mt-4 p-4 rounded-2xl border text-xs font-semibold flex items-center justify-between gap-3"
                                      :class="activeStudent === 'A' ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-orange-50/70 border-orange-200 text-orange-950'">
                                     <div class="flex items-center gap-2.5">
-                                        <span class="text-xl">🔒</span>
+                                        <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-[10px] font-bold uppercase">Locked</span>
                                         <div>
                                             <span class="font-black text-sm block" x-text="activeStudent === 'A' ? 'Gambar Dapur A adalah RAHASIA Anda!' : 'Gambar Dapur B adalah RAHASIA Anda!'"></span>
                                             <p class="text-xs text-slate-600 mt-0.5" x-text="activeStudent === 'A' ? 'Hitung barang dapur A di atas, lalu tanyakan jumlah barang di dapur B kepada Siswa B dalam bahasa Inggris.' : 'Hitung barang dapur B di atas, lalu tanyakan jumlah barang di dapur A kepada Siswa A dalam bahasa Inggris.'"></p>
@@ -4494,11 +10263,11 @@
                                                 Lembar Catatan Hitungan (Count Sheet)
                                             </h3>
                                         </div>
-                                        <p class="text-xs text-slate-500 font-medium" x-text="activeStudent === 'A' ? 'Hitung Dapur A milikmu sendiri, lalu tanyakan Dapur B kepada Siswa B dengan klik tombol tanya 🗣️!' : 'Hitung Dapur B milikmu sendiri, lalu tanyakan Dapur A kepada Siswa A dengan klik tombol tanya 🗣️!'"></p>
+                                        <p class="text-xs text-slate-500 font-medium" x-text="activeStudent === 'A' ? 'Hitung Dapur A milikmu sendiri, lalu tanyakan Dapur B kepada Siswa B dengan klik tombol tanya!' : 'Hitung Dapur B milikmu sendiri, lalu tanyakan Dapur A kepada Siswa A dengan klik tombol tanya!'"></p>
                                     </div>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2" x-show="previewRole === 'admin'">
                                         <button @click="showAnswers = !showAnswers" type="button" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition shadow-2xs">
-                                            <span x-text="showAnswers ? 'Sembunyikan Kunci' : 'Kunci Jawaban 👁️'"></span>
+                                            <span x-text="showAnswers ? 'Sembunyikan Kunci' : 'Kunci Jawaban'"></span>
                                         </button>
                                         <button @click="fillAutoAnswers()" type="button" class="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs border border-sky-200 transition shadow-2xs">
                                             Isi Kunci Otomatis
@@ -4517,7 +10286,7 @@
                                                         <span>DAPUR A (KITCHEN A)</span>
                                                         <span class="text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full"
                                                               :class="activeStudent === 'A' ? 'bg-sky-500 text-white' : 'bg-sky-950 text-sky-200'"
-                                                              x-text="activeStudent === 'A' ? '👁️ Dapur Saya (Siswa A)' : '🗣️ Dapur Partner (Tanyakan)'"></span>
+                                                              x-text="activeStudent === 'A' ? 'Dapur Saya (Siswa A)' : 'Dapur Partner (Tanyakan)'"></span>
                                                     </div>
                                                 </th>
                                                 <th class="p-3 sm:p-4 text-center bg-orange-900 text-orange-100 whitespace-nowrap">
@@ -4525,7 +10294,7 @@
                                                         <span>DAPUR B (KITCHEN B)</span>
                                                         <span class="text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full"
                                                               :class="activeStudent === 'B' ? 'bg-amber-500 text-white' : 'bg-orange-950 text-orange-200'"
-                                                              x-text="activeStudent === 'B' ? '👁️ Dapur Saya (Siswa B)' : '🗣️ Dapur Partner (Tanyakan)'"></span>
+                                                              x-text="activeStudent === 'B' ? 'Dapur Saya (Siswa B)' : 'Dapur Partner (Tanyakan)'"></span>
                                                     </div>
                                                 </th>
                                                 <th class="p-3 sm:p-4 text-right whitespace-nowrap">LEBIH BANYAK DI...</th>
@@ -4601,7 +10370,7 @@
                                      :class="getTotalB() > getTotalA() ? 'bg-orange-50 border-orange-200 text-orange-950' : (getTotalA() > getTotalB() ? 'bg-sky-50 border-sky-200 text-sky-950' : 'bg-slate-50 border-slate-200 text-slate-800')">
                                     <div class="flex items-center justify-between flex-wrap gap-2">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-2xl">🏆</span>
+                                            
                                             <div>
                                                 <span class="font-black text-xs uppercase tracking-wider block">Hasil Akhir Permainan:</span>
                                                 <p class="font-black text-sm" x-text="getTotalB() > getTotalA() ? 'Dapur B memiliki total barang terbanyak (' + getTotalB() + ' items vs ' + getTotalA() + ' items)!' : (getTotalA() > getTotalB() ? 'Dapur A memiliki total barang terbanyak (' + getTotalA() + ' items vs ' + getTotalB() + ' items)!' : 'Masukkan semua hitungan untuk menentukan pemenang!')"></p>
@@ -4617,7 +10386,7 @@
                             <!-- Speaking Questions Practice & Audio Helpers -->
                             <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200 w-full">
                                 <div class="pb-4 mb-6 border-b border-slate-100 flex items-center gap-2">
-                                    <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">💬</span>
+                                    <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">EX</span>
                                     <div>
                                         <h3 class="text-xl font-black text-slate-900">Pola Tanya Jawab Percakapan (Speaking Drill &amp; Audio)</h3>
                                         <p class="text-xs text-slate-500 font-medium">Gunakan kalimat tanya berikut saat berlatih berpasangan di kelas.</p>
@@ -4663,7 +10432,7 @@
                                             <span class="text-xs text-slate-300 font-bold hidden sm:inline">Mode Zoom Layar Penuh HD</span>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <button @click="activeStudent = (activeStudent === 'A' ? 'B' : 'A')" type="button" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
+                                            <button x-show="previewRole === 'admin'" @click="activeStudent = (activeStudent === 'A' ? 'B' : 'A')" type="button" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
                                                 Ganti ke Dapur <span x-text="activeStudent === 'A' ? 'B' : 'A'"></span>
                                             </button>
                                             <button @click="isZoomModalOpen = false" type="button" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-red-500 text-white flex items-center justify-center text-base font-bold transition">
@@ -4785,7 +10554,7 @@
                                         <div class="flex items-center gap-2 mb-2.5 flex-wrap">
                                             <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider text-white">Worksheet 4 Game</span>
                                             <span style="background-color: #ff9800 !important;" class="px-3 py-1 rounded-full text-white text-xs font-black shadow-xs">Waktu: {{ $gameData['time'] ?? '20-25 Menit' }}</span>
-                                            <span class="px-3 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black">{{ $participationBadge['icon'] }} {{ $participationBadge['label'] }}</span>
+                                            <span class="px-3 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black">{{ $participationBadge['label'] }}</span>
                                             <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold text-white">4 Info Desks &bull; 7 Tourist Sheets (A–G)</span>
                                         </div>
                                         <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
@@ -4798,7 +10567,7 @@
                                         <!-- Prominent Button: Panduan & Cara Main Game -->
                                         <div class="mt-4 flex flex-wrap items-center gap-2">
                                             <button type="button" @click="activeTab = 'guide'" class="px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all border border-amber-300 transform hover:-translate-y-0.5">
-                                                <span>📖</span> <span>Cara Main &amp; Aturan Game (Bahasa Indonesia)</span>
+                                                <span>Cara Main &amp; Aturan Game</span>
                                             </button>
                                         </div>
                                     </div>
@@ -4808,37 +10577,37 @@
                                         <div class="text-[11px] font-bold text-sky-100 uppercase tracking-wider mb-1">Authentic Worksheets:</div>
                                         <div class="flex flex-wrap gap-1.5 max-w-xs">
                                             <button type="button" @click="activeModal = 'map'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🗺️</span> <span>Map</span>
+                                                <span>Map</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'desks'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🏢</span> <span>4 Desks</span>
+                                                <span>4 Desks</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_a'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet A</span>
+                                                <span>Sheet A</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_b'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet B</span>
+                                                <span>Sheet B</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_c'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet C</span>
+                                                <span>Sheet C</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_d'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet D</span>
+                                                <span>Sheet D</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_e'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet E</span>
+                                                <span>Sheet E</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_f'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet F</span>
+                                                <span>Sheet F</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'sheet_g'" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
-                                                <span>🎒</span> <span>Sheet G</span>
+                                                <span>Sheet G</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'teacher_rules_1'" class="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-300 text-xs font-black text-slate-950 transition-all flex items-center gap-1 shadow-xs">
-                                                <span>📖</span> <span>Rules 1</span>
+                                                <span>Rules 1</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'teacher_rules_2'" class="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-300 text-xs font-black text-slate-950 transition-all flex items-center gap-1 shadow-xs">
-                                                <span>📖</span> <span>Rules 2</span>
+                                                <span>Rules 2</span>
                                             </button>
                                         </div>
                                     </div>
@@ -4850,32 +10619,32 @@
                                 <button type="button" @click="activeTab = 'map'"
                                     :class="activeTab === 'map' ? 'bg-white text-sky-600 shadow-sm font-black' : 'text-slate-600 font-semibold hover:text-slate-900'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2">
-                                    <span>🗺️</span> <span>Town Map &amp; 8 Landmarks</span>
+                                    <span>Town Map &amp; 8 Landmarks</span>
                                 </button>
                                 <button type="button" @click="activeTab = 'guide'"
                                     :class="activeTab === 'guide' ? 'bg-amber-400 text-slate-950 shadow-sm font-black' : 'bg-white/70 text-amber-900 font-black hover:bg-white'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 border border-amber-300">
-                                    <span>📖</span> <span>Cara Bermain &amp; Aturan Game</span>
+                                    <span>Cara Bermain &amp; Aturan Game</span>
                                 </button>
                                 <button type="button" @click="activeTab = 'desks'"
                                     :class="activeTab === 'desks' ? 'bg-white text-sky-600 shadow-sm font-black' : 'text-slate-600 font-semibold hover:text-slate-900'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2">
-                                    <span>🏢</span> <span>4 Information Desks</span>
+                                    <span>4 Information Desks</span>
                                 </button>
                                 <button type="button" @click="activeTab = 'sheets'"
                                     :class="activeTab === 'sheets' ? 'bg-white text-sky-600 shadow-sm font-black' : 'text-slate-600 font-semibold hover:text-slate-900'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2">
-                                    <span>🎒</span> <span>Tourist Roleplays (Sheets A–G)</span>
+                                    <span>Tourist Roleplays (Sheets A–G)</span>
                                 </button>
                                 <button type="button" @click="activeTab = 'calculator'"
                                     :class="activeTab === 'calculator' ? 'bg-white text-sky-600 shadow-sm font-black' : 'text-slate-600 font-semibold hover:text-slate-900'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2">
-                                    <span>🧮</span> <span>Travel Tools &amp; Calculators</span>
+                                    <span>Travel Tools &amp; Calculators</span>
                                 </button>
                                 <button type="button" @click="activeTab = 'dialogues'"
                                     :class="activeTab === 'dialogues' ? 'bg-white text-sky-600 shadow-sm font-black' : 'text-slate-600 font-semibold hover:text-slate-900'"
                                     class="px-4 py-2.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2">
-                                    <span>💬</span> <span>Speaking Phrases</span>
+                                    <span>Speaking Phrases</span>
                                 </button>
                             </div>
 
@@ -4884,7 +10653,7 @@
                                 <!-- Quick Game Instructions Banner on Tab 1 -->
                                 <div class="p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-amber-50 border border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-3xl shrink-0">🎮</span>
+                                        
                                         <div>
                                             <div class="font-black text-slate-900 text-xs sm:text-sm flex items-center gap-2 flex-wrap">
                                                 <span>Cara Main Cepat (Wandering Tourists):</span>
@@ -4896,7 +10665,7 @@
                                         </div>
                                     </div>
                                     <button type="button" @click="activeTab = 'guide'" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-black transition-all flex items-center gap-1.5 shrink-0 shadow-sm self-start sm:self-auto">
-                                        <span>📖</span> <span>Baca Panduan Lengkap</span>
+                                        <span>Baca Panduan Lengkap</span>
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -4905,7 +10674,7 @@
                                         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
                                             <div>
                                                 <h3 class="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2">
-                                                    <span>🗺️</span> <span>Interactive Town Map</span>
+                                                    <span>Interactive Town Map</span>
                                                 </h3>
                                                 <p class="text-xs text-slate-500">Klik pin atau landmark untuk mendengar nama dan audio petunjuk</p>
                                             </div>
@@ -4915,12 +10684,12 @@
                                                 <button type="button" @click="mapMode = '3d'" 
                                                     :class="mapMode === '3d' ? 'bg-white text-sky-700 shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold'"
                                                     class="px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5">
-                                                    <span>✨ 3D Vibrant</span>
+                                                    <span>3D Vibrant</span>
                                                 </button>
                                                 <button type="button" @click="mapMode = 'bw'" 
                                                     :class="mapMode === 'bw' ? 'bg-white text-slate-900 shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold'"
                                                     class="px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5">
-                                                    <span>📄 Authentic B&amp;W</span>
+                                                    <span>Authentic B&amp;W</span>
                                                 </button>
                                                 <button type="button" @click="activeModal = 'map'" class="p-1.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 transition-all text-xs font-bold" title="Zoom Map">
                                                     🔍
@@ -5054,7 +10823,7 @@
                                                         style="top: 16%; left: 59%;"
                                                         class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group/pin transition-transform hover:scale-110 focus:outline-none z-10">
                                                         <span class="px-2 py-0.5 rounded-md bg-slate-900/90 text-white font-black text-[10px] shadow-md border border-white/80 flex items-center gap-1 backdrop-blur-xs">
-                                                            <span>🚆</span> <span>Station</span>
+                                                            <span>Station</span>
                                                         </span>
                                                     </button>
 
@@ -5063,7 +10832,7 @@
                                                         style="top: 36%; left: 80%;"
                                                         class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group/pin transition-transform hover:scale-110 focus:outline-none z-10">
                                                         <span class="px-2 py-0.5 rounded-md bg-emerald-700/95 text-white font-black text-[10px] shadow-md border border-white/80 flex items-center gap-1 backdrop-blur-xs">
-                                                            <span>ℹ️</span> <span>Tourist Office</span>
+                                                            <span>Tourist Office</span>
                                                         </span>
                                                     </button>
 
@@ -5072,7 +10841,7 @@
                                                         style="top: 68%; left: 6%;"
                                                         class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group/pin transition-transform hover:scale-110 focus:outline-none z-10">
                                                         <span class="px-2 py-0.5 rounded-md bg-amber-600/95 text-white font-black text-[10px] shadow-md border border-white/80 flex items-center gap-1 backdrop-blur-xs">
-                                                            <span>🏦</span> <span>Bank</span>
+                                                            <span>Bank</span>
                                                         </span>
                                                     </button>
 
@@ -5081,7 +10850,7 @@
                                                         style="top: 63%; left: 88%;"
                                                         class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group/pin transition-transform hover:scale-110 focus:outline-none z-10">
                                                         <span class="px-2 py-0.5 rounded-md bg-sky-700/95 text-white font-black text-[10px] shadow-md border border-white/80 flex items-center gap-1 backdrop-blur-xs">
-                                                            <span>🏨</span> <span>Hotel</span>
+                                                            <span>Hotel</span>
                                                         </span>
                                                     </button>
                                                 </div>
@@ -5089,7 +10858,7 @@
 
                                             <!-- Bottom Info Overlay Pill -->
                                             <div class="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl text-white text-xs font-semibold flex items-center gap-2 pointer-events-none">
-                                                <span x-text="mapMode === '3d' ? '✨ 3D Mode Aktif &bull; Klik pin atau buka modal zoom' : '📄 B&amp;W Scan Aktif &bull; Klik untuk zoom resolusi tinggi'"></span>
+                                                <span x-text="mapMode === '3d' ? '3D Mode Aktif &bull; Klik pin atau buka modal zoom' : 'B&amp;W Scan Aktif &bull; Klik untuk zoom resolusi tinggi'"></span>
                                             </div>
                                         </div>
 
@@ -5134,7 +10903,7 @@
                                                                         @if(!empty($task['question']) && $task['question'] !== 'Mark it on your map.')
                                                                             <div class="text-sky-900 text-[11px] font-semibold italic flex items-start justify-between gap-1.5 min-w-0">
                                                                                 <span class="break-words min-w-0 flex-1 leading-tight">{{ $task['question'] }}</span>
-                                                                                <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 text-[10px] shrink-0" title="Dengar Audio">🔊</button>
+                                                                                <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 text-[10px] shrink-0" title="Dengar Audio"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                                             </div>
                                                                             <!-- Interactive Input for typing answers -->
                                                                             <div class="pt-0.5 space-y-1 min-w-0">
@@ -5149,12 +10918,12 @@
                                                                         <div class="flex items-center justify-between pt-1 border-t border-slate-200/60 min-w-0 gap-2 flex-wrap">
                                                                             <span class="text-[10px] text-slate-500 font-semibold truncate min-w-0">Tujuan: <strong class="text-slate-700">{{ $task['target_place'] }}</strong></span>
                                                                             <button type="button" @click="toggleSolution('{{ $taskSubId }}')" class="text-[10px] font-bold text-amber-700 hover:text-amber-800 shrink-0">
-                                                                                <span x-text="revealedSolutions['{{ $taskSubId }}'] ? '🔒 Tutup Kunci' : '🔑 Kunci'"></span>
+                                                                                <span x-text="revealedSolutions['{{ $taskSubId }}'] ? 'Tutup Kunci' : 'Kunci'"></span>
                                                                             </button>
                                                                         </div>
 
                                                                         <div x-show="revealedSolutions['{{ $taskSubId }}']" x-collapse class="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold break-words min-w-0">
-                                                                            ✅ {{ $task['answer'] }}
+                                                                            {{ $task['answer'] }}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -5179,7 +10948,7 @@
                                                                         @if(!empty($task['question']) && $task['question'] !== 'Mark it on your map.')
                                                                             <div class="text-sky-900 text-[11px] font-semibold italic flex items-start justify-between gap-1.5 min-w-0">
                                                                                 <span class="break-words min-w-0 flex-1 leading-tight">{{ $task['question'] }}</span>
-                                                                                <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 text-[10px] shrink-0" title="Dengar Audio">🔊</button>
+                                                                                <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 text-[10px] shrink-0" title="Dengar Audio"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                                             </div>
                                                                             <!-- Interactive Input for typing answers -->
                                                                             <div class="pt-0.5 space-y-1 min-w-0">
@@ -5194,12 +10963,12 @@
                                                                         <div class="flex items-center justify-between pt-1 border-t border-slate-200/60 min-w-0 gap-2 flex-wrap">
                                                                             <span class="text-[10px] text-slate-500 font-semibold truncate min-w-0">Tujuan: <strong class="text-slate-700">{{ $task['target_place'] }}</strong></span>
                                                                             <button type="button" @click="toggleSolution('{{ $taskSubId }}')" class="text-[10px] font-bold text-amber-700 hover:text-amber-800 shrink-0">
-                                                                                <span x-text="revealedSolutions['{{ $taskSubId }}'] ? '🔒 Tutup Kunci' : '🔑 Kunci'"></span>
+                                                                                <span x-text="revealedSolutions['{{ $taskSubId }}'] ? 'Tutup Kunci' : 'Kunci'"></span>
                                                                             </button>
                                                                         </div>
 
                                                                         <div x-show="revealedSolutions['{{ $taskSubId }}']" x-collapse class="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold break-words min-w-0">
-                                                                            ✅ {{ $task['answer'] }}
+                                                                            {{ $task['answer'] }}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -5239,7 +11008,7 @@
                                         <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-md space-y-3">
                                             <div class="flex items-center justify-between">
                                                 <h4 class="font-black text-slate-900 text-sm uppercase tracking-wider flex items-center gap-2">
-                                                    <span>🏢</span> <span>4 Major Services on Map</span>
+                                                    <span>4 Major Services on Map</span>
                                                 </h4>
                                                 <span class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[11px] font-bold">Roleplay Hubs</span>
                                             </div>
@@ -5248,14 +11017,12 @@
                                                     <div class="p-3 rounded-2xl bg-sky-50/50 border border-sky-100 space-y-1 hover:shadow-xs transition-all cursor-pointer" @click="selectedDesk = '{{ $bKey }}'; activeTab = 'desks'; speakText(@js($building['audio']))">
                                                         <div class="flex items-center justify-between">
                                                             <div class="font-bold text-xs text-sky-950 flex items-center gap-1.5">
-                                                                <span>{{ $building['icon'] ?? '🏢' }}</span>
+                                                                
                                                                 <span>{{ $building['name'] }}</span>
                                                             </div>
-                                                            <button type="button" @click.stop="speakText(@js($building['audio']))" class="p-1 rounded-lg bg-sky-200/70 hover:bg-sky-300 text-sky-900 transition-all text-xs" title="Listen Location">
-                                                                🔊
-                                                            </button>
+                                                            <button type="button" @click.stop="speakText(@js($building['audio']))" class="p-1 rounded-lg bg-sky-200/70 hover:bg-sky-300 text-sky-900 transition-all text-xs" title="Listen Location"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                         </div>
-                                                        <div class="text-[11px] font-semibold text-slate-600">📍 {{ $building['street'] }}</div>
+                                                        <div class="text-[11px] font-semibold text-slate-600">{{ $building['street'] }}</div>
                                                         <div class="text-[11px] text-slate-500 leading-tight">{{ $building['desc'] }}</div>
                                                     </div>
                                                 @endforeach
@@ -5266,7 +11033,7 @@
                                         <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-md space-y-3">
                                             <div class="flex items-center justify-between">
                                                 <h4 class="font-black text-slate-900 text-sm uppercase tracking-wider flex items-center gap-2">
-                                                    <span>🏛️</span> <span>8 Numbered Town Landmarks</span>
+                                                    <span>8 Numbered Town Landmarks</span>
                                                 </h4>
                                                 <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">1 &ndash; 8 on Map</span>
                                             </div>
@@ -5287,11 +11054,11 @@
                                                                         <span>{{ $landmark['name'] }}</span>
                                                                     </div>
                                                                     <div class="text-[11px] font-semibold text-slate-600 mt-0.5">
-                                                                        📍 {{ $landmark['street'] }}
+                                                                        {{ $landmark['street'] }}
                                                                     </div>
                                                                     <div class="flex items-center gap-2 mt-1 text-[11px]">
                                                                         <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">
-                                                                            🕒 {{ $landmark['open'] }}
+                                                                            {{ $landmark['open'] }}
                                                                         </span>
                                                                         <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-semibold">
                                                                             {{ $landmark['closed'] }}
@@ -5300,9 +11067,7 @@
                                                                 </div>
                                                             </div>
 
-                                                            <button type="button" @click.stop="selectedLandmark = {{ $num }}; speakText(@js($landmark['audio']))" class="p-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 transition-all text-xs shrink-0" title="Listen Audio">
-                                                                🔊
-                                                            </button>
+                                                            <button type="button" @click.stop="selectedLandmark = {{ $num }}; speakText(@js($landmark['audio']))" class="p-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 transition-all text-xs shrink-0" title="Listen Audio"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -5319,7 +11084,7 @@
                                     <button type="button" @click="selectedDesk = 'tourist_office'"
                                         :class="selectedDesk === 'tourist_office' ? 'bg-sky-500 text-white shadow-md border-sky-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
                                         class="p-4 rounded-2xl border text-left transition-all space-y-1">
-                                        <div class="text-2xl">ℹ️</div>
+                                        <div class="text-xs font-bold px-2 py-1 bg-sky-100 text-sky-800 rounded">INFO</div>
                                         <div class="font-black text-sm">Tourist Office</div>
                                         <div class="text-[11px] opacity-80">Opening Times (8 Places)</div>
                                     </button>
@@ -5327,7 +11092,7 @@
                                     <button type="button" @click="selectedDesk = 'bank'"
                                         :class="selectedDesk === 'bank' ? 'bg-sky-500 text-white shadow-md border-sky-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
                                         class="p-4 rounded-2xl border text-left transition-all space-y-1">
-                                        <div class="text-2xl">🏦</div>
+                                        <div class="text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded">BANK</div>
                                         <div class="font-black text-sm">Bank</div>
                                         <div class="text-[11px] opacity-80">Exchange Rates (£)</div>
                                     </button>
@@ -5335,7 +11100,7 @@
                                     <button type="button" @click="selectedDesk = 'hotel'"
                                         :class="selectedDesk === 'hotel' ? 'bg-sky-500 text-white shadow-md border-sky-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
                                         class="p-4 rounded-2xl border text-left transition-all space-y-1">
-                                        <div class="text-2xl">🏨</div>
+                                        <div class="text-xs font-bold px-2 py-1 bg-purple-100 text-purple-800 rounded">HOTEL</div>
                                         <div class="font-black text-sm">Seaview Hotel</div>
                                         <div class="text-[11px] opacity-80">Room Tariffs (1-4 Nights)</div>
                                     </button>
@@ -5343,7 +11108,7 @@
                                     <button type="button" @click="selectedDesk = 'station'"
                                         :class="selectedDesk === 'station' ? 'bg-sky-500 text-white shadow-md border-sky-600' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
                                         class="p-4 rounded-2xl border text-left transition-all space-y-1">
-                                        <div class="text-2xl">🚆</div>
+                                        <div class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-800 rounded">STATION</div>
                                         <div class="font-black text-sm">Railway Station</div>
                                         <div class="text-[11px] opacity-80">Timetable &amp; Fares</div>
                                     </button>
@@ -5354,13 +11119,13 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-2xl">ℹ️</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-sky-100 text-sky-800 rounded">INFO</span>
                                                 <h3 class="font-black text-slate-900 text-xl">Tourist Office Desk</h3>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1">Official Opening Times of Places of Interest in Town</p>
                                         </div>
                                         <button type="button" @click="speakText('Welcome to the Tourist Information Office! How can I help you find sights and opening times today?')" class="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto">
-                                            🔊 <span>Play Greeting</span>
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg> <span>Play Greeting</span>
                                         </button>
                                     </div>
 
@@ -5378,9 +11143,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button type="button" @click="speakText(@js($place['audio']))" class="p-2 rounded-xl bg-white hover:bg-sky-100 text-sky-700 border border-slate-200 transition-all text-xs" title="Listen Audio">
-                                                    🔊
-                                                </button>
+                                                <button type="button" @click="speakText(@js($place['audio']))" class="p-2 rounded-xl bg-white hover:bg-sky-100 text-sky-700 border border-slate-200 transition-all text-xs" title="Listen Audio"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                             </div>
                                         @endforeach
                                     </div>
@@ -5391,13 +11154,13 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-2xl">🏦</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">BANK</span>
                                                 <h3 class="font-black text-slate-900 text-xl">Bank (Foreign Exchange Desk)</h3>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1">Rates of Exchange for Pounds (&pound; sterling)</p>
                                         </div>
                                         <button type="button" @click="speakText('Good morning, this is the Foreign Exchange counter. We convert foreign currencies into British Pounds.')" class="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto">
-                                            🔊 <span>Play Greeting</span>
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg> <span>Play Greeting</span>
                                         </button>
                                     </div>
 
@@ -5406,9 +11169,7 @@
                                             <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/70 space-y-2 hover:bg-amber-50 transition-all">
                                                 <div class="flex items-center justify-between">
                                                     <span class="font-black text-sm text-slate-900">{{ $curr['currency'] }}</span>
-                                                    <button type="button" @click="speakText(@js($curr['audio']))" class="p-1.5 rounded-lg bg-white text-amber-700 border border-amber-200 hover:bg-amber-100 transition-all text-xs" title="Listen Rate">
-                                                        🔊
-                                                    </button>
+                                                    <button type="button" @click="speakText(@js($curr['audio']))" class="p-1.5 rounded-lg bg-white text-amber-700 border border-amber-200 hover:bg-amber-100 transition-all text-xs" title="Listen Rate"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                 </div>
                                                 <div class="text-xs font-bold text-amber-900 bg-white p-2 rounded-xl border border-amber-200">
                                                     Rate: {{ $curr['rate_desc'] }}
@@ -5426,13 +11187,13 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-2xl">🏨</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded">HOTEL</span>
                                                 <h3 class="font-black text-slate-900 text-xl">Seaview Hotel Reception</h3>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1">Official Room Price List &amp; Booking Rates per Night</p>
                                         </div>
                                         <button type="button" @click="speakText('Welcome to the Seaview Hotel! We offer comfortable single and double rooms by the sea.')" class="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto">
-                                            🔊 <span>Play Greeting</span>
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg> <span>Play Greeting</span>
                                         </button>
                                     </div>
 
@@ -5457,9 +11218,7 @@
                                                         </td>
                                                         <td class="p-3.5 text-center font-black text-sm text-emerald-700">{{ $room['price'] }}</td>
                                                         <td class="p-3.5 text-center">
-                                                            <button type="button" @click="speakText(@js($room['audio']))" class="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-sky-700 transition-all text-xs" title="Listen Audio">
-                                                                🔊
-                                                            </button>
+                                                            <button type="button" @click="speakText(@js($room['audio']))" class="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-sky-700 transition-all text-xs" title="Listen Audio"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -5473,13 +11232,13 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-2xl">🚆</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">STATION</span>
                                                 <h3 class="font-black text-slate-900 text-xl">Railway Station Ticket Office</h3>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1">Train Timetable &amp; Single / Return Fares</p>
                                         </div>
                                         <button type="button" @click="speakText('Good day from the Railway Station! Trains are running on schedule to London, Liverpool, York, Manchester, and Bristol.')" class="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto">
-                                            🔊 <span>Play Greeting</span>
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg> <span>Play Greeting</span>
                                         </button>
                                     </div>
 
@@ -5498,7 +11257,7 @@
                                                 @foreach(($gameData['desks']['station']['trains'] ?? []) as $train)
                                                     <tr class="hover:bg-sky-50/40 transition-colors">
                                                         <td class="p-3.5 font-bold text-slate-900 flex items-center gap-2">
-                                                            <span>🚄</span> <span>{{ $train['dest'] }}</span>
+                                                            <span>{{ $train['dest'] }}</span>
                                                         </td>
                                                         <td class="p-3.5">
                                                             <div class="flex flex-wrap gap-1.5">
@@ -5512,9 +11271,7 @@
                                                         <td class="p-3.5 text-center font-bold text-slate-800">{{ $train['single'] }}</td>
                                                         <td class="p-3.5 text-center font-black text-emerald-700">{{ $train['return'] }}</td>
                                                         <td class="p-3.5 text-center">
-                                                            <button type="button" @click="speakText(@js($train['audio']))" class="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-sky-700 transition-all text-xs" title="Listen Timetable">
-                                                                🔊
-                                                            </button>
+                                                            <button type="button" @click="speakText(@js($train['audio']))" class="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-sky-700 transition-all text-xs" title="Listen Timetable"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -5537,7 +11294,7 @@
                                                 <span class="text-[10px] font-bold opacity-80">7 Tasks</span>
                                             </div>
                                             <div class="font-black text-xs sm:text-sm truncate">{{ $sVal['title'] }}</div>
-                                            <div class="text-[10px] opacity-80 line-clamp-1 truncate">📍 {{ $sVal['start'] }}</div>
+                                            <div class="text-[10px] opacity-80 line-clamp-1 truncate">{{ $sVal['start'] }}</div>
                                         </button>
                                     @endforeach
                                 </div>
@@ -5553,13 +11310,13 @@
                                                     <h3 class="font-black text-slate-900 text-xl">{{ $sheet['title'] }}</h3>
                                                 </div>
                                                 <p class="text-xs text-slate-500 mt-1">
-                                                    📍 <strong>Starting Location:</strong> {{ $sheet['start'] }}
+                                                    <strong>Starting Location:</strong> {{ $sheet['start'] }}
                                                 </p>
                                             </div>
 
                                             <div class="flex items-center gap-2">
                                                 <button type="button" @click="activeModal = '{{ $sheetKey }}'" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all flex items-center gap-1.5">
-                                                    <span>📄</span> <span>Lihat Lembar Asli</span>
+                                                    <span>Lihat Lembar Asli</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -5583,7 +11340,7 @@
                                                                 {{ $task['action'] }}
                                                             </div>
                                                             <div class="text-xs font-semibold text-sky-700">
-                                                                📝 <em>{{ $task['question'] }}</em>
+                                                                <em>{{ $task['question'] }}</em>
                                                             </div>
 
                                                             <!-- Speaking Dialogue Box -->
@@ -5592,17 +11349,13 @@
                                                                     <div>
                                                                         <strong class="text-sky-900">Tourist:</strong> "{{ $task['inquiry'] }}"
                                                                     </div>
-                                                                    <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-sky-200/60 hover:bg-sky-300 text-sky-900 transition-all text-xs shrink-0" title="Play Inquiry">
-                                                                        🔊
-                                                                    </button>
+                                                                    <button type="button" @click="speakText(@js($task['inquiry']))" class="p-1 rounded-md bg-sky-200/60 hover:bg-sky-300 text-sky-900 transition-all text-xs shrink-0" title="Play Inquiry"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                                 </div>
                                                                 <div class="flex items-start justify-between gap-2 pt-1 border-t border-sky-100">
                                                                     <div>
                                                                         <strong class="text-emerald-900">Desk Clerk:</strong> "{{ $task['desk_reply'] }}"
                                                                     </div>
-                                                                    <button type="button" @click="speakText(@js($task['desk_reply']))" class="p-1 rounded-md bg-emerald-200/60 hover:bg-emerald-300 text-emerald-900 transition-all text-xs shrink-0" title="Play Reply">
-                                                                        🔊
-                                                                    </button>
+                                                                    <button type="button" @click="speakText(@js($task['desk_reply']))" class="p-1 rounded-md bg-emerald-200/60 hover:bg-emerald-300 text-emerald-900 transition-all text-xs shrink-0" title="Play Reply"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -5612,7 +11365,7 @@
                                                             <!-- Interactive student input field -->
                                                             <div class="space-y-1">
                                                                 <div class="text-[10px] font-bold text-slate-500 flex items-center justify-between">
-                                                                    <span>✍️ Catatan / Jawaban Anda:</span>
+                                                                    <span>Catatan / Jawaban Anda:</span>
                                                                     <span x-show="userAnswers['{{ $taskId }}']" class="text-emerald-600 font-extrabold text-[9px]">Tersimpan</span>
                                                                 </div>
                                                                 <input type="text"
@@ -5625,12 +11378,12 @@
                                                             <button type="button" @click="toggleSolution('{{ $taskId }}')"
                                                                 class="w-full px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 border"
                                                                 :class="revealedSolutions['{{ $taskId }}'] ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'">
-                                                                <span x-text="revealedSolutions['{{ $taskId }}'] ? '🔒 Sembunyikan Kunci' : '🔑 Buka Kunci Jawaban'"></span>
+                                                                <span x-text="revealedSolutions['{{ $taskId }}'] ? 'Sembunyikan Kunci' : 'Buka Kunci Jawaban'"></span>
                                                             </button>
 
                                                             <div x-show="revealedSolutions['{{ $taskId }}']" x-collapse class="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1 text-xs">
                                                                 <div class="font-black text-amber-900 flex items-center gap-1">
-                                                                    <span>✅</span> <span>Kunci: {{ $task['answer'] }}</span>
+                                                                    <span>Kunci: {{ $task['answer'] }}</span>
                                                                 </div>
                                                                 <div class="text-[11px] text-amber-800 leading-tight">
                                                                     {{ $task['calc'] }}
@@ -5652,7 +11405,7 @@
                                     <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5 flex flex-col justify-between">
                                         <div class="space-y-4">
                                             <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-                                                <span class="text-2xl">💱</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">FOREX</span>
                                                 <div>
                                                     <h4 class="font-black text-slate-900 text-base">Bank Currency Converter</h4>
                                                     <p class="text-xs text-slate-500">Live conversion to &pound; Sterling</p>
@@ -5709,7 +11462,7 @@
                                     <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5 flex flex-col justify-between">
                                         <div class="space-y-4">
                                             <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-                                                <span class="text-2xl">🏨</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded">HOTEL</span>
                                                 <div>
                                                     <h4 class="font-black text-slate-900 text-base">Hotel Cost Estimator</h4>
                                                     <p class="text-xs text-slate-500">Seaview Hotel room calculation</p>
@@ -5766,7 +11519,7 @@
                                     <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5 flex flex-col justify-between">
                                         <div class="space-y-4">
                                             <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-                                                <span class="text-2xl">🚆</span>
+                                                <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">STATION</span>
                                                 <div>
                                                     <h4 class="font-black text-slate-900 text-base">Train Board &amp; Fares</h4>
                                                     <p class="text-xs text-slate-500">Check departure times &amp; tickets</p>
@@ -5828,7 +11581,7 @@
                                 <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
                                     <div class="pb-4 border-b border-slate-100">
                                         <h3 class="font-black text-slate-900 text-xl flex items-center gap-2">
-                                            <span>💬</span> <span>Target Speaking Exponents &amp; Roleplay Phrases</span>
+                                            <span>Target Speaking Exponents &amp; Roleplay Phrases</span>
                                         </h3>
                                         <p class="text-xs text-slate-500 mt-1">Gunakan pola kalimat berikut saat simulasi di 4 meja informasi</p>
                                     </div>
@@ -5842,9 +11595,7 @@
                                                         "{{ $exp }}"
                                                     </div>
                                                 </div>
-                                                <button type="button" @click="speakText(@js($exp))" class="p-2 rounded-xl bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 transition-all text-xs shrink-0" title="Listen Audio">
-                                                    🔊
-                                                </button>
+                                                <button type="button" @click="speakText(@js($exp))" class="p-2 rounded-xl bg-white text-sky-700 border border-sky-200 hover:bg-sky-100 transition-all text-xs shrink-0" title="Listen Audio"><svg class="w-3.5 h-3.5 shrink-0 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button>
                                             </div>
                                         @endforeach
                                     </div>
@@ -5852,7 +11603,7 @@
                                     <!-- Sample Connected Roleplay Script -->
                                     <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                                         <div class="font-black text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                                            <span>🎭</span> <span>Contoh Percakapan Lengkap (Dialogue Demonstration)</span>
+                                            <span>Contoh Percakapan Lengkap (Dialogue Demonstration)</span>
                                         </div>
                                         <div class="space-y-2 text-xs text-slate-700 leading-relaxed">
                                             <p><strong>Tourist:</strong> "Excuse me, could you tell me where the bank is?"</p>
@@ -5873,7 +11624,7 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="text-2xl">👩‍🏫</span>
+                                                
                                                 <h3 class="font-black text-slate-900 text-xl">Teacher's Lesson Plan &amp; Rules • Wandering Tourists</h3>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1">Official Game Guide &amp; Classroom Simulation Methodology</p>
@@ -5881,10 +11632,10 @@
 
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="activeModal = 'teacher_rules_1'" class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black transition-all flex items-center gap-1.5 shadow-xs">
-                                                <span>📖</span> <span>Rules Scan Hal 1</span>
+                                                <span>Rules Scan Hal 1</span>
                                             </button>
                                             <button type="button" @click="activeModal = 'teacher_rules_2'" class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black transition-all flex items-center gap-1.5 shadow-xs">
-                                                <span>📖</span> <span>Rules Scan Hal 2</span>
+                                                <span>Rules Scan Hal 2</span>
                                             </button>
                                         </div>
                                     </div>
@@ -5918,25 +11669,25 @@
                                             <ul class="space-y-2 text-xs font-medium text-slate-800">
                                                 <li class="p-3 rounded-xl bg-white border border-slate-200/70 space-y-1">
                                                     <div class="font-black text-sky-950 flex items-center gap-1.5">
-                                                        <span>🏢</span> <span>1. Setup 4 Information Desks</span>
+                                                        <span>1. Setup 4 Information Desks</span>
                                                     </div>
                                                     <p class="text-slate-600">Kosongkan ruang tengah kelas. Tempatkan 4 meja di 4 sudut ruangan berbeda untuk mewakili: <strong>Tourist Office</strong>, <strong>Bank</strong>, <strong>Railway Station</strong>, dan <strong>Seaview Hotel</strong>. Tunjuk 4 siswa memegang kartu master masing-masing meja. *(Jika ada 15-16 siswa, tempatkan 2 siswa per meja untuk melayani antrean)*.</p>
                                                 </li>
                                                 <li class="p-3 rounded-xl bg-white border border-slate-200/70 space-y-1">
                                                     <div class="font-black text-sky-950 flex items-center gap-1.5">
-                                                        <span>🎒</span> <span>2. Distribute Tourist Sheets &amp; Maps</span>
+                                                        <span>2. Distribute Tourist Sheets &amp; Maps</span>
                                                     </div>
                                                     <p class="text-slate-600">Siswa yang tersisa berperan sebagai <strong>Wandering Tourists</strong>. Bagikan lembar tugas (Sheets A s.d. G) beserta Peta Kota (Town Map) kepada masing-masing turis.</p>
                                                 </li>
                                                 <li class="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
                                                     <div class="font-black text-amber-950 flex items-center gap-1.5">
-                                                        <span>⚠️</span> <span>3. Core Rule: Follow Exact Order of Tasks</span>
+                                                        <span>3. Core Rule: Follow Exact Order of Tasks</span>
                                                     </div>
                                                     <p class="text-amber-900 font-semibold">Tujuan permainan adalah siswa harus menyelesaikan instruksi misi <strong>sesuai urutan langkah yang tertulis di lembar tugas (Step 1 s.d. 7)</strong>.</p>
                                                 </li>
                                                 <li class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
                                                     <div class="font-black text-emerald-950 flex items-center gap-1.5">
-                                                        <span>🗺️</span> <span>4. Core Rule: Ask &amp; Mark Before Visiting</span>
+                                                        <span>4. Core Rule: Ask &amp; Mark Before Visiting</span>
                                                     </div>
                                                     <p class="text-emerald-900 font-semibold">Turis harus bertanya kepada orang di jalan (sesama siswa) mengenai lokasi Bank, Hotel, Tourist Office, dan Stasiun, lalu <strong>menandai posisinya di peta terlebih dahulu</strong> sebelum mendatangi meja informasi tersebut.</p>
                                                 </li>
@@ -5948,7 +11699,7 @@
                                             <!-- How to Use / Pedagogical Background -->
                                             <div class="p-5 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-2.5">
                                                 <div class="font-black text-xs text-sky-950 uppercase tracking-wider flex items-center gap-1.5">
-                                                    <span>💡</span> <span>How to Use the Game (Pedagogical Context)</span>
+                                                    <span>How to Use the Game (Pedagogical Context)</span>
                                                 </div>
                                                 <p class="text-xs text-slate-700 leading-relaxed font-medium">
                                                     Simulasi dasar (*elementary simulation*) ini dirancang untuk memantapkan dan mengintegrasikan 5 keterampilan komunikasi praktis yang telah dipelajari siswa:
@@ -5965,7 +11716,7 @@
                                             <!-- Essential Vocabulary -->
                                             <div class="p-5 rounded-2xl bg-amber-50/60 border border-amber-100 space-y-2.5">
                                                 <div class="font-black text-xs text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
-                                                    <span>📚</span> <span>Essential Vocabulary &amp; Sights</span>
+                                                    <span>Essential Vocabulary &amp; Sights</span>
                                                 </div>
                                                 <div class="p-3 rounded-xl bg-white border border-amber-100 text-xs text-slate-700 leading-relaxed space-y-1">
                                                     <p><strong>Places &amp; Sights:</strong> bank, station, tourist office, museum, hotel, art gallery, shopping centre, zoo, abbey, castle, aquarium.</p>
@@ -5984,7 +11735,7 @@
                                     <!-- Modal Header -->
                                     <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                                         <div class="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                                            <span>📄</span>
+                                            
                                             <span x-text="{
                                                 'map': 'Town Map (Authentic Worksheet)',
                                                 'desks': 'Information Desks Master Sheet',
@@ -6012,12 +11763,12 @@
                                                     <button type="button" @click="mapMode = '3d'" 
                                                         :class="mapMode === '3d' ? 'bg-sky-500 text-white font-black shadow-sm' : 'text-slate-300 hover:text-white font-bold'"
                                                         class="px-4 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5">
-                                                        <span>✨ 3D Vibrant Map</span>
+                                                        <span>3D Vibrant Map</span>
                                                     </button>
                                                     <button type="button" @click="mapMode = 'bw'" 
                                                         :class="mapMode === 'bw' ? 'bg-sky-500 text-white font-black shadow-sm' : 'text-slate-300 hover:text-white font-bold'"
                                                         class="px-4 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5">
-                                                        <span>📄 Authentic B&amp;W Map</span>
+                                                        <span>Authentic B&amp;W Map</span>
                                                     </button>
                                                 </div>
                                                 <img :src="mapMode === '3d' ? '{{ asset('images/speaking/worksheet4/town_map_3d_vibrant.png') }}' : '{{ asset('images/speaking/worksheet4/town_map_bw.png') }}'" class="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl border border-slate-700">
@@ -6083,7 +11834,7 @@
                                                 Information Gap
                                             </span>
                                             <span class="px-3 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase">
-                                                {{ $participationBadge['icon'] }} {{ $participationBadge['label'] }}
+                                                {{ $participationBadge['label'] }}
                                             </span>
                                         </div>
                                         <h2 class="text-2xl sm:text-4xl font-black tracking-tight mt-1 text-white">Wedding Photos (Foto Pernikahan)</h2>
@@ -6103,27 +11854,29 @@
                                     <button @click="gameTab = 'worksheet'"
                                         :class="gameTab === 'worksheet' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>🖼️</span> <span>1. Lembar Foto &amp; Isi Nama</span>
+                                        <span>1. Lembar Foto &amp; Isi Nama</span>
                                     </button>
-                                    <button @click="gameTab = 'student_a'"
+                                    <button x-show="previewRole === 'admin' || assignedStudentRole === 'A'" @click="gameTab = 'student_a'"
                                         :class="gameTab === 'student_a' ? 'bg-white text-indigo-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>👰</span> <span>2. Kartu Siswa A (Bride's Tree)</span>
+                                        <span x-text="previewRole === 'student' ? '2. Kartu Anda: Siswa A (Bride)' : '2. Kartu Siswa A (Bride\'s Tree)'"></span>
+                                        <span x-show="previewRole === 'student' && assignedStudentRole === 'A'" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-200 text-indigo-900 font-black ml-1">Terkunci</span>
                                     </button>
-                                    <button @click="gameTab = 'student_b'"
+                                    <button x-show="previewRole === 'admin' || assignedStudentRole === 'B'" @click="gameTab = 'student_b'"
                                         :class="gameTab === 'student_b' ? 'bg-white text-orange-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>🤵</span> <span>3. Kartu Siswa B (Groom's Tree)</span>
+                                        <span x-text="previewRole === 'student' ? '3. Kartu Anda: Siswa B (Groom)' : '3. Kartu Siswa B (Groom\'s Tree)'"></span>
+                                        <span x-show="previewRole === 'student' && assignedStudentRole === 'B'" class="text-[10px] px-1.5 py-0.5 rounded bg-orange-200 text-orange-900 font-black ml-1">Terkunci</span>
                                     </button>
                                     <button @click="gameTab = 'phrases'"
                                         :class="gameTab === 'phrases' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>💬</span> <span>4. Pola Percakapan &amp; Audio</span>
+                                        <span>4. Pola Percakapan &amp; Audio</span>
                                     </button>
-                                    <button @click="gameTab = 'guide'"
+                                    <button x-show="previewRole === 'admin'" @click="gameTab = 'guide'"
                                         :class="gameTab === 'guide' ? 'bg-white text-slate-900 font-black shadow-md' : 'text-white hover:bg-white/15 font-bold'"
                                         class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5">
-                                        <span>📖</span> <span>5. Panduan Tutor / Guru</span>
+                                        <span>5. Panduan Tutor / Guru</span>
                                     </button>
                                 </div>
                             </div>
@@ -6136,7 +11889,7 @@
                                 <!-- Quick Instruction Banner -->
                                 <div class="p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-amber-50 border border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-3xl shrink-0">🎯</span>
+                                        
                                         <div>
                                             <div class="font-black text-slate-900 text-xs sm:text-sm flex items-center gap-2 flex-wrap">
                                                 <span>Misi Game (Wedding Photo Identification):</span>
@@ -6149,22 +11902,22 @@
                                     </div>
                                     <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
                                         <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-black transition flex items-center gap-1.5 shadow-sm">
-                                            <span>🔍</span> <span>Lihat Foto Full</span>
+                                            <span>Lihat Foto Full</span>
                                         </button>
                                         <button type="button" @click="activeModal = 'trees_full'" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black transition flex items-center gap-1.5 shadow-sm">
-                                            <span>🌳</span> <span>Lihat Pohon Keluarga</span>
+                                            <span>Lihat Pohon Keluarga</span>
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- 📸 BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
+                                <!-- BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
                                 <div class="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-md space-y-4">
                                     <!-- Photo Header with Toggle Buttons -->
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <h3 class="font-black text-slate-900 text-lg sm:text-xl flex items-center gap-2">
-                                                    <span>📸</span> <span>The Big Wedding Photograph</span>
+                                                    <span>The Big Wedding Photograph</span>
                                                 </h3>
                                                 <span class="px-3 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black">16 Karakter</span>
                                             </div>
@@ -6173,20 +11926,9 @@
 
                                         <!-- Color / Sketch Mode Switcher -->
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <div class="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200 text-xs">
-                                                <button type="button" @click="photoMode = 'color'"
-                                                    :class="photoMode === 'color' ? 'bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>🎨</span> <span>Foto Berwarna HD</span>
-                                                </button>
-                                                <button type="button" @click="photoMode = 'sketch'"
-                                                    :class="photoMode === 'sketch' ? 'bg-slate-900 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>✏️</span> <span>Sketsa Hitam Putih</span>
-                                                </button>
-                                            </div>
-                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1 shadow-sm">
-                                                <span>🔍</span> <span>Zoom</span>
+                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                <span>Zoom</span>
                                             </button>
                                         </div>
                                     </div>
@@ -6194,15 +11936,9 @@
                                     <!-- Main Large Image Container with Interactive Input Overlays -->
                                     <div class="relative w-full max-w-5xl mx-auto rounded-3xl overflow-hidden border-2 sm:border-4 border-slate-700 bg-slate-900 shadow-2xl select-none">
                                         <!-- Colored Image -->
-                                        <img x-show="photoMode === 'color'"
+                                        <img
                                              src="{{ asset('images/speaking/wedding_photos/wedding_photo_hd.jpg?v=14') }}"
                                              alt="Colored Wedding Photo"
-                                             class="w-full h-auto block select-none pointer-events-none">
-                                        
-                                        <!-- Classic Sketch Image -->
-                                        <img x-show="photoMode === 'sketch'"
-                                             src="{{ asset('images/speaking/wedding_photos/wedding_photo_upright.png') }}"
-                                             alt="Sketch Wedding Photo"
                                              class="w-full h-auto block select-none pointer-events-none">
 
                                                             <!-- Interactive Overlay Layer -->
@@ -6373,11 +12109,11 @@
                 </div>
                             </div>
 
-                            <!-- 🌳 2-COLUMN FAMILY TREES (BRIDE'S SIDE VS GROOM'S SIDE) -->
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch w-full">
+                            <!-- 2-COLUMN FAMILY TREES (BRIDE'S SIDE VS GROOM'S SIDE) -->
+                                <div :class="previewRole === 'admin' ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch w-full' : 'grid grid-cols-1 gap-6 items-stretch w-full'">
                                     
                                     <!-- Column 1: Family Tree A (Bride's Family - Ann's Side) -->
-                                    <div class="w-full bg-white rounded-3xl p-5 sm:p-6 border-2 border-indigo-200 shadow-sm flex flex-col justify-between space-y-4">
+                                    <div x-show="previewRole === 'admin' || assignedStudentRole === 'A'" class="w-full bg-white rounded-3xl p-5 sm:p-6 border-2 border-indigo-200 shadow-sm flex flex-col justify-between space-y-4">
                                         <div class="flex items-center justify-between pb-3 border-b border-indigo-100 gap-2">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0">A</span>
@@ -6387,18 +12123,14 @@
                                                 </div>
                                             </div>
                                             <button type="button" @click="activeModal = 'tree_a_full'" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 text-xs font-black transition flex items-center gap-1 shadow-2xs shrink-0">
-                                                <span>🔍</span> <span>Perbesar Pohon A</span>
+                                                <span>Perbesar Pohon A</span>
                                             </button>
                                         </div>
 
                                         <!-- Image Container Tree A -->
                                         <div class="bg-indigo-50/40 rounded-2xl p-3 sm:p-4 border border-indigo-100 flex items-center justify-center cursor-pointer hover:border-indigo-400 transition group flex-1 min-h-[360px]" @click="activeModal = 'tree_a_full'">
-                                            <img x-show="photoMode === 'color'"
+                                            <img
                                                  src="{{ asset('images/speaking/wedding_photos/family_tree_a_hd.jpg?v=13') }}"
-                                                 alt="Family Tree A (Bride's Family)"
-                                                 class="max-h-[440px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200 shadow-xs">
-                                            <img x-show="photoMode === 'sketch'"
-                                                 src="{{ asset('images/speaking/wedding_photos/family_tree_a.png') }}"
                                                  alt="Family Tree A (Bride's Family)"
                                                  class="max-h-[440px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200 shadow-xs">
                                         </div>
@@ -6406,7 +12138,7 @@
                                         <!-- Quick Info Footer A -->
                                         <div class="p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-950 flex items-center justify-between">
                                             <div class="flex items-center gap-2">
-                                                <span>👰</span>
+                                                <span class="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block"></span>
                                                 <span class="font-bold">Anggota: Joe, Elsie, Tom, Jess, Pete, Sue, Sam, Mike, Ann</span>
                                             </div>
                                             <button type="button" @click="gameTab = 'student_a'" class="text-xs font-black text-indigo-600 hover:underline shrink-0">
@@ -6416,7 +12148,7 @@
                                     </div>
 
                                     <!-- Column 2: Family Tree B (Groom's Family - Tim's Side) -->
-                                    <div class="w-full bg-white rounded-3xl p-5 sm:p-6 border-2 border-orange-200 shadow-sm flex flex-col justify-between space-y-4">
+                                    <div x-show="previewRole === 'admin' || assignedStudentRole === 'B'" class="w-full bg-white rounded-3xl p-5 sm:p-6 border-2 border-orange-200 shadow-sm flex flex-col justify-between space-y-4">
                                         <div class="flex items-center justify-between pb-3 border-b border-orange-100 gap-2">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-8 h-8 rounded-xl bg-orange-600 text-white font-black text-sm flex items-center justify-center shrink-0">B</span>
@@ -6426,18 +12158,14 @@
                                                 </div>
                                             </div>
                                             <button type="button" @click="activeModal = 'tree_b_full'" class="px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-600 hover:text-white text-orange-700 text-xs font-black transition flex items-center gap-1 shadow-2xs shrink-0">
-                                                <span>🔍</span> <span>Perbesar Pohon B</span>
+                                                <span>Perbesar Pohon B</span>
                                             </button>
                                         </div>
 
                                         <!-- Image Container Tree B -->
                                         <div class="bg-orange-50/40 rounded-2xl p-3 sm:p-4 border border-orange-100 flex items-center justify-center cursor-pointer hover:border-orange-400 transition group flex-1 min-h-[360px]" @click="activeModal = 'tree_b_full'">
-                                            <img x-show="photoMode === 'color'"
+                                            <img
                                                  src="{{ asset('images/speaking/wedding_photos/family_tree_b_hd.jpg?v=14') }}"
-                                                 alt="Family Tree B (Groom's Family)"
-                                                 class="max-h-[440px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200 shadow-xs">
-                                            <img x-show="photoMode === 'sketch'"
-                                                 src="{{ asset('images/speaking/wedding_photos/family_tree_b.png') }}"
                                                  alt="Family Tree B (Groom's Family)"
                                                  class="max-h-[440px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200 shadow-xs">
                                         </div>
@@ -6445,7 +12173,7 @@
                                         <!-- Quick Info Footer B -->
                                         <div class="p-3 rounded-2xl bg-orange-50/80 border border-orange-200 text-xs text-orange-950 flex items-center justify-between">
                                             <div class="flex items-center gap-2">
-                                                <span>🤵</span>
+                                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block"></span>
                                                 <span class="font-bold">Anggota: Jim, Betty, Al, Jane, Ben, Liz, Tim, Beth, John</span>
                                             </div>
                                             <button type="button" @click="gameTab = 'student_b'" class="text-xs font-black text-orange-600 hover:underline shrink-0">
@@ -6459,7 +12187,7 @@
                                 <div x-show="isSubmitted" class="p-5 rounded-3xl transition-all shadow-md flex items-center justify-between"
                                      :class="score >= 70 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white' : 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-3xl" x-text="score >= 70 ? '🏆' : '📝'"></span>
+                                        <span class="text-3xl" x-text="score >= 70 ? 'PASS' : 'QUIZ'"></span>
                                         <div>
                                             <div class="font-black text-lg sm:text-xl" x-text="score >= 70 ? 'Bagus Sekali!' : 'Terus Berlatih!'"></div>
                                             <div class="text-xs opacity-90">Skor Anda: <span class="font-black text-sm" x-text="score + '%'"></span> (<span x-text="correctCount"></span>/15 benar)</div>
@@ -6477,7 +12205,7 @@
                                     </button>
                                     <div class="flex items-center gap-2">
                                         <button @click="checkAnswers()" type="button" class="px-7 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2">
-                                            <span>✓</span> <span>Periksa Jawaban Saya</span>
+                                            <span>Periksa Jawaban Saya</span>
                                         </button>
                                     </div>
                                 </div>
@@ -6486,13 +12214,13 @@
                             <!-- ==================================================== -->
                             <!-- TAB 2: STUDENT A CARD (BRIDE'S FAMILY TREE)          -->
                             <!-- ==================================================== -->
-                            <div x-show="gameTab === 'student_a'" class="space-y-6">
+                            <div x-show="gameTab === 'student_a' && (previewRole === 'admin' || assignedStudentRole === 'A')" class="space-y-6">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border-2 border-indigo-200 relative overflow-hidden space-y-6">
                                     
                                     <!-- Secret Card Header -->
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-indigo-100 gap-3">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-4xl">👰</span>
+                                            <span class="w-3 h-3 rounded-full bg-pink-400 inline-block"></span>
                                             <div>
                                                 <div class="flex items-center gap-2 flex-wrap">
                                                     <span class="px-3 py-0.5 rounded-full bg-indigo-600 text-white text-xs font-black uppercase">
@@ -6504,19 +12232,19 @@
                                                 </div>
                                                 <h3 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">Family Tree A (Pohon Keluarga Pengantin Wanita)</h3>
                                                 <p class="text-xs text-indigo-700 font-semibold mt-0.5">
-                                                    🔒 Anda adalah saudara/saudari dari <strong>Ann</strong>! Gunakan pohon keluarga ini untuk menjawab pertanyaan Siswa B.
+                                                    Anda adalah saudara/saudari dari <strong>Ann</strong>! Gunakan pohon keluarga ini untuk menjawab pertanyaan Siswa B.
                                                 </p>
                                             </div>
                                         </div>
                                         <button @click="activeModal = 'tree_a_full'" type="button" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
-                                            <span>🔍</span> <span>Perbesar Gambar Pohon A</span>
+                                            <span>Perbesar Gambar Pohon A</span>
                                         </button>
                                     </div>
 
                                     <!-- Role Mission Alert Box for Student A -->
                                     <div class="p-4 rounded-2xl bg-indigo-50/80 border-2 border-indigo-200 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                                         <div class="flex items-start gap-3">
-                                            <span class="text-2xl shrink-0">🎯</span>
+                                            
                                             <div>
                                                 <div class="font-black text-indigo-950 text-sm">Instruksi Permainan Siswa A:</div>
                                                 <ol class="list-decimal list-inside text-indigo-900 space-y-1 mt-1 font-medium leading-relaxed">
@@ -6530,14 +12258,14 @@
                                         </button>
                                     </div>
 
-                                    <!-- 📸 BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
+                                    <!-- BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
                                 <div class="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-md space-y-4">
                                     <!-- Photo Header with Toggle Buttons -->
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <h3 class="font-black text-slate-900 text-lg sm:text-xl flex items-center gap-2">
-                                                    <span>📸</span> <span>The Big Wedding Photograph</span>
+                                                    <span>The Big Wedding Photograph</span>
                                                 </h3>
                                                 <span class="px-3 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black">16 Karakter</span>
                                             </div>
@@ -6546,20 +12274,9 @@
 
                                         <!-- Color / Sketch Mode Switcher -->
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <div class="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200 text-xs">
-                                                <button type="button" @click="photoMode = 'color'"
-                                                    :class="photoMode === 'color' ? 'bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>🎨</span> <span>Foto Berwarna HD</span>
-                                                </button>
-                                                <button type="button" @click="photoMode = 'sketch'"
-                                                    :class="photoMode === 'sketch' ? 'bg-slate-900 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>✏️</span> <span>Sketsa Hitam Putih</span>
-                                                </button>
-                                            </div>
-                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1 shadow-sm">
-                                                <span>🔍</span> <span>Zoom</span>
+                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                <span>Zoom</span>
                                             </button>
                                         </div>
                                     </div>
@@ -6567,15 +12284,9 @@
                                     <!-- Main Large Image Container with Interactive Input Overlays -->
                                     <div class="relative w-full max-w-5xl mx-auto rounded-3xl overflow-hidden border-2 sm:border-4 border-slate-700 bg-slate-900 shadow-2xl select-none">
                                         <!-- Colored Image -->
-                                        <img x-show="photoMode === 'color'"
+                                        <img
                                              src="{{ asset('images/speaking/wedding_photos/wedding_photo_hd.jpg?v=14') }}"
                                              alt="Colored Wedding Photo"
-                                             class="w-full h-auto block select-none pointer-events-none">
-                                        
-                                        <!-- Classic Sketch Image -->
-                                        <img x-show="photoMode === 'sketch'"
-                                             src="{{ asset('images/speaking/wedding_photos/wedding_photo_upright.png') }}"
-                                             alt="Sketch Wedding Photo"
                                              class="w-full h-auto block select-none pointer-events-none">
 
                                                             <!-- Interactive Overlay Layer -->
@@ -6750,18 +12461,14 @@
                                     <div class="bg-indigo-50/40 rounded-3xl p-4 sm:p-6 border-2 border-indigo-100 space-y-3">
                                         <div class="flex items-center justify-between">
                                             <div class="font-black text-slate-800 text-xs sm:text-sm flex items-center gap-2">
-                                                <span>🖼️</span> <span>Gambar Pohon Keluarga A (Keluarga Anda):</span>
+                                                <span>Gambar Pohon Keluarga A (Keluarga Anda):</span>
                                             </div>
                                             <span class="text-[11px] text-slate-400 font-bold">Klik gambar untuk layar penuh</span>
                                         </div>
 
                                         <div class="bg-white rounded-2xl p-3 sm:p-6 border border-indigo-200 flex items-center justify-center shadow-inner cursor-pointer hover:border-indigo-400 transition group" @click="activeModal = 'tree_a_full'">
-                                            <img x-show="photoMode === 'color'"
+                                            <img
                                                  src="{{ asset('images/speaking/wedding_photos/family_tree_a_hd.jpg?v=13') }}"
-                                                 alt="Family Tree A"
-                                                 class="max-h-[460px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200">
-                                            <img x-show="photoMode === 'sketch'"
-                                                 src="{{ asset('images/speaking/wedding_photos/family_tree_a.png') }}"
                                                  alt="Family Tree A"
                                                  class="max-h-[460px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200">
                                         </div>
@@ -6771,9 +12478,9 @@
                                     <div class="space-y-3 pt-2">
                                         <div class="flex items-center justify-between">
                                             <div class="font-black text-slate-900 text-sm flex items-center gap-2">
-                                                <span>🗣️</span> <span>Contoh Jawaban Lisan Siswa A (Klik untuk mendengar audio):</span>
+                                                <span>Contoh Jawaban Lisan Siswa A (Klik untuk mendengar audio):</span>
                                             </div>
-                                            <span class="text-xs text-slate-400 font-bold">Tekan 🔊 untuk melafalkan</span>
+                                            <span class="text-xs text-slate-400 font-bold">Klik tombol audio untuk melafalkan</span>
                                         </div>
                                         
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -6796,13 +12503,13 @@
                             <!-- ==================================================== -->
                             <!-- TAB 3: STUDENT B CARD (GROOM'S FAMILY TREE)          -->
                             <!-- ==================================================== -->
-                            <div x-show="gameTab === 'student_b'" class="space-y-6">
+                            <div x-show="gameTab === 'student_b' && (previewRole === 'admin' || assignedStudentRole === 'B')" class="space-y-6">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border-2 border-orange-200 relative overflow-hidden space-y-6">
                                     
                                     <!-- Secret Card Header -->
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-orange-100 gap-3">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-4xl">🤵</span>
+                                            <span class="w-3 h-3 rounded-full bg-indigo-400 inline-block"></span>
                                             <div>
                                                 <div class="flex items-center gap-2 flex-wrap">
                                                     <span class="px-3 py-0.5 rounded-full bg-orange-600 text-white text-xs font-black uppercase">
@@ -6814,19 +12521,19 @@
                                                 </div>
                                                 <h3 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">Family Tree B (Pohon Keluarga Pengantin Pria)</h3>
                                                 <p class="text-xs text-orange-700 font-semibold mt-0.5">
-                                                    🔒 Anda adalah saudara/saudari dari <strong>Tim</strong>! Gunakan pohon keluarga ini untuk menjawab pertanyaan Siswa A.
+                                                    Anda adalah saudara/saudari dari <strong>Tim</strong>! Gunakan pohon keluarga ini untuk menjawab pertanyaan Siswa A.
                                                 </p>
                                             </div>
                                         </div>
                                         <button @click="activeModal = 'tree_b_full'" type="button" class="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
-                                            <span>🔍</span> <span>Perbesar Gambar Pohon B</span>
+                                            <span>Perbesar Gambar Pohon B</span>
                                         </button>
                                     </div>
 
                                     <!-- Role Mission Alert Box for Student B -->
                                     <div class="p-4 rounded-2xl bg-orange-50/80 border-2 border-orange-200 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                                         <div class="flex items-start gap-3">
-                                            <span class="text-2xl shrink-0">🎯</span>
+                                            
                                             <div>
                                                 <div class="font-black text-orange-950 text-sm">Instruksi Permainan Siswa B:</div>
                                                 <ol class="list-decimal list-inside text-orange-900 space-y-1 mt-1 font-medium leading-relaxed">
@@ -6840,14 +12547,14 @@
                                         </button>
                                     </div>
 
-                                    <!-- 📸 BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
+                                    <!-- BIG FULL-WIDTH WEDDING PHOTO SHOWCASE -->
                                 <div class="w-full bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-md space-y-4">
                                     <!-- Photo Header with Toggle Buttons -->
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <h3 class="font-black text-slate-900 text-lg sm:text-xl flex items-center gap-2">
-                                                    <span>📸</span> <span>The Big Wedding Photograph</span>
+                                                    <span>The Big Wedding Photograph</span>
                                                 </h3>
                                                 <span class="px-3 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black">16 Karakter</span>
                                             </div>
@@ -6856,20 +12563,9 @@
 
                                         <!-- Color / Sketch Mode Switcher -->
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <div class="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200 text-xs">
-                                                <button type="button" @click="photoMode = 'color'"
-                                                    :class="photoMode === 'color' ? 'bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>🎨</span> <span>Foto Berwarna HD</span>
-                                                </button>
-                                                <button type="button" @click="photoMode = 'sketch'"
-                                                    :class="photoMode === 'sketch' ? 'bg-slate-900 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900 font-bold'"
-                                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                                                    <span>✏️</span> <span>Sketsa Hitam Putih</span>
-                                                </button>
-                                            </div>
-                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1 shadow-sm">
-                                                <span>🔍</span> <span>Zoom</span>
+                                            <button type="button" @click="activeModal = 'photo_full'" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                <span>Zoom</span>
                                             </button>
                                         </div>
                                     </div>
@@ -6877,15 +12573,9 @@
                                     <!-- Main Large Image Container with Interactive Input Overlays -->
                                     <div class="relative w-full max-w-5xl mx-auto rounded-3xl overflow-hidden border-2 sm:border-4 border-slate-700 bg-slate-900 shadow-2xl select-none">
                                         <!-- Colored Image -->
-                                        <img x-show="photoMode === 'color'"
+                                        <img
                                              src="{{ asset('images/speaking/wedding_photos/wedding_photo_hd.jpg?v=14') }}"
                                              alt="Colored Wedding Photo"
-                                             class="w-full h-auto block select-none pointer-events-none">
-                                        
-                                        <!-- Classic Sketch Image -->
-                                        <img x-show="photoMode === 'sketch'"
-                                             src="{{ asset('images/speaking/wedding_photos/wedding_photo_upright.png') }}"
-                                             alt="Sketch Wedding Photo"
                                              class="w-full h-auto block select-none pointer-events-none">
 
                                                             <!-- Interactive Overlay Layer -->
@@ -7060,18 +12750,14 @@
                                     <div class="bg-orange-50/40 rounded-3xl p-4 sm:p-6 border-2 border-orange-100 space-y-3">
                                         <div class="flex items-center justify-between">
                                             <div class="font-black text-slate-800 text-xs sm:text-sm flex items-center gap-2">
-                                                <span>🖼️</span> <span>Gambar Pohon Keluarga B (Keluarga Anda):</span>
+                                                <span>Gambar Pohon Keluarga B (Keluarga Anda):</span>
                                             </div>
                                             <span class="text-[11px] text-slate-400 font-bold">Klik gambar untuk layar penuh</span>
                                         </div>
 
                                         <div class="bg-white rounded-2xl p-3 sm:p-6 border border-orange-200 flex items-center justify-center shadow-inner cursor-pointer hover:border-orange-400 transition group" @click="activeModal = 'tree_b_full'">
-                                            <img x-show="photoMode === 'color'"
+                                            <img
                                                  src="{{ asset('images/speaking/wedding_photos/family_tree_b_hd.jpg?v=14') }}"
-                                                 alt="Family Tree B"
-                                                 class="max-h-[460px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200">
-                                            <img x-show="photoMode === 'sketch'"
-                                                 src="{{ asset('images/speaking/wedding_photos/family_tree_b.png') }}"
                                                  alt="Family Tree B"
                                                  class="max-h-[460px] w-auto max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-200">
                                         </div>
@@ -7081,9 +12767,9 @@
                                     <div class="space-y-3 pt-2">
                                         <div class="flex items-center justify-between">
                                             <div class="font-black text-slate-900 text-sm flex items-center gap-2">
-                                                <span>🗣️</span> <span>Contoh Jawaban Lisan Siswa B (Klik untuk mendengar audio):</span>
+                                                <span>Contoh Jawaban Lisan Siswa B (Klik untuk mendengar audio):</span>
                                             </div>
-                                            <span class="text-xs text-slate-400 font-bold">Tekan 🔊 untuk melafalkan</span>
+                                            <span class="text-xs text-slate-400 font-bold">Klik tombol audio untuk melafalkan</span>
                                         </div>
                                         
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -7177,7 +12863,7 @@
                             <!-- ==================================================== -->
                             <!-- TAB 5: TEACHER'S LESSON PLAN & CLASSROOM LANGUAGE    -->
                             <!-- ==================================================== -->
-                            <div x-show="gameTab === 'guide'" class="space-y-6">
+                            <div x-show="gameTab === 'guide' && previewRole === 'admin'" class="space-y-6">
                                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200/90 space-y-6">
                                     <div class="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div>
@@ -7187,10 +12873,10 @@
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <button @click="activeModal = 'guide1_full'" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs transition">
-                                                Scan Panduan 1 📄
+                                                Scan Panduan 1
                                             </button>
                                             <button @click="activeModal = 'guide2_full'" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs transition">
-                                                Scan Panduan 2 📄
+                                                Scan Panduan 2
                                             </button>
                                         </div>
                                     </div>
@@ -7223,7 +12909,7 @@
                                     <div class="p-5 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-3">
                                         <div class="flex items-center justify-between">
                                             <div class="font-black text-blue-950 text-sm flex items-center gap-2">
-                                                <span>🎙️</span> <span>Authentic Classroom Language Script (Bahasa Instruksi Tutor):</span>
+                                                <span>Authentic Classroom Language Script (Bahasa Instruksi Tutor):</span>
                                             </div>
                                             <button @click="speakText('Listen. A, B, you two work together. Look, here is a wedding photo. A, this is your sister Ann. B, this is your brother Tim. Ann is marrying Tim. This is your family tree A, keep it secret. This is your family tree B, keep it secret. Ask each other: Who is that? and write the names on the photo.')"
                                                 class="px-3 py-1 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition flex items-center gap-1">
@@ -7254,28 +12940,14 @@
                                     <!-- Modal Header -->
                                     <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                                         <div class="font-black text-sm sm:text-base flex items-center gap-2">
-                                            <span x-show="activeModal === 'photo_full'">📸 The Big Wedding Photograph</span>
-                                            <span x-show="activeModal === 'tree_a_full'">👰 Family Tree A (Bride's Family - Ann's Side)</span>
-                                            <span x-show="activeModal === 'tree_b_full'">🤵 Family Tree B (Groom's Family - Tim's Side)</span>
-                                            <span x-show="activeModal === 'trees_full'">🌳 Family Trees (A &amp; B)</span>
-                                            <span x-show="activeModal === 'guide1_full'">📄 Teacher's Guide Page 1</span>
-                                            <span x-show="activeModal === 'guide2_full'">📄 Teacher's Guide Page 2 (Classroom Language)</span>
+                                            <span x-show="activeModal === 'photo_full'">The Big Wedding Photograph</span>
+                                            <span x-show="activeModal === 'tree_a_full'">Family Tree A (Bride's Family - Ann's Side)</span>
+                                            <span x-show="activeModal === 'tree_b_full'">Family Tree B (Groom's Family - Tim's Side)</span>
+                                            <span x-show="activeModal === 'trees_full'">Family Trees (A &amp; B)</span>
+                                            <span x-show="activeModal === 'guide1_full'">Teacher's Guide Page 1</span>
+                                            <span x-show="activeModal === 'guide2_full'">Teacher's Guide Page 2 (Classroom Language)</span>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <template x-if="activeModal === 'photo_full'">
-                                                <div class="bg-white/10 p-0.5 rounded-xl flex items-center text-xs">
-                                                    <button type="button" @click="photoMode = 'color'"
-                                                        :class="photoMode === 'color' ? 'bg-indigo-600 text-white font-black shadow-xs' : 'text-slate-300 hover:text-white'"
-                                                        class="px-2.5 py-1 rounded-lg transition">
-                                                        Warna
-                                                    </button>
-                                                    <button type="button" @click="photoMode = 'sketch'"
-                                                        :class="photoMode === 'sketch' ? 'bg-white text-slate-900 font-black shadow-xs' : 'text-slate-300 hover:text-white'"
-                                                        class="px-2.5 py-1 rounded-lg transition">
-                                                        Sketsa
-                                                    </button>
-                                                </div>
-                                            </template>
                                             <button @click="activeModal = null" class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </button>
@@ -7286,29 +12958,26 @@
                                     <div class="p-4 overflow-y-auto flex-1 flex items-center justify-center bg-slate-900/10">
                                         <template x-if="activeModal === 'photo_full'">
                                             <div>
-                                                <img x-show="photoMode === 'color'" src="{{ asset('images/speaking/wedding_photos/wedding_photo_hd.jpg?v=14') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-lg">
-                                                <img x-show="photoMode === 'sketch'" src="{{ asset('images/speaking/wedding_photos/wedding_photo_upright.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-lg">
+                                                <img src="{{ asset('images/speaking/wedding_photos/wedding_photo_hd.jpg?v=14') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-lg">
                                             </div>
                                         </template>
-                                        <template x-if="activeModal === 'tree_a_full'">
+                                        <template x-if="activeModal === 'tree_a_full' && (previewRole === 'admin' || assignedStudentRole === 'A')">
                                             <div>
-                                                <img x-show="photoMode === 'color'" src="{{ asset('images/speaking/wedding_photos/family_tree_a_hd.jpg?v=13') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
-                                                <img x-show="photoMode === 'sketch'" src="{{ asset('images/speaking/wedding_photos/family_tree_a.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
+                                                <img src="{{ asset('images/speaking/wedding_photos/family_tree_a_hd.jpg?v=13') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
                                             </div>
                                         </template>
-                                        <template x-if="activeModal === 'tree_b_full'">
+                                        <template x-if="activeModal === 'tree_b_full' && (previewRole === 'admin' || assignedStudentRole === 'B')">
                                             <div>
-                                                <img x-show="photoMode === 'color'" src="{{ asset('images/speaking/wedding_photos/family_tree_b_hd.jpg?v=14') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
-                                                <img x-show="photoMode === 'sketch'" src="{{ asset('images/speaking/wedding_photos/family_tree_b.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
+                                                <img src="{{ asset('images/speaking/wedding_photos/family_tree_b_hd.jpg?v=14') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
                                             </div>
                                         </template>
-                                        <template x-if="activeModal === 'trees_full'">
+                                        <template x-if="activeModal === 'trees_full' && previewRole === 'admin'">
                                             <img src="{{ asset('images/speaking/wedding_photos/family_trees.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
                                         </template>
-                                        <template x-if="activeModal === 'guide1_full'">
+                                        <template x-if="activeModal === 'guide1_full' && previewRole === 'admin'">
                                             <img src="{{ asset('images/speaking/wedding_photos/teacher_guide_1.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
                                         </template>
-                                        <template x-if="activeModal === 'guide2_full'">
+                                        <template x-if="activeModal === 'guide2_full' && previewRole === 'admin'">
                                             <img src="{{ asset('images/speaking/wedding_photos/teacher_guide_2.png') }}" class="max-w-full max-h-[78vh] object-contain rounded-xl shadow-md">
                                         </template>
                                     </div>
@@ -7330,18 +12999,15 @@
 
                         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-6">
                             <div>
-                                <div class="flex items-center gap-2 mb-2.5 flex-wrap">
-                                    <span style="background-color: #29a8f5 !important;" class="px-3.5 py-1 rounded-full text-xs font-black text-white shadow-xs">
-                                        {{ $gameData['title'] ?? 'Zoom Speaking Game' }}
-                                    </span>
-                                    <span style="background-color: #ff9800 !important;" class="px-3 py-1 rounded-full text-xs font-black text-white shadow-xs">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                    <span style="background-color: #ff9800 !important;" class="px-3.5 py-1 rounded-full text-xs font-black text-white shadow-xs">
                                         Waktu: {{ $gameData['time'] ?? '15-20 Menit' }}
                                     </span>
                                     <span style="background-color: #f0f9ff !important; color: #0284c7 !important; border: 1px solid #bae6fd !important;" class="px-3 py-1 rounded-full text-xs font-black">
                                         {{ count($gameData['cards'] ?? []) }} Siswa di Kelas
                                     </span>
                                     <span class="px-3 py-1 rounded-full bg-emerald-400 text-slate-950 text-xs font-black uppercase">
-                                        {{ $participationBadge['icon'] }} {{ $participationBadge['label'] }}
+                                        {{ $participationBadge['label'] }}
                                     </span>
                                 </div>
                                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -7359,7 +13025,7 @@
                                     <span x-text="selectedStudentCard ? 'Ganti / Acak Ulang Kartu' : 'Ambil Kartu Misi Acak Saya'"></span>
                                 </button>
 
-                                <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
+                                <div x-show="previewRole === 'admin'" class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
                                     <button @click="gameViewMode = 'student'" :style="gameViewMode === 'student' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" :class="gameViewMode === 'student' ? 'shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'" class="px-3.5 py-2 rounded-xl transition">
                                         Misi Saya
                                     </button>
@@ -7370,72 +13036,78 @@
                             </div>
                         </div>
 
-                        <!-- Game Procedures & Rules Grid (Teacher Management vs Student Gameplay - Blue & Orange Theme) -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                            <!-- Left: Grammar & Vocab Focus (Blue Container Theme) -->
-                            <div style="background-color: #f0f9ff !important; border-color: #bae6fd !important;" class="p-6 rounded-[2rem] border-2 flex flex-col justify-between shadow-xs">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-2.5">
-                                        <span style="background-color: #29a8f5 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">G</span>
-                                        <h4 style="color: #0284c7 !important;" class="text-xs font-black uppercase tracking-wider">Grammar &amp; Vocabulary Focus</h4>
-                                    </div>
-                                    <p class="text-xs sm:text-sm text-sky-950 font-semibold leading-relaxed mb-3">
-                                        <strong style="color: #0284c7;">Grammar:</strong> WH-Questions (<em>what, who, when, where, how</em>) &amp; Auxiliary verbs.<br>
-                                        <strong style="color: #0284c7;">Vocabulary:</strong> Personal information, routines, hobbies, travel, &amp; daily habits.
-                                    </p>
+                        <!-- Collapsible Game Procedures, Focus & Rules -->
+                        <div x-data="{ showGameGuide: false }" class="mb-6">
+                            <button @click="showGameGuide = !showGameGuide" type="button" 
+                                class="w-full py-2.5 px-4 sm:px-5 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 transition flex items-center justify-between shadow-2xs group">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-6 h-6 rounded-lg bg-sky-600 text-white font-black text-xs flex items-center justify-center group-hover:scale-105 transition">📋</span>
+                                    <span class="text-xs sm:text-sm font-black text-slate-800 group-hover:text-sky-900">Panduan Main, Tata Kelola & Fokus Materi (Grammar / Vocabulary)</span>
                                 </div>
-                                <div style="background-color: #ffffff !important; border-color: #7dd3fc !important; color: #0369a1 !important;" class="p-3 rounded-2xl border text-[11px] font-black flex items-center gap-1.5 shadow-2xs">
-                                    <svg class="w-4 h-4 text-sky-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                    <span>Target: Melatih kelancaran bertanya dan merespons secara spontan.</span>
+                                <span class="text-xs font-bold text-sky-600 flex items-center gap-1 group-hover:text-sky-800" x-text="showGameGuide ? 'Tutup Panduan ▲' : 'Buka Panduan ▼'"></span>
+                            </button>
+
+                            <div x-show="showGameGuide" x-collapse class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Left: Grammar & Vocab Focus -->
+                                <div style="background-color: #f0f9ff !important; border-color: #bae6fd !important;" class="p-5 rounded-2xl border-2 flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span style="background-color: #29a8f5 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">G</span>
+                                            <h4 style="color: #0284c7 !important;" class="text-xs font-black uppercase tracking-wider">Grammar &amp; Vocabulary Focus</h4>
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-sky-950 font-semibold leading-relaxed mb-3">
+                                            <strong style="color: #0284c7;">Grammar:</strong> WH-Questions (<em>what, who, when, where, how</em>) &amp; Auxiliary verbs.<br>
+                                            <strong style="color: #0284c7;">Vocabulary:</strong> Personal information, routines, hobbies, travel, &amp; daily habits.
+                                        </p>
+                                    </div>
+                                    <div style="background-color: #ffffff !important; border-color: #7dd3fc !important; color: #0369a1 !important;" class="p-2.5 rounded-xl border text-[11px] font-black flex items-center gap-1.5 shadow-2xs">
+                                        <svg class="w-4 h-4 text-sky-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span>Target: Melatih kelancaran bertanya dan merespons secara spontan.</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Right: Role-Based Rules Switcher (Orange Container Theme) -->
-                            <div style="background-color: #fff7ed !important; border-color: #fed7aa !important;" class="p-6 rounded-[2rem] border-2 flex flex-col justify-between shadow-xs" x-data="{ roleRuleTab: '{{ (auth()->user()?->role ?? '') === 'student' ? 'student' : 'teacher' }}' }">
-                                <div>
-                                    <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-orange-200">
-                                        <div class="flex items-center gap-2">
-                                            <span style="background-color: #ff9800 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">R</span>
-                                            <h4 style="color: #c2410c !important;" class="text-xs font-black uppercase tracking-wider">Panduan &amp; Aturan Main</h4>
+                                <!-- Right: Role-Based Rules Switcher -->
+                                <div style="background-color: #fff7ed !important; border-color: #fed7aa !important;" 
+                                     class="p-5 rounded-2xl border-2 flex flex-col justify-between shadow-xs" 
+                                     x-data="{ roleRuleTab: '{{ (auth()->user()?->role ?? '') === 'student' ? 'student' : 'teacher' }}' }"
+                                     x-init="$watch('previewRole', val => { if(val === 'student') roleRuleTab = 'student'; if(val === 'admin') roleRuleTab = 'teacher'; }); if(previewRole === 'student') roleRuleTab = 'student';">
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-orange-200">
+                                            <div class="flex items-center gap-2">
+                                                <span style="background-color: #ff9800 !important;" class="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs">R</span>
+                                                <h4 style="color: #c2410c !important;" class="text-xs font-black uppercase tracking-wider">Panduan &amp; Aturan Main</h4>
+                                            </div>
+
+                                            <!-- Role Switcher Pills -->
+                                            <div x-show="previewRole === 'admin'" class="flex items-center bg-white p-0.5 rounded-xl border border-orange-200 text-[10px] font-bold shadow-2xs">
+                                                <button @click="roleRuleTab = 'teacher'" :style="roleRuleTab === 'teacher' ? 'background-color: #ff9800 !important; color: #ffffff !important;' : ''" :class="roleRuleTab === 'teacher' ? 'shadow-2xs font-black' : 'text-slate-600 hover:text-orange-600'" class="px-2 py-0.5 rounded-lg transition">
+                                                    Guru / Admin
+                                                </button>
+                                                <button @click="roleRuleTab = 'student'" :style="roleRuleTab === 'student' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" :class="roleRuleTab === 'student' ? 'shadow-2xs font-black' : 'text-slate-600 hover:text-sky-600'" class="px-2 py-0.5 rounded-lg transition">
+                                                    Siswa
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <!-- Role Switcher Pills -->
-                                        <div class="flex items-center bg-white p-0.5 rounded-xl border border-orange-200 text-[11px] font-bold shadow-2xs">
-                                            <button @click="roleRuleTab = 'teacher'" :style="roleRuleTab === 'teacher' ? 'background-color: #ff9800 !important; color: #ffffff !important;' : ''" :class="roleRuleTab === 'teacher' ? 'shadow-2xs font-black' : 'text-slate-600 hover:text-orange-600'" class="px-2.5 py-1 rounded-lg transition">
-                                                Guru / Admin
-                                            </button>
-                                            <button @click="roleRuleTab = 'student'" :style="roleRuleTab === 'student' ? 'background-color: #29a8f5 !important; color: #ffffff !important;' : ''" :class="roleRuleTab === 'student' ? 'shadow-2xs font-black' : 'text-slate-600 hover:text-sky-600'" class="px-2.5 py-1 rounded-lg transition">
-                                                Siswa
-                                            </button>
+                                        <!-- TEACHER / ADMIN FACILITATION GUIDE -->
+                                        <div x-show="roleRuleTab === 'teacher'" x-transition class="space-y-1.5">
+                                            <ol class="text-xs text-orange-950 space-y-1 font-medium list-decimal list-inside leading-relaxed">
+                                                <li><strong>Distribusi Kartu:</strong> Pastikan tiap siswa mengambil 1 nomor kartu misi acak (tersedia {{ count($gameData['cards'] ?? []) }} kartu).</li>
+                                                <li><strong>Aktivitas Interaksi:</strong> Arahkan siswa untuk saling mewawancarai teman di Kelas / Kelompok.</li>
+                                                <li><strong>Follow-Up Prompt:</strong> Ingatkan siswa melontarkan pertanyaan lanjutan (misal: <em>"Where did you go?" &rarr; "Did you like it?"</em>).</li>
+                                                <li><strong>Sesi Report Back:</strong> Minta tiap siswa membacakan laporan kesimpulan hasil surveinya ke seluruh kelas.</li>
+                                            </ol>
                                         </div>
-                                    </div>
 
-                                    <!-- TEACHER / ADMIN FACILITATION GUIDE (Tata Kelola Permainan di Kelas) -->
-                                    <div x-show="roleRuleTab === 'teacher'" x-transition class="space-y-2">
-                                        <div class="flex items-center gap-1.5 text-xs font-bold text-orange-950 mb-1">
-                                            <span style="background-color: #ffedd5 !important; color: #c2410c !important;" class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase">Tata Kelola Guru</span>
-                                            <span>Langkah Pengelolaan Kelas:</span>
+                                        <!-- STUDENT GAMEPLAY RULES -->
+                                        <div x-show="roleRuleTab === 'student'" x-transition class="space-y-1.5">
+                                            <ol class="text-xs text-sky-950 space-y-1 font-medium list-decimal list-inside leading-relaxed">
+                                                <li><strong>Ambil Kartu Misi:</strong> Klik tombol <em>"Ambil Kartu Misi Acak Saya"</em> untuk mendapatkan misi investigasimu.</li>
+                                                <li><strong>Tanya Teman di Kelas:</strong> Nyalakan mikrofon, ajukan pertanyaan di kartumu ke setiap teman sekelas.</li>
+                                                <li><strong>Catat di Survey Pad:</strong> Masukkan nama teman dan jawabannya pada formulir survey interaktif di bawah.</li>
+                                                <li><strong>Bacakan Laporan:</strong> Tekan tombol audio untuk berlatih, lalu sampaikan temuanmu ke guru dan kelas!</li>
+                                            </ol>
                                         </div>
-                                        <ol class="text-xs text-orange-950 space-y-1.5 font-medium list-decimal list-inside leading-relaxed">
-                                            <li><strong>Distribusi Kartu:</strong> Pastikan tiap siswa mengambil 1 nomor kartu misi acak (tersedia {{ count($gameData['cards'] ?? []) }} kartu).</li>
-                                            <li><strong>Aktivitas Interaksi:</strong> Arahkan siswa untuk saling mewawancarai teman di Kelas / Kelompok.</li>
-                                            <li><strong>Follow-Up Prompt:</strong> Ingatkan siswa melontarkan pertanyaan lanjutan (misal: <em>"Where did you go?" &rarr; "Did you like it?"</em>).</li>
-                                            <li><strong>Sesi Report Back:</strong> Minta tiap siswa membacakan laporan kesimpulan hasil surveinya ke seluruh kelas.</li>
-                                        </ol>
-                                    </div>
-
-                                    <!-- STUDENT GAMEPLAY RULES (Cara Main Siswa) -->
-                                    <div x-show="roleRuleTab === 'student'" x-transition class="space-y-2">
-                                        <div class="flex items-center gap-1.5 text-xs font-bold text-sky-950 mb-1">
-                                            <span style="background-color: #e0f2fe !important; color: #0369a1 !important;" class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase">Petunjuk Siswa</span>
-                                            <span>Cara Main di Kelas:</span>
-                                        </div>
-                                        <ol class="text-xs text-sky-950 space-y-1.5 font-medium list-decimal list-inside leading-relaxed">
-                                            <li><strong>Ambil Kartu Misi:</strong> Klik tombol <em>"Ambil Kartu Misi Acak Saya"</em> untuk mendapatkan misi investigasimu.</li>
-                                            <li><strong>Tanya Teman di Kelas:</strong> Nyalakan mikrofon, ajukan pertanyaan di kartumu ke setiap teman sekelas.</li>
-                                            <li><strong>Catat di Survey Pad:</strong> Masukkan nama teman dan jawabannya pada formulir survey interaktif di bawah.</li>
-                                            <li><strong>Bacakan Laporan:</strong> Tekan tombol audio untuk berlatih, lalu sampaikan temuanmu ke guru dan kelas!</li>
-                                        </ol>
                                     </div>
                                 </div>
                             </div>
@@ -7467,8 +13139,10 @@
 
                                     <h3 class="text-2xl sm:text-3xl font-black text-white mb-2 leading-snug" x-text="'&ldquo;' + selectedStudentCard.title + '&rdquo;'"></h3>
 
-                                    <!-- 1. FULL WIDTH CARD IMAGE (100% Bleed) -->
-                                    <div class="my-6 w-full rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden bg-white border-2 border-white/90">
+                                    <!-- 1. FULL WIDTH CARD IMAGE (100% Bleed) - some card sets (e.g. Championship
+                                         Ranking & Floor Race Challenge) have no artwork yet, so this only renders
+                                         when the card actually provides one instead of showing a broken-image icon. -->
+                                    <div x-show="selectedStudentCard.image" class="my-6 w-full rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden bg-white border-2 border-white/90">
                                         <img :src="selectedStudentCard.image" :alt="selectedStudentCard.title" class="w-full h-auto object-contain block">
                                     </div>
 
@@ -7589,33 +13263,45 @@
                                         <div>
                                             <div class="flex items-center gap-2 mb-3">
                                                 <span style="background-color: {{ $cardThemeColor }} !important;" class="w-6 h-6 rounded-full text-white text-xs font-black flex items-center justify-center shadow-2xs shrink-0">
-                                                    {{ $card['id'] }}
+                                                    {{ $card['id'] ?? $loop->iteration }}
                                                 </span>
-                                                <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                                                    {{ $card['badge'] }}
-                                                </span>
+                                                @if(!empty($card['badge']))
+                                                    <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                                        {{ $card['badge'] }}
+                                                    </span>
+                                                @elseif(!empty($card['rank']))
+                                                    <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                                        {{ $card['rank'] }}
+                                                    </span>
+                                                @endif
                                             </div>
 
-                                            <!-- Card Illustration Visual (Full-Bleed HD) -->
-                                            <div class="mb-3 rounded-xl overflow-hidden bg-white border border-slate-300 shadow-sm">
-                                                <img src="{{ asset($card['image']) }}" alt="{{ $card['title'] }}" class="w-full h-auto object-contain block">
-                                            </div>
+                                            @if(!empty($card['image']))
+                                                <!-- Card Illustration Visual (Full-Bleed HD) -->
+                                                <div class="mb-3 rounded-xl overflow-hidden bg-white border border-slate-300 shadow-sm">
+                                                    <img src="{{ asset($card['image']) }}" alt="{{ $card['title'] ?? 'Card Image' }}" class="w-full h-auto object-contain block">
+                                                </div>
+                                            @endif
 
                                             <div class="space-y-2 mb-3">
-                                                <div style="background-color: {{ $cardBgColor }} !important; border: 1px solid {{ $cardBorderColor }} !important;" class="p-2.5 rounded-xl">
-                                                    <p style="color: {{ $cardTextColor }} !important;" class="text-[10px] font-black uppercase tracking-wider">Tanyakan ke Teman:</p>
-                                                    <p class="text-xs font-black text-slate-900 mt-0.5">"{{ $card['question'] }}"</p>
-                                                </div>
+                                                @if(!empty($card['question']) || !empty($card['title']) || !empty($card['clue']) || !empty($card['desc']))
+                                                    <div style="background-color: {{ $cardBgColor }} !important; border: 1px solid {{ $cardBorderColor }} !important;" class="p-2.5 rounded-xl">
+                                                        <p style="color: {{ $cardTextColor }} !important;" class="text-[10px] font-black uppercase tracking-wider">{{ !empty($card['question']) ? 'Tanyakan ke Teman:' : 'Misi Kartu:' }}</p>
+                                                        <p class="text-xs font-black text-slate-900 mt-0.5">"{{ $card['question'] ?? ($card['title'] ?? ($card['clue'] ?? ($card['desc'] ?? ''))) }}"</p>
+                                                    </div>
+                                                @endif
 
-                                                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-                                                    <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Pola Jawaban:</p>
-                                                    <p class="text-xs font-medium text-slate-700 mt-0.5">{{ $card['sample_answer'] }}</p>
-                                                </div>
+                                                @if(!empty($card['sample_answer']) || !empty($card['desc']) || !empty($card['read']))
+                                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                                                        <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Pola Jawaban / Keterangan:</p>
+                                                        <p class="text-xs font-medium text-slate-700 mt-0.5">{{ $card['sample_answer'] ?? ($card['read'] ?? ($card['desc'] ?? '')) }}</p>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
 
                                         <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                                            <button @click="selectCardById({{ $card['id'] }}); gameViewMode = 'student'" type="button" style="background-color: {{ $cardThemeColor }} !important;" class="w-full py-2.5 px-3 rounded-xl text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-2xs hover:opacity-90">
+                                            <button @click="selectCardById({{ $card['id'] ?? $loop->iteration }}); gameViewMode = 'student'" type="button" style="background-color: {{ $cardThemeColor }} !important;" class="w-full py-2.5 px-3 rounded-xl text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-2xs hover:opacity-90">
                                                 <span>Pilih Kartu Misi Ini</span>
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                             </button>
@@ -7719,7 +13405,7 @@
                                 <template x-if="aiState === 'finished'">
                                     <span style="background-color: #15803d !important; color: #ffffff !important; border: 2px solid #ffffff !important;" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-black shadow-lg backdrop-blur-md">
                                         <span class="w-2.5 h-2.5 rounded-full bg-white"></span>
-                                        <span>Sesi Wawancara Selesai! Kerja yang luar biasa 🎉</span>
+                                        <span>Sesi Wawancara Selesai! Kerja yang luar biasa!</span>
                                     </span>
                                 </template>
                             </div>
@@ -7737,7 +13423,7 @@
                                      NOT shown to teachers even though they otherwise share
                                      access with admins elsewhere on this page. --}}
                                 @if(Auth::user()?->isAdmin())
-                                <button @click="openAiEditModal()" type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-400/90 hover:bg-amber-400 text-slate-900 text-xs font-bold backdrop-blur-md transition border border-white/40 shadow-xs">
+                                <button x-show="previewRole === 'admin'" @click="openAiEditModal()" type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-400/90 hover:bg-amber-400 text-slate-900 text-xs font-bold backdrop-blur-md transition border border-white/40 shadow-xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
@@ -7754,7 +13440,7 @@
                                             <span style="background-color: #ff9800 !important; color: white !important;" class="px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-2xs">Pertanyaan AI Examiner</span>
                                         </div>
                                         <p class="text-base sm:text-xl font-black text-white leading-relaxed" x-text="'&ldquo;' + currentAiQuestion.question + '&rdquo;'"></p>
-                                        <p x-show="currentAiQuestion.hint" style="background-color: rgba(0, 0, 0, 0.2) !important;" class="text-xs text-amber-200 mt-3 font-semibold p-2.5 rounded-xl border border-white/20" x-text="'💡 Petunjuk: ' + currentAiQuestion.hint"></p>
+                                        <p x-show="currentAiQuestion.hint" style="background-color: rgba(0, 0, 0, 0.2) !important;" class="text-xs text-amber-200 mt-3 font-semibold p-2.5 rounded-xl border border-white/20" x-text="'Petunjuk: ' + currentAiQuestion.hint"></p>
                                     </div>
                                 </template>
                             </div>
@@ -7831,16 +13517,110 @@
                 @endif
             </div>
 
+            @if(!empty($meetingSubtopics) && count($meetingSubtopics) > 0)
+            <!-- VERTICAL FLOATING SUBTOPIC SELECTOR (RIGHT-SIDE DOCK) -->
+            <div class="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col items-end select-none"
+                 x-data="{
+                     isHovered: false,
+                     isPinned: false,
+                     get isOpen() { return this.isPinned || this.isHovered; }
+                 }"
+                 @mouseenter="isHovered = true"
+                 @mouseleave="isHovered = false"
+                 @click.outside="isPinned = false">
+
+                <!-- 1. Collapsed Capsule Trigger (Clean White & Modern) -->
+                <div x-show="!isOpen"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-90 translate-x-2"
+                     x-transition:enter-end="opacity-100 scale-100 translate-x-0"
+                     @click="isPinned = true"
+                     class="cursor-pointer bg-white border-2 border-sky-400 rounded-3xl py-2.5 px-2 sm:px-2.5 shadow-xl hover:shadow-2xl hover:shadow-sky-500/25 text-slate-800 flex flex-col items-center gap-1.5 transition-all hover:scale-105 group ring-4 ring-sky-100/80">
+                    <span class="w-8 h-8 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/30 group-hover:rotate-6 transition-transform">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    </span>
+                    <div class="flex flex-col items-center text-[9px] font-black leading-tight text-sky-700 uppercase tracking-tighter select-none mt-0.5 text-center">
+                        <span>SUB</span>
+                        <span>TOPIK</span>
+                    </div>
+                </div>
+
+                <!-- 2. Expanded Drawer Panel (Clean White & Spacious) -->
+                <div x-show="isOpen"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95 translate-x-4"
+                     x-transition:enter-end="opacity-100 scale-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 scale-95 translate-x-4"
+                     x-cloak
+                     class="bg-white border-2 border-sky-300 rounded-[2rem] p-4 shadow-2xl text-slate-900 w-[280px] sm:w-[320px] ring-4 ring-sky-100/80 flex flex-col gap-3">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-sky-500/20">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                            </span>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Sub Topik Meeting</h4>
+                                <span class="text-[10px] font-bold text-sky-600">Meeting {{ $meetingNumber }} • {{ count($meetingSubtopics) }} Topik</span>
+                            </div>
+                        </div>
+                        <button @click.stop="isPinned = !isPinned" type="button"
+                                :class="isPinned ? 'bg-amber-400 text-slate-950 font-black shadow-xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'"
+                                class="w-7 h-7 rounded-xl text-xs flex items-center justify-center transition"
+                                :title="isPinned ? 'Lepas Pin Panel' : 'Pin Panel Tetap Terbuka'">
+                            <span class='text-xs font-mono font-bold' x-text="isPinned ? 'PIN' : '✕'"></span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+                        @foreach($meetingSubtopics as $st)
+                            <button @click="goToSubtopic({{ $loop->index }}, null, {{ $st['materiIndex'] ?? $loop->index }}, @js($st['subTab'] ?? null)); if (!isPinned) isHovered = false;"
+                                    type="button"
+                                    :class="(activeSubtopicIndex === {{ $loop->index }} || activeSubtopicId === '{{ $st['id'] }}') ? 'bg-sky-50 border-sky-400 text-sky-950 shadow-sm ring-1 ring-sky-400' : 'bg-slate-50 hover:bg-slate-100/90 text-slate-700 border-slate-200/80 hover:border-sky-300'"
+                                    class="w-full text-left p-3 rounded-2xl transition-all duration-200 flex items-center justify-between gap-2.5 group border">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span style="background-color: {{ $loop->iteration % 2 === 1 ? '#29a8f5' : '#ff9800' }} !important;"
+                                          class="w-7 h-7 rounded-xl text-white font-black text-[11px] flex items-center justify-center shrink-0 shadow-xs">
+                                        {{ $st['num'] }}
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition truncate">
+                                            {{ $st['title'] }}
+                                        </p>
+                                        @if(!empty($st['desc']))
+                                            <p class="text-[10px] text-slate-500 truncate mt-0.5">
+                                                {{ $st['desc'] }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-sky-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @if(Auth::user()?->isAdmin() || Auth::user()?->isTeacher())
                 @php
                     $primaryGame = $games[0] ?? null;
+                    foreach ($games as $gCandidate) {
+                        if (in_array(($gCandidate['type'] ?? ''), ['wedding_photos', 'how_many_kitchen', 'tourist_in_town'], true)) {
+                            $primaryGame = $gCandidate;
+                            break;
+                        }
+                    }
                     $primaryGameType = $primaryGame['type'] ?? 'default';
                     $primaryParticipationType = $primaryGame['participation_type'] ?? 'pair';
                     $knownBespokeGameTypes = ['wedding_photos', 'how_many_kitchen', 'tourist_in_town'];
                     $currentMeetingGroups = $meetingStudentGroups->filter(fn ($grp) => $grp->game_index === null || $grp->game_index === 0)->values();
                 @endphp
-                <!-- 👑 GLOBAL FLOATING ADMIN ROLE CONTROLLER BAR (ALL TABS EXCEPT AI INTERVIEW) -->
-                <div x-show="activeTab !== 'extended'" 
+                <!-- GLOBAL FLOATING ADMIN ROLE CONTROLLER BAR (ALL TABS EXCEPT AI INTERVIEW) -->
+                <div x-show="previewRole === 'admin' && activeTab !== 'extended'" 
                      x-transition:enter="transition ease-out duration-200" 
                      x-transition:enter-start="opacity-0 translate-y-4" 
                      x-transition:enter-end="opacity-100 translate-y-0" 
@@ -7853,7 +13633,7 @@
                          class="border-2 text-white rounded-full px-3 py-2 sm:px-4 sm:py-2.5 shadow-2xl flex items-center gap-1.5 sm:gap-2 ring-4 ring-black/30">
                         <!-- Crown Admin Badge -->
                         <div class="flex items-center gap-1.5 pl-1 pr-1.5 shrink-0">
-                            <span class="w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">👑</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-xs">ADMIN</span>
                             <span class="text-xs font-black uppercase text-amber-400 hidden md:inline tracking-wider">ADMIN:</span>
                         </div>
 
@@ -7866,7 +13646,7 @@
                                 <button @click="setWeddingGameTab('worksheet')" type="button"
                                     :style="weddingGameTab === 'worksheet' && activeTab === 'game' ? 'background-color: #f59e0b !important; color: #0f172a !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>🖼️</span> <span>Main / Foto</span>
+                                    <span>Main / Foto</span>
                                 </button>
                                 
                                 @if($currentMeetingGroups->isEmpty())
@@ -7874,23 +13654,23 @@
                                     <button @click="setWeddingGameTab('student_a')" type="button"
                                         :style="weddingGameTab === 'student_a' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>👰</span> <span>Student A</span>
+                                        <span class="w-2 h-2 rounded-full bg-pink-400 inline-block"></span> <span>Student A</span>
                                     </button>
 
                                     <!-- Student B -->
                                     <button @click="setWeddingGameTab('student_b')" type="button"
                                         :style="weddingGameTab === 'student_b' && activeTab === 'game' ? 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>🤵</span> <span>Student B</span>
+                                        <span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span> <span>Student B</span>
                                     </button>
                                 @else
                                     <!-- Real kelompok drive the slots: 1st group = Student A, 2nd group = Student B -->
                                     @foreach($currentMeetingGroups->take(2) as $index => $group)
                                         @php $slotValue = $index === 0 ? 'student_a' : 'student_b'; @endphp
                                         <button @click="setWeddingGameTab('{{ $slotValue }}', {{ $group->id }})" type="button"
-                                            :style="weddingGameTab === '{{ $slotValue }}' && activeTab === 'game' ? '{{ $index === 0 ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' }}' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
+                                            :style="weddingGameTab === '{{ $slotValue }}' && activeTab === 'game' ? '{{ $index === 0 ? 'background-color: #4f46e5 !important; color: #ffffff !important;' : 'background-color: #ea580c !important; color: #ffffff !important;' }}' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>{{ $index === 0 ? '👰' : '🤵' }}</span> <span>{{ $group->name }}</span>
+                                            <span class='w-2 h-2 rounded-full bg-indigo-400 inline-block'></span> <span>{{ $group->name }}</span>
                                         </button>
                                     @endforeach
                                 @endif
@@ -7899,14 +13679,14 @@
                                 <button @click="setWeddingGameTab('phrases')" type="button"
                                     :style="weddingGameTab === 'phrases' && activeTab === 'game' ? 'background-color: #0284c7 !important; color: #ffffff !important; border-color: #38bdf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>💬</span> <span>Pola Percakapan</span>
+                                    <span>Pola Percakapan</span>
                                 </button>
                                 
                                 <!-- Guide -->
                                 <button @click="setWeddingGameTab('guide')" type="button"
                                     :style="weddingGameTab === 'guide' && activeTab === 'game' ? 'background-color: #059669 !important; color: #ffffff !important; border-color: #34d399 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>📖</span> <span>Panduan Guru</span>
+                                    <span>Panduan Guru</span>
                                 </button>
 
                             @elseif($primaryGameType === 'how_many_kitchen')
@@ -7914,12 +13694,12 @@
                                     <button @click="setKitchenGameTab('A')" type="button"
                                         :style="kitchenActiveStudent === 'A' && activeTab === 'game' ? 'background-color: #0284c7 !important; color: #ffffff !important; border-color: #38bdf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>🍳</span> <span>Student A (Kitchen A)</span>
+                                        <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> <span>Student A</span>
                                     </button>
                                     <button @click="setKitchenGameTab('B')" type="button"
                                         :style="kitchenActiveStudent === 'B' && activeTab === 'game' ? 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>🍽️</span> <span>Student B (Kitchen B)</span>
+                                        <span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> <span>Student B</span>
                                     </button>
                                 @else
                                     @foreach($currentMeetingGroups->take(2) as $index => $group)
@@ -7927,28 +13707,28 @@
                                         <button @click="setKitchenGameTab('{{ $slotValue }}', {{ $group->id }})" type="button"
                                             :style="kitchenActiveStudent === '{{ $slotValue }}' && activeTab === 'game' ? '{{ $index === 0 ? 'background-color: #0284c7 !important; color: #ffffff !important; border-color: #38bdf8 !important;' : 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' }}' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>{{ $index === 0 ? '🍳' : '🍽️' }}</span> <span>{{ $group->name }}</span>
+                                            <span class='w-2 h-2 rounded-full bg-sky-400 inline-block'></span> <span>{{ $group->name }}</span>
                                         </button>
                                     @endforeach
                                 @endif
                                 <button @click="toggleKitchenAnswers()" type="button"
                                     :style="kitchenShowAnswers ? 'background-color: #f59e0b !important; color: #0f172a !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>🔑</span> <span x-text="kitchenShowAnswers ? 'Sembunyikan Kunci' : 'Kunci Jawaban'"></span>
+                                    <span x-text="kitchenShowAnswers ? 'Sembunyikan Kunci' : 'Kunci Jawaban'"></span>
                                 </button>
 
                             @elseif($primaryGameType === 'tourist_in_town')
                                 <button @click="setTouristTab('map')" type="button"
                                     :style="touristTab === 'map' && activeTab === 'game' ? 'background-color: #f59e0b !important; color: #0f172a !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>🗺️</span> <span>Peta Master</span>
+                                    <span>Peta Master</span>
                                 </button>
                                 @if($currentMeetingGroups->isEmpty())
                                     @foreach(['a','b','c','d','e','f','g'] as $letter)
                                         <button @click="setTouristTab('sheets', 'sheet_{{ $letter }}')" type="button"
                                             :style="touristTab === 'sheets' && touristSheet === 'sheet_{{ $letter }}' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>🎒</span> <span>{{ strtoupper($letter) }}</span>
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> <span>{{ strtoupper($letter) }}</span>
                                         </button>
                                     @endforeach
                                 @else
@@ -7957,19 +13737,19 @@
                                         <button @click="setTouristTab('sheets', '{{ $slotValue }}', {{ $group->id }})" type="button"
                                             :style="touristTab === 'sheets' && touristSheet === '{{ $slotValue }}' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>🎒</span> <span>{{ $group->name }}</span>
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> <span>{{ $group->name }}</span>
                                         </button>
                                     @endforeach
                                 @endif
                                 <button @click="setTouristTab('desks')" type="button"
                                     :style="touristTab === 'desks' && activeTab === 'game' ? 'background-color: #059669 !important; color: #ffffff !important; border-color: #34d399 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>🏢</span> <span>4 Desks</span>
+                                    <span>4 Desks</span>
                                 </button>
                                 <button @click="setTouristTab('guide')" type="button"
                                     :style="touristTab === 'guide' && activeTab === 'game' ? 'background-color: #f59e0b !important; color: #0f172a !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                     class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                    <span>📖</span> <span>Panduan</span>
+                                    <span>Panduan</span>
                                 </button>
 
                             @elseif(!in_array($primaryGameType, $knownBespokeGameTypes) && $primaryParticipationType === 'pair')
@@ -7979,20 +13759,20 @@
                                     <button @click="setGenericSlot('student_a')" type="button"
                                         :style="genericActiveSlot === 'student_a' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>🧑</span> <span>Student A</span>
+                                        <span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span> <span>Student A</span>
                                     </button>
                                     <button @click="setGenericSlot('student_b')" type="button"
                                         :style="genericActiveSlot === 'student_b' && activeTab === 'game' ? 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                         class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                        <span>🧑</span> <span>Student B</span>
+                                        <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> <span>Student B</span>
                                     </button>
                                 @else
                                     @foreach($currentMeetingGroups->take(2) as $index => $group)
                                         @php $slotValue = $index === 0 ? 'student_a' : 'student_b'; @endphp
                                         <button @click="setGenericSlot('{{ $slotValue }}', {{ $group->id }})" type="button"
-                                            :style="genericActiveSlot === '{{ $slotValue }}' && activeTab === 'game' ? '{{ $index === 0 ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #ea580c !important; color: #ffffff !important; border-color: #fb923c !important;' }}' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
+                                            :style="genericActiveSlot === '{{ $slotValue }}' && activeTab === 'game' ? '{{ $index === 0 ? 'background-color: #4f46e5 !important; color: #ffffff !important;' : 'background-color: #ea580c !important; color: #ffffff !important;' }}' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>🧑</span> <span>{{ $group->name }}</span>
+                                            <span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span> <span>{{ $group->name }}</span>
                                         </button>
                                     @endforeach
                                 @endif
@@ -8006,7 +13786,7 @@
                                         <button @click="setGenericSlot('group_{{ $slotNumber }}')" type="button"
                                             :style="genericActiveSlot === 'group_{{ $slotNumber }}' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>👥</span> <span>Kelompok {{ $slotNumber }}</span>
+                                            <span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span> <span>Kelompok {{ $slotNumber }}</span>
                                         </button>
                                     @endforeach
                                 @else
@@ -8015,7 +13795,7 @@
                                         <button @click="setGenericSlot('{{ $slotValue }}', {{ $group->id }})" type="button"
                                             :style="genericActiveSlot === '{{ $slotValue }}' && activeTab === 'game' ? 'background-color: #4f46e5 !important; color: #ffffff !important; border-color: #818cf8 !important;' : 'background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;'"
                                             class="px-2.5 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                            <span>👥</span> <span>{{ $group->name }}</span>
+                                            <span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span> <span>{{ $group->name }}</span>
                                         </button>
                                     @endforeach
                                 @endif
@@ -8025,7 +13805,7 @@
                             <button @click="$dispatch('open-modal', 'kelompok-meeting')" type="button"
                                 style="background-color: #1e293b !important; color: #ffffff !important; border-color: #334155 !important;"
                                 class="px-3 py-1.5 rounded-full text-xs font-black border transition whitespace-nowrap flex items-center gap-1 shadow-sm hover:brightness-110">
-                                <span>👥</span> <span>Kelompok</span>
+                                <span>Kelompok</span>
                             </button>
                         </div>
                     </div>
@@ -8044,6 +13824,30 @@
                             </p>
                         </div>
                     @endforeach
+                </div>
+
+                <!-- FLOATING DOCK IN STUDENT PREVIEW MODE -->
+                <div x-show="previewRole === 'student'" 
+                     x-transition:enter="transition ease-out duration-200" 
+                     x-transition:enter-start="opacity-0 translate-y-4" 
+                     x-transition:enter-end="opacity-100 translate-y-0" 
+                     x-transition:leave="transition ease-in duration-150" 
+                     x-transition:leave-start="opacity-100 translate-y-0" 
+                     x-transition:leave-end="opacity-0 translate-y-4" 
+                     x-cloak
+                     class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[98vw] sm:max-w-max transition-all duration-300 shadow-2xl">
+                    <div style="background-color: #1e3a8a !important; border-color: #60a5fa !important;"
+                         class="border-2 text-white rounded-full px-4 py-2 sm:px-5 sm:py-2.5 shadow-2xl flex items-center gap-3 ring-4 ring-black/30 backdrop-blur-md">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+                            <span class="text-xs font-black uppercase text-white tracking-wider">Tampilan Siswa</span>
+                        </div>
+                        <div class="h-4 w-px bg-white/30"></div>
+                        <button @click="setPreviewRole('admin')" type="button" class="px-3.5 py-1.5 bg-white hover:bg-blue-50 text-blue-800 rounded-full font-black text-xs transition shadow-xs flex items-center gap-1.5 hover:scale-105">
+                            <span>Kembali ke Admin</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                    </div>
                 </div>
             @endif
         </main>
@@ -8170,26 +13974,26 @@
                         <button @click="activeGroupTab = 'auto_pair'" type="button"
                             :class="activeGroupTab === 'auto_pair' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
                             class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shrink-0">
-                            <span>🎲</span> <span>Pasangkan Acak (2 Siswa)</span>
+                            <span>Pasangkan Acak (2 Siswa)</span>
                         </button>
                         <button @click="activeGroupTab = 'bulk'" type="button"
                             :class="activeGroupTab === 'bulk' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
                             class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shrink-0">
-                            <span>📋</span> <span>Bagi Banyak Kelompok</span>
+                            <span>Bagi Banyak Kelompok</span>
                         </button>
                         <button @click="activeGroupTab = 'manual'" type="button"
                             :class="activeGroupTab === 'manual' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
                             class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shrink-0">
-                            <span>➕</span> <span>Buat Manual</span>
+                            <span>Buat Manual</span>
                         </button>
                         <button @click="activeGroupTab = 'list'" type="button"
                             :class="activeGroupTab === 'list' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
                             class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shrink-0">
-                            <span>👥</span> <span>Kelompok Aktif ({{ $meetingStudentGroups->count() }})</span>
+                            <span>Kelompok Aktif ({{ $meetingStudentGroups->count() }})</span>
                         </button>
                     </div>
 
-                    <!-- TAB 1: 🎲 AUTO-PAIR (PEMBUATAN PASANGAN ACAK 2 SISWA) -->
+                    <!-- TAB 1: AUTO-PAIR (PEMBUATAN PASANGAN ACAK 2 SISWA) -->
                     <div x-show="activeGroupTab === 'auto_pair'" class="space-y-5">
                         <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/80 to-sky-50/80 border border-indigo-100/80 flex items-start gap-3">
                             <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
@@ -8280,7 +14084,7 @@
                                         <span class="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-black" x-text="previewPairs.length + ' Pasangan'"></span>
                                     </div>
                                     <button @click="generatePreview()" type="button" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white font-extrabold text-[11px] transition flex items-center gap-1 shadow-2xs">
-                                        <span>🎲</span> <span>Acak Ulang Kombinasi</span>
+                                        <span>Acak Ulang Kombinasi</span>
                                     </button>
                                 </div>
 
@@ -8314,13 +14118,13 @@
                                 </button>
                                 <button type="submit" :disabled="getSelectedCount() < 2"
                                     class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
-                                    <span>🚀</span> <span>Simpan & Bentuk Pasangan</span>
+                                    <span>Simpan & Bentuk Pasangan</span>
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <!-- TAB 2: 📋 BULK GROUP ASSIGN WITH RANDOMIZE SHUFFLE -->
+                    <!-- TAB 2: BULK GROUP ASSIGN WITH RANDOMIZE SHUFFLE -->
                     <div x-show="activeGroupTab === 'bulk'" class="space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
                             <div>
@@ -8329,10 +14133,10 @@
                             </div>
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <button @click="randomizeBulk()" type="button" class="px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100 text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-                                    <span>🎲</span> <span>Acak (Shuffle)</span>
+                                    <span>Acak (Shuffle)</span>
                                 </button>
                                 <button @click="setPairBulk()" type="button" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 hover:bg-indigo-100 text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-                                    <span>👥</span> <span>Set Pasangan (2/Grup)</span>
+                                    <span>Set Pasangan (2/Grup)</span>
                                 </button>
                                 <button @click="resetBulk()" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition">
                                     Reset
@@ -8386,7 +14190,7 @@
                         </form>
                     </div>
 
-                    <!-- TAB 3: ➕ BUAT KELOMPOK MANUAL -->
+                    <!-- TAB 3: BUAT KELOMPOK MANUAL -->
                     <div x-show="activeGroupTab === 'manual'" class="space-y-4">
                         <form method="POST" action="{{ route('class-periods.groups.store', $selectedClassPeriod) }}">
                             @csrf
@@ -8434,7 +14238,7 @@
                         </form>
                     </div>
 
-                    <!-- TAB 4: 👥 DAFTAR KELOMPOK AKTIF -->
+                    <!-- TAB 4: DAFTAR KELOMPOK AKTIF -->
                     <div x-show="activeGroupTab === 'list'" class="space-y-3">
                         <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                             <span class="text-xs font-bold text-slate-500">Total: {{ $meetingStudentGroups->count() }} Kelompok / Pasangan</span>
@@ -8444,7 +14248,7 @@
                                     @method('DELETE')
                                     <input type="hidden" name="meeting_id" value="{{ $dbMeeting->id ?? '' }}">
                                     <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-bold flex items-center gap-1 transition">
-                                        <span>🗑️</span> <span>Hapus Semua Kelompok Meeting Ini</span>
+                                        <span>Hapus Semua Kelompok Meeting Ini</span>
                                     </button>
                                 </form>
                             @endif
@@ -8513,7 +14317,7 @@
                                 <div class="text-center py-6 bg-slate-50 rounded-2xl border border-slate-200">
                                     <p class="text-xs text-slate-500 font-medium">Belum ada kelompok/pasangan untuk meeting ini.</p>
                                     <button @click="activeGroupTab = 'auto_pair'" type="button" class="mt-2 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs">
-                                        🎲 Buat Pasangan Acak Sekarang
+                                        Buat Pasangan Acak Sekarang
                                     </button>
                                 </div>
                             @endforelse

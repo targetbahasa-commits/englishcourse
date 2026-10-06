@@ -59,12 +59,9 @@
     <p class="mb-2 text-gray-700">Label the map below.</p>
     <p class="mb-6 text-gray-700 italic">Write the correct letter, <strong>A-E</strong>, next to questions <strong>16-20</strong>.</p>
 
-    {{-- Map Image Placeholder --}}
     <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg w-full max-w-2xl relative">
-            <p class="text-gray-500 mb-2 font-medium">Map / Plan Insert</p>
-            <p class="text-sm text-gray-400 mb-4">Please upload the map image to: <code>public/images/assignments/ielts/listening/part2/test20-map.png</code></p>
-            <img src="{{ asset('images/assignments/ielts/listening/part2/test20-map.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Mount Rushmore Map">
+        <div class="p-3 border border-gray-200 bg-white rounded-xl shadow-sm max-w-2xl mx-auto">
+            <img src="{{ asset('assets/images/ielts/listening/practice/part2/test20.jpeg') }}" class="w-full h-auto rounded-lg" alt="Mount Rushmore Map">
         </div>
     </div>
 

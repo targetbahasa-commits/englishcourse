@@ -96,12 +96,49 @@ class IeltsWritingController extends Controller
         $view = $this->resolveIeltsWritingNavigation->resolveMeetingView($meeting->view_type);
 
         $userId = \Illuminate\Support\Facades\Auth::id() ?? session()->getId();
+
+        if (Auth::check() && $request->has('retry')) {
+            IeltsWritingPracticeSubmission::where('user_id', Auth::id())
+                ->where(function ($q) use ($meeting, $id) {
+                    $q->where('meeting_id', $meeting->id)
+                      ->orWhere('meeting_id', $id);
+                })
+                ->delete();
+
+            \App\Models\IeltsWritingDraft::where('user_id', Auth::id())
+                ->where(function ($q) use ($meeting, $id) {
+                    $q->where('meeting_id', $meeting->id)
+                      ->orWhere('meeting_id', $id);
+                })
+                ->delete();
+
+            \Illuminate\Support\Facades\Cache::forget("ielts_writing_draft_" . Auth::id() . "_{$meeting->id}");
+            \Illuminate\Support\Facades\Cache::forget("ielts_writing_draft_" . Auth::id() . "_{$id}");
+
+            session()->forget('ielts_writing_meeting' . $meeting->id . '_user_answers');
+            session()->forget('ielts_writing_meeting' . $id . '_user_answers');
+
+            return redirect()->to($request->url());
+        }
+
+        $existingSubmission = null;
+        if (Auth::check()) {
+            $existingSubmission = IeltsWritingPracticeSubmission::where('user_id', Auth::id())
+                ->where(function ($q) use ($meeting, $id) {
+                    $q->where('meeting_id', $meeting->id)
+                      ->orWhere('meeting_id', $id);
+                })
+                ->whereNotNull('scores')
+                ->latest('id')
+                ->first();
+        }
+
         $savedAnswers = \Illuminate\Support\Facades\Cache::get("ielts_writing_draft_{$userId}_{$meeting->id}")
             ?? \Illuminate\Support\Facades\Cache::get("ielts_writing_draft_{$userId}_{$id}")
             ?? session('ielts_writing_meeting' . $meeting->id . '_user_answers')
             ?? session('ielts_writing_meeting' . $id . '_user_answers', []);
 
-        return view($view, compact('task', 'meeting', 'backUrl', 'isClassEnded', 'savedAnswers'));
+        return view($view, compact('task', 'meeting', 'backUrl', 'isClassEnded', 'savedAnswers', 'existingSubmission'));
     }
 
     /**
@@ -301,7 +338,30 @@ class IeltsWritingController extends Controller
         $user = Auth::user();
         $canManageAiGrading = $user && ($user->isAdmin() || $user->isTeacher());
 
-        return view('assignments.ielts.writing.practice-index', compact('task', 'type', 'items', 'task2Meetings', 'isClassEnded', 'isGeneral', 'canManageAiGrading'));
+        $submissionsByMeeting = [];
+        if (Auth::check()) {
+            $itemsCol = collect($items);
+            $task2Col = collect($task2Meetings);
+            $meetingIds = $itemsCol->pluck('id')->merge($task2Col->pluck('id'))->filter()->unique();
+            $meetingNumbers = $itemsCol->pluck('meeting_number')->merge($task2Col->pluck('meeting_number'))->filter()->unique();
+            $allIds = $meetingIds->merge($meetingNumbers)->unique();
+
+            if ($allIds->isNotEmpty()) {
+                $studentSubmissions = IeltsWritingPracticeSubmission::where('user_id', Auth::id())
+                    ->whereIn('meeting_id', $allIds)
+                    ->whereNotNull('scores')
+                    ->latest('id')
+                    ->get();
+
+                foreach ($studentSubmissions as $sub) {
+                    if (!isset($submissionsByMeeting[$sub->meeting_id])) {
+                        $submissionsByMeeting[$sub->meeting_id] = $sub;
+                    }
+                }
+            }
+        }
+
+        return view('assignments.ielts.writing.practice-index', compact('task', 'type', 'items', 'task2Meetings', 'isClassEnded', 'isGeneral', 'canManageAiGrading', 'submissionsByMeeting'));
     }
 
     /**
@@ -536,6 +596,14 @@ class IeltsWritingController extends Controller
         }
 
         $data['submission_id'] = $submission->id;
+
+        if ($isSuccess && Auth::check() && $meetingId) {
+            \App\Models\IeltsWritingDraft::where('user_id', Auth::id())
+                ->where('meeting_id', $meetingId)
+                ->delete();
+            \Illuminate\Support\Facades\Cache::forget("ielts_writing_draft_" . Auth::id() . "_{$meetingId}");
+            session()->forget('ielts_writing_meeting' . $meetingId . '_user_answers');
+        }
 
         return response()->json($data, $response->getStatusCode());
     }

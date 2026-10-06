@@ -185,30 +185,30 @@
                                         </div>
                                     @elseif($meetingNumber === 11)
                                         <div class="ml-11 sm:ml-13 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <input type="text"
-                                                   name="meeting11_answers[{{ $qNum }}][v2]"
-                                                   class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
-                                                   placeholder="Verb 2 (Past)"
-                                                   value="{{ $draftAnswers[$qNum . '_v2'] ?? '' }}"
-                                                   data-draft-key="{{ $qNum }}_v2"
-                                                   autocomplete="off">
-                                            <input type="text"
-                                                   name="meeting11_answers[{{ $qNum }}][v3]"
-                                                   class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
-                                                   placeholder="Verb 3 (Past Participle)"
-                                                   value="{{ $draftAnswers[$qNum . '_v3'] ?? '' }}"
-                                                   data-draft-key="{{ $qNum }}_v3"
-                                                   autocomplete="off">
+                                            <textarea rows="1"
+                                                      name="meeting11_answers[{{ $qNum }}][v2]"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
+                                                      placeholder="Verb 2 (Past)"
+                                                      data-draft-key="{{ $qNum }}_v2"
+                                                      autocomplete="off">{{ $draftAnswers[$qNum . '_v2'] ?? '' }}</textarea>
+                                            <textarea rows="1"
+                                                      name="meeting11_answers[{{ $qNum }}][v3]"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
+                                                      placeholder="Verb 3 (Past Participle)"
+                                                      data-draft-key="{{ $qNum }}_v3"
+                                                      autocomplete="off">{{ $draftAnswers[$qNum . '_v3'] ?? '' }}</textarea>
                                         </div>
                                     @else
                                         <div class="ml-11 sm:ml-13">
-                                            <input type="text"
-                                                   name="answers[{{ $qNum }}]"
-                                                   class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
-                                                   placeholder="Tulis bahasa Inggrisnya di sini..."
-                                                   value="{{ $draftAnswers[$qNum] ?? '' }}"
-                                                   data-draft-key="{{ $qNum }}"
-                                                   autocomplete="off">
+                                            <textarea rows="1"
+                                                      name="answers[{{ $qNum }}]"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400"
+                                                      placeholder="Tulis bahasa Inggrisnya di sini..."
+                                                      data-draft-key="{{ $qNum }}"
+                                                      autocomplete="off">{{ $draftAnswers[$qNum] ?? '' }}</textarea>
                                         </div>
                                     @endif
                                 </li>
@@ -230,7 +230,7 @@
                                     <p class="text-base leading-relaxed">{!! $paragraphResult['formatted_answer'] !== '' ? $paragraphResult['formatted_answer'] : '<em class="text-gray-400">(tidak dijawab)</em>' !!}</p>
                                     <p class="text-xs text-gray-500 mt-2">Skor: <span class="font-semibold text-gray-700">{{ $paragraphResult['score'] }}/{{ $paragraphResult['max_score'] }}</span> &middot; Kunci: <span class="italic">{{ $paragraphResult['correct_answer'] }}</span></p>
                                 @else
-                                    <textarea name="paragraph_answer" id="grammar-draft-paragraph" rows="4" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400" placeholder="Tulis terjemahan paragraf dalam bahasa Inggris...">{{ $draftParagraphAnswer ?? '' }}</textarea>
+                                    <textarea name="paragraph_answer" id="grammar-draft-paragraph" rows="4" style="field-sizing: content;" class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400" placeholder="Tulis terjemahan paragraf dalam bahasa Inggris...">{{ $draftParagraphAnswer ?? '' }}</textarea>
                                 @endif
                             </div>
                         @endif
@@ -686,6 +686,13 @@
             }
 
             async function syncGrammarDraft() {
+                // "Ulangi Soal Ini" sets this flag before its reset POST navigates
+                // away. Without this guard, the beforeunload listener below (and
+                // any input/blur/interval trigger racing the navigation) calls
+                // this function with the still-stale DOM values and immediately
+                // writes them right back into localStorage/server, undoing the
+                // reset the user just confirmed.
+                if (window.__grammarResetInProgress) return false;
                 const data = collectAnswers();
                 saveToLocalStorage(data);
 
@@ -733,6 +740,7 @@
             }
 
             function queueGrammarDraftSync() {
+                if (window.__grammarResetInProgress) return;
                 const data = collectAnswers();
                 saveToLocalStorage(data);
                 clearTimeout(draftTimer);

@@ -10,6 +10,8 @@ class IeltsReadingPassage extends Model
 
     public function questions()
     {
-        return $this->hasMany(IeltsReadingQuestion::class, 'passage_id');
+        return $this->hasMany(IeltsReadingQuestion::class, 'passage_id')
+            ->orderBy('order')
+            ->orderBy('question_number');
     }
 }

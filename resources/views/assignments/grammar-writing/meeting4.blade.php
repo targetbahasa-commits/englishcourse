@@ -552,13 +552,13 @@
                                         @endif
                                     </div>
                                 </div>
-                                <input type="text"
-                                       name="trans_sent[{{ $idx }}]"
-                                       value="{{ old('trans_sent.'.$idx, $transResults['sentences'][$idx]['user_answer'] ?? ($draftAnswers['trans_sent'][$idx] ?? '')) }}"
-                                       class="w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $stage === 3 ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                <textarea name="trans_sent[{{ $idx }}]"
+                                          rows="1"
+                                          style="field-sizing: content;"
+                                          class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                          placeholder="Translate to English..."
+                                          {{ $stage === 3 ? 'readonly' : '' }}
+                                          autocomplete="off">{{ old('trans_sent.'.$idx, $transResults['sentences'][$idx]['user_answer'] ?? ($draftAnswers['trans_sent'][$idx] ?? '')) }}</textarea>
 
                                 @if($stage === 3 && isset($transResults['sentences'][$idx]))
                                     @php
@@ -701,13 +701,13 @@
                                         @endif
                                     </div>
                                 </div>
-                                <input type="text"
-                                       name="trans_matrix_intro[{{ $idx }}]"
-                                       value="{{ old('trans_matrix_intro.'.$idx, $transResults['matrixIntro'][$idx]['user_answer'] ?? ($draftAnswers['trans_matrix_intro'][$idx] ?? '')) }}"
-                                       class="w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $stage === 3 ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                <textarea name="trans_matrix_intro[{{ $idx }}]"
+                                          rows="1"
+                                          style="field-sizing: content;"
+                                          class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                          placeholder="Translate to English..."
+                                          {{ $stage === 3 ? 'readonly' : '' }}
+                                          autocomplete="off">{{ old('trans_matrix_intro.'.$idx, $transResults['matrixIntro'][$idx]['user_answer'] ?? ($draftAnswers['trans_matrix_intro'][$idx] ?? '')) }}</textarea>
 
                                 @if($stage === 3 && isset($transResults['matrixIntro'][$idx]))
                                     @php
@@ -811,13 +811,13 @@
                                                 @php
                                                     $key = str_replace(' ', '_', strtolower($tenseName)) . '_' . $type;
                                                 @endphp
-                                                <input type="text"
-                                                       name="trans_matrix[{{ $key }}]"
-                                                       value="{{ old('trans_matrix.'.$key, $transResults['matrix'][$tenseName][$type]['user_answer'] ?? ($draftAnswers['trans_matrix'][$key] ?? '')) }}"
-                                                       class="w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                       placeholder="Translate..."
-                                                       {{ $stage === 3 ? 'readonly' : '' }}
-                                                       autocomplete="off">
+                                                <textarea name="trans_matrix[{{ $key }}]"
+                                                          rows="1"
+                                                          style="field-sizing: content;"
+                                                          class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                          placeholder="Translate..."
+                                                          {{ $stage === 3 ? 'readonly' : '' }}
+                                                          autocomplete="off">{{ old('trans_matrix.'.$key, $transResults['matrix'][$tenseName][$type]['user_answer'] ?? ($draftAnswers['trans_matrix'][$key] ?? '')) }}</textarea>
 
                                                 @if($stage === 3 && isset($transResults['matrix'][$tenseName][$type]))
                                                     @php
@@ -926,7 +926,7 @@
         },
 
         checkIfSubmitted() {
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             return !!isReadonly;
         },
 

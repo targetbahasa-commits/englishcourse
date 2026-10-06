@@ -23,9 +23,9 @@ class SubmitStructureMeeting
             }
         }
 
-        $score = $questions->count() > 0 ? ($correctCount / $questions->count()) * 100 : 0;
+        $score = count($questions) > 0 ? ($correctCount / count($questions)) * 100 : 0;
 
-        if ($number === 16 && $questions->count() === 40) {
+        if (count($questions) === 40) {
             $conversion = [
                 40 => 68, 39 => 68, 38 => 68,
                 37 => 65, 36 => 63,
@@ -47,7 +47,7 @@ class SubmitStructureMeeting
         return [
             'score' => $score,
             'correct_count' => $correctCount,
-            'total_questions' => $questions->count(),
+            'total_questions' => count($questions),
             'user_answers' => $userAnswers,
         ];
     }

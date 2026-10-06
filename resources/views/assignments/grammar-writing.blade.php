@@ -25,7 +25,7 @@
         @endif
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-8 pb-24">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div class="relative w-96">
@@ -124,7 +124,7 @@
                     </p>
                 </div>
                 @php
-                    $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($program->classPeriods->first())->id ?? '';
+                    $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? $program?->classPeriods?->first()?->id ?? '';
                     $calendarBatchName = addslashes($program->name ?? 'Assignments');
                 @endphp
                 <div class="flex items-center gap-3">
@@ -372,5 +372,6 @@
     </script>
 
     @include('components.meetings-calendar-modal')
+    <x-meeting-progress-bar :program-slug="$program->slug ?? 'fast-track-grammar-for-writing'" :total-meetings="count($meetings ?? []) ?: 10" />
 </body>
 </html>

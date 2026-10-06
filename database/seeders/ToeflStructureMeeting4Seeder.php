@@ -12,9 +12,16 @@ class ToeflStructureMeeting4Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 4)->firstOrFail();
-        
-        // Clear existing questions for this meeting
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 4],
+            [
+                'title' => 'FANBOYS',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
+        // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
         $questions = [
@@ -75,11 +82,11 @@ class ToeflStructureMeeting4Seeder extends Seeder
             [
                 'question_number' => 7,
                 'question_text' => 'The pituitary gland, ____ the brain, releases hormones to control other glands.',
-                'option_a' => 'found below',
+                'option_a' => 'finds itself below',
                 'option_b' => 'it is found below',
                 'option_c' => 'its foundation below',
-                'option_d' => 'finds itself below',
-                'correct_answer' => 'A',
+                'option_d' => 'found below',
+                'correct_answer' => 'D',
             ],
             [
                 'question_number' => 8,
@@ -93,11 +100,11 @@ class ToeflStructureMeeting4Seeder extends Seeder
             [
                 'question_number' => 9,
                 'question_text' => 'Multinational companies ____ it increasingly important to employ internationally acceptable brand names.',
-                'option_a' => 'finding',
-                'option_b' => 'are finding',
+                'option_a' => 'are finding',
+                'option_b' => 'finding',
                 'option_c' => 'they find',
                 'option_d' => 'they are finding',
-                'correct_answer' => 'B',
+                'correct_answer' => 'A',
             ],
             [
                 'question_number' => 10,
@@ -120,6 +127,7 @@ class ToeflStructureMeeting4Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

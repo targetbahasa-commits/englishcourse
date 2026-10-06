@@ -226,6 +226,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_seen_at' => 'datetime',
+            'email_verification_code_expires_at' => 'datetime',
         ];
     }
 

@@ -38,25 +38,27 @@ class BuildStudentPaymentIndexData
             $programPricingPreview[(string) $program->id] = [];
             
             foreach ($classTypes as $type) {
-                $basePrice = $program->price ?? 0;
-                
-                if ($type === 'private') {
-                    $basePrice = $program->price_private ?? $basePrice;
-                } elseif ($type === 'semi_private') {
-                    $basePrice = $program->price_semi_private ?? $basePrice;
+                $priceField = 'price';
+                if ($type === 'private' && $program->price_private !== null) {
+                    $priceField = 'price_private';
+                } elseif ($type === 'semi_private' && $program->price_semi_private !== null) {
+                    $priceField = 'price_semi_private';
                 }
 
                 if (in_array($user->learning_mode, ['offline', 'both'])) {
                     if ($type === 'private' && !is_null($program->price_private_offline)) {
-                        $basePrice = $program->price_private_offline;
+                        $priceField = 'price_private_offline';
                     } elseif ($type === 'semi_private' && !is_null($program->price_semi_private_offline)) {
-                        $basePrice = $program->price_semi_private_offline;
+                        $priceField = 'price_semi_private_offline';
                     } elseif (!is_null($program->price_offline)) {
-                        $basePrice = $program->price_offline;
+                        $priceField = 'price_offline';
                     }
                 }
-                
-                $baseAmount   = max(0, (int) $basePrice);
+
+                // Per-price inline discount applied first, audience-based
+                // ProgramDiscount rules stack on top - see InitiatePayment for
+                // the matching logic used when the payment is actually created.
+                $baseAmount   = $program->discountedPrice($priceField);
                 $discount     = $this->discountResolver->resolve($user, $program, $baseAmount);
 
                 $programPricingPreview[(string) $program->id][$type] = [

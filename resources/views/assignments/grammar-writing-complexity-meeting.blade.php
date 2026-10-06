@@ -51,7 +51,7 @@
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-800">{{ $trackTitle }}</h2>
                     <p class="text-gray-500 text-sm">Meeting {{ $meetingNumber }} &mdash; {{ $topic }}</p>
                 </div>
-                <x-grammar-meeting-actions :meetingNumber="$meetingNumber ?? $meeting" track="complexity" />
+                <x-grammar-meeting-actions :meetingNumber="$meetingNumber ?? $meeting" :track="$track ?? 'complexity'" :reset-route="$resetRoute ?? null" :back-route="$backRoute ?? null" />
             </div>
 
             @if(!empty($submitted))
@@ -183,27 +183,27 @@
                                             @endphp
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-500 mb-1">Nama Tenses</label>
-                                                <input type="text"
-                                                       name="answers[{{ $i + 1 }}][tense]"
-                                                       class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                       placeholder="mis. Present Perfect Passive"
-                                                       value="{{ $tenseVal }}"
-                                                       data-draft-key="{{ $i + 1 }}"
-                                                       data-draft-subkey="tense"
-                                                       {{ !empty($submitted) ? 'readonly' : '' }}
-                                                       autocomplete="off">
+                                                <textarea rows="1"
+                                                          name="answers[{{ $i + 1 }}][tense]"
+                                                          style="field-sizing: content;"
+                                                          class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                          placeholder="mis. Present Perfect Passive"
+                                                          data-draft-key="{{ $i + 1 }}"
+                                                          data-draft-subkey="tense"
+                                                          {{ !empty($submitted) ? 'readonly' : '' }}
+                                                          autocomplete="off">{{ $tenseVal }}</textarea>
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-500 mb-1">Terjemahan</label>
-                                                <input type="text"
-                                                       name="answers[{{ $i + 1 }}][trans]"
-                                                       class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                       placeholder="Tulis bahasa Inggrisnya di sini..."
-                                                       value="{{ $transVal }}"
-                                                       data-draft-key="{{ $i + 1 }}"
-                                                       data-draft-subkey="trans"
-                                                       {{ !empty($submitted) ? 'readonly' : '' }}
-                                                       autocomplete="off">
+                                                <textarea rows="1"
+                                                          name="answers[{{ $i + 1 }}][trans]"
+                                                          style="field-sizing: content;"
+                                                          class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                          placeholder="Tulis bahasa Inggrisnya di sini..."
+                                                          data-draft-key="{{ $i + 1 }}"
+                                                          data-draft-subkey="trans"
+                                                          {{ !empty($submitted) ? 'readonly' : '' }}
+                                                          autocomplete="off">{{ $transVal }}</textarea>
                                             </div>
 
                                             @if(!empty($submitted) && $itemResult)
@@ -223,14 +223,14 @@
                                                 </div>
                                             @endif
                                         @else
-                                            <input type="text"
-                                                   name="answers[{{ $i + 1 }}]"
-                                                   class="grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   placeholder="Tulis bahasa Inggrisnya di sini..."
-                                                   value="{{ $userAnswers[$i + 1] ?? ($draftAnswers[$i + 1] ?? '') }}"
-                                                   data-draft-key="{{ $i + 1 }}"
-                                                   {{ !empty($submitted) ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea rows="1"
+                                                      name="answers[{{ $i + 1 }}]"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      placeholder="Tulis bahasa Inggrisnya di sini..."
+                                                      data-draft-key="{{ $i + 1 }}"
+                                                      {{ !empty($submitted) ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ $userAnswers[$i + 1] ?? ($draftAnswers[$i + 1] ?? '') }}</textarea>
 
                                             @if(!empty($submitted) && $itemResult)
                                                 <div class="mt-2 text-xs">
@@ -320,7 +320,8 @@
                                         <textarea
                                             name="userParagraphAnswer"
                                             rows="7"
-                                            class="grammar-draft-input w-full px-3.5 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 leading-relaxed {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                            style="field-sizing: content;"
+                                            class="auto-expand-answer resize-none overflow-hidden grammar-draft-input w-full px-3.5 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 leading-relaxed {{ !empty($submitted) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                             placeholder="Tulis terjemahan paragraf lengkap di sini..."
                                             data-draft-key="paragraph_answer"
                                             {{ !empty($submitted) ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer ?? ($draftParagraph ?? '')) }}</textarea>
@@ -548,6 +549,13 @@
             }
 
             async function syncGrammarDraft() {
+                // "Ulangi Soal Ini" sets this flag before its reset POST navigates
+                // away. Without this guard, the beforeunload listener below (and
+                // any input/blur/interval trigger racing the navigation) calls
+                // this function with the still-stale DOM values and immediately
+                // writes them right back into localStorage/server, undoing the
+                // reset the user just confirmed.
+                if (window.__grammarResetInProgress) return false;
                 const answers = collectAnswers();
                 saveToLocalStorage(answers);
 
@@ -589,6 +597,7 @@
             }
 
             function queueGrammarDraftSync() {
+                if (window.__grammarResetInProgress) return;
                 const answers = collectAnswers();
                 saveToLocalStorage(answers);
                 clearTimeout(draftTimer);

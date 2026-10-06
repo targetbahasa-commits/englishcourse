@@ -48,42 +48,42 @@
                 $palettes = [
                     [
                         'gradient' => 'linear-gradient(135deg, #22c55e 0%, #0f766e 100%)',
-                        'badge' => 'bg-white border-emerald-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-white text-emerald-600',
                         'body' => 'bg-white',
                         'button' => 'bg-emerald-200 text-emerald-800',
                     ],
                     [
                         'gradient' => 'linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%)',
-                        'badge' => 'bg-white border-indigo-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-white text-blue-600',
                         'body' => 'bg-white',
                         'button' => 'bg-blue-200 text-blue-800',
                     ],
                     [
                         'gradient' => 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
-                        'badge' => 'bg-white border-orange-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-white text-orange-600',
                         'body' => 'bg-white',
                         'button' => 'bg-orange-200 text-orange-800',
                     ],
                     [
                         'gradient' => 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-                        'badge' => 'bg-fuchsia-100/25 border-fuchsia-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-fuchsia-50 text-fuchsia-600',
                         'body' => 'bg-fuchsia-50/40',
                         'button' => 'bg-fuchsia-200 text-fuchsia-800',
                     ],
                     [
                         'gradient' => 'linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%)',
-                        'badge' => 'bg-white border-cyan-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-white text-cyan-600',
                         'body' => 'bg-white',
                         'button' => 'bg-cyan-200 text-cyan-800',
                     ],
                     [
                         'gradient' => 'linear-gradient(135deg, #eab308 0%, #f97316 100%)',
-                        'badge' => 'bg-white border-yellow-100/40 text-white',
+                        'badge' => 'bg-white/20 border-white/30 text-white',
                         'icon' => 'bg-white text-yellow-600',
                         'body' => 'bg-white',
                         'button' => 'bg-yellow-200 text-yellow-800',
@@ -106,12 +106,23 @@
                                 ? route('assignments.toefl-itp.structure.meeting', $pkg['meeting_number'])
                                 : '#';
                             $questionCount = (int) ($pkg['question_count'] ?? 0);
+                            $hasScore = !empty($pkg['score_data']);
+                            $scoreData = $pkg['score_data'] ?? null;
+                            $scoreValue = $hasScore ? round($scoreData['score']) : null;
                         @endphp
                         <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
                             <div style="background: {{ $palette['gradient'] }}" class="p-6 relative">
-                                <span class="absolute top-4 right-4 px-3 py-1 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border {{ $palette['badge'] }}">
-                                    {{ $isAvailable ? 'PRACTICE' : 'COMING SOON' }}
-                                </span>
+                                <div class="absolute top-4 right-4 flex items-center gap-2">
+                                    @if($hasScore)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white text-emerald-700 shadow-md border border-white/80" title="Skor tersimpan: {{ $scoreValue }} ({{ $scoreData['correct_count'] ?? '?' }}/{{ $scoreData['total_questions'] ?? $questionCount }} Benar)">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>Skor: {{ $scoreValue }}</span>
+                                        </span>
+                                    @endif
+                                    <span class="px-3 py-1 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border {{ $palette['badge'] }}">
+                                        {{ $isAvailable ? 'PRACTICE' : 'COMING SOON' }}
+                                    </span>
+                                </div>
 
                                 <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md mb-4 {{ $palette['icon'] }}">
                                     <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,12 +139,43 @@
                             </div>
 
                             <div class="p-6 flex flex-col flex-1 {{ $palette['body'] }} justify-end">
+                                @if($hasScore)
+                                    <div class="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-sm shrink-0">
+                                                <svg class="w-5 h-5 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="text-xs font-extrabold text-emerald-950">Sudah Dikerjakan</div>
+                                                @if(isset($scoreData['correct_count'], $scoreData['total_questions']))
+                                                    <div class="text-[11px] font-semibold text-emerald-700">
+                                                        {{ $scoreData['correct_count'] }}/{{ $scoreData['total_questions'] }} Soal Benar ({{ round(($scoreData['correct_count'] / max(1, $scoreData['total_questions'])) * 100) }}%)
+                                                    </div>
+                                                @else
+                                                    <div class="text-[11px] font-medium text-emerald-600">Hasil tersimpan</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xl font-black text-emerald-700 leading-none">{{ $scoreValue }}</div>
+                                            <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mt-0.5">Nilai</div>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 @if($isAvailable)
-                                    <a href="{{ $meetingLink }}"
-                                       class="block w-full py-3 text-center rounded-xl font-bold shadow bg-red-500 text-white hover:bg-red-600 transition">
-                                        Start Practice ->
-                                    </a>
+                                    @if($hasScore)
+                                        <a href="{{ $meetingLink }}"
+                                           class="block w-full py-3 text-center rounded-xl font-bold shadow bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            <span>Lihat Hasil / Ulangi -></span>
+                                        </a>
+                                    @else
+                                        <a href="{{ $meetingLink }}"
+                                           class="block w-full py-3 text-center rounded-xl font-bold shadow bg-red-500 text-white hover:bg-red-600 transition">
+                                            Start Practice ->
+                                        </a>
+                                    @endif
                                 @else
                                     <button type="button"
                                        disabled

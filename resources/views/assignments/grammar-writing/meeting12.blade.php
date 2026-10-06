@@ -14,7 +14,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF] p-8">
+<body class="font-sans antialiased bg-[#F3F4FF] p-4 sm:p-6 lg:p-8">
     @include('components.impersonation-banner')
     @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
     <div class="w-full max-w-[1920px] mx-auto flex flex-col min-h-screen">
@@ -34,12 +34,30 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting7.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting7.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm" x-data="{ mobileTab: 'soal' }">
             @csrf
 
+            <!-- Mobile View Switcher (< lg) -->
+            <div class="flex lg:hidden mb-4 p-1.5 bg-white rounded-2xl border border-cyan-200 shadow-sm sticky top-3 z-30">
+                <button type="button" @click="mobileTab = 'soal'"
+                        :class="mobileTab === 'soal' ? 'bg-cyan-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Soal Latihan ({{ count($questions) }})</span>
+                </button>
+                <button type="button" @click="mobileTab = 'materi'"
+                        :class="mobileTab === 'materi' ? 'bg-cyan-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Materi &amp; Rumus</span>
+                </button>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
-                <!-- Left Column: Tips & Cheat Sheet (Sticky) -->
-                <div class="lg:col-span-5 sticky top-6 self-start max-h-[calc(100vh-2rem)] overflow-y-auto pr-2">
+                <!-- Left Column: Tips & Cheat Sheet (Sticky on Desktop, Tab on Mobile) -->
+                <div id="materi-sticky-panel"
+                     class="lg:col-span-5 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto pr-0 lg:pr-2"
+                     :class="mobileTab === 'materi' ? 'block' : 'hidden lg:block'">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-6">
                         <!-- 1. FANBOYS (Coordinating Conjunctions) -->
                         <div>
@@ -266,8 +284,8 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Exercise -->
-                <div class="lg:col-span-7">
+                <!-- Right Column: Exercise (Always on Desktop, Tab on Mobile) -->
+                <div class="lg:col-span-7" :class="mobileTab === 'soal' ? 'block' : 'hidden lg:block'">
                     <div class="bg-white rounded-3xl shadow-sm border border-cyan-100 overflow-visible mb-6">
                         <div class="bg-gradient-to-r from-cyan-50 via-sky-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-cyan-100">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -412,13 +430,13 @@
                                         </div>
 
                                         <div class="ml-11 sm:ml-13">
-                                            <input type="text"
+                                            <textarea rows="1"
                                                    name="userAnswers[{{ $idx }}]"
-                                                   value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                   style="field-sizing: content;"
+                                                   class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                                    placeholder="Translate to English..."
                                                    {{ $submitted ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                                   autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
 
                                             @if($submitted)
                                                 @if($results[$idx]['score'] == 10)
@@ -496,7 +514,8 @@
                                 <textarea
                                     name="userParagraphAnswer"
                                     rows="10"
-                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                    style="field-sizing: content;"
+                                    class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                     placeholder="Tulis terjemahan paragraf di sini..."
                                     {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                             </div>
@@ -555,6 +574,24 @@
         .word-wrong { color: #ef4444; text-decoration: line-through; }
         .word-missing { color: #3b82f6; font-weight: bold; }
         .word-extra { color: #f59e0b; text-decoration: line-through; }
+
+        /* lg:top-6, lg:max-h-[calc(100vh-2rem)] and lg:self-start aren't in the
+           compiled Tailwind bundle on this deploy (the utility combo was never
+           used elsewhere, so it was never generated) - lg:sticky and
+           lg:overflow-y-auto DO exist and work, but without a top offset or a
+           max-height, sticky has nothing to stick to and overflow-y has no
+           constrained height to scroll within, so the left panel just grows to
+           full content height instead of staying pinned with its own scrollbar.
+           Plain CSS here matches Tailwind's own lg breakpoint (min-width: 1024px)
+           exactly, so it stays in sync with the lg:sticky / lg:block toggling
+           that already works. */
+        @media (min-width: 1024px) {
+            #materi-sticky-panel {
+                top: 1.5rem;
+                align-self: start;
+                max-height: calc(100vh - 2rem);
+            }
+        }
     </style>
 
     <!-- Auto-Save Script -->
@@ -619,7 +656,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             
             return !!isReadonly;
         },

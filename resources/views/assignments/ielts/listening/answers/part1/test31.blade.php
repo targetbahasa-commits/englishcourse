@@ -1,48 +1,45 @@
-<div class="p-4 bg-white border border-emerald-200 rounded-xl mb-6">
-    <h3 class="font-bold text-emerald-800 text-lg mb-3 flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Kunci Jawaban Test 31 (Part 1)
-    </h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 1</span>
-            <span class="text-sm font-semibold text-gray-800">R242</span>
+<div class="space-y-3">
+    <h5 class="font-bold text-gray-800 text-lg mb-4">Kunci Jawaban Section 1 (Test 31)</h5>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 1</span>
+            <span class="font-bold text-blue-600">every other week</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 2</span>
-            <span class="text-sm font-semibold text-gray-800">89.99</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 2</span>
+            <span class="font-bold text-blue-600">Peter Wisrough</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 3</span>
-            <span class="text-sm font-semibold text-gray-800">City Centre/ City Center</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 3</span>
+            <span class="font-bold text-blue-600">168 Bridge Road</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 4</span>
-            <span class="text-sm font-semibold text-gray-800">steam escaping/ escaping steam</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 4</span>
+            <span class="font-bold text-blue-600">helpline@blackcat.com</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 5</span>
-            <span class="text-sm font-semibold text-gray-800">84 Park Rd/Road</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 5</span>
+            <span class="font-bold text-blue-600">BS97PU</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 6</span>
-            <span class="text-sm font-semibold text-gray-800">B0241DJ</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 6</span>
+            <span class="font-bold text-blue-600">yellow</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 7</span>
-            <span class="text-sm font-semibold text-gray-800">credit card</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 7</span>
+            <span class="font-bold text-blue-600">Central Park</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 8</span>
-            <span class="text-sm font-semibold text-gray-800">April 2008</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 8</span>
+            <span class="font-bold text-blue-600">metal</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 9</span>
-            <span class="text-sm font-semibold text-gray-800">refund</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 9</span>
+            <span class="font-bold text-blue-600">magazines</span>
         </div>
-        <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
-            <span class="text-xs font-bold text-emerald-600 block">Soal 10</span>
-            <span class="text-sm font-semibold text-gray-800">once a month</span>
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-bold text-gray-700">Soal 10</span>
+            <span class="font-bold text-blue-600">Savvy</span>
         </div>
     </div>
 </div>

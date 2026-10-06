@@ -9,16 +9,16 @@
 
 <!-- List of Headings/Features Box (Top) -->
 @if($usesMatchingOptionsLayout && !empty($question['options']) && in_array($question['type'], ['matching_headings', 'matching_features']))
-<div class="mb-8 border-2 border-gray-300 p-4 rounded-none bg-white">
-    <h4 class="text-center font-bold text-gray-800 mb-4 text-lg">{{ $question['box_title'] ?? ($question['type'] === 'matching_features' ? 'List of Categories' : 'List of Headings') }}</h4>
-    <ul class="space-y-2">
+<div class="mb-8 border-2 border-gray-800 p-6 bg-white shadow-sm">
+    <h4 class="text-center font-bold text-gray-900 mb-5 text-xl font-serif tracking-wide">{{ $question['box_title'] ?? ($question['type'] === 'matching_features' ? 'List of Categories' : 'List of Headings') }}</h4>
+    <ul class="space-y-2.5 max-w-xl mx-auto">
         @foreach($options as $optKey => $optText)
             @php
                 $cleanOptText = preg_replace('/^\s*' . preg_quote($optKey, '/') . '\s*[\-\–\.\:]\s*/ui', '', $optText);
             @endphp
-            <li class="text-gray-700 text-sm md:text-base leading-relaxed pl-8 -indent-8 flex gap-2">
-                <span class="font-bold min-w-[25px] inline-block">{{ $optKey }}</span>
-                <span>{{ $cleanOptText }}</span>
+            <li class="text-gray-800 text-base md:text-lg leading-relaxed flex items-start gap-4">
+                <span class="font-bold min-w-[32px] text-right font-serif text-gray-900 select-none">{{ $optKey }}</span>
+                <span class="flex-1">{{ $cleanOptText }}</span>
             </li>
         @endforeach
     </ul>

@@ -24,7 +24,7 @@ class EloquentIeltsReadingRepository implements IeltsReadingRepository
     {
         return IeltsReadingPassage::where('material_id', $materialId)
             ->with(['questions' => function ($query) {
-                $query->orderBy('order');
+                $query->orderBy('order')->orderBy('question_number');
             }])
             ->orderBy('order')
             ->get()->all();

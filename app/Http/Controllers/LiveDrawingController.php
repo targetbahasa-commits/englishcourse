@@ -119,6 +119,33 @@ class LiveDrawingController extends Controller
     }
 
     /**
+     * Whether $user (a student) has been individually granted permission to
+     * DRAW (not just watch) into $broadcasterId's active broadcast - see
+     * presenceDrawPermissions()/updateDrawPermissions(). A student must
+     * already be a batch target (watching) to ever be a draw-permitted one;
+     * the permission list here is never consulted on its own. Also requires
+     * the broadcast to still be live (same presence key fetch() checks) so
+     * a permission granted in an earlier broadcast can never silently carry
+     * over into a brand new one just because the cache entry hasn't expired
+     * yet (draw_permissions has no TTL tied to the broadcast's own
+     * start/stop, only its own 3600s cap - see presenceDrawPermissions()).
+     */
+    private function isAllowedToDrawInBroadcast($user, int $broadcasterId): bool
+    {
+        if (! $this->isBatchTarget($user, $broadcasterId)) {
+            return false;
+        }
+
+        if (! Cache::has("live_drawing_broadcast_presence_{$broadcasterId}")) {
+            return false;
+        }
+
+        $allowed = Cache::get("live_drawing_draw_permissions_{$broadcasterId}", []);
+
+        return in_array((int) $user->id, array_map('intval', (array) $allowed), true);
+    }
+
+    /**
      * Cache key name for the small registry of staff user ids currently
      * broadcasting (see presence()/myBatchStatus()) - a student has no
      * other way to discover which broadcaster(s), if any, are active.
@@ -175,7 +202,16 @@ class LiveDrawingController extends Controller
         $isOwner = (int) $user->id === (int) $targetUserId;
         $isStaff = in_array($user->role, self::STAFF_ROLES);
 
-        if (! $isOwner && ! $isStaff) {
+        // A student explicitly granted draw permission for the room they're
+        // currently watching (see isAllowedToDrawInBroadcast()) may write
+        // into it too - this is the ONLY way a non-owner, non-staff user
+        // ever passes this check. It still resolves to the 'student' layer
+        // below exactly like drawing on their own room does (layer is
+        // inferred from role, not ownership), so it can never touch the
+        // staff layer.
+        $canDrawViaBroadcast = ! $isOwner && ! $isStaff && $this->isAllowedToDrawInBroadcast($user, (int) $targetUserId);
+
+        if (! $isOwner && ! $isStaff && ! $canDrawViaBroadcast) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. You do not have permission to draw in this room.',
@@ -530,6 +566,16 @@ class LiveDrawingController extends Controller
                     Cache::forget($broadcastKey);
                     Cache::forget("live_drawing_broadcast_ruled_{$targetUserId}");
                     Cache::forget("live_drawing_broadcast_zoom_{$targetUserId}");
+                    // Draw permissions are scoped to THIS broadcast session -
+                    // without clearing them here, a student granted draw
+                    // access now would keep it into a brand new broadcast
+                    // started later (draw_permissions' own TTL is 3600s,
+                    // unrelated to the broadcast's actual lifetime), even if
+                    // the teacher never intended that. isAllowedToDrawInBroadcast()
+                    // already checks broadcast_presence separately, so this
+                    // isn't strictly required for correctness right now, but
+                    // keeps the two states from silently drifting apart.
+                    Cache::forget("live_drawing_draw_permissions_{$targetUserId}");
                 }
 
                 // Additionally needs to be discoverable by students who have
@@ -623,6 +669,51 @@ class LiveDrawingController extends Controller
     }
 
     /**
+     * POST /api/live-drawing/batch/draw-permissions
+     *
+     * Sets which currently-watching students may ALSO draw (not just watch)
+     * into the CALLER's OWN broadcast room - see
+     * isAllowedToDrawInBroadcast()/sync(). Always a full replace of the
+     * list, same convention as presenceTargets(). Being in this list alone
+     * is never enough - isAllowedToDrawInBroadcast() still requires the
+     * student to also be a current batch target (presenceTargets()) and the
+     * broadcast to still be live, so this endpoint can't be used to grant
+     * draw access to a student who isn't even watching.
+     *
+     * Request body (JSON): { studentIds: int[] }
+     */
+    public function presenceDrawPermissions(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
+        }
+
+        if (! in_array($user->role, self::STAFF_ROLES)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only staff can set whiteboard draw permissions.',
+            ], 403);
+        }
+
+        $studentIds = $request->input('studentIds', []);
+
+        if (! is_array($studentIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'studentIds must be an array.',
+            ], 422);
+        }
+
+        $stored = array_values(array_map('intval', $studentIds));
+
+        Cache::put("live_drawing_draw_permissions_{$user->id}", $stored, 3600);
+
+        return response()->json(['success' => true, 'studentIds' => $stored]);
+    }
+
+    /**
      * GET /api/live-drawing/batch/my-status
      *
      * Lets a student's own page (already polling its own individual room)
@@ -665,6 +756,11 @@ class LiveDrawingController extends Controller
                     // along here instead.
                     'ruledLines' => (bool) Cache::get("live_drawing_broadcast_ruled_{$broadcasterId}", false),
                     'zoomLevel'  => (float) Cache::get("live_drawing_broadcast_zoom_{$broadcasterId}", 1),
+                    // Whether the teacher has additionally granted THIS
+                    // student permission to draw (not just watch) - see
+                    // isAllowedToDrawInBroadcast()/checkBatchStatus(), which
+                    // uses this to decide whether to unlock readOnlyMode.
+                    'canDraw'    => $this->isAllowedToDrawInBroadcast($user, $broadcasterId),
                 ]);
             }
         }

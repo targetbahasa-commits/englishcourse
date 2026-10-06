@@ -14,13 +14,19 @@ class ClassMeeting extends Model
         'start_time',
         'end_time',
         'topic',
-        'meeting_link'
+        'meeting_link',
+        'recording_url',
+        'recording_urls',
+        'recording_password',
+        'recording_passwords',
     ];
 
     protected $casts = [
         'meeting_date' => 'date',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'recording_urls' => 'array',
+        'recording_passwords' => 'array',
     ];
 
     public function classPeriod()

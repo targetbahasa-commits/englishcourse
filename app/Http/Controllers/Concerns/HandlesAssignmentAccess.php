@@ -74,6 +74,30 @@ trait HandlesAssignmentAccess
                 }
             }
 
+            if ($user && $user->isStudent() && $requiredProgramSlug === 'toefl-itp' && $routeName && !preg_match('/^assignments\.[^.]+$/', $routeName)) {
+                $rawSlugs = [];
+                if ($user->program && $user->class_period_id) $rawSlugs[] = $user->program->slug;
+                $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->whereIn('status', ['active', 'completed'])->with('program')->get();
+                foreach ($enrollments as $enr) { if ($enr->program) $rawSlugs[] = $enr->program->slug; }
+
+                $hasFullAccess = in_array('toefl-itp', $rawSlugs) || $this->hasTemporaryFullAssignmentAccess($user->email);
+
+                if (!$hasFullAccess) {
+                    // Bare section route (e.g. assignments.toefl-itp.structure) is the
+                    // materi/lesson page itself, not just a sub-route - checked separately
+                    // from the ".section." substring match since it has no trailing dot.
+                    if (($routeName === 'assignments.toefl-itp.listening' || str_contains($routeName, '.listening.')) && !in_array('toefl-itp-listening', $rawSlugs)) {
+                        return redirect()->route('assignments.toefl-itp')->with('error', 'Anda tidak memiliki akses ke kelas TOEFL ITP Listening.');
+                    }
+                    if (($routeName === 'assignments.toefl-itp.structure' || str_contains($routeName, '.structure.')) && !in_array('toefl-itp-structure', $rawSlugs)) {
+                        return redirect()->route('assignments.toefl-itp')->with('error', 'Anda tidak memiliki akses ke kelas TOEFL ITP Structure.');
+                    }
+                    if (($routeName === 'assignments.toefl-itp.reading' || str_contains($routeName, '.reading.')) && !in_array('toefl-itp-reading', $rawSlugs)) {
+                        return redirect()->route('assignments.toefl-itp')->with('error', 'Anda tidak memiliki akses ke kelas TOEFL ITP Reading.');
+                    }
+                }
+            }
+
             $this->maybeRecordAttendanceForAssignmentAccess($user, $requiredProgramSlug, $request);
 
             return $next($request);
@@ -137,6 +161,12 @@ trait HandlesAssignmentAccess
      * comparisons against class_meetings.start_time/end_time rather than
      * touching the model's `datetime` cast on those columns, which would
      * otherwise misinterpret a plain TIME value.
+     *
+     * Falls back to a same-day match with no time comparison at all when
+     * no timed ClassMeeting is found - see the fallback query below for
+     * why: relying solely on start_time/end_time being set means a
+     * meeting nobody has gotten around to entering "Jam Kelas" for can
+     * never auto-record attendance, silently, with no error anywhere.
      */
     protected function resolveCurrentClassMeetingForAttendance($user, string $requiredProgramSlug): ?\App\Models\ClassMeeting
     {
@@ -176,12 +206,32 @@ trait HandlesAssignmentAccess
         $windowStart = $now->copy()->subMinutes(self::ATTENDANCE_GRACE_MINUTES)->toTimeString();
         $windowEnd = $now->copy()->addMinutes(self::ATTENDANCE_GRACE_MINUTES)->toTimeString();
 
-        return \App\Models\ClassMeeting::whereIn('class_period_id', $classPeriodIds)
+        $timedMatch = \App\Models\ClassMeeting::whereIn('class_period_id', $classPeriodIds)
             ->where('meeting_date', $now->toDateString())
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->where('start_time', '<=', $windowEnd)
             ->where('end_time', '>=', $windowStart)
+            ->first();
+
+        if ($timedMatch) {
+            return $timedMatch;
+        }
+
+        // Fallback for a meeting whose "Jam Kelas" (start_time/end_time)
+        // was never filled in by the teacher/admin - without this, a
+        // ClassMeeting with a real, correct meeting_date but no time set
+        // can NEVER match the time-window query above, so a student who
+        // genuinely opens their assignment during today's real class gets
+        // silently un-recorded with no indication anything is wrong. Being
+        // scheduled for today at all is treated as "class is happening" in
+        // that case, trading the 15-minute precision for not losing
+        // attendance entirely.
+        return \App\Models\ClassMeeting::whereIn('class_period_id', $classPeriodIds)
+            ->where('meeting_date', $now->toDateString())
+            ->where(function ($query) {
+                $query->whereNull('start_time')->orWhereNull('end_time');
+            })
             ->first();
     }
 
@@ -205,6 +255,10 @@ trait HandlesAssignmentAccess
 
         if ($request->routeIs('assignments.grammar-writing*')) {
             return 'grammar-for-writing';
+        }
+
+        if ($request->routeIs('assignments.speaking*')) {
+            return 'speaking';
         }
 
         return null;
@@ -309,6 +363,10 @@ trait HandlesAssignmentAccess
             'introductory-speaking',
             'intermediate-speaking',
             'advanced-speaking',
+            'proficiency-speaking',
+            'proficient-speaking',
+            'super-speaking',
+            'speaking',
             'grammar-for-speaking'
         ], true)) {
             return 'speaking';
@@ -316,6 +374,10 @@ trait HandlesAssignmentAccess
 
         if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-writing', 'ielts-academic-speaking', 'ielts-academic-full-package', 'ielts-academic-all-sections'], true)) {
             return 'ielts-academic';
+        }
+
+        if (in_array($slug, ['toefl-itp-structure', 'toefl-itp-reading', 'toefl-itp-listening'], true)) {
+            return 'toefl-itp';
         }
 
         if (str_starts_with((string) $slug, 'cambridge-')) {

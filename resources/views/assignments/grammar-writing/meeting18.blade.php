@@ -131,13 +131,13 @@
                             </div>
                             
                             <div class="mb-2">
-                                <input type="text"
+                                <textarea rows="1"
                                        name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-lime-500 focus:ring-1 focus:ring-lime-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                       style="field-sizing: content;"
+                                       class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-lime-500 focus:ring-1 focus:ring-lime-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                        placeholder="Translate to English..."
                                        {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                       autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results[$idx]['score'] == 10)
@@ -221,13 +221,13 @@
                             </div>
                             
                             <div class="mb-2">
-                                <input type="text"
+                                <textarea rows="1"
                                        name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                       style="field-sizing: content;"
+                                       class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                        placeholder="Translate to English..."
                                        {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                       autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results[$idx]['score'] == 10)
@@ -311,13 +311,13 @@
                             </div>
                             
                             <div class="mb-2">
-                                <input type="text"
+                                <textarea rows="1"
                                        name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                       style="field-sizing: content;"
+                                       class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                        placeholder="Translate to English..."
                                        {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                       autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results[$idx]['score'] == 10)
@@ -401,13 +401,13 @@
                             </div>
                             
                             <div class="mb-2">
-                                <input type="text"
+                                <textarea rows="1"
                                        name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                       style="field-sizing: content;"
+                                       class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                        placeholder="Translate to English..."
                                        {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                       autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results[$idx]['score'] == 10)
@@ -506,7 +506,8 @@
                         <textarea
                             name="userParagraphAnswer"
                             rows="6"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-lime-500 focus:ring-1 focus:ring-lime-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-lime-500 focus:ring-1 focus:ring-lime-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan paragraf di sini..."
                             {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                     </div>
@@ -636,7 +637,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             
             return !!isReadonly;
         },

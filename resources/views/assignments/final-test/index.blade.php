@@ -699,6 +699,39 @@
                     @endforeach
                 </section>
 
+                @if(isset($finalTestResults) && count($finalTestResults) > 0)
+                <section class="mt-10">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Hasil Final Test Saya</h2>
+                            <p class="mt-1 text-sm text-slate-500">Lihat kembali hasil evaluasi final test yang sudah Anda kerjakan.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        @foreach($finalTestResults as $result)
+                        <a href="{{ route('final-test.results.show', $result) }}" class="flex flex-col justify-between rounded-[1.5rem] border border-slate-100 bg-white p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition">
+                            <div class="mb-4">
+                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600 mb-4">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900">{{ $result->test_label ?: str($result->test_type)->replace('_', ' ')->title() }}</h3>
+                                <p class="text-sm text-slate-500 mt-1">Tanggal: {{ optional($result->completed_at ?? $result->created_at)->format('d M Y') }}</p>
+                                <div class="mt-3 flex items-center gap-2">
+                                    <span class="text-xs font-semibold text-slate-500">Nilai:</span>
+                                    <span class="inline-flex items-center rounded-lg bg-white px-2.5 py-1 text-sm font-bold text-emerald-700">{{ $result->score + 0 }}</span>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-slate-100 mt-auto">
+                                <span class="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm">
+                                    Lihat Hasil Evaluasi
+                                </span>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
                 @if(isset($offlineTestResults) && count($offlineTestResults) > 0)
                 <section class="mt-10">
                     <div class="mb-6 flex items-center justify-between">

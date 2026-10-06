@@ -12,6 +12,7 @@ class Enrollment extends Model
         'user_id',
         'program_id',
         'class_period_id',
+        'teacher_id',
         'class_period_booked_at',
         'enrolled_at',
         'status'
@@ -30,6 +31,11 @@ class Enrollment extends Model
     public function classPeriod(): BelongsTo
     {
         return $this->belongsTo(ClassPeriod::class);
+    }
+
+    public function teacher(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 
     public function program(): BelongsTo

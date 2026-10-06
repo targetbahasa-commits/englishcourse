@@ -21,4 +21,9 @@ class ToeflReadingQuestion extends Model
     protected $casts = [
         'keywords' => 'array',
     ];
+
+    public function passage()
+    {
+        return $this->belongsTo(ToeflReadingPassage::class, 'passage_id');
+    }
 }

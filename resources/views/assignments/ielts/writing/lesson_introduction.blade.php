@@ -136,7 +136,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan mengapa keterampilan praktis lebih penting (atau sebaliknya). Gunakan struktur 4 kalimat.</p>
-                    <textarea x-model="answers.ex1" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 2 -->
@@ -148,7 +148,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang mendukung pandangan bahwa teknologi membuat hidup lebih mudah.</p>
-                    <textarea x-model="answers.ex2" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex2" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 3 -->
@@ -160,7 +160,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan peran individu dalam menjaga lingkungan.</p>
-                    <textarea x-model="answers.ex3" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 4 -->
@@ -172,7 +172,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis paragraf yang menjelaskan sisi negatif hidup sendirian di kota besar.</p>
-                    <textarea x-model="answers.ex4" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex4" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 5 -->
@@ -184,7 +184,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan dampak negatif media sosial terhadap remaja.</p>
-                    <textarea x-model="answers.ex5" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex5" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 6 -->
@@ -196,7 +196,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf mendukung pentingnya pelajaran keuangan untuk anak-anak.</p>
-                    <textarea x-model="answers.ex6" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex6" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 7 -->
@@ -208,7 +208,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan alasan orang lebih suka membuka bisnis sendiri.</p>
-                    <textarea x-model="answers.ex7" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex7" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 8 -->
@@ -220,7 +220,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis paragraf yang menjelaskan dampak negatif globalisasi terhadap budaya lokal.</p>
-                    <textarea x-model="answers.ex8" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex8" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 9 -->
@@ -232,7 +232,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan keuntungan belajar bahasa asing sejak SD.</p>
-                    <textarea x-model="answers.ex9" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex9" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
 
                 <!-- Latihan 10 -->
@@ -244,7 +244,7 @@
                     </div>
                     <p class="text-sm font-semibold text-orange-600 mb-2">Tugas:</p>
                     <p class="text-sm text-gray-600 mb-3">Tulis satu paragraf yang menjelaskan bagaimana transportasi umum bisa mengurangi kemacetan.</p>
-                    <textarea x-model="answers.ex10" class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
+                    <textarea x-model="answers.ex10" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="4" placeholder="Write your paragraph here..."></textarea>
                 </div>
             </div>
         </div>

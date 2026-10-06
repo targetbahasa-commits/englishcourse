@@ -301,14 +301,24 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
                                         <div class="flex items-center gap-1" x-data="{ copied: false }">
-                                            <a href="{{ $booking->registration_link }}" target="_blank" rel="noopener"
-                                               class="inline-flex items-center px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-md font-semibold text-xs text-emerald-700 hover:bg-emerald-100 transition ease-in-out duration-150 shadow-sm"
-                                               title="Buka halaman registrasi, data booking sudah terisi otomatis">
+                                            <button type="button"
+                                                    x-on:click="$dispatch('open-register-lead', {
+                                                        enrollmentId: {{ $booking->id }},
+                                                        studentName: @js($booking->user->name ?? '-'),
+                                                        studentEmail: @js($booking->user->email ?? '-'),
+                                                        studentPhone: @js($booking->user->phone_number ?? '-'),
+                                                        programId: {{ $booking->program_id ?? 'null' }},
+                                                        programName: @js($booking->program->name ?? '-'),
+                                                        periodId: {{ $booking->class_period_id ?? 'null' }},
+                                                        batchName: @js($booking->classPeriod->name ?? '-'),
+                                                    })"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-md font-semibold text-xs text-emerald-700 hover:bg-emerald-100 transition ease-in-out duration-150 shadow-sm"
+                                                    title="Daftarkan langsung sebagai student dari sini">
                                                 Registrasi
-                                            </a>
+                                            </button>
                                             <button type="button"
                                                     @click="window.copyToClipboard('{{ $booking->registration_link }}').then(() => { copied = true; setTimeout(() => copied = false, 1500); })"
-                                                    class="text-gray-300 hover:text-gray-600 shrink-0" title="Salin link registrasi (kirim via WhatsApp)">
+                                                    class="text-gray-300 hover:text-gray-600 shrink-0" title="Salin link registrasi mandiri (kirim via WhatsApp, siswa yang isi sendiri)">
                                                 <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                                 <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                             </button>
@@ -479,6 +489,199 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </x-modal>
+
+    <!-- Modal: Admin registers a booking lead as a student directly, no public /daftar page involved -->
+    <x-modal name="register-lead" focusable>
+        <div class="p-6"
+             x-data="{
+                step: 'form',
+                saving: false,
+                errorMsg: '',
+                passwordCopied: false,
+                enrollmentId: null,
+                studentName: '',
+                studentEmail: '',
+                studentPhone: '',
+                originalProgramId: null,
+                originalPeriodId: null,
+                selectedProgramId: '',
+                selectedPeriodId: '',
+                paymentChannel: 'bank_transfer',
+                paymentAmount: '',
+                resultPassword: '',
+                resultAmount: null,
+                allPrograms: {{ Js::from($programs->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])->values()) }},
+                allPeriods: {{ Js::from($editablePeriodsJson) }},
+                get periodsForProgram() {
+                    return this.allPeriods.filter(p => p.programId == this.selectedProgramId);
+                },
+                onProgramChange() {
+                    // Switching kelas/program invalidates the previously selected
+                    // batch, since batches belong to exactly one program.
+                    this.selectedPeriodId = (this.selectedProgramId == this.originalProgramId) ? this.originalPeriodId : '';
+                }
+             }"
+             x-on:open-register-lead.window="
+                step = 'form';
+                errorMsg = '';
+                saving = false;
+                enrollmentId = $event.detail.enrollmentId;
+                studentName = $event.detail.studentName;
+                studentEmail = $event.detail.studentEmail;
+                studentPhone = $event.detail.studentPhone;
+                originalProgramId = $event.detail.programId;
+                originalPeriodId = $event.detail.periodId;
+                selectedProgramId = $event.detail.programId;
+                selectedPeriodId = $event.detail.periodId;
+                paymentChannel = 'bank_transfer';
+                paymentAmount = '';
+                $dispatch('open-modal', 'register-lead');
+             "
+             x-on:close="step = 'form'"
+        >
+            <template x-if="step === 'form'">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Daftarkan sebagai Student</h2>
+                    <p class="text-sm text-gray-500 mb-4">Konfirmasi data booking lalu daftarkan langsung di sini - tidak perlu buka halaman registrasi terpisah.</p>
+
+                    <div class="space-y-3 mb-4">
+                        <div>
+                            <x-input-label for="register_name" value="Nama" />
+                            <x-text-input id="register_name" type="text" x-model="studentName" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label for="register_email" value="Email" />
+                            <x-text-input id="register_email" type="email" x-model="studentEmail" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label for="register_phone" value="WhatsApp" />
+                            <x-text-input id="register_phone" type="text" x-model="studentPhone" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label for="register_program_id" value="Kelas (Program)" />
+                            <select id="register_program_id" x-model="selectedProgramId" x-on:change="onProgramChange()" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
+                                <template x-for="program in allPrograms" :key="program.id">
+                                    <option :value="program.id" x-text="program.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="register_class_period_id" value="Batch" />
+                            <select id="register_class_period_id" x-model="selectedPeriodId" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
+                                <option value="" disabled>-- Pilih Batch --</option>
+                                <template x-for="period in periodsForProgram" :key="period.id">
+                                    <option :value="period.id" :disabled="period.isFull && period.id != originalPeriodId" x-text="period.label"></option>
+                                </template>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Hanya menampilkan batch dari kelas/program yang dipilih di atas.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-input-label for="register_payment_channel" value="Metode Pembayaran" />
+                        <select id="register_payment_channel" x-model="paymentChannel" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full">
+                            <option value="bank_transfer">Transfer Bank</option>
+                            <option value="qris">QRIS</option>
+                            <option value="cash">Tunai</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Invoice akan dibuat dan masuk ke Payment Queue untuk diverifikasi, sama seperti pendaftaran mandiri.</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <x-input-label for="register_amount" value="Jumlah Pembayaran (Rp)" />
+                        <x-text-input id="register_amount" type="number" min="0" step="1" x-model="paymentAmount" placeholder="Kosongkan untuk pakai harga program otomatis" class="mt-1 block w-full" />
+                        <p class="text-xs text-gray-500 mt-1">Isi manual kalau harga nego/offline atau harga program belum diatur. Kosongkan untuk pakai harga program apa adanya.</p>
+                    </div>
+
+                    <p x-show="errorMsg" x-cloak class="mt-3 text-sm text-red-600" x-text="errorMsg"></p>
+
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Batal
+                        </button>
+                        <button type="button"
+                                :disabled="saving"
+                                :class="saving ? 'opacity-60 cursor-not-allowed' : ''"
+                                x-on:click="
+                                    saving = true;
+                                    errorMsg = '';
+                                    fetch('{{ url('/admin/bookings') }}/' + enrollmentId + '/register', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                            'Accept': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            payment_channel: paymentChannel,
+                                            name: studentName,
+                                            email: studentEmail,
+                                            phone_number: studentPhone,
+                                            program_id: selectedProgramId,
+                                            class_period_id: selectedPeriodId,
+                                            amount: paymentAmount === '' ? null : paymentAmount,
+                                        }),
+                                    })
+                                    .then(async (r) => ({ ok: r.ok, data: await r.json() }))
+                                    .then(({ ok, data }) => {
+                                        saving = false;
+                                        if (!ok || !data.success) {
+                                            errorMsg = data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Gagal mendaftarkan student. Silakan coba lagi.');
+                                            return;
+                                        }
+                                        resultPassword = data.password;
+                                        resultAmount = data.invoice_amount;
+                                        step = 'success';
+                                    })
+                                    .catch(() => {
+                                        saving = false;
+                                        errorMsg = 'Gagal menghubungi server. Periksa koneksi lalu coba lagi.';
+                                    });
+                                "
+                                class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 focus:bg-emerald-700 active:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <span x-show="!saving">Daftarkan sebagai Student</span>
+                            <span x-show="saving" x-cloak>Mendaftarkan...</span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="step === 'success'">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <h2 class="text-lg font-bold text-gray-900">Berhasil Didaftarkan</h2>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">
+                        <span class="font-semibold" x-text="studentName"></span> sudah menjadi student. Bagikan password sementara ini ke mereka (lewat WhatsApp) supaya bisa login.
+                    </p>
+
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-1.5 mb-4 text-sm">
+                        <div class="flex justify-between gap-4"><span class="text-gray-500 shrink-0">Email Login</span><span class="font-semibold text-gray-800 text-right" x-text="studentEmail"></span></div>
+                        <div class="flex justify-between gap-4 items-center">
+                            <span class="text-gray-500 shrink-0">Password</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-semibold text-gray-800" x-text="resultPassword"></span>
+                                <button type="button"
+                                        @click="window.copyToClipboard(resultPassword).then(() => { passwordCopied = true; setTimeout(() => passwordCopied = false, 1500); })"
+                                        class="text-gray-300 hover:text-gray-600 shrink-0" title="Salin password">
+                                    <svg x-show="!passwordCopied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                    <svg x-show="passwordCopied" x-cloak class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="resultAmount !== null" class="flex justify-between gap-4"><span class="text-gray-500 shrink-0">Jumlah Invoice</span><span class="font-semibold text-gray-800 text-right" x-text="'Rp ' + (resultAmount !== null ? Number(resultAmount).toLocaleString('id-ID') : '')"></span></div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="button" x-on:click="$dispatch('close'); window.location.reload();" class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Selesai
+                        </button>
+                    </div>
+                </div>
+            </template>
         </div>
     </x-modal>
 

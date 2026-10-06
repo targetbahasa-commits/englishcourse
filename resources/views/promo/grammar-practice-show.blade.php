@@ -23,6 +23,20 @@
         body {
             font-family: 'Figtree', sans-serif;
         }
+        textarea.auto-expand-answer {
+            field-sizing: content;
+            height: auto;
+            width: 100%;
+            resize: none;
+            overflow: hidden;
+        }
+        textarea.auto-expand-answer[rows="1"] {
+            min-block-size: 2.75rem;
+        }
+        textarea.auto-expand-answer:not([rows="1"]) {
+            min-block-size: 8lh;
+            min-height: 9rem;
+        }
     </style>
 </head>
 
@@ -178,15 +192,17 @@
                                     <div class="flex-1 min-w-0 relative">
                                         <template x-if="sentence.type === 'paragraph'">
                                             <textarea x-model="sentence.answer" rows="4" :disabled="sentence.submitted"
+                                                style="field-sizing: content;"
                                                 placeholder="Tulis terjemahan paragraf dalam bahasa Inggris..."
-                                                class="w-full p-2.5 sm:p-3.5 pr-9 sm:pr-10 border border-gray-300 rounded-xl text-xs sm:text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-600 leading-relaxed"></textarea>
+                                                class="auto-expand-answer resize-none overflow-hidden w-full p-2.5 sm:p-3.5 pr-9 sm:pr-10 border border-gray-300 rounded-xl text-xs sm:text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-600 leading-relaxed"></textarea>
                                         </template>
                                         <template x-if="sentence.type !== 'paragraph'">
-                                            <input type="text" x-model="sentence.answer"
+                                            <textarea rows="1" x-model="sentence.answer"
+                                                style="field-sizing: content;"
                                                 @keydown.enter.prevent="if(!sentence.submitted) submitSingle(sentence)"
                                                 :disabled="sentence.submitted"
                                                 placeholder="Tulis bahasa Inggrisnya di sini..."
-                                                class="w-full px-3.5 py-2.5 pr-9 sm:pr-10 border border-gray-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-600">
+                                                class="auto-expand-answer resize-none overflow-hidden w-full px-3.5 py-2.5 pr-9 sm:pr-10 border border-gray-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-600"></textarea>
                                         </template>
 
                                         <!-- Embedded Subtle Gray Refresh Button -->
@@ -635,6 +651,32 @@
                 }
             };
         }
+        (function () {
+            const supportsFieldSizing = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('field-sizing', 'content');
+            const resizeEl = function (el) {
+                if (!el || el.tagName !== 'TEXTAREA' || !el.classList.contains('auto-expand-answer')) return;
+                if (supportsFieldSizing) return;
+                el.style.height = 'auto';
+                if (el.scrollHeight > 0) {
+                    el.style.height = el.scrollHeight + 'px';
+                }
+            };
+            const resizeAll = function (root) {
+                (root || document).querySelectorAll('textarea.auto-expand-answer').forEach(resizeEl);
+            };
+            if (!supportsFieldSizing) {
+                document.addEventListener('input', function (e) {
+                    if (e.target && e.target.matches && e.target.matches('textarea.auto-expand-answer')) {
+                        resizeEl(e.target);
+                    }
+                });
+                document.addEventListener('DOMContentLoaded', function () {
+                    resizeAll();
+                    setTimeout(resizeAll, 150);
+                });
+                window.addEventListener('load', function () { resizeAll(); });
+            }
+        })();
     </script>
 </body>
 

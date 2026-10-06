@@ -46,7 +46,18 @@
                         <h1 class="text-lg font-bold text-gray-900">{{ $meeting->title }}</h1>
                     </div>
                 </div>
-                <div class="text-sm font-medium text-blue-600">Lesson {{ $meeting->meeting_number }}</div>
+                <div class="flex items-center gap-3">
+                    @if($existingScore)
+                        <span class="px-3 py-1.5 rounded-full font-bold text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                            ✓ Skor: {{ round($existingScore->score) }}
+                        </span>
+                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-3 py-1.5 rounded-full font-bold text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Kerjakan Ulang
+                        </a>
+                    @endif
+                    <div class="text-sm font-medium text-blue-600">Lesson {{ $meeting->meeting_number }}</div>
+                </div>
             </div>
 
             <!-- SUCCESS MODAL -->
@@ -330,6 +341,58 @@
                     <!-- Scrollable Questions Area -->
                     <div class="flex-1 overflow-y-auto custom-scroll p-6">
                         <div class="max-w-2xl mx-auto space-y-8">
+                            @if($existingScore)
+                                @php
+                                    $rScore = $existingScore->score;
+                                    $rCorrect = $existingScore->correct_count;
+                                    $rTotal = $existingScore->total_questions;
+                                    $rColor = $rScore >= 80 ? 'emerald' : ($rScore >= 60 ? 'blue' : 'amber');
+                                @endphp
+                                <div id="scoreReport" class="bg-{{ $rColor }}-50 border-l-4 border-{{ $rColor }}-500 p-6 rounded-2xl shadow-sm">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 mt-1">
+                                                @if($rScore >= 80)
+                                                    <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                @elseif($rScore >= 60)
+                                                    <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                    </svg>
+                                                @else
+                                                    <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                            <div class="ml-4">
+                                                <h3 class="text-xl leading-6 font-bold text-{{ $rColor }}-800">
+                                                    Hasil Latihan Reading
+                                                </h3>
+                                                <div class="mt-2 text-{{ $rColor }}-700 grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                                                    <div class="flex items-baseline gap-3">
+                                                        <span class="text-4xl font-extrabold tracking-tight">{{ round($rScore) }}</span>
+                                                        <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Score</span>
+                                                    </div>
+                                                    <div class="flex flex-col justify-center">
+                                                        <div class="text-base font-semibold">Benar {{ $rCorrect }} / {{ $rTotal }} Soal</div>
+                                                        <p class="text-xs opacity-90 italic">
+                                                            {{ $rScore >= 80 ? 'Kerja bagus! Pertahankan prestasi Anda.' : ($rScore >= 60 ? 'Bagus! Terus berlatih untuk hasil maksimal.' : 'Perlu latihan lagi. Jangan menyerah!') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md transition inline-flex items-center gap-1.5 text-xs">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                Kerjakan Ulang
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             @foreach($passages as $index => $passage)
                                 <div x-show="currentPassage === {{ $index }}" class="space-y-8">
                                 @foreach($passage->questions as $question)
@@ -405,30 +468,62 @@
                                     @if($hasOptions)
                                     <div class="grid grid-cols-1 gap-3 pl-0 md:pl-0 mt-4">
                                         @foreach(['a', 'b', 'c', 'd'] as $opt)
-                                            @php $optionText = $question->{'option_'.$opt}; @endphp
+                                            @php 
+                                                $optionText = $question->{'option_'.$opt}; 
+                                                $upperOpt = strtoupper($opt);
+                                                $correctAns = strtoupper($question->correct_answer ?? '');
+                                                $userAns = $existingScore ? ($existingScore->answers[$question->id] ?? null) : null;
+                                                $isUserChoice = ($userAns === $upperOpt);
+                                                $isCorrectChoice = ($correctAns === $upperOpt);
+
+                                                $labelClass = 'border-gray-100 hover:border-gray-200 bg-white shadow-sm';
+                                                $badgeClass = 'bg-white text-gray-400 group-hover:bg-gray-200';
+                                                $textClass = 'text-gray-700';
+
+                                                if ($existingScore) {
+                                                    if ($isCorrectChoice) {
+                                                        $labelClass = 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-300 shadow-sm';
+                                                        $badgeClass = 'bg-emerald-600 text-white font-bold shadow-md';
+                                                        $textClass = 'text-emerald-800 font-bold';
+                                                    } elseif ($isUserChoice && !$isCorrectChoice) {
+                                                        $labelClass = 'border-rose-500 bg-rose-50 ring-2 ring-rose-300 shadow-sm';
+                                                        $badgeClass = 'bg-rose-600 text-white font-bold shadow-md';
+                                                        $textClass = 'text-rose-800 font-bold';
+                                                    }
+                                                }
+                                            @endphp
                                             @if($optionText)
-                                            <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group bg-white shadow-sm hover:bg-white"
-                                                :class="selected === '{{ strtoupper($opt) }}' ? 'border-red-500 bg-red-50 ring-1 ring-red-200' : 'border-gray-100 hover:border-gray-200'"
+                                            <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group {{ $labelClass }}"
+                                                @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'border-red-500 bg-red-50 ring-1 ring-red-200' : 'border-gray-100 hover:border-gray-200'" @endif
                                             >
                                                 <input type="radio" 
                                                     name="question_{{ $question->id }}" 
-                                                    value="{{ strtoupper($opt) }}" 
+                                                    value="{{ $upperOpt }}" 
                                                     class="hidden"
-                                                    x-model="selected"
+                                                    @if($isUserChoice) checked @endif
+                                                    @if(!$existingScore) x-model="selected" @endif
                                                 >
                                                 
                                                 <!-- Circle Indicator -->
-                                                <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-4 transition-all duration-200 shrink-0"
-                                                    :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white shadow-md scale-110' : 'bg-white text-gray-400 group-hover:bg-gray-200'"
+                                                <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-4 transition-all duration-200 shrink-0 {{ $badgeClass }}"
+                                                    @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'bg-red-600 text-white shadow-md scale-110' : 'bg-white text-gray-400 group-hover:bg-gray-200'" @endif
                                                 >
-                                                    {{ strtoupper($opt) }}
+                                                    {{ $upperOpt }}
                                                 </div>
 
-                                                <span class="text-lg font-medium transition-colors duration-200 leading-relaxed" 
-                                                    :class="selected === '{{ strtoupper($opt) }}' ? 'text-red-700 font-semibold' : 'text-gray-700'"
+                                                <span class="text-lg font-medium transition-colors duration-200 leading-relaxed {{ $textClass }}" 
+                                                    @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'text-red-700 font-semibold' : 'text-gray-700'" @endif
                                                 >
                                                     {{ $optionText }}
                                                 </span>
+
+                                                @if($existingScore)
+                                                    @if($isCorrectChoice)
+                                                        <span class="ml-auto text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">✓ Kunci</span>
+                                                    @elseif($isUserChoice)
+                                                        <span class="ml-auto text-xs font-bold text-rose-700 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full shrink-0">✕ Jawaban Anda</span>
+                                                    @endif
+                                                @endif
                                             </label>
                                             @endif
                                         @endforeach
@@ -470,12 +565,19 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                     </button>
 
+                                    @if($existingScore)
+                                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            Kerjakan Ulang
+                                        </a>
+                                    @endif
+
                                     <button 
                                         x-show="currentPassage === totalPassages - 1"
                                         type="submit"
                                         class="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-xl font-bold shadow-lg hover:bg-green-700 transition transform hover:-translate-y-1"
                                     >
-                                        Submit Answers
+                                        {{ $existingScore ? 'Resubmit Answers' : 'Submit Answers' }}
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     </button>
                                 </div>

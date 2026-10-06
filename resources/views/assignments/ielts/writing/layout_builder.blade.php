@@ -48,6 +48,11 @@
         loading: false,
         improving: false,
         essay: '',
+        // Magic Sentence (inline-in-textarea, same UX as the promo test page)
+        msOpen: false,
+        msText: '',
+        msLoading: false,
+        msError: null,
         result: null,
         error: null,
         showResults: false,
@@ -107,6 +112,66 @@
             window.addEventListener('mouseup', onMouseUp);
         },
 
+        toggleMagicSentence() {
+            this.msOpen = !this.msOpen;
+            if (this.msOpen) {
+                // The inline overlay only exists inside the Penulisan Esai
+                // (writing mode) textarea section - jump there so the student
+                // actually sees it instead of the button silently doing nothing
+                // while still in planning mode.
+                this.mode = 'writing';
+                this.msText = '';
+                if (this.$refs.msInput) {
+                    this.$refs.msInput.innerText = '';
+                }
+                setTimeout(() => {
+                    if (this.$refs.msInput) {
+                        this.$refs.msInput.focus();
+                        try {
+                            let sel = window.getSelection();
+                            let range = document.createRange();
+                            range.selectNodeContents(this.$refs.msInput);
+                            range.collapse(false);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        } catch(e) {}
+                    }
+                }, 50);
+            }
+        },
+
+        async translateSentence() {
+            if (!this.msText.trim()) return;
+            this.msLoading = true;
+            this.msError = null;
+            try {
+                const response = await fetch('/api/ollama/translate-sentence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content')
+                    },
+                    body: JSON.stringify({ text: this.msText.trim() })
+                });
+                if (!response.ok) throw new Error('Translation failed.');
+                const data = await response.json();
+                if (data.translation) {
+                    const current = this.essay || '';
+                    const prefix = current.length > 0 && !current.endsWith(' ') && !current.endsWith('\n') ? ' ' : '';
+                    this.essay = current + prefix + data.translation;
+                    this.msText = '';
+                    this.msOpen = false;
+                } else {
+                    this.msError = 'Unexpected response from AI.';
+                }
+            } catch (e) {
+                this.msError = e.message;
+            } finally {
+                this.msLoading = false;
+            }
+        },
+
         init() {
             const key = 'ielts_task2_autosave_' + {{ $meeting->id }};
 
@@ -142,6 +207,20 @@
                 }
             }, 1000);
 
+            const resizeAll = () => {
+                this.$nextTick(() => {
+                    this.$el.querySelectorAll('textarea.auto-expand-answer').forEach((el) => {
+                        if (el.scrollHeight > 0) {
+                            el.style.height = 'auto';
+                            el.style.height = el.scrollHeight + 'px';
+                        }
+                    });
+                });
+            };
+            resizeAll();
+            setTimeout(resizeAll, 150);
+            this.$watch('mode', resizeAll);
+
             // Watch & Save
             const saver = () => {
                 localStorage.setItem(key, JSON.stringify({
@@ -150,6 +229,7 @@
                     essay: this.essay
                 }));
                 this.queueDraftSync();
+                resizeAll();
             };
 
             this.$watch('form', saver);
@@ -859,7 +939,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Introduction Text</label>
-                            <textarea name="form_intro" x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
+                            <textarea name="form_intro" x-model="form.intro" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -876,17 +956,17 @@
                         <!-- Argument 1 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen 1</label>
-                            <input name="form_b1_a1" x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama pertama...">
-                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
+                            <textarea name="form_b1_a1" x-model="form.b1_a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-500 text-sm resize-none overflow-hidden" placeholder="Poin utama pertama..."></textarea>
+                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
                         </div>
 
                         <!-- Argument 2 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen 2</label>
-                            <input name="form_b1_a2" x-model="form.b1_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama kedua...">
-                            <textarea name="form_b1_a2_supp" x-model="form.b1_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b1_a2_ex" x-model="form.b1_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
+                            <textarea name="form_b1_a2" x-model="form.b1_a2" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-500 text-sm resize-none overflow-hidden" placeholder="Poin utama kedua..."></textarea>
+                            <textarea name="form_b1_a2_supp" x-model="form.b1_a2_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a2_ex" x-model="form.b1_a2_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -902,17 +982,17 @@
                         <!-- Argument 1 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen 1</label>
-                            <input name="form_b2_a1" x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama pertama...">
-                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
+                            <textarea name="form_b2_a1" x-model="form.b2_a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-500 text-sm resize-none overflow-hidden" placeholder="Poin utama pertama..."></textarea>
+                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
                         </div>
 
                         <!-- Argument 2 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen 2</label>
-                            <input name="form_b2_a2" x-model="form.b2_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama kedua...">
-                            <textarea name="form_b2_a2_supp" x-model="form.b2_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b2_a2_ex" x-model="form.b2_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
+                            <textarea name="form_b2_a2" x-model="form.b2_a2" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-500 text-sm resize-none overflow-hidden" placeholder="Poin utama kedua..."></textarea>
+                            <textarea name="form_b2_a2_supp" x-model="form.b2_a2_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a2_ex" x-model="form.b2_a2_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -929,17 +1009,17 @@
                             <!-- Argument 1 -->
                             <div class="bg-green-50 p-3 rounded-lg">
                                 <label class="block text-xs font-bold text-green-600 uppercase mb-1">Argumen 1</label>
-                                <input :name="'extra_' + para.id + '_a1'" x-model="para.a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama...">
-                                <textarea :name="'extra_' + para.id + '_a1_supp'" x-model="para.a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
-                                <textarea :name="'extra_' + para.id + '_a1_ex'" x-model="para.a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a1'" x-model="para.a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-500 text-sm resize-none overflow-hidden" placeholder="Poin utama..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a1_supp'" x-model="para.a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a1_ex'" x-model="para.a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh..."></textarea>
                             </div>
 
                             <!-- Argument 2 -->
                             <div class="bg-green-50 p-3 rounded-lg">
                                 <label class="block text-xs font-bold text-green-600 uppercase mb-1">Argumen 2</label>
-                                <input :name="'extra_' + para.id + '_a2'" x-model="para.a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama kedua...">
-                                <textarea :name="'extra_' + para.id + '_a2_supp'" x-model="para.a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
-                                <textarea :name="'extra_' + para.id + '_a2_ex'" x-model="para.a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a2'" x-model="para.a2" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-500 text-sm resize-none overflow-hidden" placeholder="Poin utama kedua..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a2_supp'" x-model="para.a2_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a2_ex'" x-model="para.a2_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -965,7 +1045,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Conclusion Text</label>
-                            <textarea name="form_conclusion" x-model="form.conclusion" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan kesimpulan Anda di sini (Restate Thesis + Summary)..."></textarea>
+                            <textarea name="form_conclusion" x-model="form.conclusion" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="4" placeholder="Tuliskan kesimpulan Anda di sini (Restate Thesis + Summary)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -989,12 +1069,56 @@
                     
                     <!-- Scrollable Textarea Container -->
                     <div class="flex-1 relative min-h-0 overflow-y-auto custom-scrollbar">
-                        <textarea name="essay" x-model="essay"
+                        <textarea name="essay" x-model="essay" x-show="!msOpen"
                                   x-ref="writingArea"
+                                  style="field-sizing: content;"
                                   @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                   x-init="$watch('essay', () => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' }); $nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })"
-                                  class="block w-full min-h-full h-auto p-4 bg-gray-50 border-none resize-none font-serif text-lg leading-relaxed focus:ring-0 focus:bg-white transition-colors overflow-hidden" 
+                                  class="auto-expand-answer block w-full min-h-full h-auto p-4 bg-gray-50 border-none resize-none font-serif text-lg leading-relaxed focus:ring-0 focus:bg-white transition-colors overflow-hidden"
                                   placeholder="Tuliskan kedua paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
+
+                        {{-- Magic Sentence inline overlay: mirrors the essay text as a static
+                             span immediately followed by a contenteditable span, so the
+                             Indonesian sentence appears to be typed right where the cursor
+                             was in the essay - same UX as the promo test page - instead of
+                             a separate popup dialog. --}}
+                        <div x-show="msOpen" x-cloak class="absolute inset-0 w-full h-full z-10 bg-white">
+                            <div class="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-20">
+                                <div class="bg-gray-900 bg-opacity-90 text-white px-4 py-2 rounded-full shadow-lg text-[11px] sm:text-xs flex items-center gap-2 backdrop-blur-sm">
+                                    <span class="text-white"><strong>Magic Sentence:</strong> Ketik B. Indonesia →
+                                        tekan <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Ctrl+Enter</kbd> /
+                                        <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Cmd+Return</kbd>
+                                        untuk translate ke gaya IELTS, atau <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Esc</kbd> untuk keluar.</span>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 w-full h-full p-4 bg-gray-50 font-serif text-lg leading-relaxed overflow-y-auto whitespace-pre-wrap break-words custom-scrollbar cursor-text"
+                                @click="if($refs.msInput) {
+                                    $refs.msInput.focus();
+                                    try {
+                                        let sel = window.getSelection();
+                                        let range = document.createRange();
+                                        range.selectNodeContents($refs.msInput);
+                                        range.collapse(false);
+                                        sel.removeAllRanges();
+                                        sel.addRange(range);
+                                    } catch(e) {}
+                                }"><span x-text="essay"></span><span x-ref="msInput" contenteditable="true" inputmode="text"
+                                    class="outline-none border-b-2 border-dashed border-blue-400 bg-blue-50 text-blue-900 empty:before:content-[attr(data-placeholder)] empty:before:text-blue-300 cursor-text inline"
+                                    data-placeholder="Ketik kalimat di sini..."
+                                    @keydown.enter.ctrl.prevent="msText = $el.innerText; translateSentence()"
+                                    @keydown.enter.meta.prevent="msText = $el.innerText; translateSentence()"
+                                    @keydown.escape.prevent="msOpen = false; msText = ''"
+                                    @input="msText = $el.innerText"></span><button
+                                    type="button" x-show="msText.trim().length > 0 && !msLoading"
+                                    @click.stop="if($refs.msInput) { msText = $refs.msInput.innerText; translateSentence(); }"
+                                    class="inline-flex items-center justify-center w-4 h-4 ml-0.5 bg-blue-500 hover:bg-blue-600 text-white rounded shadow-sm transition-transform hover:scale-110 focus:outline-none align-baseline"
+                                    title="Translate (Ctrl+Enter / Cmd+Enter)">
+                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                </button><span x-show="msLoading" class="inline-flex items-center ml-1 text-blue-500 align-baseline">
+                                    <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1460,7 +1584,7 @@
         </div>
     </div>
     @include('assignments.ielts.writing.partials.practice_panels')
-    @include('assignments.ielts.writing.practice_toolbar')
+    @include('assignments.ielts.writing.practice_toolbar', ['inlineMagicSentence' => true])
 </div>
     <!-- Admin Prompt Edit Modal -->
     @if(Auth::user()->role === 'admin')

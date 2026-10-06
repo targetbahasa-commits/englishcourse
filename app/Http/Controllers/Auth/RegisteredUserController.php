@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -118,10 +119,22 @@ class RegisteredUserController extends Controller
         $request->validate([
             'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            // A booking (see BookingClassController) creates a role=guest User row
+            // with this same email/phone before the person ever fills out this
+            // form, so excluding role=guest rows from the uniqueness check lets
+            // them complete real registration with that email/phone instead of
+            // getting rejected as "already taken" - the guest row gets upgraded
+            // in place below rather than blocking a fresh signup.
+            'email' => [
+                'required', 'string', 'lowercase', 'email', 'max:255',
+                Rule::unique('users')->where(fn ($query) => $query->where('role', '!=', 'guest')),
+            ],
             'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
             'role' => ['nullable', 'string', 'in:student,teacher,guest,test-taker'],
-            'phone_number' => ['nullable', 'string', 'max:20'],
+            'phone_number' => [
+                'nullable', 'string', 'max:20',
+                Rule::unique('users', 'phone_number')->where(fn ($query) => $query->where('role', '!=', 'guest')),
+            ],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
             'partner_code' => ['nullable', 'string', 'exists:partners,registration_code'],
             'utm_source' => ['nullable', 'string', 'max:100'],
@@ -144,6 +157,7 @@ class RegisteredUserController extends Controller
             'password.numbers' => 'Password harus mengandung angka.',
             'proof_file.mimes' => 'Format file bukti transfer harus JPG, PNG, atau PDF.',
             'proof_file.max' => 'Ukuran file bukti transfer maksimal 4MB.',
+            'phone_number.unique' => 'Nomor HP ini sudah terdaftar dengan akun lain. Jika ini akun Anda, silakan login. Jika lupa email atau password, hubungi admin.',
         ]);
 
         $attributionData = $this->extractAttributionData($request);
@@ -231,23 +245,52 @@ class RegisteredUserController extends Controller
             $newReferralCode = strtoupper(Str::random(6));
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password),
-            'role' => $role,
-            'referral_code' => $newReferralCode,
-            'referred_by_id' => $referredBy,
-            'partner_id' => $partnerId,
-            // 'program_id' is intentionally left null until admin approves the Payment
-        ] + $attributionData);
+        // Upgrade an existing booking-lead (role=guest) row in place instead of
+        // inserting a new one, so the person keeps the email/phone they used
+        // when they booked a class, and any Enrollment created by that booking
+        // (tied to this same user_id) carries over automatically.
+        $existingGuest = User::where('role', 'guest')
+            ->where(function ($query) use ($request) {
+                $query->where('email', $request->email);
+                if ($request->filled('phone_number')) {
+                    $query->orWhere('phone_number', $request->phone_number);
+                }
+            })
+            ->first();
+
+        if ($existingGuest) {
+            $existingGuest->fill([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'password' => Hash::make($request->password),
+                'role' => $role,
+                'referral_code' => $existingGuest->referral_code ?: $newReferralCode,
+                'referred_by_id' => $referredBy,
+                'partner_id' => $partnerId,
+                'converted_from_guest_at' => now(),
+            ] + $attributionData);
+            $existingGuest->save();
+            $user = $existingGuest;
+        } else {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'password' => Hash::make($request->password),
+                'role' => $role,
+                'referral_code' => $newReferralCode,
+                'referred_by_id' => $referredBy,
+                'partner_id' => $partnerId,
+                // 'program_id' is intentionally left null until admin approves the Payment
+            ] + $attributionData);
+        }
 
         event(new Registered($user));
 
         Auth::login($user);
 
-
+        app(\App\Application\Registration\SendEmailVerificationCode::class)->handle($user);
 
         if ($role === 'student' && $selectedProgramId && !$skipPaymentFlow) {
             $paymentChannel = (string) $request->input('payment_channel_choice', 'bank_transfer');
@@ -266,6 +309,10 @@ class RegisteredUserController extends Controller
                         'status' => 'waiting_verification',
                     ]);
 
+                    if (!$user->email_verified_at) {
+                        return $this->requireEmailVerification();
+                    }
+
                     return redirect()->route('student.payments.show', $payment)
                         ->with('success', 'Akun berhasil dibuat dan bukti transfer sedang diverifikasi admin.');
                 }
@@ -273,8 +320,16 @@ class RegisteredUserController extends Controller
                 \Illuminate\Support\Facades\Log::error('Failed to initiate payment on registration: ' . $e->getMessage());
             }
 
+            if (!$user->email_verified_at) {
+                return $this->requireEmailVerification();
+            }
+
             return redirect()->route('student.payments.index')
                 ->with('success', 'Akun berhasil dibuat. Silakan lanjutkan pembayaran untuk invoice pertamamu.');
+        }
+
+        if (!$user->email_verified_at) {
+            return $this->requireEmailVerification();
         }
 
         // After registration, always redirect students to assignments so locking is visible
@@ -294,5 +349,11 @@ class RegisteredUserController extends Controller
         }
 
         return redirect(route('dashboard', absolute: false));
+    }
+
+    private function requireEmailVerification(): RedirectResponse
+    {
+        return redirect()->route('verification.code.notice')
+            ->with('success', 'Akun berhasil dibuat! Kami sudah mengirim kode verifikasi ke email Anda.');
     }
 }

@@ -98,8 +98,6 @@
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'ielts_listening' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA IELTS Listening</a>
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'ielts_reading_general' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA IELTS Reading General</a>
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'ielts_reading_academic' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA IELTS Reading Academic</a>
-                                    <a href="#" @click.prevent="$dispatch(\'open-wa-preview\', { type: \'grammar\' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA Grammar</a>
-                                    <a href="#" @click.prevent="$dispatch(\'open-wa-preview\', { type: \'grammar\' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA Grammar</a>
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'toefl_listening' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA Listening ITP</a>
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'toefl_structure' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA Structure ITP</a>
                                     <a href="#" @click.prevent="$dispatch('open-wa-preview', { type: 'toefl_reading' }); openWaDropdown = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium" role="menuitem">WA Reading ITP</a>
@@ -690,33 +688,41 @@
                     </div>
                 </div>
 
-                <!-- TOEFL Structure Tab -->
+                <!-- TOEFL Structure Tab (Dedicated & Isolated from Assignments) -->
                 <div x-show="tab === 'toefl_structure'" style="display: none;">
+                    <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800">TOEFL Structure Promo Tests</h3>
+                            <p class="text-xs text-gray-500">Terpisah 100% dari kurikulum & assignments siswa &mdash; aman dibuat dan dikelola khusus promo.</p>
+                        </div>
+                        <button type="button" @click="createToeflPromoModal = true" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm font-semibold shadow-xs transition">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            + Create New TOEFL Structure Test
+                        </button>
+                    </div>
+
                     <div class="bg-white shadow-sm overflow-hidden border border-gray-200 sm:rounded-lg">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 w-4">
-                                        <input type="checkbox" @change="selectAll({{ \Illuminate\Support\Js::from($toeflStructure) }}, 'toefl_structure')" class="rounded border-gray-300 text-blue-600 shadow-sm">
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lesson / Period</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Package / Title</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promo Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($toeflStructure as $test)
+                                @forelse($toeflPromoStructureTests as $test)
+                                    @php
+                                        $testPromoUrl = url('/promo/test/toefl-structure/' . $test->id);
+                                    @endphp
                                     <tr>
-                                        <td class="px-6 py-4 w-4 whitespace-nowrap">
-                                            <input type="checkbox" :checked="isTestSelected({{ $test->id }}, '{{ 'toefl_' . $test->toefl_type }}')" @change="toggleTest({{ $test->id }}, '{{ 'toefl_' . $test->toefl_type }}')" class="rounded border-gray-300 text-blue-600 shadow-sm">
-                                        </td>
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $test->title }}</div>
-                                            <div class="text-sm text-gray-500">Meeting {{ $test->meeting_number }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
-                                            {{ $test->toefl_type }}
+                                            <div class="text-sm font-bold text-gray-900">{{ $test->title }}</div>
+                                            @if($test->description)
+                                                <div class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $test->description }}</div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($test->is_free_tier)
@@ -731,26 +737,45 @@
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Standard</span>
                                             @endif
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                            <div class="font-bold text-gray-900 mb-0.5">{{ $test->questions_count }} Soal</div>
+                                            @if(str_contains(strtolower($test->title), 'part a'))
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-2xs font-bold bg-blue-50 text-blue-700 border border-blue-200">Khusus Part A: Structure</span>
+                                            @elseif(str_contains(strtolower($test->title), 'part b'))
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-2xs font-bold bg-purple-50 text-purple-700 border border-purple-200">Khusus Part B: Written</span>
+                                            @else
+                                                <span class="text-2xs text-gray-500 font-medium">Part A (1–15) &bull; Part B (16–40)</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            {{ $test->duration_minutes }} Menit
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div x-data="{ testData: {{ \Illuminate\Support\Js::from($test) }}, linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
-                                                <button @click="window.copyLink('{{ route('guest.quick-access-toefl', ['type' => $test->toefl_type, 'number' => $test->meeting_number]) }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" 
+                                            <div x-data="{ linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
+                                                <button @click="window.copyLink('{{ $testPromoUrl }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" 
                                                         class="text-blue-600 hover:text-blue-900 flex items-center gap-1"
                                                         title="Copy Online Link">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                                     <span x-text="linkCopiedOnline ? 'Copied!' : 'Copy Online'" class="text-xs"></span>
                                                 </button>
-                                                <button @click="window.copyLink('{{ route('guest.quick-access-toefl', ['type' => $test->toefl_type, 'number' => $test->meeting_number]) }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" 
+                                                <button @click="window.copyLink('{{ $testPromoUrl }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" 
                                                         class="text-green-600 hover:text-green-900 flex items-center gap-1"
                                                         title="Copy Offline Link">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                                     <span x-text="linkCopiedOffline ? 'Copied!' : 'Copy Offline'" class="text-xs"></span>
                                                 </button>
-                                                <a href="{{ route('promo.test.toeflitpstructure.meeting', ['number' => $test->meeting_number]) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Edit Soal</a>
-                                                <button @click="editToeflModal = testData" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
+                                                <a href="{{ route('admin.promo-tests.toefl-structure.questions.index', $test->id) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit Soal</a>
+                                                <button @click="editToeflPromoModal = {{ \Illuminate\Support\Js::from($test) }}" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                                            Belum ada paket Promo Test TOEFL Structure. Silakan klik "+ Create New TOEFL Structure Test" untuk membuat baru.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -2181,6 +2206,107 @@
                     </div>
                 </div>
 
+                <!-- Create TOEFL Promo Test Modal -->
+                <div x-show="createToeflPromoModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="createToeflPromoModal = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="POST" action="{{ route('admin.promo-tests.toefl-structure-promo.store') }}">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-2">Create New TOEFL Structure Test</h3>
+                                    <p class="text-xs text-gray-500 mb-4">Paket tes promo ini 100% terpisah dari kurikulum kelas siswa. Setelah dibuat, Anda dapat mengelola soal melalui tombol "Edit Soal".</p>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <input type="checkbox" id="toefl_is_free_tier" name="is_free_tier" value="1" checked class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4">
+                                            <label for="toefl_is_free_tier" class="text-sm font-semibold text-blue-900">Aktifkan sebagai Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Paket Tes *</label>
+                                            <input type="text" name="title" required placeholder="Contoh: TOEFL Structure Diagnostic Test 2" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi Pengerjaan (Menit)</label>
+                                            <input type="number" name="duration_minutes" value="25" min="5" max="120" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Keterangan (Opsional)</label>
+                                            <textarea name="description" rows="2" placeholder="Keterangan singkat mengenai tes promo ini." class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Buat Paket Tes
+                                    </button>
+                                    <button type="button" @click="createToeflPromoModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Batal
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manage TOEFL Promo Test Settings Modal -->
+                <div x-show="editToeflPromoModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="editToeflPromoModal = null"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="POST" :action="`/admin/promo-tests/toefl-structure-promo/${editToeflPromoModal?.id}`">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">
+                                        Manage Settings: <span class="text-blue-600" x-text="editToeflPromoModal ? editToeflPromoModal.title : ''"></span>
+                                    </h3>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <input type="checkbox" id="tpe_is_free_tier" name="is_free_tier" value="1" :checked="editToeflPromoModal?.is_free_tier" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4">
+                                            <label for="tpe_is_free_tier" class="text-sm font-semibold text-blue-900">Aktifkan sebagai Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Paket Tes *</label>
+                                            <input type="text" name="title" :value="editToeflPromoModal?.title" required class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (Menit)</label>
+                                            <input type="number" name="duration_minutes" :value="editToeflPromoModal?.duration_minutes ?? 25" min="5" max="120" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Promo Start Date (Optional)</label>
+                                                <input type="datetime-local" name="promo_start" :value="editToeflPromoModal?.promo_start ? editToeflPromoModal.promo_start.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Promo End Date (Optional)</label>
+                                                <input type="datetime-local" name="promo_deadline" :value="editToeflPromoModal?.promo_deadline ? editToeflPromoModal.promo_deadline.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Simpan Perubahan
+                                    </button>
+                                    <button type="button" @click="editToeflPromoModal = null" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Batal
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -2191,12 +2317,14 @@
                 tab: sessionStorage.getItem('adminPromoTab') || 'writing',
                 createWritingModal: false,
                 createSpeakingModal: false,
+                createToeflPromoModal: false,
                 editWritingModal: null,
                 editSpeakingModal: null,
                 editListeningModal: null,
                 editReadingGeneralModal: null,
                 editReadingAcademicModal: null,
                 editToeflModal: null,
+                editToeflPromoModal: null,
                 editGrammarModal: null,
                 editPteModal: null,
                 createPteSpeakingWritingModal: false,

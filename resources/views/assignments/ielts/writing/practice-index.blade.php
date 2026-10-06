@@ -2,6 +2,14 @@
 
 @section('title', 'IELTS Writing - Bank Latihan')
 
+{{-- layouts.admin never outputs a csrf-token meta tag, so the AI-grading
+     toggle's document.querySelector('meta[name="csrf-token"]').content read
+     off a tag that never existed, throwing and showing "Terjadi kesalahan
+     jaringan." before the toggle's fetch() request ever went out. --}}
+@section('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @php
     $taskParam = $task ?? request('task'); // null | '1' | '2'
     $typeParam = $type ?? request('type'); // null | 'line' | 'bar' | ... | 'formal' | 'informal'
@@ -273,17 +281,53 @@
         @if(count($task2Meetings) > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($task2Meetings as $m)
+                @php
+                    $sub = $submissionsByMeeting[$m->id] ?? $submissionsByMeeting[$m->meeting_number] ?? null;
+                    $overallBand = $sub ? ($sub->scores['overall_band'] ?? $sub->teacher_score ?? null) : null;
+                @endphp
                 <a href="{{ route($writingMeetingRoute, ['task' => 2, 'id' => $m->id]) }}"
                    class="relative block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
                     @if(!empty($canManageAiGrading))
                         @include('assignments.ielts.writing.partials.ai-grading-toggle', ['meeting' => $m])
                     @endif
-                    <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-start justify-between mb-3 gap-2">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-orange-600 transition">{{ $m->title }}</h3>
+                        @if($overallBand !== null)
+                            <div class="student-score-badge flex items-center gap-1 px-2.5 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-sm shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Band {{ is_numeric($overallBand) ? number_format((float)$overallBand, 1) : $overallBand }}</span>
+                            </div>
+                        @endif
                     </div>
                     <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $m->prompt }}</p>
+
+                    @if($overallBand !== null)
+                        <div class="mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 flex items-center justify-between shadow-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">✓</div>
+                                <div>
+                                    <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Sudah Dikerjakan</p>
+                                    <p class="text-xs text-emerald-700 font-medium">Hasil evaluasi tersimpan</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-500 font-medium block uppercase tracking-wider">Skor Band</span>
+                                <span class="text-sm font-black text-emerald-700">Band {{ is_numeric($overallBand) ? number_format((float)$overallBand, 1) : $overallBand }}</span>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="pt-4 border-t border-gray-100 flex items-center justify-end">
-                        <span class="text-xs font-semibold text-orange-500 group-hover:text-orange-700 transition">Open →</span>
+                        @if($overallBand !== null)
+                            <span class="text-xs font-semibold text-emerald-600 group-hover:text-emerald-700 transition flex items-center gap-1">
+                                <span>Review Hasil & Kerjakan Ulang</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </span>
+                        @elseif(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span class="text-xs font-semibold text-orange-500 group-hover:text-orange-700 transition">Open →</span>
+                        @endif
                     </div>
                 </a>
             @endforeach
@@ -415,16 +459,48 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($items as $item)
+                @php
+                    $sub = $submissionsByMeeting[$item->id] ?? $submissionsByMeeting[$item->meeting_number] ?? null;
+                    $overallBand = $sub ? ($sub->scores['overall_band'] ?? $sub->teacher_score ?? null) : null;
+                @endphp
                 <a href="{{ route($writingMeetingRoute, ['task' => 1, 'id' => $item->id]) }}" class="relative block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
                     @if(!empty($canManageAiGrading))
                         @include('assignments.ielts.writing.partials.ai-grading-toggle', ['meeting' => $item])
                     @endif
-                    <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-start justify-between mb-3 gap-2">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-teal-600 transition">{{ $item->title }}</h3>
+                        @if($overallBand !== null)
+                            <div class="student-score-badge flex items-center gap-1 px-2.5 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-sm shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Band {{ is_numeric($overallBand) ? number_format((float)$overallBand, 1) : $overallBand }}</span>
+                            </div>
+                        @endif
                     </div>
                     <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $item->prompt }}</p>
+
+                    @if($overallBand !== null)
+                        <div class="mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 flex items-center justify-between shadow-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">✓</div>
+                                <div>
+                                    <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Sudah Dikerjakan</p>
+                                    <p class="text-xs text-emerald-700 font-medium">Hasil evaluasi tersimpan</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-500 font-medium block uppercase tracking-wider">Skor Band</span>
+                                <span class="text-sm font-black text-emerald-700">Band {{ is_numeric($overallBand) ? number_format((float)$overallBand, 1) : $overallBand }}</span>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="pt-4 border-t border-gray-100 flex items-center justify-end">
-                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        @if($overallBand !== null)
+                            <span class="text-xs font-semibold text-emerald-600 group-hover:text-emerald-700 transition flex items-center gap-1">
+                                <span>Review Hasil & Kerjakan Ulang</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </span>
+                        @elseif(!empty($isClassEnded) && Auth::user()->isStudent())
                             <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
                         @else
                             <span class="text-xs font-semibold text-teal-500 group-hover:text-teal-700 transition">Start Practice →</span>

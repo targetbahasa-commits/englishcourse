@@ -8,42 +8,47 @@ class ToeflReadingPracticeData
     {
         $packages = [];
 
-        foreach (range(1, 10) as $number) {
+        foreach (range(1, 14) as $number) {
+            $numFormatted = sprintf('%02d', $number);
             $packages[] = [
                 'package_number' => $number,
-                'title' => 'Paket ' . $number,
-                'subtitle' => 'Reading Comprehension',
-                'status' => 'coming_soon',
-                'description' => 'Paket soal reading akan segera tersedia.',
+                'title' => 'Practice Test ' . $numFormatted,
+                'subtitle' => '5 Passages • 50 Questions',
+                'status' => 'available',
+                'description' => 'Latihan reading TOEFL ITP paket ' . $number . ' lengkap dengan 50 soal dan cek skor langsung.',
             ];
         }
-
-        $packages[0] = [
-            'package_number' => 1,
-            'title' => 'Practice Test 01',
-            'subtitle' => '5 Passages • 50 Questions',
-            'status' => 'available',
-            'description' => 'Latihan reading TOEFL ITP lengkap dengan 50 soal dan cek skor langsung.',
-        ];
-
-        $packages[1] = [
-            'package_number' => 2,
-            'title' => 'Practice Test 02',
-            'subtitle' => '5 Passages • 50 Questions',
-            'status' => 'available',
-            'description' => 'Latihan reading TOEFL ITP paket 2 lengkap dengan 50 soal dan cek skor langsung.',
-        ];
 
         return $packages;
     }
 
     public static function package(int $number): ?array
     {
-        return match ($number) {
-            1 => self::packageOne(),
-            2 => self::packageTwo(),
+        $data = match ($number) {
+            1 => Packages\Package01::data(),
+            2 => Packages\Package02::data(),
+            3 => Packages\Package03::data(),
+            4 => Packages\Package04::data(),
+            5 => Packages\Package05::data(),
+            6 => Packages\Package06::data(),
+            7 => Packages\Package07::data(),
+            8 => Packages\Package08::data(),
+            9 => Packages\Package09::data(),
+            10 => Packages\Package10::data(),
+            11 => Packages\Package11::data(),
+            12 => Packages\Package12::data(),
+            13 => Packages\Package13::data(),
+            14 => Packages\Package14::data(),
             default => null,
         };
+
+        if (!$data) {
+            return null;
+        }
+
+        $data['passages'] = self::attachExplanations($data['passages'], $number);
+
+        return $data;
     }
 
     private static function attachExplanations(array $passages, int $packageNumber): array
@@ -766,263 +771,5 @@ class ToeflReadingPracticeData
         ];
 
         return $banks[$packageNumber] ?? [];
-    }
-
-    private static function packageTwo(): array
-    {
-        return [
-            'package_number' => 2,
-            'title' => 'Practice Test 02',
-            'subtitle' => 'TOEFL ITP Reading Practice',
-            'description' => 'Read each passage and choose the best answer for every question.',
-            'directions' => 'Read the passages. Then choose the correct answer for each question.',
-            'questions_count' => 50,
-            'passages' => self::attachExplanations([
-                [
-                    'section_title' => 'Questions 1-10',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">By far the most important United States export product in the eighteenth and nineteenth centuries was cotton, favored by the European textile industry over flax or wool because it was easy to process and soft to the touch. Mechanization of spinning and weaving allowed significant centralization and expansion in the textile industry during this period, and at the same time the demand for cotton increased dramatically. American producers were able to meet this demand largely because of the invention of the cotton gin by Eli Whitney in 1793. Cotton could be grown throughout the South, but separating the fiber -- or lint -- from the seed was a laborious process. Sea island cotton was relatively easy to process by hand, because its fibers were long and seeds were concentrated at the base of the flower, but it demanded a long growing season, available only along the nation's eastern seacoast. Short-staple cotton required a much shorter growing season, but the shortness of the fibers and their mixture with seeds meant that a worker could hand-process only about one pound per day. Whitney's gin was a hand-powered machine with revolving drums and metal teeth to pull cotton fibers away from seeds. Using the gin, a worker could produce up to 50 pounds of lint a day. The later development of larger gins, powered by horses, water, or steam, multiplied productivity further.</p>
-    <p class="toefl-passage-paragraph">The interaction of improved processing and high demand led to the rapid spread of the cultivation of cotton and to a surge in production. It became the main American export, dwarfing all others. In 1802, cotton composed 14 percent of total American exports by value. Cotton had a 36 percent share by 1810 and over a 50 percent share in 1830. In 1860, 61 percent of the value of American exports was represented by cotton. In contrast, wheat and wheat flour composed only 6 percent of the value of American exports in that year. Clearly, cotton was king in the trade of the young republic. The growing market for cotton and other American agricultural products led to an unprecedented expansion of agricultural settlement, mostly in the eastern half of the United States -- west of the Appalachian Mountains and east of the Mississippi River.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 1, 'text' => 'The main point of the passage is that the eighteenth and nineteenth centuries were a time when', 'options' => ['A' => 'the European textile industry increased its demand for American export products', 'B' => 'mechanization of spinning and weaving dramatically changed the textile industry', 'C' => 'cotton became a profitable crop but was still time-consuming to process', 'D' => 'cotton became the most important American export product'], 'answer' => 'D'],
-                        ['number' => 2, 'text' => 'The word "favored" in line 2 is closest in meaning to', 'options' => ['A' => 'preferred', 'B' => 'recommended', 'C' => 'imported', 'D' => 'included'], 'answer' => 'A'],
-                        ['number' => 3, 'text' => 'All of the following are mentioned in the passage as reasons for the increased demand for cotton EXCEPT', 'options' => ['A' => 'cotton\'s softness', 'B' => 'cotton\'s ease of processing', 'C' => 'a shortage of flax and wool', 'D' => 'the growth that occurred in the textile industry'], 'answer' => 'C'],
-                        ['number' => 4, 'text' => 'The word "laborious" in line 8 is closest in meaning to', 'options' => ['A' => 'unfamiliar', 'B' => 'primitive', 'C' => 'skilled', 'D' => 'difficult'], 'answer' => 'D'],
-                        ['number' => 5, 'text' => 'According to the passage, one advantage of sea island cotton was its', 'options' => ['A' => 'abundance of seeds', 'B' => 'long fibers', 'C' => 'long growing season', 'D' => 'adaptability to different climates'], 'answer' => 'B'],
-                        ['number' => 6, 'text' => 'Which of the following can be inferred from the passage about cotton production in the United States after the introduction of Whitney\'s cotton gin?', 'options' => ['A' => 'More cotton came from sea island cotton plants than before.', 'B' => 'More cotton came from short-staple cotton plants than before.', 'C' => 'Most cotton produced was sold domestically.', 'D' => 'Most cotton produced was exported to England.'], 'answer' => 'B'],
-                        ['number' => 7, 'text' => 'The word "surge" in line 18 is closest in meaning to', 'options' => ['A' => 'sharp increase', 'B' => 'sudden stop', 'C' => 'important change', 'D' => 'excess amount'], 'answer' => 'A'],
-                        ['number' => 8, 'text' => 'The author mentions "wheat and wheat flour" in line 22 in order to', 'options' => ['A' => 'show that Americans exported more agricultural products than they imported.', 'B' => 'show the increase in the amount of wheat products exported.', 'C' => 'demonstrate the importance of cotton among American export products.', 'D' => 'demonstrate that wheat farming was becoming more profitable.'], 'answer' => 'C'],
-                        ['number' => 9, 'text' => 'The word "unprecedented" in line 25 is closest in meaning to', 'options' => ['A' => 'slow', 'B' => 'profitable', 'C' => 'not seen before', 'D' => 'never explained'], 'answer' => 'C'],
-                        ['number' => 10, 'text' => 'According to the passage, the Mississippi River was', 'options' => ['A' => 'one of the boundaries of a region where new agricultural settlement took place', 'B' => 'a major source of water for agricultural crops', 'C' => 'the primary route by which agricultural crops were transported', 'D' => 'a main source of power for most agricultural machinery'], 'answer' => 'A'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 11-19',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">The origins of nest-building remain obscure, but current observation of nest-building activities provide evidence of their evolution. Clues to this evolutionary process can be found in the activities of play and in the behavior and movements of birds during mating, such as incessant pulling at strips of vegetation or scraping of the soil. During the early days of the reproductive cycle, the birds seem only to play with the building materials. In preparation for mating, they engage in activities that resemble nest-building, and continue these activities throughout and even after the mating cycle. Effective attempts at construction occur only after mating.</p>
-    <p class="toefl-passage-paragraph">Although nest-building is an instinctive ability, there is considerable adaptability in both site selection and use of materials, especially with those species which build quite elaborate constructions. Furthermore, some element of learning is often evident since younger birds do not build as well as their practiced elders. Young ravens, for example, first attempt to build with sticks of quite unsuitable size, while a jackdaw's first nest includes virtually any movable object. The novelist John Steinbeck recorded the contents of a young osprey nest built in his garden, which included three shirts, a bath towel, and one arrow.</p>
-    <p class="toefl-passage-paragraph">Birds also display remarkable behavior in collecting building materials. Crows have been seen to tear off stout green twigs, and sparrowhawks will dive purposefully onto a branch until it snaps and then hang upside down to break it off. Golden eagles, over generations of work, construct enormous nests. One of these, examined after it had been dislodged by high winds, weighed almost two tons and included foundation branches almost two meters long. The carrying capacity of the eagles, however, is only relative to their size and most birds are able to carry an extra load of just over twenty percent of their body weight.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)'],
-                    'questions' => [
-                        ['number' => 11, 'text' => 'The word "obscure" in line 1 is closest in meaning to', 'options' => ['A' => 'interesting', 'B' => 'unclear', 'C' => 'imperfect', 'D' => 'complex'], 'answer' => 'B'],
-                        ['number' => 12, 'text' => 'According to the passage, which of the following activities is characteristic of the early part of the reproductive cycle of birds?', 'options' => ['A' => 'Selecting a mate', 'B' => 'Collecting nest-building materials', 'C' => 'Playing with nest-building materials', 'D' => 'Building a nest'], 'answer' => 'C'],
-                        ['number' => 13, 'text' => 'The word "display" in line 17 is closest in meaning to', 'options' => ['A' => 'communicate', 'B' => 'imitate', 'C' => 'initiate', 'D' => 'exhibit'], 'answer' => 'D'],
-                        ['number' => 14, 'text' => 'The novelist John Steinbeck is mentioned in line 14 because he', 'options' => ['A' => 'conducted a scientific study on the behavior of ospreys', 'B' => 'was the first to describe where ospreys built their nests', 'C' => 'described the materials ospreys can use to build their nests', 'D' => 'compared the size of osprey nests with the nests of other species'], 'answer' => 'C'],
-                        ['number' => 15, 'text' => 'Which of the following birds are mentioned as those that build nests that include unusual objects?', 'options' => ['A' => 'Ravens', 'B' => 'Ospreys', 'C' => 'Crows', 'D' => 'Sparrowhawks'], 'answer' => 'B'],
-                        ['number' => 16, 'text' => 'According to the passage, when gathering materials to build their nests, sparrowhawks do which of the following?', 'options' => ['A' => 'Hang upside down', 'B' => 'Select only green twigs', 'C' => 'Use objects blowing in the wind', 'D' => 'Collect more branches than necessary'], 'answer' => 'A'],
-                        ['number' => 17, 'text' => 'The word "these" in line 20 refers to', 'options' => ['A' => 'golden eagles', 'B' => 'generations', 'C' => 'winds', 'D' => 'nests'], 'answer' => 'D'],
-                        ['number' => 18, 'text' => 'The word "load" in line 23 is closest in meaning to', 'options' => ['A' => 'weight', 'B' => 'number', 'C' => 'section', 'D' => 'level'], 'answer' => 'A'],
-                        ['number' => 19, 'text' => 'The author mentions twenty percent in line 23 to indicate that', 'options' => ['A' => 'eagles are twenty percent bigger than most birds', 'B' => 'twenty percent of all nests include foundation branches', 'C' => 'the nests of eagles are twenty percent larger than those of other birds', 'D' => 'birds can carry twenty percent of their own weight'], 'answer' => 'D'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 20-30',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">A survey is a study, generally in the form of an interview or a questionnaire, that provides information concerning how people think and act. In the United States, the best-known surveys are the Gallup poll and the Harris poll. As anyone who watches the news during presidential campaigns knows, these polls have become an important part of political life in the United States.</p>
-    <p class="toefl-passage-paragraph">North Americans are familiar with the many "person-on-the-street" interviews on local television news shows. While such interviews can be highly entertaining, they are not necessarily an accurate indication of public opinion. First, they reflect the opinions of only those people who appear at a certain location. Thus, such samples can be biased in favor of commuters, middle-class shoppers, or factory workers, depending on which area the newspeople select. Second, television interviews tend to attract outgoing people who are willing to appear on the air, while they frighten away others who may feel intimidated by a camera. A survey must be based on a precise, representative sampling if it is to genuinely reflect a broad range of the population.</p>
-    <p class="toefl-passage-paragraph">In preparing to conduct a survey, sociologists must exercise great care in the wording of questions. An effective survey question must be simple and clear enough for people to understand it. It must also be specific enough so that there are no problems in interpreting the results. Even questions that are less structured must be carefully phrased in order to elicit the type of information desired. Surveys can be indispensable sources of information, but only if the sampling is done properly and the questions are worded accurately.</p>
-    <p class="toefl-passage-paragraph">There are two main forms of surveys: the interview and the questionnaire. Each of these forms of survey research has its advantages. An interviewer can obtain a high response rate because people find it more difficult to turn down a personal request for an interview than to throw away a written questionnaire. In addition, an interviewer can go beyond written questions and probe for a subject's underlying feelings and reasons. However, questionnaires have the advantage of being cheaper and more consistent.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 20, 'text' => 'What does the passage mainly discuss?', 'options' => ['A' => 'The history of surveys in North America', 'B' => 'The principles of conducting surveys', 'C' => 'Problems associated with interpreting surveys', 'D' => 'The importance of polls in American political life'], 'answer' => 'B'],
-                        ['number' => 21, 'text' => 'The word "they" in line 8 refers to', 'options' => ['A' => 'North Americans', 'B' => 'news shows', 'C' => 'interviews', 'D' => 'opinions'], 'answer' => 'C'],
-                        ['number' => 22, 'text' => 'According to the passage, the main disadvantage of person-on-the-street interviews is that they', 'options' => ['A' => 'are not based on a representative sampling', 'B' => 'are used only on television', 'C' => 'are not carefully worded', 'D' => 'reflect political opinions'], 'answer' => 'A'],
-                        ['number' => 23, 'text' => 'The word "precise" in line 13 is closest in meaning to', 'options' => ['A' => 'planned', 'B' => 'rational', 'C' => 'required', 'D' => 'accurate'], 'answer' => 'D'],
-                        ['number' => 24, 'text' => 'According to paragraph 3, which of the following is most important for an effective survey?', 'options' => ['A' => 'A high number of respondents', 'B' => 'Carefully worded questions', 'C' => 'An interviewer\'s ability to measure respondents\' feelings', 'D' => 'A sociologist who is able to interpret the results'], 'answer' => 'B'],
-                        ['number' => 25, 'text' => 'The word "exercise" in line 15 is closest in meaning to', 'options' => ['A' => 'utilize', 'B' => 'consider', 'C' => 'design', 'D' => 'defend'], 'answer' => 'A'],
-                        ['number' => 26, 'text' => 'The word "elicit" in line 18 is closest in meaning to', 'options' => ['A' => 'compose', 'B' => 'rule out', 'C' => 'predict', 'D' => 'bring out'], 'answer' => 'D'],
-                        ['number' => 27, 'text' => 'It can be inferred from the passage that one reason that sociologists may become frustrated with questionnaires is that', 'options' => ['A' => 'respondents often do not complete and return questionnaires', 'B' => 'questionnaires are often difficult to read', 'C' => 'questionnaires are expensive and difficult to distribute', 'D' => 'respondents are too eager to supplement questions with their own opinions'], 'answer' => 'A'],
-                        ['number' => 28, 'text' => 'According to the passage, one advantage of live interviews over questionnaires is that live interviews', 'options' => ['A' => 'cost less', 'B' => 'can produce more information', 'C' => 'are easier to interpret', 'D' => 'minimize the influence of the researcher'], 'answer' => 'B'],
-                        ['number' => 29, 'text' => 'The word "probe" in line 25 is closest in meaning to', 'options' => ['A' => 'explore', 'B' => 'influence', 'C' => 'analyze', 'D' => 'apply'], 'answer' => 'A'],
-                        ['number' => 30, 'text' => 'Which of the following terms is defined in the passage?', 'options' => ['A' => 'Survey (line 1)', 'B' => 'Public opinion (line 8)', 'C' => 'Representative sampling (line 13)', 'D' => 'Response rate (line 22)'], 'answer' => 'A'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 31-39',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">Perhaps one of the most dramatic and important changes that took place in the Mesozoic era occurred late in that era, among the small organisms that populate the uppermost, sunlit portion of the oceans -- the plankton. The term "plankton" is a broad one, designating all of the small plants and animals that float about or weakly propel themselves through the sea. In the late stages of the Mesozoic era, during the Cretaceous period, there was a great expansion of plankton that precipitated skeletons or shells composed of two types of mineral: silica and calcium carbonate. This development radically changed the types of sediments that accumulated on the seafloor, because, while the organic parts of the plankton decayed after the organisms died, their mineralized skeletons often survived and sank to the bottom. For the first time in the Earth's long history, very large quantities of silica skeletons, which would eventually harden into rock, began to pile up in parts of the deep sea. Thick deposits of calcareous ooze made up of the tiny remains of the calcium carbonate-secreting plankton also accumulated as never before. The famous white chalk cliffs of Dover, in the southeast of England, are just one example of the huge quantities of such material that amassed during the Cretaceous period; there are many more. Just why the calcareous plankton were so prolific during the latter part of the Cretaceous period is not fully understood. Such massive amounts of chalky sediments have never since been deposited over a comparable period of time.</p>
-    <p class="toefl-passage-paragraph">The high biological productivity of the Cretaceous oceans also led to ideal conditions for oil accumulation. Oil is formed when organic material trapped in sediments is slowly buried and subjected to increased temperatures and pressures, transforming it into petroleum. Sediments rich in organic material accumulated along the margins of the Tethys Seaway, the tropical east-west ocean that formed when Earth's single landmass (known as Pangaea) split apart during the Mesozoic era. Many of today's important oil fields are found in those sediments -- in Russia, the Middle East, the Gulf of Mexico, and in the states of Texas and Louisiana in the United States.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 31, 'text' => 'What does the passage mainly discuss?', 'options' => ['A' => 'How sediments were built up in oceans during the Cretaceous period', 'B' => 'How petroleum was formed in the Mesozoic era', 'C' => 'The impact of changes in oceanic animal and plant life in the Mesozoic era', 'D' => 'The differences between plankton found in the present era and Cretaceous plankton'], 'answer' => 'C'],
-                        ['number' => 32, 'text' => 'The passage indicates that the Cretaceous period occurred', 'options' => ['A' => 'in the early part of the Mesozoic era', 'B' => 'in the middle part of the Mesozoic era', 'C' => 'in the later part of the Mesozoic era', 'D' => 'after the Mesozoic era'], 'answer' => 'C'],
-                        ['number' => 33, 'text' => 'The passage mentions all of the following aspects of plankton EXCEPT', 'options' => ['A' => 'the length of their lives', 'B' => 'the level of the ocean at which they are found', 'C' => 'their movement', 'D' => 'their size'], 'answer' => 'A'],
-                        ['number' => 34, 'text' => 'The word "accumulated" in line 8 is closest in meaning to', 'options' => ['A' => 'depended', 'B' => 'matured', 'C' => 'dissolved', 'D' => 'collected'], 'answer' => 'D'],
-                        ['number' => 35, 'text' => 'According to the passage, the most dramatic change to the oceans caused by plankton during the Cretaceous period concerned', 'options' => ['A' => 'the depth of the water', 'B' => 'the makeup of the sediment on the ocean floor', 'C' => 'the decrease in petroleum-producing sediment', 'D' => 'a decline in the quantity of calcareous ooze on the seafloor'], 'answer' => 'B'],
-                        ['number' => 36, 'text' => 'The "white chalk cliffs of Dover" are mentioned in line 14 of the passage to', 'options' => ['A' => 'show where the plankton sediment first began to build up', 'B' => 'provide an example of a plankton buildup that scientists cannot explain', 'C' => 'provide an example of the buildup of plankton sediment', 'D' => 'indicate the largest single plankton buildup on Earth'], 'answer' => 'C'],
-                        ['number' => 37, 'text' => 'The word "prolific" in line 16 is closest in meaning to', 'options' => ['A' => 'fruitful', 'B' => 'distinct', 'C' => 'determined', 'D' => 'energetic'], 'answer' => 'A'],
-                        ['number' => 38, 'text' => 'The word "ideal" in line 19 is closest in meaning to', 'options' => ['A' => 'common', 'B' => 'clear', 'C' => 'perfect', 'D' => 'immediate'], 'answer' => 'C'],
-                        ['number' => 39, 'text' => 'The word "it" in line 21 refers to', 'options' => ['A' => 'biological productivity', 'B' => 'oil', 'C' => 'organic material', 'D' => 'petroleum'], 'answer' => 'C'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 40-50',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">Of all modern instruments, the violin is apparently one of the simplest. It consists in essence of a hollow, varnished wooden sound box, or resonator, and a long neck, covered with a fingerboard, along which four strings are stretched at high tension. The beauty of design, shape, and decoration is no accident: the proportions of the instrument are determined almost entirely by acoustical considerations. Its simplicity of appearance is deceptive. About 70 parts are involved in the construction of a violin. Its tone and its outstanding range of expressiveness make it an ideal solo instrument. No less important, however, is its role as an orchestral and chamber instrument. In combination with the larger and deeper-sounding members of the same family, the violins form the nucleus of the modern symphony orchestra.</p>
-    <p class="toefl-passage-paragraph">The violin has been in existence since about 1550. Its importance as an instrument in its own right dates from the early 1600's, when it first became standard in Italian opera orchestras. Its stature as an orchestral instrument was raised further when in 1626 Louis XIII of France established at his court the orchestra known as Les vingt-quatre violons du Roy (The King's 24 Violins), which was to become widely famous later in the century.</p>
-    <p class="toefl-passage-paragraph">In its early history, the violin had a dull and rather quiet tone resulting from the fact that the strings were thick and were attached to the body of the instrument very loosely. During the eighteenth and nineteenth centuries, exciting technical changes were inspired by such composer-violinists as Vivaldi and Tartini. Their instrumental compositions demanded a fuller, clearer, and more brilliant tone that was produced by using thinner strings and a far higher string tension. Small changes had to be made to the violin's internal structure and to the fingerboard so that they could withstand the extra strain. Accordingly, a higher standard of performance was achieved, in terms of both facility and interpretation. Left-hand technique was considerably elaborated, and new fingering patterns on the fingerboard were developed for very high notes.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 40, 'text' => 'The word "standard" in line 12 is closest in meaning to', 'options' => ['A' => 'practical', 'B' => 'customary', 'C' => 'possible', 'D' => 'unusual'], 'answer' => 'B'],
-                        ['number' => 41, 'text' => '"The King\'s 24 Violins" is mentioned in line 15 to illustrate', 'options' => ['A' => 'how the violin became a renowned instrument', 'B' => 'the competition in the 1600\'s between French and Italian orchestras', 'C' => 'the superiority of French violins', 'D' => 'why the violin was considered the only instrument suitable to be played by royalty'], 'answer' => 'A'],
-                        ['number' => 42, 'text' => 'What is the main idea presented in paragraph 3?', 'options' => ['A' => 'The violin has been modified to fit its evolving musical functions.', 'B' => 'The violin is probably the best known and most widely distributed musical instrument in the world.', 'C' => 'The violin had reached the height of its popularity by the middle of the eighteenth century.', 'D' => 'The technique of playing the violin has remained essentially the same since the 1600\'s.'], 'answer' => 'A'],
-                        ['number' => 43, 'text' => 'The author mentions Vivaldi and Tartini in line 20 as examples of composers whose music', 'options' => ['A' => 'inspired more people to play the violin', 'B' => 'had to be adapted to the violin', 'C' => 'demanded more sophisticated violins', 'D' => 'could be played only by their students'], 'answer' => 'C'],
-                        ['number' => 44, 'text' => 'The word "they" in line 23 refers to', 'options' => ['A' => 'Vivaldi and Tartini', 'B' => 'thinner strings and a higher string tension', 'C' => 'small changes', 'D' => 'internal structure and fingerboard'], 'answer' => 'D'],
-                        ['number' => 45, 'text' => 'The word "strain" in line 23 is closest in meaning to', 'options' => ['A' => 'struggle', 'B' => 'strength', 'C' => 'strategy', 'D' => 'stress'], 'answer' => 'D'],
-                        ['number' => 46, 'text' => 'The word "Accordingly" in line 24 is closest in meaning to', 'options' => ['A' => 'However', 'B' => 'Consequently', 'C' => 'Nevertheless', 'D' => 'Ultimately'], 'answer' => 'B'],
-                        ['number' => 47, 'text' => 'According to the passage, early violins were different from modern violins in that early violins', 'options' => ['A' => 'were heavier', 'B' => 'broke down more easily', 'C' => 'produced softer tones', 'D' => 'were easier to play'], 'answer' => 'C'],
-                        ['number' => 48, 'text' => 'According to the passage, which of the following contributes to a dull sound being produced by a violin?', 'options' => ['A' => 'A long fingerboard', 'B' => 'A small body', 'C' => 'High string tension', 'D' => 'Thick strings'], 'answer' => 'D'],
-                        ['number' => 49, 'text' => 'Which of the following terms is defined in the passage?', 'options' => ['A' => 'resonator (line 2)', 'B' => 'solo (line 7)', 'C' => 'left-hand technique (line 25)', 'D' => 'fingering patterns (lines 25-26)'], 'answer' => 'A'],
-                        ['number' => 50, 'text' => 'All of the following are mentioned in the passage as contributing to the ability to play modern violin music EXCEPT', 'options' => ['A' => 'more complicated techniques for the left hand', 'B' => 'different ways to use the fingers to play very high notes', 'C' => 'use of rare wood for the fingerboard and neck', 'D' => 'minor alterations to the structure of the instrument'], 'answer' => 'C'],
-                    ],
-                ],
-            ], 2),
-        ];
-    }
-
-    private static function packageOne(): array
-    {
-        return [
-            'package_number' => 1,
-            'title' => 'Practice Test 01',
-            'subtitle' => 'TOEFL ITP Reading Practice',
-            'description' => 'Read each passage and choose the best answer for every question.',
-            'directions' => 'Read the passages. Then choose the correct answer for each question.',
-            'questions_count' => 50,
-            'passages' => self::attachExplanations([
-                [
-                    'section_title' => 'Questions 1-10',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">All mammals feed their young. Beluga whale mothers, for example, nurse their calves for some twenty months, until they are about to give birth again and their young are able to find their own food. The behavior of feeding of the young is built into the reproductive system. It is a nonelective part of parental care and the defining feature of a mammal, the most important thing that mammals -- whether marsupials, platypuses, spiny anteaters, or placental mammals -- have in common.</p>
-    <p class="toefl-passage-paragraph">But not all animal parents, even those that tend their offspring to the point of hatching or birth, feed their young. Most egg-guarding fish do not, for the simple reason that their young are so much smaller than the parents and eat food that is also much smaller than the food eaten by adults. In reptiles, the crocodile mother protects her young after they have hatched and takes them down to the water, where they will find food, but she does not actually feed them. Few insects feed their young after hatching, but some make other arrangement, provisioning their cells and nests with caterpillars and spiders that they have paralyzed with their venom and stored in a state of suspended animation so that their larvae might have a supply of fresh food when they hatch.</p>
-    <p class="toefl-passage-paragraph">For animals other than mammals, then, feeding is not intrinsic to parental care. Animals add it to their reproductive strategies to give them an edge in their lifelong quest for descendants. The most vulnerable moment in any animal's life is when it first finds itself completely on its own, when it must forage and fend for itself. Feeding postpones that moment until a young animal has grown to such a size that it is better able to cope. Young that are fed by their parents become nutritionally independent at a much greater fraction of their full adult size. And in the meantime those young are shielded against the vagaries of fluctuating of difficult-to-find supplies. Once a species does take the step of feeding its young, the young become totally dependent on the extra effort. If both parents are removed, the young generally do no survive.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 1, 'text' => 'What does the passage mainly discuss?', 'options' => ['A' => 'The care that various animals give to their offspring.', 'B' => 'The difficulties young animals face in obtaining food.', 'C' => 'The methods that mammals use to nurse their young.', 'D' => 'The importance among young mammals of becoming independent.'], 'answer' => 'A'],
-                        ['number' => 2, 'text' => 'The author lists various animals in line 5 to', 'options' => ['A' => 'contrast the feeding habits of different types of mammals', 'B' => 'describe the process by which mammals came to be defined', 'C' => 'emphasize the point that every type of mammal feeds its own young', 'D' => 'explain why a particular feature of mammals is nonelective'], 'answer' => 'C'],
-                        ['number' => 3, 'text' => 'The word "tend" in line 7 is closest in meaning to', 'options' => ['A' => 'sit on', 'B' => 'move', 'C' => 'notice', 'D' => 'care for'], 'answer' => 'D'],
-                        ['number' => 4, 'text' => 'What can be inferred from the passage about the practice of animal parents feeding their young?', 'options' => ['A' => 'It is unknown among fish.', 'B' => 'It is unrelated to the size of the young.', 'C' => 'It is dangerous for the parents.', 'D' => 'It is most common among mammals.'], 'answer' => 'D'],
-                        ['number' => 5, 'text' => 'The word "provisioning" in line 13 is closest in meaning to', 'options' => ['A' => 'supplying', 'B' => 'preparing', 'C' => 'building', 'D' => 'expanding'], 'answer' => 'A'],
-                        ['number' => 6, 'text' => 'According to the passage, how do some insects make sure their young have food?', 'options' => ['A' => 'By storing food near their young.', 'B' => 'By locating their nests or cells near spiders and caterpillars.', 'C' => 'By searching for food some distance from their nest.', 'D' => 'By gathering food from a nearby water source.'], 'answer' => 'A'],
-                        ['number' => 7, 'text' => 'The word "edge" in line 17 is closest in meaning to', 'options' => ['A' => 'opportunity', 'B' => 'advantage', 'C' => 'purpose', 'D' => 'rest'], 'answer' => 'B'],
-                        ['number' => 8, 'text' => 'The word "it" in line 20 refers to', 'options' => ['A' => 'feeding', 'B' => 'moment', 'C' => 'young animal', 'D' => 'size'], 'answer' => 'C'],
-                        ['number' => 9, 'text' => 'According to the passage, animal young are most defenseless when', 'options' => ['A' => 'their parents are away searching for food', 'B' => 'their parents have many young to feed', 'C' => 'they are only a few days old', 'D' => 'they first become independent'], 'answer' => 'D'],
-                        ['number' => 10, 'text' => 'The word "shielded" in line 22 is closest in meaning to', 'options' => ['A' => 'raised', 'B' => 'protected', 'C' => 'hatched', 'D' => 'valued'], 'answer' => 'B'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 11-21',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">Printmaking is the generic term for a number of processes, of which woodcut and engraving are two prime examples. Prints are made by pressing a sheet of paper (or other material) against an image-bearing surface to which ink has been applied. When the paper is removed, the image adheres to it, but in reverse.</p>
-    <p class="toefl-passage-paragraph">The woodcut had been used in China from the fifth century A.D. for applying patterns to textiles. The process was not introduced into Europe until the fourteenth century, first for textile decoration and then for printing on paper. Woodcuts are created by a relief process; first, the artist takes a block of wood, which has been sawed parallel to the grain, covers it with a white ground, and then draws the image in ink. The background is carved away, leaving the design area slightly raised. The woodblock is inked, and the ink adheres to the raised image. It is then transferred to damp paper either by hand or with a printing press.</p>
-    <p class="toefl-passage-paragraph">Engraving, which grew out of the goldsmith's art, originated in Germany and northern Italy in the middle of the fifteenth century. It is an intaglio process (from Italian intagliare, "to carve"). The image is incised into a highly polished metal plate, usually copper, with a cutting instrument, or burin. The artist inks the plate and wipes it clean so that some ink remains in the incised grooves. An impression is made on damp paper in a printing press, with sufficient pressure being applied so that the paper picks up the ink.</p>
-    <p class="toefl-passage-paragraph">Both woodcut and engraving have distinctive characteristics. Engraving lends itself to subtle modeling and shading through the use of fine lines. Hatching and cross-hatching determine the degree of light and shade in a print. Woodcuts tend to be more linear, with sharper contrasts between light and dark. Printmaking is well suited to the production of multiple images. A set of multiples is called an edition. Both methods can yield several hundred good-quality prints before the original block or plate begins to show signs of wear. Mass production of prints in the sixteenth century made images available, at a lower cost, to a much broader public than before.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 11, 'text' => 'What does the passage mainly discuss?', 'options' => ['A' => 'The origins of textile decoration', 'B' => 'The characteristics of good-quality prints', 'C' => 'Two types of printmaking', 'D' => 'Types of paper used in printmaking'], 'answer' => 'C'],
-                        ['number' => 12, 'text' => 'The word "prime" in line 2 is closest in meaning to', 'options' => ['A' => 'principal', 'B' => 'complex', 'C' => 'general', 'D' => 'recent'], 'answer' => 'A'],
-                        ['number' => 13, 'text' => 'The author\'s purpose in paragraph 2 is to describe', 'options' => ['A' => 'the woodcuts found in China in the fifth century', 'B' => 'the use of woodcuts in the textile industry', 'C' => 'the process involved in creating a woodcut', 'D' => 'the introduction of woodcuts to Europe'], 'answer' => 'C'],
-                        ['number' => 14, 'text' => 'The word "incised" in line 14 is closest in meaning to', 'options' => ['A' => 'burned', 'B' => 'cut', 'C' => 'framed', 'D' => 'baked'], 'answer' => 'B'],
-                        ['number' => 15, 'text' => 'Which of the following terms is defined in the passage?', 'options' => ['A' => 'patterns', 'B' => 'grain', 'C' => 'burin', 'D' => 'grooves'], 'answer' => 'C'],
-                        ['number' => 16, 'text' => 'The word "distinctive" in line 18 is closest in meaning to', 'options' => ['A' => 'unique', 'B' => 'accurate', 'C' => 'irregular', 'D' => 'similar'], 'answer' => 'A'],
-                        ['number' => 17, 'text' => 'According to the passage, all of the following are true about engraving EXCEPT that it', 'options' => ['A' => 'developed from the art of the goldsmiths', 'B' => 'requires that the paper be cut with a burin', 'C' => 'originated in the fifteenth century', 'D' => 'involves carving into a metal plate'], 'answer' => 'B'],
-                        ['number' => 18, 'text' => 'The word "yield" in line 22 is closest in meaning to', 'options' => ['A' => 'imitate', 'B' => 'produce', 'C' => 'revise', 'D' => 'contrast'], 'answer' => 'B'],
-                        ['number' => 19, 'text' => 'According to the passage, what do woodcut and engraving have in common?', 'options' => ['A' => 'Their designs are slightly raised.', 'B' => 'They achieve contrast through hatching and cross-hatching.', 'C' => 'They were first used in Europe.', 'D' => 'They allow multiple copies to be produced from one original.'], 'answer' => 'D'],
-                        ['number' => 20, 'text' => 'According to the author, what made it possible for members of the general public to own prints in the sixteenth century?', 'options' => ['A' => 'Prints could be made at low cost.', 'B' => 'The quality of paper and ink had improved.', 'C' => 'Many people became involved in the printmaking industry.', 'D' => 'Decreased demand for prints kept prices affordable.'], 'answer' => 'A'],
-                        ['number' => 21, 'text' => 'According to the passage, all of the following are true about prints EXCEPT that they', 'options' => ['A' => 'can be reproduced on materials other than paper', 'B' => 'are created from a reversed image', 'C' => 'show variations between light and dark shades', 'D' => 'require a printing press'], 'answer' => 'D'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 22-31',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">The first peoples to inhabit what today is the southeastern United States sustained themselves as hunters and gathers. Sometimes early in the first millennium A.D., however, they began to cultivate corn and other crops. Gradually, as they became more skilled at gardening, they settled into permanent villages and developed a rich culture, characterized by the great earthen mounds they erected as monuments to their gods and as tombs for their distinguished dead. Most of these early mound builders were part of the Adena-Hopewell culture, which had its beginnings near the Ohio River and takes its name from sites in Ohio. The culture spread southward into the present-day states of Louisiana, Alabama, Georgia, and Florida. Its peoples became great traders, bartering jewellery, pottery, animal pelts, tools, and other goods along extensive trading networks that stretched up and down eastern North America and as far west as the Rocky Mountains.</p>
-    <p class="toefl-passage-paragraph">About A.D. 400, the Hopewell culture fell into decay. Over the next centuries, it was supplanted by another culture, the Mississippian, named after the river along which many of its earliest villages were located. This complex civilization dominated the Southeast from about A.D. 700 until shortly before the Europeans began arriving in the sixteenth century. At the peak of its strength, about the year 1200, it was the most advanced culture in North America. Like their Hopewell predecessors, the Mississippians became highly skilled at growing food, although on a grander scale. They developed an improved strain of corn, which could survive in wet soil and a relatively cool climate, and also learned to cultivate beans. Indeed, agriculture became so important to the Mississippians that it became closely associated with the Sun -- the guarantor of good crops. Many tribes called themselves "children of the Sun" and believed their omnipotent priest-chiefs were descendants of the great sun god.</p>
-    <p class="toefl-passage-paragraph">Although most Mississippians lived in small villages, many others inhabited large towns. Most of these towns boasted at least one major flat-topped mound on which stood a temple that contained a sacred flame. Only priests and those charged with guarding the flame could enter the temples. The mounds also served as ceremonial and trading sites, and at times they were used as burial grounds.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 22, 'text' => 'What does the passage mainly discuss?', 'options' => ['A' => 'The development of agriculture', 'B' => 'The locations of towns and villages', 'C' => 'The early people and cultures of the United States', 'D' => 'The construction of burial mounds'], 'answer' => 'C'],
-                        ['number' => 23, 'text' => 'Which of the following resulted from the rise of agriculture in the southeastern United States?', 'options' => ['A' => 'The development of trade in North America', 'B' => 'The establishment of permanent settlements', 'C' => 'Conflicts with other Native American groups over land', 'D' => 'A migration of these peoples to the Rocky Mountains.'], 'answer' => 'B'],
-                        ['number' => 24, 'text' => 'What does the term "Adena-Hopewell" designate?', 'options' => ['A' => 'The early locations of the Adena-Hopewell culture', 'B' => 'The two most important nations of the Adena-Hopewell culture', 'C' => 'Two former leaders who were honored with large burial mounds.', 'D' => 'Two important trade routes in eastern North America'], 'answer' => 'A'],
-                        ['number' => 25, 'text' => 'The word "bartering" in line 9 is closest in meaning to', 'options' => ['A' => 'producing', 'B' => 'exchanging', 'C' => 'transporting', 'D' => 'loading'], 'answer' => 'B'],
-                        ['number' => 26, 'text' => 'The word "supplanted" in line 13 is closest in meaning to', 'options' => ['A' => 'conquered', 'B' => 'preceded', 'C' => 'replaced', 'D' => 'imitated'], 'answer' => 'C'],
-                        ['number' => 27, 'text' => 'According to the passage, when did the Mississippian culture reach its highest point of development?', 'options' => ['A' => 'About A.D. 400', 'B' => 'Between A.D. 400 and A.D. 700', 'C' => 'About A.D. 1200', 'D' => 'In the sixteenth century'], 'answer' => 'C'],
-                        ['number' => 28, 'text' => 'According to the passage, how did the agriculture of the Mississippians differ from that of their Hopewell predecessors?', 'options' => ['A' => 'The Mississippians produced more durable and larger crops of food.', 'B' => 'The Mississippians sold their food to other groups.', 'C' => 'The Mississippians could only grow plants in warm, dry climates.', 'D' => 'The Mississippians produced special foods for their religious leaders.'], 'answer' => 'A'],
-                        ['number' => 29, 'text' => 'Why does the author mention that many Mississippian tribes called themselves "children of the Sun"?', 'options' => ['A' => 'To explain why they were obedient to their priest-chiefs.', 'B' => 'To argue about the importance of religion in their culture.', 'C' => 'To illustrate the great importance they placed on agriculture.', 'D' => 'To provide an example of their religious rituals.'], 'answer' => 'C'],
-                        ['number' => 30, 'text' => 'The phrase "charged with" in line 26 is closest in meaning to', 'options' => ['A' => 'passed on', 'B' => 'experienced at', 'C' => 'interested in', 'D' => 'assigned to'], 'answer' => 'D'],
-                        ['number' => 31, 'text' => 'According to the passage, the flat-topped mounds in Mississippian towns were used for all of the following purposes EXCEPT', 'options' => ['A' => 'religious ceremonies', 'B' => 'meeting places for the entire community', 'C' => 'sites for commerce', 'D' => 'burial sites'], 'answer' => 'B'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 32-40',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">Overland transport in the United States was still extremely primitive in 1790. Roads were few and short, usually extending from inland communities to the nearest river town or seaport. Nearly all interstate commerce was carried out by sailing ships that served the bays and harbors of the seaboard. Yet, in 1790 the nation was on the threshold of a new era of road development. Unable to finance road construction, states turned for help to private companies, organized by merchants and land speculators who had a personal interest in improved communications with the interior. The pioneer in this move was the state of Pennsylvania, which chartered a company in 1792 to construct a turnpike, a road for the use of which a toll, or payment, is collected, from Philadelphia to Lancaster. The legislature gave the company the authority to erect tollgates at points along the road where payment would be collected, though it carefully regulated the rates. (The states had unquestioned authority to regulate private business in this period.)</p>
-    <p class="toefl-passage-paragraph">The company built a gravel road within two years, and the success of the Lancaster Pike encouraged imitation. Northern states generally relied on private companies to build their toll roads, but Virginia constructed a network at public expense. Such was the road building fever that by 1810 New York alone had some 1,500 miles of turnpikes extending from the Atlantic to Lake Erie.</p>
-    <p class="toefl-passage-paragraph">Transportation on these early turnpikes consisted of freight carrier wagons and passenger stagecoaches. The most common road freight carrier was the Conestoga wagon, a vehicle developed in the mid-eighteenth century by German immigrants in the area around Lancaster, Pennsylvania. It featured large, broad wheels able to negotiate all but the deepest ruts and holes, and its round bottom prevented the freight from shifting on a hill. Covered with canvas and drawn by four to six horses, the Conestoga wagon rivaled the log cabin as the primary symbol of the frontier. Passengers traveled in a variety of stagecoaches, the most common of which had four benches, each holding three persons. It was only a platform on wheels, with no springs; slender poles held up the top, and leather curtains kept out dust and rain.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 32, 'text' => 'Paragraph 1 discusses early road building in the United States mainly in terms of the', 'options' => ['A' => 'popularity of turnpikes', 'B' => 'financing of new roads', 'C' => 'development of the interior', 'D' => 'laws governing road use'], 'answer' => 'B'],
-                        ['number' => 33, 'text' => 'The word "primitive" in line 1 is closest in meaning to', 'options' => ['A' => 'unsafe', 'B' => 'unknown', 'C' => 'inexpensive', 'D' => 'undeveloped'], 'answer' => 'D'],
-                        ['number' => 34, 'text' => 'In 1790 most roads connected towns in the interior of the country with', 'options' => ['A' => 'other inland communities', 'B' => 'towns in other states', 'C' => 'river towns or seaports', 'D' => 'construction sites'], 'answer' => 'C'],
-                        ['number' => 35, 'text' => 'The phrase "on the threshold of" in lines 4 and 5 is closest in meaning to', 'options' => ['A' => 'in need of', 'B' => 'in place of', 'C' => 'at the start of', 'D' => 'with the purpose of'], 'answer' => 'C'],
-                        ['number' => 36, 'text' => 'According to the passage, why did states want private companies to help with road building?', 'options' => ['A' => 'The states could not afford to build roads themselves.', 'B' => 'The states were not as well equipped as private companies.', 'C' => 'Private companies could complete roads faster than the states.', 'D' => 'Private companies had greater knowledge of the interior.'], 'answer' => 'A'],
-                        ['number' => 37, 'text' => 'The word "it" in line 11 refers to', 'options' => ['A' => 'legislature', 'B' => 'company', 'C' => 'authority', 'D' => 'payment'], 'answer' => 'A'],
-                        ['number' => 38, 'text' => 'The word "imitation" in line 14 is closest in meaning to', 'options' => ['A' => 'investment', 'B' => 'suggestion', 'C' => 'increasing', 'D' => 'copying'], 'answer' => 'D'],
-                        ['number' => 39, 'text' => 'Virginia is mentioned as an example of a state that', 'options' => ['A' => 'built roads without tollgates', 'B' => 'built roads with government money', 'C' => 'completed 1,500 miles of turnpikes in one year', 'D' => 'introduced new law restricting road use'], 'answer' => 'B'],
-                        ['number' => 40, 'text' => 'The "large, broad wheels" of the Conestoga wagon are mentioned in line 21 as an example of a feature of wagons that was', 'options' => ['A' => 'unusual in mid-eighteenth century vehicles', 'B' => 'first found in Germany', 'C' => 'effective on roads with uneven surfaces', 'D' => 'responsible for frequent damage to freight'], 'answer' => 'C'],
-                    ],
-                ],
-                [
-                    'section_title' => 'Questions 41-50',
-                    'content' => <<<'HTML'
-<div class="toefl-passage-text">
-    <p class="toefl-passage-paragraph">In Death Valley, California, one of the hottest, most arid places in North America, there is much salt, and salt can damage rocks impressively. Inhabitants of areas elsewhere, where streets and highways are salted to control ice, are familiar with the resulting rust and deterioration on cars. That attests to the chemically corrosive nature of salt, but it is not the way salt destroys rocks. Salt breaks rocks apart principally by a process called crystal prying and wedging. This happens not by soaking the rocks in salt water, but by moistening their bottoms with salt water. Such conditions exist in many areas along the eastern edge of central Death Valley. There, salty water rises from the groundwater table by capillary action through tiny spaces in sediment until it reaches the surface.</p>
-    <p class="toefl-passage-paragraph">Most stones have capillary passages that suck salt water from the wet ground. Death Valley provides an ultra-dry atmosphere and high daily temperatures, which promote evaporation and the formation of salt crystals along the cracks or other openings within stones. These crystals grow as long as salt water is available. Like tree roots breaking up a sidewalk, the growing crystals exert pressure on the rock and eventually pry the rock apart along planes of weakness, such as banding in metamorphic rocks, bedding in sedimentary rocks, or preexisting or incipient fractions, and along boundaries between individual mineral crystals or grains. Besides crystal growth, the expansion of halite crystals (the same as everyday table salt) by heating and of sulfates and similar salts by hydration can contribute additional stresses. A rock durable enough to have withstood natural conditions for a very long time in other areas could probably be shattered into small pieces by salt weathering within a few generations.</p>
-    <p class="toefl-passage-paragraph">The dominant salt in Death Valley is halite, or sodium chloride, but other salts, mostly carbonates and sulfates, also cause prying and wedging, as does ordinary ice. Weathering by a variety of salts, though often subtle, is a worldwide phenomenon. Not restricted to arid regions, intense salt weathering occurs mostly in salt-rich places like the seashore, near the large saline lakes in the Dry Valleys of Antarctica, and in desert sections of Australia, New Zealand, and central Asia.</p>
-</div>
-HTML,
-                    'line_markers' => ['Line', '(5)', '(10)', '(15)', '(20)', '(25)'],
-                    'questions' => [
-                        ['number' => 41, 'text' => 'What is the passage mainly about?', 'options' => ['A' => 'The destructive effects of salt on rocks.', 'B' => 'The impressive salt rocks in Death Valley.', 'C' => 'The amount of salt produced in Death Valley.', 'D' => 'The damaging effects of salt on roads and highways.'], 'answer' => 'A'],
-                        ['number' => 42, 'text' => 'The word "it" in line 9 refers to', 'options' => ['A' => 'salty water', 'B' => 'groundwater table', 'C' => 'capillary action', 'D' => 'sediment'], 'answer' => 'A'],
-                        ['number' => 43, 'text' => 'The word "exert" in line 14 is closest in meaning to', 'options' => ['A' => 'put', 'B' => 'reduce', 'C' => 'replace', 'D' => 'control'], 'answer' => 'A'],
-                        ['number' => 44, 'text' => 'In lines 13-17, why does the author compare tree roots with growing salt crystals?', 'options' => ['A' => 'They both force hard surfaces to crack.', 'B' => 'They both grow as long as water is available.', 'C' => 'They both react quickly to a rise in temperature.', 'D' => 'They both cause salty water to rise from the groundwater table.'], 'answer' => 'A'],
-                        ['number' => 45, 'text' => 'In lines 17-18, the author mentions the expansion of halite crystals by heating and of sulfates and similar salts by hydration in order to', 'options' => ['A' => 'present an alternative theory about crystal growth', 'B' => 'explain how some rocks are not affected by salt', 'C' => 'simplify the explanation of crystal prying and wedging', 'D' => 'introduce additional means by which crystals destroy rocks'], 'answer' => 'D'],
-                        ['number' => 46, 'text' => 'The word "durable" in line 19 is closest in meaning to', 'options' => ['A' => 'large', 'B' => 'strong', 'C' => 'flexible', 'D' => 'pressured'], 'answer' => 'B'],
-                        ['number' => 47, 'text' => 'The word "shattered" in line 20 is closest in meaning to', 'options' => ['A' => 'arranged', 'B' => 'dissolved', 'C' => 'broken apart', 'D' => 'gathered together'], 'answer' => 'C'],
-                        ['number' => 48, 'text' => 'The word "dominant" in line 22 is closest in meaning to', 'options' => ['A' => 'most recent', 'B' => 'most common', 'C' => 'least available', 'D' => 'least damaging'], 'answer' => 'B'],
-                        ['number' => 49, 'text' => 'According to the passage, which of the following is true about the effects of salts on rocks?', 'options' => ['A' => 'Only two types of salts cause prying and wedging.', 'B' => 'Salts usually cause damage only in combination with ice.', 'C' => 'A variety of salts in all kinds of environments can cause weathering.', 'D' => 'Salt damage at the seashore is more severe than salt damage in Death Valley.'], 'answer' => 'C'],
-                        ['number' => 50, 'text' => 'Which of the following can be inferred from the passage about rocks that are found in areas where ice is common?', 'options' => ['A' => 'They are protected from weathering.', 'B' => 'They do not allow capillary action of water.', 'C' => 'They show similar kinds of damage as rocks in Death Valley.', 'D' => 'They contain more carbonates than sulfates.'], 'answer' => 'C'],
-                    ],
-                ],
-            ], 1),
-        ];
     }
 }

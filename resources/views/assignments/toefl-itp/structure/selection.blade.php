@@ -58,7 +58,28 @@
             @endif
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Material Explanation Card -->
+            <div class="relative group">
+                <a href="{{ route('assignments.toefl-itp.structure.meeting', $main->meeting_number) . '?material=1' }}" 
+                   class="block h-full p-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white">Penjelasan Materi</h3>
+                        </div>
+                        <svg class="w-6 h-6 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <p class="text-emerald-50 text-sm">Ringkasan Rumus & Contoh {{ $main->title }}</p>
+                </a>
+            </div>
+
             @foreach($exercises as $index => $exercise)
                 @php
                     // Determine link
@@ -80,15 +101,15 @@
 
                 <div class="relative group">
                     <a href="{{ $link }}" 
-                       class="block p-6 bg-gradient-to-br {{ $color['from'] }} {{ $color['to'] }} rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+                       class="block h-full p-6 bg-gradient-to-br {{ $color['from'] }} {{ $color['to'] }} rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                     <span class="text-white font-bold text-xl">{{ $labelNumber }}</span>
                                 </div>
                                 <h3 class="text-xl font-bold text-white">{{ $exercise->title }}</h3>
                             </div>
-                            <svg class="w-6 h-6 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </div>
@@ -123,7 +144,7 @@
                 <h3 class="text-xl font-bold mb-4">Delete Exercise</h3>
                 <div class="space-y-2">
                     @foreach($exercises as $index => $exercise)
-                        @if($exercise->meeting_number != 6)
+                        @if($exercise->meeting_number != $main->meeting_number)
                         <div class="flex items-center justify-between p-3 bg-white rounded-lg">
                             <span class="font-medium">{{ $exercise->title }}</span>
                             <form action="{{ route('assignments.toefl-itp.structure.meeting.remove-set', $main->meeting_number) }}" method="POST" onsubmit="return confirm('Are you sure?');">

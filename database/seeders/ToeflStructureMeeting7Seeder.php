@@ -12,17 +12,15 @@ class ToeflStructureMeeting7Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 7)->first();
-        
-        if (!$meeting) {
-            $meeting = \App\Models\ToeflStructureMeeting::create([
-                'meeting_number' => 7,
-                'title' => 'Noun Clauses',
-                'description' => 'Structure Meeting 7 - Noun Clauses',
-                'is_locked' => false
-            ]);
-        }
-        
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 7],
+            [
+                'title' => 'Adjective Clause',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
         // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
@@ -65,7 +63,7 @@ class ToeflStructureMeeting7Seeder extends Seeder
             ],
             [
                 'question_number' => 5,
-                'question_text' => "Lack of clarity about ______ the party in the coming year will be removed at the party's convention.",
+                'question_text' => 'Lack of clarity about ______ the party in the coming year will be removed at the party\'s convention.',
                 'option_a' => 'will lead',
                 'option_b' => 'lead',
                 'option_c' => 'they will lead',
@@ -102,11 +100,11 @@ class ToeflStructureMeeting7Seeder extends Seeder
             [
                 'question_number' => 9,
                 'question_text' => 'The National Institute of Dental Research estimates ______ in fluoridated areas have about 25 percent less tooth decay than children elsewhere.',
-                'option_a' => 'for school children',
+                'option_a' => 'that school children',
                 'option_b' => 'school children\'s',
-                'option_c' => 'that school children',
+                'option_c' => 'for school children',
                 'option_d' => 'that for school children',
-                'correct_answer' => 'C',
+                'correct_answer' => 'A',
             ],
             [
                 'question_number' => 10,
@@ -129,6 +127,7 @@ class ToeflStructureMeeting7Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

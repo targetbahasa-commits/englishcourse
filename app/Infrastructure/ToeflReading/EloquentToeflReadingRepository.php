@@ -75,6 +75,20 @@ class EloquentToeflReadingRepository implements ToeflReadingRepository
         })->get()->all();
     }
 
+    public function getScoreForUser(int $userId, int $meetingNumber): mixed
+    {
+        return ToeflReadingScore::where('user_id', $userId)
+            ->where('meeting_number', $meetingNumber)
+            ->first();
+    }
+
+    public function deleteScoreForUser(int $userId, int $meetingNumber): bool
+    {
+        return (bool) ToeflReadingScore::where('user_id', $userId)
+            ->where('meeting_number', $meetingNumber)
+            ->delete();
+    }
+
     public function saveScore(int $userId, int $meetingNumber, array $data): void
     {
         ToeflReadingScore::updateOrCreate(

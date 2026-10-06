@@ -190,3 +190,41 @@ Alpine.data('readingPracticePage', (answerKey, totalQuestions) => ({
 Alpine.start();
 
 import './password-rules';
+
+// ============================================================
+// Auto-Expanding Answer Textarea Helper
+// Ensures all textarea.auto-expand-answer elements expand
+// vertically downward as text grows or is restored.
+// ============================================================
+(function initAutoExpandAnswerHelper() {
+    function resizeTextarea(el) {
+        if (!el || el.tagName !== 'TEXTAREA') return;
+        el.style.height = 'auto';
+        if (el.scrollHeight > 0) {
+            el.style.height = `${el.scrollHeight}px`;
+        }
+    }
+
+    function resizeAllAutoExpandTextareas(root = document) {
+        root.querySelectorAll('textarea.auto-expand-answer').forEach(resizeTextarea);
+    }
+
+    window.resizeAutoExpandTextarea = resizeTextarea;
+    window.resizeAutoExpandTextareas = resizeAllAutoExpandTextareas;
+
+    document.addEventListener('input', (e) => {
+        if (e.target && e.target.matches && e.target.matches('textarea.auto-expand-answer')) {
+            resizeTextarea(e.target);
+        }
+    });
+
+    window.addEventListener('resize', () => resizeAllAutoExpandTextareas());
+    document.addEventListener('DOMContentLoaded', () => {
+        resizeAllAutoExpandTextareas();
+        setTimeout(() => resizeAllAutoExpandTextareas(), 150);
+        setTimeout(() => resizeAllAutoExpandTextareas(), 500);
+        setTimeout(() => resizeAllAutoExpandTextareas(), 1200);
+    });
+    window.addEventListener('load', () => resizeAllAutoExpandTextareas());
+})();
+

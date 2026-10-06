@@ -67,7 +67,7 @@ class AiController extends Controller
             try {
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json'
-                ])->timeout(20)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey, $payload);
+                ])->timeout(20)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' . $geminiKey, $payload);
 
                 if ($response->successful() && $response->json('candidates.0.content.parts.0.text')) {
                     return [

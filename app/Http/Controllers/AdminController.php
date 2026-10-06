@@ -15,7 +15,7 @@ class AdminController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->getAdminDashboard->execute();
+        $data = $this->getAdminDashboard->execute(24, includeAttendanceHealth: true);
 
         return view('admin.dashboard', $data);
     }

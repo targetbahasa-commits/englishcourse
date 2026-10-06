@@ -3,7 +3,6 @@
 namespace App\Infrastructure\Admin;
 
 use App\Domain\Admin\Repositories\AdminUserRepository;
-use App\Models\ClassPeriod;
 use App\Models\Enrollment;
 use App\Models\Program;
 use App\Models\User;
@@ -64,14 +63,25 @@ class EloquentAdminUserRepository implements AdminUserRepository
         }
         $programIds = array_values(array_unique(array_filter($programIds)));
 
+        $teacherIds = $data['teacher_ids'] ?? [];
+        $classPeriodIds = $data['class_period_ids'] ?? [];
+
         if (!empty($programIds)) {
-            $data['program_id'] = $programIds[0];
+            $primaryProgramId = $programIds[0];
+            $data['program_id'] = $primaryProgramId;
+            $data['teacher_id'] = $this->resolvePerProgramId($teacherIds, $primaryProgramId);
+            $data['class_period_id'] = $this->resolvePerProgramId($classPeriodIds, $primaryProgramId);
         }
 
         $user = User::create($data);
 
         foreach ($programIds as $pId) {
-            $this->enrollUserInProgram($user, $pId);
+            $this->enrollUserInProgram(
+                $user,
+                $pId,
+                $this->resolvePerProgramId($teacherIds, $pId),
+                $this->resolvePerProgramId($classPeriodIds, $pId)
+            );
         }
 
         return $user;
@@ -94,9 +104,15 @@ class EloquentAdminUserRepository implements AdminUserRepository
             $programIds[] = (int) $data['program_id'];
         }
 
+        $teacherIds = $data['teacher_ids'] ?? [];
+        $classPeriodIds = $data['class_period_ids'] ?? [];
+
         if ($programIds !== null) {
             $programIds = array_values(array_unique(array_filter($programIds)));
-            $data['program_id'] = !empty($programIds) ? $programIds[0] : null;
+            $primaryProgramId = $programIds[0] ?? null;
+            $data['program_id'] = $primaryProgramId;
+            $data['teacher_id'] = $primaryProgramId ? $this->resolvePerProgramId($teacherIds, $primaryProgramId) : null;
+            $data['class_period_id'] = $primaryProgramId ? $this->resolvePerProgramId($classPeriodIds, $primaryProgramId) : null;
         }
 
         $user->update($data);
@@ -104,7 +120,12 @@ class EloquentAdminUserRepository implements AdminUserRepository
         if ($programIds !== null) {
             // Actively enroll selected programs
             foreach ($programIds as $pId) {
-                $this->enrollUserInProgram($user, $pId);
+                $this->enrollUserInProgram(
+                    $user,
+                    $pId,
+                    $this->resolvePerProgramId($teacherIds, $pId),
+                    $this->resolvePerProgramId($classPeriodIds, $pId)
+                );
             }
 
             // Drop any enrollments not selected in the new list
@@ -119,40 +140,43 @@ class EloquentAdminUserRepository implements AdminUserRepository
     }
 
     /**
-     * Create/reactivate a student's Enrollment for a program via the admin multi-program
-     * checkbox form. This form only exposes one class_period_id selector for however many
-     * programs are ticked, so $user->class_period_id is NOT necessarily valid for $programId
-     * (it may belong to a different program entirely, or be null). Only ever apply it when
-     * it demonstrably belongs to this program; never overwrite an existing enrollment's
-     * class_period_id through this generic path (that field is set correctly by the
-     * dedicated payment-approval / assign-to-class-period flows, which know exactly which
-     * class period a specific program-enrollment belongs to).
+     * Pulls the teacher/class-period id submitted for one specific program out of the
+     * admin form's teacher_ids[program_id] / class_period_ids[program_id] arrays. An
+     * empty/missing entry means the admin explicitly left that program's row blank.
      */
-    private function enrollUserInProgram(User $user, int $programId): void
+    private function resolvePerProgramId(mixed $map, int $programId): ?int
     {
-        $existing = Enrollment::where('user_id', $user->id)->where('program_id', $programId)->first();
+        if (!is_array($map)) {
+            return null;
+        }
+        $value = $map[$programId] ?? null;
+        return ($value !== null && $value !== '') ? (int) $value : null;
+    }
 
+    /**
+     * Create/reactivate a student's Enrollment for a program via the admin multi-program
+     * form, which renders one Teacher and one Batch/Class Period selector per checked
+     * program - so $teacherId/$classPeriodId here are already scoped to this exact
+     * program, not guessed from a single shared field.
+     */
+    private function enrollUserInProgram(User $user, int $programId, ?int $teacherId, ?int $classPeriodId): void
+    {
+        $attributes = [
+            'status' => 'active',
+            'teacher_id' => $teacherId,
+            'class_period_id' => $classPeriodId,
+        ];
+
+        $existing = Enrollment::where('user_id', $user->id)->where('program_id', $programId)->first();
         if ($existing) {
-            $existing->update(['status' => 'active']);
+            $existing->update($attributes);
             return;
         }
 
-        $classPeriodId = null;
-        if ($user->class_period_id) {
-            $ownsProgram = ClassPeriod::where('id', $user->class_period_id)
-                ->where('program_id', $programId)
-                ->exists();
-            if ($ownsProgram) {
-                $classPeriodId = $user->class_period_id;
-            }
-        }
-
-        Enrollment::create([
+        Enrollment::create(array_merge([
             'user_id' => $user->id,
             'program_id' => $programId,
-            'class_period_id' => $classPeriodId,
-            'status' => 'active',
-        ]);
+        ], $attributes));
     }
 
     public function delete(mixed $user): void

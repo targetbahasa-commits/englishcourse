@@ -210,17 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <!-- Attempt 1 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium">Attempt 1 (Use "The line graph compares...")</label>
-                        <textarea name="attempt1" x-model="answers.attempt1" rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400" placeholder="The line graph compares..."></textarea>
+                        <textarea name="attempt1" x-model="answers.attempt1" rows="2" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The line graph compares..."></textarea>
                     </div>
                     <!-- Attempt 2 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium">Attempt 2 (Use "The chart illustrates...")</label>
-                        <textarea name="attempt2" x-model="answers.attempt2" rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400" placeholder="The chart illustrates..."></textarea>
+                        <textarea name="attempt2" x-model="answers.attempt2" rows="2" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The chart illustrates..."></textarea>
                     </div>
                     <!-- Attempt 3 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium">Attempt 3 (Change time expression "between... and...")</label>
-                        <textarea name="attempt3" x-model="answers.attempt3" rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400" placeholder="The line graph shows changes in... from... to..."></textarea>
+                        <textarea name="attempt3" x-model="answers.attempt3" rows="2" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The line graph shows changes in... from... to..."></textarea>
                     </div>
                     
                      <!-- Reveal Sample Button -->
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write an introduction:</label>
-                    <textarea name="intro_bar" x-model="answers.intro_bar" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 transition-all text-base placeholder-gray-400" placeholder="The bar chart..."></textarea>
+                    <textarea name="intro_bar" x-model="answers.intro_bar" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The bar chart..."></textarea>
                 </div>
             </div>
 
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write an introduction:</label>
-                    <textarea name="intro_table" x-model="answers.intro_table" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 transition-all text-base placeholder-gray-400" placeholder="The table compares..."></textarea>
+                    <textarea name="intro_table" x-model="answers.intro_table" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The table compares..."></textarea>
                 </div>
             </div>
 
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write an introduction:</label>
-                    <textarea name="intro_pie" x-model="answers.intro_pie" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 transition-all text-base placeholder-gray-400" placeholder="The pie charts show..."></textarea>
+                    <textarea name="intro_pie" x-model="answers.intro_pie" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The pie charts show..."></textarea>
                 </div>
             </div>
 
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="p-6">
                     <label class="block text-gray-700 font-medium mb-2">Write an introduction:</label>
-                    <textarea name="intro_mixed" x-model="answers.intro_mixed" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 transition-all text-base placeholder-gray-400" placeholder="The mixed charts illustrate..."></textarea>
+                    <textarea name="intro_mixed" x-model="answers.intro_mixed" rows="3" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 transition-all text-base placeholder-gray-400 resize-none overflow-hidden" placeholder="The mixed charts illustrate..."></textarea>
                 </div>
             </div>
         </div>

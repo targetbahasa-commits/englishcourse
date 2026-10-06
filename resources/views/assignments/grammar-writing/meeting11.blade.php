@@ -134,13 +134,13 @@
                             </div>
                             
                             <div class="mb-2">
-                                <input type="text"
+                                <textarea rows="1"
                                        name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-1 focus:ring-pink-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                       style="field-sizing: content;"
+                                       class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-1 focus:ring-pink-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                        placeholder="Translate to English..."
                                        {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                       autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results[$idx]['score'] == 10)
@@ -245,7 +245,8 @@
                         <textarea
                             name="userParagraphAnswer"
                             rows="8"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-1 focus:ring-pink-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-1 focus:ring-pink-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan paragraf di sini..."
                             {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                     </div>
@@ -366,7 +367,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const isReadonly = document.querySelector('form[action*="/assignments/grammar-writing/meeting"] input[type="text"][readonly], form[action*="/assignments/grammar-writing/meeting"] textarea[readonly]');
             
             return !!isReadonly;
         },

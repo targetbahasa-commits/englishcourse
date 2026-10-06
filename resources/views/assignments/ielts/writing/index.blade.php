@@ -3,7 +3,7 @@
 @section('title', 'IELTS Writing - Task ' . ($task ?? 1))
 
 @section('content')
-<div class="container mx-auto px-4 py-8" x-data="{ 
+<div class="container mx-auto px-4 py-8 pb-24" x-data="{ 
     showModal: false, 
     editingMeeting: null,
     formData: {
@@ -247,5 +247,6 @@
         @endif
     </div>
     @include('components.meetings-calendar-modal')
+    <x-meeting-progress-bar program-slug="ielts-academic-writing" :total-meetings="count($meetings ?? []) ?: 10" />
 </div>
 @endsection

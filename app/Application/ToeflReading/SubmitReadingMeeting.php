@@ -16,28 +16,34 @@ class SubmitReadingMeeting
         $questions = $this->repository->getQuestionsByMeeting($meeting->id);
 
         $correctCount = 0;
+        $userAnswers = [];
         foreach ($questions as $question) {
             $userAnswer = $requestData['question_' . $question->id] ?? null;
+            $userAnswers[$question->id] = $userAnswer ? strtoupper((string) $userAnswer) : null;
             if ($userAnswer && strtoupper((string) $userAnswer) === strtoupper((string) $question->correct_answer)) {
                 $correctCount++;
             }
         }
 
-        $totalQuestions = $questions->count();
+        $totalQuestions = count($questions);
         $score = 0;
 
         if ($totalQuestions == 50) {
             $conversion = [
-                50 => 67, 49 => 66, 48 => 65, 47 => 64, 46 => 63,
-                45 => 62, 44 => 61, 43 => 60, 42 => 59, 41 => 58, 40 => 57,
-                39 => 57, 38 => 56, 37 => 55, 36 => 54, 35 => 54,
-                34 => 53, 33 => 52, 32 => 52, 31 => 51, 30 => 51,
-                29 => 50, 28 => 49, 27 => 49, 26 => 48, 25 => 48,
-                24 => 47, 23 => 47, 22 => 46, 21 => 45, 20 => 45,
-                19 => 44, 18 => 43, 17 => 43, 16 => 42, 15 => 41,
-                14 => 41, 13 => 40, 12 => 40, 11 => 39, 10 => 38,
-                9 => 37, 8 => 37, 7 => 36, 6 => 35, 5 => 34,
-                4 => 33, 3 => 32, 2 => 31, 1 => 31, 0 => 31,
+                50 => 67, 49 => 66, 48 => 65,
+                47 => 64, 46 => 63, 45 => 62,
+                44 => 61, 43 => 60, 42 => 59,
+                41 => 58, 40 => 58, 39 => 57,
+                38 => 56, 37 => 56, 36 => 55,
+                35 => 54, 34 => 54, 33 => 53,
+                32 => 52, 31 => 52, 30 => 51,
+                29 => 50, 28 => 50, 27 => 49,
+                26 => 48, 25 => 48, 24 => 47,
+                23 => 46, 22 => 45, 21 => 44,
+                20 => 43, 19 => 42, 18 => 41,
+                17 => 40, 16 => 38, 15 => 37,
+                14 => 35, 13 => 33, 12 => 31,
+                11 => 31, 10 => 31, 9 => 31, 8 => 31, 7 => 31, 6 => 31, 5 => 31, 4 => 31, 3 => 31, 2 => 31, 1 => 31, 0 => 31,
             ];
             $score = ($conversion[$correctCount] ?? 31) * 10;
         } elseif ($totalQuestions > 0) {
@@ -48,6 +54,7 @@ class SubmitReadingMeeting
             'score' => $score,
             'correct_count' => $correctCount,
             'total_questions' => $totalQuestions,
+            'answers' => $userAnswers,
         ]);
 
         return "Assignment submitted! Your Score: {$score} ({$correctCount}/{$totalQuestions} correct)";

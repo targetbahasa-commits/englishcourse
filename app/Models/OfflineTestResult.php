@@ -24,6 +24,16 @@ class OfflineTestResult extends Model
         'certificate_sent_at' => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function (self $result) {
+            if (empty($result->certificate_number)) {
+                $result->certificate_number = app(\App\Application\Certificates\GenerateCertificateNumber::class)
+                    ->generate($result->test_type, now());
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

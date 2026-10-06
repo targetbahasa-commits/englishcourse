@@ -11,6 +11,7 @@ use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
 use App\Models\IeltsReadingPassage;
 use App\Models\IeltsReadingPracticeResult;
+use App\Models\IeltsReadingPracticeDraft;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -168,7 +169,10 @@ class IeltsReadingController extends Controller
             } else {
                 $ansStr = strtolower(trim((string)($userAnswer ?? '')));
                 $corrStr = strtolower(trim((string)($data['correct'] ?? '')));
-                $isCorrect = $ansStr === $corrStr && $ansStr !== '';
+                if ($corrStr !== '') {
+                    $possibleOptions = array_map(fn($o) => strtolower(trim($o)), explode('/', $corrStr));
+                    $isCorrect = in_array($ansStr, $possibleOptions, true) && $ansStr !== '';
+                }
             }
 
             if ($isCorrect) {
@@ -194,6 +198,10 @@ class IeltsReadingController extends Controller
                     'answers_data' => $userAnswers,
                 ]
             );
+
+            IeltsReadingPracticeDraft::where('user_id', Auth::id())
+                ->where('material_id', $materialId)
+                ->delete();
         }
 
         return response()->json([
@@ -202,6 +210,48 @@ class IeltsReadingController extends Controller
             'band_score' => $bandScore,
             'answer_key' => $keys,
         ]);
+    }
+
+    public function saveDraft(Request $request)
+    {
+        $request->validate([
+            'material_id' => 'required|integer',
+            'answers' => 'required|array',
+        ]);
+
+        if (!Auth::check()) {
+            return response()->json(['status' => 'unauthenticated'], 401);
+        }
+
+        IeltsReadingPracticeDraft::updateOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'material_id' => $request->input('material_id'),
+            ],
+            [
+                'answers_data' => $request->input('answers'),
+            ]
+        );
+
+        return response()->json(['status' => 'saved']);
+    }
+
+    private function resolveMaterialAnswerKeys(array $materialData): array
+    {
+        if (!isset($materialData['content'])) {
+            return [];
+        }
+
+        $isSingle = isset($materialData['content']['passage_title']);
+        $sections = $isSingle ? [$materialData['content']] : $materialData['content'];
+
+        $resolver = app(QuestionAnswerKeyResolver::class);
+        $keys = [];
+        foreach (collect($sections)->flatMap(fn($s) => $s['questions'] ?? []) as $q) {
+            $keys = $keys + $resolver->resolve($q);
+        }
+
+        return $keys;
     }
 
     private function calculateBandScore($correct, bool $isGeneral = false)
@@ -247,6 +297,16 @@ class IeltsReadingController extends Controller
 
     public function material(int $id)
     {
+        if (request()->query('retry') == '1' && Auth::check()) {
+            IeltsReadingPracticeResult::where('user_id', Auth::id())
+                ->where('material_id', $id)
+                ->delete();
+            IeltsReadingPracticeDraft::where('user_id', Auth::id())
+                ->where('material_id', $id)
+                ->delete();
+            return redirect()->route('assignments.ielts-academic.reading.material', $id);
+        }
+
         $material = $this->buildIeltsReadingMaterialData->material($id, Auth::user());
 
         if ($material instanceof RedirectResponse) {
@@ -256,6 +316,19 @@ class IeltsReadingController extends Controller
         if ($material !== null) {
             if (is_array($material)) {
                 $material['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic');
+                $material['materialId'] = $id;
+
+                $existingResult = Auth::check()
+                    ? IeltsReadingPracticeResult::where('user_id', Auth::id())->where('material_id', $id)->first()
+                    : null;
+                $material['existingResult'] = $existingResult;
+
+                $draft = (Auth::check() && !$existingResult)
+                    ? IeltsReadingPracticeDraft::where('user_id', Auth::id())->where('material_id', $id)->first()
+                    : null;
+                $material['draftAnswers'] = $draft?->answers_data ?? [];
+
+                $material['answerKeys'] = $this->resolveMaterialAnswerKeys($material);
             }
 
             return view('assignments.ielts.reading.material', $material);
@@ -269,6 +342,19 @@ class IeltsReadingController extends Controller
 
         if (is_array($legacyMaterial)) {
             $legacyMaterial['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic');
+            $legacyMaterial['materialId'] = $id;
+
+            $existingResult = Auth::check()
+                ? IeltsReadingPracticeResult::where('user_id', Auth::id())->where('material_id', $id)->first()
+                : null;
+            $legacyMaterial['existingResult'] = $existingResult;
+
+            $draft = (Auth::check() && !$existingResult)
+                ? IeltsReadingPracticeDraft::where('user_id', Auth::id())->where('material_id', $id)->first()
+                : null;
+            $legacyMaterial['draftAnswers'] = $draft?->answers_data ?? [];
+
+            $legacyMaterial['answerKeys'] = $this->resolveMaterialAnswerKeys($legacyMaterial);
         }
 
         return view('assignments.ielts.reading.material', $legacyMaterial);
@@ -296,6 +382,16 @@ class IeltsReadingController extends Controller
             }
         }
 
+        if (request()->query('retry') == '1' && Auth::check()) {
+            IeltsReadingPracticeResult::where('user_id', Auth::id())
+                ->where('material_id', $targetId)
+                ->delete();
+            IeltsReadingPracticeDraft::where('user_id', Auth::id())
+                ->where('material_id', $targetId)
+                ->delete();
+            return redirect()->route('assignments.ielts-general.reading.material', $id);
+        }
+
         $material = $this->buildIeltsReadingMaterialData->material($targetId, Auth::user());
 
         if ($material instanceof RedirectResponse) {
@@ -306,6 +402,19 @@ class IeltsReadingController extends Controller
             if (is_array($material)) {
                 $material['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-general-full-package');
                 $material['isGeneral'] = true;
+                $material['materialId'] = $targetId;
+
+                $existingResult = Auth::check()
+                    ? IeltsReadingPracticeResult::where('user_id', Auth::id())->where('material_id', $targetId)->first()
+                    : null;
+                $material['existingResult'] = $existingResult;
+
+                $draft = (Auth::check() && !$existingResult)
+                    ? IeltsReadingPracticeDraft::where('user_id', Auth::id())->where('material_id', $targetId)->first()
+                    : null;
+                $material['draftAnswers'] = $draft?->answers_data ?? [];
+
+                $material['answerKeys'] = $this->resolveMaterialAnswerKeys($material);
             }
 
             return view('assignments.ielts.reading.material', $material);
@@ -320,6 +429,19 @@ class IeltsReadingController extends Controller
         if (is_array($legacyMaterial)) {
             $legacyMaterial['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-general-full-package');
             $legacyMaterial['isGeneral'] = true;
+            $legacyMaterial['materialId'] = $targetId;
+
+            $existingResult = Auth::check()
+                ? IeltsReadingPracticeResult::where('user_id', Auth::id())->where('material_id', $targetId)->first()
+                : null;
+            $legacyMaterial['existingResult'] = $existingResult;
+
+            $draft = (Auth::check() && !$existingResult)
+                ? IeltsReadingPracticeDraft::where('user_id', Auth::id())->where('material_id', $targetId)->first()
+                : null;
+            $legacyMaterial['draftAnswers'] = $draft?->answers_data ?? [];
+
+            $legacyMaterial['answerKeys'] = $this->resolveMaterialAnswerKeys($legacyMaterial);
         }
 
         return view('assignments.ielts.reading.material', $legacyMaterial);

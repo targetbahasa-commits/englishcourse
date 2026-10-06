@@ -24,7 +24,7 @@
         @endif
 
         <main class="flex-1 md:ml-64 p-8 pb-24">
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-5xl mx-auto">
                 <!-- Header -->
                 <div class="mb-8">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
@@ -135,7 +135,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         @forelse($practiceSets ?? [] as $set)
                         @php
                             $colors = [
@@ -147,19 +147,19 @@
                             $c = $colors[$set->meeting_number] ?? $colors[1];
                         @endphp
                         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col group hover:-translate-y-1">
-                            <div class="h-28 bg-gradient-to-br {{ $c['from'] }} {{ $c['to'] }} p-4 flex flex-col justify-between text-white relative">
-                                <div class="flex items-center justify-between">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm border border-white/20">
+                            <div class="min-h-[6.5rem] bg-gradient-to-br {{ $c['from'] }} {{ $c['to'] }} p-5 flex flex-col justify-between text-white relative">
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm border border-white/20">
                                         Practice Set {{ $set->meeting_number }}
                                     </span>
 
                                     <div class="flex items-center gap-1.5">
                                         @if($set->completed)
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400 text-gray-900 shadow-xs">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400 text-gray-900 shadow-xs">
                                                 ✓ Skor: {{ round($set->user_score) }}
                                             </span>
                                         @else
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white">
                                                 {{ $set->questions_count }} Soal
                                             </span>
                                         @endif
@@ -171,7 +171,7 @@
                                             <button type="submit" class="p-1 rounded-lg transition {{ $set->is_locked ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30' }}" title="{{ $set->is_locked ? 'Buka Kunci' : 'Kunci Practice Test' }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     @if($set->is_locked)
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
                                                     @else
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
                                                     @endif
@@ -195,24 +195,24 @@
                                         @endif
                                     </div>
                                 </div>
-                                <h3 class="text-base font-bold text-white drop-shadow-sm line-clamp-1" title="{{ $set->title }}">{{ $set->title }}</h3>
+                                <h3 class="text-lg font-bold text-white drop-shadow-sm leading-snug line-clamp-2" title="{{ $set->title }}">{{ $set->title }}</h3>
                             </div>
-                            <div class="p-4 flex-1 flex flex-col justify-between">
+                            <div class="p-5 flex-1 flex flex-col justify-between">
                                 <div>
                                     @if($set->subtitle)
-                                        <p class="text-[11px] font-semibold {{ $c['text'] }} mb-1 line-clamp-1">{{ $set->subtitle }}</p>
+                                        <p class="text-xs font-semibold {{ $c['text'] }} mb-1.5">{{ $set->subtitle }}</p>
                                     @endif
-                                    <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                                    <p class="text-xs sm:text-sm text-gray-500 line-clamp-2 leading-relaxed mb-4">
                                         {{ $set->description }}
                                     </p>
                                 </div>
                                 <div class="pt-3 border-t border-gray-100">
                                     @if(!$set->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                                        <a href="{{ route('assignments.sat.reading-writing.meeting', $set->meeting_number) }}" class="block w-full py-2.5 px-3 text-center rounded-xl text-xs font-bold text-white {{ $c['btn'] }} transition shadow-sm">
+                                        <a href="{{ route('assignments.sat.reading-writing.meeting', $set->meeting_number) }}" class="block w-full py-3 px-4 text-center rounded-xl text-sm font-bold text-white {{ $c['btn'] }} transition shadow-sm hover:shadow-md">
                                             {{ $set->completed ? 'Buka Latihan' : 'Mulai Latihan' }} &rarr;
                                         </a>
                                     @else
-                                        <button disabled class="block w-full py-2 px-3 text-center rounded-xl text-xs font-bold text-gray-400 bg-gray-100 cursor-not-allowed">
+                                        <button disabled class="block w-full py-3 px-4 text-center rounded-xl text-sm font-bold text-gray-400 bg-gray-100 cursor-not-allowed">
                                             🔒 Terkunci
                                         </button>
                                     @endif

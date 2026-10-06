@@ -13,6 +13,32 @@
     
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        textarea.auto-expand-answer {
+            field-sizing: content;
+            height: auto;
+            width: 100%;
+            resize: none;
+            overflow: hidden;
+        }
+        textarea.auto-expand-answer[rows="1"] {
+            min-block-size: 2.75rem;
+            min-height: 2.75rem;
+        }
+        textarea.auto-expand-answer[rows="2"] {
+            min-height: 4.25rem;
+        }
+        textarea.auto-expand-answer[rows="3"] {
+            min-height: 5.75rem;
+        }
+        textarea.auto-expand-answer[rows="4"] {
+            min-height: 7.25rem;
+        }
+        textarea.auto-expand-answer:not([rows="1"]):not([rows="2"]):not([rows="3"]):not([rows="4"]) {
+            min-block-size: 8lh;
+            min-height: 9rem;
+        }
+    </style>
     
     <!-- Additional Styles -->
     @stack('styles')
@@ -115,9 +141,50 @@
 
     <!-- Additional Scripts -->
     @stack('scripts')
+    <script>
+        (function () {
+            const resizeEl = function (el) {
+                if (!el || el.tagName !== 'TEXTAREA' || !el.classList.contains('auto-expand-answer')) return;
+                el.style.height = 'auto';
+                if (el.scrollHeight > 0) {
+                    el.style.height = el.scrollHeight + 'px';
+                }
+            };
+            const resizeAll = function (root) {
+                (root || document).querySelectorAll('textarea.auto-expand-answer').forEach(resizeEl);
+            };
+            window.resizeAutoExpandTextarea = resizeEl;
+            window.resizeAutoExpandTextareas = resizeAll;
+            document.addEventListener('input', function (e) {
+                if (e.target && e.target.matches && e.target.matches('textarea.auto-expand-answer')) {
+                    resizeEl(e.target);
+                }
+            });
+            window.addEventListener('resize', function () { resizeAll(); });
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    resizeAll();
+                    setTimeout(resizeAll, 150);
+                    setTimeout(resizeAll, 600);
+                });
+            } else {
+                resizeAll();
+                setTimeout(resizeAll, 150);
+                setTimeout(resizeAll, 600);
+            }
+            window.addEventListener('load', function () { resizeAll(); });
+        })();
+    </script>
     @include('components.student-broadcaster')
     @include('components.chat-notifier')
     @include('components.floating-wa-button')
+    {{-- Collaborative whiteboard: only on assignment/meeting pages, for any
+         logged-in role (admin/teacher/student can all draw together there). --}}
+    @auth
+        @if(request()->is('assignments/*') || request()->is('assignments'))
+            <x-live-drawing />
+        @endif
+    @endauth
     <!-- Alpine.js for interactivity -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>

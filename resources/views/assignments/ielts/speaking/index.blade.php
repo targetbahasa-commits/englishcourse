@@ -74,7 +74,7 @@
     });
 </script>
 
-<div class="w-full px-8 py-8" x-data="speakingTopics()">
+<div class="w-full px-8 py-8 pb-24" x-data="speakingTopics()">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -133,7 +133,7 @@
             @endif
 
             @php
-                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? $batchProgram?->classPeriods?->first()?->id ?? '';
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
@@ -342,5 +342,6 @@
         </div>
     </template>
     @include('components.meetings-calendar-modal')
+    <x-meeting-progress-bar program-slug="ielts-academic-speaking" :total-meetings="count($lessons ?? []) ?: 10" />
 </div>
 @endsection

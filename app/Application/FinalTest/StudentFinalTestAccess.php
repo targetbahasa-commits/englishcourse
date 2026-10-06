@@ -71,14 +71,23 @@ class StudentFinalTestAccess
 
     public function hasCompletedAllMeetings(User $user, int $programId): bool
     {
+        $program = Program::query()->select(['id', 'slug'])->find($programId);
+
         $totalMeetings = (int) Program::query()
             ->whereKey($programId)
-            ->withCount('meetings')
+            ->withCount(['meetings' => function ($query) use ($program) {
+                if ($program?->slug === 'fast-track-grammar-for-writing') {
+                    $query->where('meeting_number', '<=', 10);
+                }
+            }])
             ->value('meetings_count');
 
         $completedMeetings = (int) MeetingScore::query()
             ->where('user_id', $user->id)
             ->where('program_id', $programId)
+            ->when($program?->slug === 'fast-track-grammar-for-writing', function ($q) {
+                $q->where('meeting_number', '<=', 10);
+            })
             ->distinct()
             ->count('meeting_number');
 

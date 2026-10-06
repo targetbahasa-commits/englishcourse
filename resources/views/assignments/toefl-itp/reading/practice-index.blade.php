@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            {{-- 10 Reading Packages --}}
+            {{-- 14 Reading Packages --}}
             <div class="mb-8">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">Paket Soal Reading</h2>
@@ -66,8 +66,12 @@
                                     8  => ['bg' => 'linear-gradient(135deg,#1e40af,#1e3a5f)', 'btn' => '#1e40af', 'btnHover' => '#1e3a8a'],
                                     9  => ['bg' => 'linear-gradient(135deg,#be123c,#9f1239)', 'btn' => '#be123c', 'btnHover' => '#9f1239'],
                                     10 => ['bg' => 'linear-gradient(135deg,#c2410c,#b91c1c)', 'btn' => '#c2410c', 'btnHover' => '#9a3412'],
+                                    11 => ['bg' => 'linear-gradient(135deg,#0284c7,#0369a1)', 'btn' => '#0284c7', 'btnHover' => '#0369a1'],
+                                    12 => ['bg' => 'linear-gradient(135deg,#4f46e5,#3730a3)', 'btn' => '#4f46e5', 'btnHover' => '#3730a3'],
+                                    13 => ['bg' => 'linear-gradient(135deg,#9333ea,#7e22ce)', 'btn' => '#9333ea', 'btnHover' => '#7e22ce'],
+                                    14 => ['bg' => 'linear-gradient(135deg,#059669,#047857)', 'btn' => '#059669', 'btnHover' => '#047857'],
                                 ];
-                                $p = $palettes[$package['package_number']] ?? $palettes[1];
+                                $p = $palettes[$package['package_number']] ?? $palettes[(($package['package_number'] - 1) % count($palettes)) + 1];
                         @endphp
                         <div class="group bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
                             {{-- Card Header --}}

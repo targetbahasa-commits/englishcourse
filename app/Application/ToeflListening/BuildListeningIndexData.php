@@ -33,6 +33,7 @@ class BuildListeningIndexData
 
                 $meetings[] = [
                     'number' => $number,
+                    'meeting_id' => $meeting?->id,
                     'is_locked' => $this->batchResolver->resolveToeflLockedState(
                         $batchLockMap,
                         $number,
@@ -50,6 +51,7 @@ class BuildListeningIndexData
 
                 $meetings[] = [
                     'number' => $dbMeeting->meeting_number,
+                    'meeting_id' => $dbMeeting->id,
                     'is_locked' => $this->batchResolver->resolveToeflLockedState(
                         $batchLockMap,
                         (int) $dbMeeting->meeting_number,

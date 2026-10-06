@@ -17,6 +17,7 @@ class ToeflReadingController extends Controller
         private readonly BuildReadingIndexData $buildReadingIndexData,
         private readonly BuildReadingMeetingViewData $buildReadingMeetingViewData,
         private readonly SubmitReadingMeeting $submitReadingMeeting,
+        private readonly \App\Domain\ToeflReading\Repositories\ToeflReadingRepository $repository,
     ) {
         $this->registerAssignmentAccessMiddleware();
     }
@@ -26,8 +27,14 @@ class ToeflReadingController extends Controller
         return view('assignments.toefl-itp.reading.index', $this->buildReadingIndexData->handle(Auth::user()));
     }
 
-    public function showMeeting(int $number)
+    public function showMeeting(Request $request, int $number)
     {
+        if ($request->has('retry')) {
+            $this->repository->deleteScoreForUser(Auth::id(), $number);
+            return redirect()->route('assignments.toefl-itp.reading.meeting', $number)
+                ->with('info', 'Latihan telah direset. Silakan kerjakan kembali.');
+        }
+
         $viewData = $this->buildReadingMeetingViewData->handle($number, Auth::user());
 
         if ($viewData['isLocked']) {
@@ -38,6 +45,7 @@ class ToeflReadingController extends Controller
         return view($viewData['view'], [
             'meeting' => $viewData['meeting'],
             'passages' => $viewData['passages'],
+            'existingScore' => $viewData['existingScore'] ?? null,
         ]);
     }
 

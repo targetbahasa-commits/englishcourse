@@ -6,43 +6,43 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 11</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">1 million/1,000,000/$1 million</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 12</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">tourism</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 13</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">southeast/south-east</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 14</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">lawyer</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 15</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">7/seven</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 16</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">A</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 17</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">C</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 18</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">E</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 19</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">D</span>
         </div>
         <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
             <span class="text-xs font-bold text-emerald-600 block">Soal 20</span>
-            <span class="text-sm font-semibold text-gray-800">-</span>
+            <span class="text-sm font-semibold text-gray-800">B</span>
         </div>
     </div>
 </div>

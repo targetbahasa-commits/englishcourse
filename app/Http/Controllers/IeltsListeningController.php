@@ -10,6 +10,8 @@ use App\Application\IeltsListening\PrepareIeltsListeningPracticeData;
 use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use App\Http\Controllers\Concerns\ResolvesAuthenticatedUser;
 use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
+use App\Models\IeltsListeningPracticeResult;
+use App\Models\IeltsListeningPracticeDraft;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,7 +41,26 @@ class IeltsListeningController extends Controller
 
     public function practiceIndex()
     {
-        return view('assignments.ielts.listening.practice-index', $this->buildIeltsListeningPracticeIndexData->handle());
+        $data = $this->buildIeltsListeningPracticeIndexData->handle();
+
+        $userPartStats = [];
+        if (Auth::check()) {
+            $results = \App\Models\IeltsListeningPracticeResult::where('user_id', Auth::id())
+                ->get()
+                ->groupBy('part');
+
+            for ($p = 1; $p <= 4; $p++) {
+                $partGroup = $results->get($p, collect());
+                $userPartStats[$p] = [
+                    'completed_count' => $partGroup->count(),
+                    'total_tests' => 50,
+                    'avg_band' => $partGroup->isNotEmpty() ? round((float) $partGroup->avg('band_score'), 1) : null,
+                ];
+            }
+        }
+        $data['userPartStats'] = $userPartStats;
+
+        return view('assignments.ielts.listening.practice-index', $data);
     }
 
     public function material(Request $request, int $id)
@@ -68,13 +89,42 @@ class IeltsListeningController extends Controller
             abort(404);
         }
 
-        return view('assignments.ielts.listening.part1-practice', ['set' => $set]);
+        $studentResults = Auth::check()
+            ? IeltsListeningPracticeResult::where('user_id', Auth::id())->where('part', $set)->get()->keyBy('test_id')
+            : collect();
+
+        return view('assignments.ielts.listening.part1-practice', [
+            'set' => $set,
+            'studentResults' => $studentResults,
+        ]);
     }
 
     public function practiceIndexTest(int $set, int $test)
     {
+        if (request()->query('retry') == '1' && Auth::check()) {
+            IeltsListeningPracticeResult::where('user_id', Auth::id())
+                ->where('part', $set)
+                ->where('test_id', $test)
+                ->delete();
+            IeltsListeningPracticeDraft::where('user_id', Auth::id())
+                ->where('part', $set)
+                ->where('test_id', $test)
+                ->delete();
+            return redirect()->route('assignments.ielts-academic.listening.practice-index.test', ['set' => $set, 'test' => $test]);
+        }
+
+        $existingResult = Auth::check()
+            ? IeltsListeningPracticeResult::where('user_id', Auth::id())->where('part', $set)->where('test_id', $test)->first()
+            : null;
+        $draft = (Auth::check() && !$existingResult)
+            ? IeltsListeningPracticeDraft::where('user_id', Auth::id())->where('part', $set)->where('test_id', $test)->first()
+            : null;
+
         $data = $this->prepareIeltsListeningPracticeData->createPracticeIndexTestMeeting($set);
         $data['testId'] = $test;
+        $data['existingResult'] = $existingResult;
+        $data['draftAnswers'] = $draft?->answers_data ?? [];
+        $data['answerKeys'] = $this->extractAnswerKeys($set, $test, $data['section'] ?? null);
 
         return view('assignments.ielts.listening.test-practice', $data);
     }
@@ -95,11 +145,32 @@ class IeltsListeningController extends Controller
 
         unset($data['isLocked']);
 
+        $studentResults = Auth::check()
+            ? IeltsListeningPracticeResult::where('user_id', Auth::id())->where('part', $set)->get()->keyBy('test_id')
+            : collect();
+        $data['studentResults'] = $studentResults;
+
         return view('assignments.ielts.listening.part1-practice', $data);
     }
 
     public function showPracticeTest(int $meetingId, int $set, int $testId, ?int $partNumber = null)
     {
+        if (request()->query('retry') == '1' && Auth::check()) {
+            IeltsListeningPracticeResult::where('user_id', Auth::id())
+                ->where('part', $set)
+                ->where('test_id', $testId)
+                ->delete();
+            IeltsListeningPracticeDraft::where('user_id', Auth::id())
+                ->where('part', $set)
+                ->where('test_id', $testId)
+                ->delete();
+            return redirect()->route('assignments.ielts-academic.listening.part1.practice.test', [
+                'meeting' => $meetingId,
+                'set' => $set,
+                'testId' => $testId,
+            ]);
+        }
+
         $user = $this->authenticatedUser();
         $data = $this->prepareIeltsListeningPracticeData->ensurePracticeTestIsAccessible(
             $meetingId,
@@ -114,6 +185,17 @@ class IeltsListeningController extends Controller
         }
 
         unset($data['isLocked']);
+
+        $existingResult = Auth::check()
+            ? IeltsListeningPracticeResult::where('user_id', Auth::id())->where('part', $set)->where('test_id', $testId)->first()
+            : null;
+        $draft = (Auth::check() && !$existingResult)
+            ? IeltsListeningPracticeDraft::where('user_id', Auth::id())->where('part', $set)->where('test_id', $testId)->first()
+            : null;
+
+        $data['existingResult'] = $existingResult;
+        $data['draftAnswers'] = $draft?->answers_data ?? [];
+        $data['answerKeys'] = $this->extractAnswerKeys($set, $testId, $data['section'] ?? null);
 
         return view('assignments.ielts.listening.test-practice', $data);
     }
@@ -259,6 +341,30 @@ class IeltsListeningController extends Controller
         $scorePercentage = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100) : 0;
         $bandScore = $this->calculateIeltsListeningBand($correctCount, $totalQuestions);
 
+        if (Auth::check()) {
+            IeltsListeningPracticeResult::updateOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'part' => $set,
+                    'test_id' => $testId,
+                ],
+                [
+                    'meeting_id' => $meetingId > 0 ? $meetingId : 0,
+                    'correct_count' => $correctCount,
+                    'total_questions' => $totalQuestions,
+                    'band_score' => (float)$bandScore,
+                    'score_percentage' => $scorePercentage,
+                    'answers_data' => $studentAnswers,
+                    'results_data' => $results,
+                ]
+            );
+
+            IeltsListeningPracticeDraft::where('user_id', Auth::id())
+                ->where('part', $set)
+                ->where('test_id', $testId)
+                ->delete();
+        }
+
         $evaluationData = [
             'set' => $set,
             'testId' => $testId,
@@ -271,8 +377,42 @@ class IeltsListeningController extends Controller
             'submitted_at' => now()->format('d M Y, H:i'),
         ];
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'evaluation_results' => $evaluationData,
+                'message' => "Jawaban IELTS Listening berhasil dikirim! Nilai: {$scorePercentage}% (Band {$bandScore}).",
+            ]);
+        }
+
         return redirect()->back()
             ->with('success', "Jawaban IELTS Listening berhasil dikirim! Nilai: {$scorePercentage}% (Band {$bandScore}).")
             ->with('evaluation_results', $evaluationData);
+    }
+
+    public function saveDraft(Request $request)
+    {
+        $request->validate([
+            'set' => 'required|integer',
+            'test' => 'required|integer',
+            'answers' => 'required|array',
+        ]);
+
+        if (!Auth::check()) {
+            return response()->json(['status' => 'unauthenticated'], 401);
+        }
+
+        IeltsListeningPracticeDraft::updateOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'part' => (int) $request->input('set'),
+                'test_id' => (int) $request->input('test'),
+            ],
+            [
+                'answers_data' => $request->input('answers'),
+            ]
+        );
+
+        return response()->json(['status' => 'saved']);
     }
 }

@@ -73,6 +73,7 @@ class ManageStructureMeetings
         $this->repository->createExerciseMeeting([
             'meeting_number' => $next,
             'title' => $parent->title . ' (Exercise ' . $nextIndex . ')',
+            'description' => 'parent:' . $parent->meeting_number,
             'is_locked' => 0,
         ]);
 
@@ -91,7 +92,7 @@ class ManageStructureMeetings
 
     public function removeSet(?int $targetNumber): string
     {
-        if ($targetNumber === 6) {
+        if ($targetNumber === null || $targetNumber < 50) {
             return 'Cannot delete the main lesson here.';
         }
 

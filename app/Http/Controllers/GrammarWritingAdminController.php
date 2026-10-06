@@ -102,12 +102,29 @@ class GrammarWritingAdminController extends Controller
      * word-match scoring, while Complexity (which has no non-AI fallback)
      * scores 0 and waits for a teacher to fill in a manual score via the
      * Grammar Writing review page.
+     *
+     * Auto-override: an admin turning this off usually means "I'll grade
+     * this meeting myself while the class is live" - but once the
+     * SUBMITTING STUDENT's own batch has ended, no teacher is grading
+     * anything for it anymore, so a manual-off setting would otherwise
+     * leave every late/ended-batch submission stuck at a 0 "waiting for
+     * manual review" that will never come. Forcing AI back on for that
+     * student keeps them able to actually learn from feedback past their
+     * batch's end date. This only ever fires for a real student submitting
+     * their own work - isStudentClassPeriodEnded() returns false
+     * immediately for any non-student caller (e.g. the admin/teacher
+     * viewing the toggle badge itself), so the admin-facing toggle display
+     * always still reflects the literal stored setting.
      */
     private function isGrammarWritingAiEnabled(string $track, int $meetingNumber): bool
     {
         $value = \App\Models\Setting::where('key', "grammar_writing_ai_{$track}_meeting_{$meetingNumber}_enabled")->value('value');
 
-        return $value === null || $value === '1';
+        if ($value === null || $value === '1') {
+            return true;
+        }
+
+        return $this->isStudentClassPeriodEnded("{$track}-grammar-for-writing");
     }
 
     /**
@@ -194,19 +211,39 @@ class GrammarWritingAdminController extends Controller
         return back()->with('success', $result['message']);
     }
 
-    public function grammarWritingClasses()
+    public function grammarWritingClasses(Request $request)
     {
         $user = Auth::user();
         $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user instanceof \App\Models\User ? $user : null);
         $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
 
-        $accessIntroductory = $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs);
-        $accessComplexity   = $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs);
-        $accessProficiency  = $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs);
-        $accessFastTrack    = $isAdminOrTeacher || in_array('fast-track-grammar-for-writing', $enrolledSlugs);
+        // A student enrolled in the Offline sibling (e.g.
+        // "introductory-grammar-for-writing-offline") has that exact slug in
+        // $enrolledSlugs, not the online base slug checked below - without
+        // stripping "-offline" here they'd see every tier as locked despite
+        // being actively enrolled.
+        $normalizedEnrolledSlugs = array_map(
+            static fn (string $slug) => preg_replace('/-offline$/', '', $slug),
+            $enrolledSlugs
+        );
+
+        $accessIntroductory = $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $normalizedEnrolledSlugs);
+        $accessComplexity   = $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $normalizedEnrolledSlugs);
+        $accessProficiency  = $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $normalizedEnrolledSlugs);
+        $accessFastTrack    = $isAdminOrTeacher || in_array('fast-track-grammar-for-writing', $normalizedEnrolledSlugs);
+
+        // Which delivery mode's tracks to link into next - carried through
+        // from the Online/Offline tab on the assignments overview grid (see
+        // assignments/index.blade.php) so the tiles below route into the
+        // matching Online/Offline program's own schedule and lock-status
+        // instead of always the Online one. grammarWritingTrack() below
+        // re-derives this independently from the student's actual
+        // enrollment, so a stale/missing mode here can't show a real
+        // student the wrong class - this only drives which links to build.
+        $mode = $request->query('mode') === 'offline' ? 'offline' : 'online';
 
         return view('assignments.grammar-writing-classes', compact(
-            'accessIntroductory', 'accessComplexity', 'accessProficiency', 'accessFastTrack', 'isAdminOrTeacher'
+            'accessIntroductory', 'accessComplexity', 'accessProficiency', 'accessFastTrack', 'isAdminOrTeacher', 'mode'
         ));
     }
 
@@ -639,8 +676,19 @@ class GrammarWritingAdminController extends Controller
             
             $availableTopics = collect(['Mix'])->merge($introAvailable)->merge($complexityAvailable)->merge($proficiencyAvailable)->unique()->values();
             
-            $introTopics = collect();
+            $introTopics = \App\Models\GrammarIntroTopic::orderBy('order')->get();
         }
+
+        $availableTopics = collect($availableTopics)
+            ->flatMap(function ($t) {
+                if (strtolower(trim((string)$t)) === 'abridgement and omitting') {
+                    return ['Abridgement', 'Omitting'];
+                }
+                return [$t];
+            })
+            ->reject(fn($t) => in_array(strtolower(trim((string)$t)), ['exam', 'examination']))
+            ->unique()
+            ->values();
         
         return view('assignments.grammar-writing-practice-level', compact('title', 'desc', 'level', 'topics', 'availableTopics', 'introTopics'));
     }
@@ -732,7 +780,7 @@ class GrammarWritingAdminController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function grammarWritingTrack(string $track, BuildGrammarWritingIndexData $buildGrammarWritingIndexData, StudentFinalTestAccess $studentFinalTestAccess)
+    public function grammarWritingTrack(Request $request, string $track, BuildGrammarWritingIndexData $buildGrammarWritingIndexData, StudentFinalTestAccess $studentFinalTestAccess)
     {
         $trackData = $this->grammarWritingTracks()[$track] ?? null;
 
@@ -740,19 +788,38 @@ class GrammarWritingAdminController extends Controller
 
         $user = Auth::user();
         $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+        $baseProgramSlug = $trackData['program_slug'];
+        $offlineProgramSlug = $baseProgramSlug . '-offline';
 
-        // Students may only access the track they are enrolled in.
+        // Online and Offline can run on completely different batches/schedules
+        // and meeting-lock states (see BuildGrammarWritingIndexData, which
+        // resolves the student's class period from this exact slug) - so a
+        // student enrolled in the Offline sibling must be routed to that
+        // program, not the Online base slug this track normally points to.
+        $resolvedProgramSlug = $baseProgramSlug;
+
         if (!$isAdminOrTeacher && $user?->isStudent()) {
             $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
-            if (!in_array($trackData['program_slug'], $enrolledSlugs, true)) {
+            if (in_array($offlineProgramSlug, $enrolledSlugs, true)) {
+                $resolvedProgramSlug = $offlineProgramSlug;
+            } elseif (!in_array($baseProgramSlug, $enrolledSlugs, true)) {
                 return redirect()->route('assignments.grammar-writing.classes')
                     ->with('error', 'Anda tidak memiliki akses ke track ini. Silakan daftar program yang sesuai.');
             }
+        } elseif ($isAdminOrTeacher && $request->query('mode') === 'offline') {
+            // Admin/teacher have no enrollment to key off - honor whichever
+            // tab (Online/Offline) they browsed in from, so previewing from
+            // the Offline tab actually shows the Offline class.
+            $resolvedProgramSlug = $offlineProgramSlug;
+        }
+
+        if ($resolvedProgramSlug !== $baseProgramSlug && !\App\Models\Program::where('slug', $resolvedProgramSlug)->exists()) {
+            $resolvedProgramSlug = $baseProgramSlug;
         }
 
         $indexData = $buildGrammarWritingIndexData->handle(
             $user,
-            $trackData['program_slug']
+            $resolvedProgramSlug
         );
 
         $aiEnabledByMeeting = [];
@@ -775,6 +842,9 @@ class GrammarWritingAdminController extends Controller
         $allMeetingsUnlocked = true;
         if (isset($indexData['program']) && $indexData['program']->meetings->isNotEmpty()) {
             foreach ($trackData['meetings'] as $meetingRow) {
+                if (!empty($meetingRow['is_bonus'])) {
+                    continue;
+                }
                 $dbMeeting = $indexData['program']->meetings->firstWhere('meeting_number', $meetingRow['source_meeting_number']);
                 if (!$dbMeeting || $dbMeeting->is_locked || empty($meetingRow['available'])) {
                     $allMeetingsUnlocked = false;
@@ -1037,6 +1107,36 @@ class GrammarWritingAdminController extends Controller
 
     public function grammarWritingIntroductoryMeetingReset(int $meeting)
     {
+        // Was a pure no-op (redirect only) - grammarWritingIntroductoryMeeting()
+        // above has no "submitted" session flag at all, it derives $submitted
+        // purely from whether a MeetingScore row exists, so without deleting
+        // that row (and the AssignmentDraft/draft session keys it also falls
+        // back to) this reset endpoint could never actually unlock a
+        // previously-submitted meeting for retry - only ever touches the
+        // clicking user's own row.
+        session()->forget([
+            "introductory_meeting{$meeting}_draft_answers",
+            "introductory_meeting{$meeting}_draft_paragraph_answer",
+        ]);
+
+        $userId = Auth::id();
+        if ($userId) {
+            try {
+                $programId = \App\Models\Program::where('slug', 'introductory-grammar-for-writing')->value('id') ?? Auth::user()?->program_id;
+                if ($programId) {
+                    \App\Models\MeetingScore::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+
+                    \App\Models\AssignmentDraft::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+                }
+            } catch (\Throwable $e) {}
+        }
+
         return redirect()->route('assignments.grammar-writing.introductory.meeting', ['meeting' => $meeting]);
     }
 
@@ -2770,6 +2870,32 @@ HTML
 
     public function grammarWritingComplexityMeetingReset(int $meeting)
     {
+        // Session keys alone used to be forgotten here, but every
+        // grammarWritingComplexityMeeting()/Meeting2ViewData load also falls
+        // back to the DB (MeetingScore/AssignmentDraft) whenever those exist
+        // for this user+meeting, regardless of session state - so without
+        // deleting those rows too, the very next page load silently
+        // re-locked the page to the scored/readonly view no matter how many
+        // times the student clicked "Ulangi Latihan". Only ever touches the
+        // clicking user's own row.
+        $userId = Auth::id();
+        if ($userId) {
+            try {
+                $programId = \App\Models\Program::where('slug', 'complexity-grammar-for-writing')->value('id') ?? Auth::user()?->program_id;
+                if ($programId) {
+                    \App\Models\MeetingScore::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+
+                    \App\Models\AssignmentDraft::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+                }
+            } catch (\Throwable $e) {}
+        }
+
         if ($meeting === 1) {
             session()->forget([
                 'complexity_meeting2_stage',
@@ -2779,6 +2905,7 @@ HTML
                 'complexity_meeting2_score_part2',
                 'complexity_meeting2_total_score',
                 'complexity_meeting1_draft_answers',
+                'complexity_meeting1_draft_paragraph_answer',
             ]);
 
             return redirect()->route('assignments.grammar-writing.complexity.meeting', 1);
@@ -2789,6 +2916,8 @@ HTML
             "complexity_meeting{$meeting}_results",
             "complexity_meeting{$meeting}_final_score",
             "complexity_meeting{$meeting}_user_answers",
+            "complexity_meeting{$meeting}_draft_answers",
+            "complexity_meeting{$meeting}_draft_paragraph_answer",
         ]);
 
         return redirect()->route('assignments.grammar-writing.complexity.meeting', $meeting);
@@ -3257,6 +3386,36 @@ HTML
 
     public function grammarWritingProficiencyMeetingReset(int $meeting)
     {
+        // Was a pure no-op (redirect only) - grammarWritingProficiencyMeeting()
+        // above has no "submitted" session flag at all, it derives $submitted
+        // purely from whether a MeetingScore row exists, so without deleting
+        // that row (and the AssignmentDraft/draft session keys it also falls
+        // back to) this reset endpoint could never actually unlock a
+        // previously-submitted meeting for retry - only ever touches the
+        // clicking user's own row.
+        session()->forget([
+            "proficiency_meeting{$meeting}_draft_answers",
+            "proficiency_meeting{$meeting}_draft_paragraph_answer",
+        ]);
+
+        $userId = Auth::id();
+        if ($userId) {
+            try {
+                $programId = \App\Models\Program::where('slug', 'proficiency-grammar-for-writing')->value('id') ?? Auth::user()?->program_id;
+                if ($programId) {
+                    \App\Models\MeetingScore::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+
+                    \App\Models\AssignmentDraft::where('user_id', $userId)
+                        ->where('program_id', $programId)
+                        ->where('meeting_number', $meeting)
+                        ->delete();
+                }
+            } catch (\Throwable $e) {}
+        }
+
         return redirect()->route('assignments.grammar-writing.proficiency.meeting', ['meeting' => $meeting]);
     }
 
@@ -3308,17 +3467,26 @@ HTML
 
                         $isNewEmpty = !isset($mergedAnswers[$k])
                             || (is_string($mergedAnswers[$k]) && trim($mergedAnswers[$k]) === '')
-                            || (is_array($mergedAnswers[$k]) && !collect($mergedAnswers[$k])->contains(fn($v) => trim((string)$v) !== ''));
+                            || (is_array($mergedAnswers[$k]) && !collect($mergedAnswers[$k])->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== ''));
 
                         if ($isNewEmpty) {
                             if (is_string($oldVal) && trim($oldVal) !== '') {
                                 $mergedAnswers[$k] = $oldVal;
-                            } elseif (is_array($oldVal) && collect($oldVal)->contains(fn($v) => trim((string)$v) !== '')) {
+                            } elseif (is_array($oldVal) && collect($oldVal)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== '')) {
                                 if (!isset($mergedAnswers[$k]) || !is_array($mergedAnswers[$k])) {
                                     $mergedAnswers[$k] = $oldVal;
                                 } else {
+                                    // $subV may itself be a nested array (e.g. trans_matrix[verb] form
+                                    // map) - never cast it to string directly.
                                     foreach ($oldVal as $subK => $subV) {
-                                        if ((!isset($mergedAnswers[$k][$subK]) || trim((string)$mergedAnswers[$k][$subK]) === '') && trim((string)$subV) !== '') {
+                                        $currentSubVal = $mergedAnswers[$k][$subK] ?? null;
+                                        $currentSubEmpty = $currentSubVal === null
+                                            || (is_string($currentSubVal) && trim($currentSubVal) === '')
+                                            || (is_array($currentSubVal) && !collect($currentSubVal)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== ''));
+                                        $subHasContent = is_array($subV)
+                                            ? collect($subV)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== '')
+                                            : trim((string)$subV) !== '';
+                                        if ($currentSubEmpty && $subHasContent) {
                                             $mergedAnswers[$k][$subK] = $subV;
                                         }
                                     }
@@ -3447,9 +3615,9 @@ HTML
         ];
     }
 
-    public function grammarWriting(BuildGrammarWritingIndexData $buildGrammarWritingIndexData, StudentFinalTestAccess $studentFinalTestAccess)
+    public function grammarWriting(Request $request, BuildGrammarWritingIndexData $buildGrammarWritingIndexData, StudentFinalTestAccess $studentFinalTestAccess)
     {
-        return $this->grammarWritingTrack('fast-track', $buildGrammarWritingIndexData, $studentFinalTestAccess);
+        return $this->grammarWritingTrack($request, 'fast-track', $buildGrammarWritingIndexData, $studentFinalTestAccess);
     }
 
     public function updatePeriod(UpdateGrammarWritingPeriodRequest $request, ManageGrammarWritingMeetings $manageGrammarWritingMeetings)
@@ -3630,8 +3798,20 @@ HTML
                 'route_name' => 'assignments.grammar-writing.meeting' . $i,
                 'route_parameters' => [],
                 'available' => \Illuminate\Support\Facades\Route::has('assignments.grammar-writing.meeting' . $i),
+                'is_bonus' => false,
             ];
         }
+
+        $meetings[] = [
+            'title' => 'Pertemuan Bonus',
+            'source_meeting_number' => 11,
+            'topic' => 'Peringkasan: Reducing, Abridgement, Omitting',
+            'description' => 'Materi & latihan komprehensif teknik peringkasan: Reducing (Adj Clause), Abridgement (Adv Clause), dan Omitting (Noun & Relative Clause).',
+            'route_name' => 'assignments.grammar-writing.fast-track.bonus',
+            'route_parameters' => [],
+            'available' => true,
+            'is_bonus' => true,
+        ];
 
         return $meetings;
     }
@@ -3684,7 +3864,7 @@ HTML
         ];
     }
 
-        private function introductoryMeetingCheatSheet(int $meeting): ?array
+    public function introductoryMeetingCheatSheet(int $meeting): ?array
     {
         return match ($meeting) {
             1 => ['__html__' => <<<'HTML'
@@ -6719,6 +6899,34 @@ Bagi materi ke dalam sub-topik yang jelas (misalnya: Verbal, Nominal, Passive, a
         }
 
         return response()->json(['success' => true, 'content' => $result['content']]);
+    }
+
+    public function fastTrackBookPdf(\Illuminate\Http\Request $request)
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        if (!$isAdminOrTeacher && $user?->isStudent()) {
+            $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
+            if (!in_array('fast-track-grammar-for-writing', $enrolledSlugs, true)) {
+                return redirect()->route('assignments.grammar-writing.classes')
+                    ->with('error', 'Anda tidak memiliki akses ke kelas Fast Track Grammar for Writing.');
+            }
+        }
+
+        $bookBuilder = app(\App\Application\GrammarWriting\BuildGrammarWritingFastTrackBookData::class);
+        $bookMeetings = $bookBuilder->handle();
+
+        $data = [
+            'trackTitle' => 'Fast Track Grammar for Writing',
+            'bookMeetings' => $bookMeetings,
+            'generatedAt' => now()->translatedFormat('d F Y'),
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('assignments.grammar-writing.book-pdf', $data);
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream('Buku_Panduan_Fast_Track_Grammar_for_Writing.pdf');
     }
 
 }

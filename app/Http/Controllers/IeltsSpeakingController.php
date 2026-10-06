@@ -48,19 +48,26 @@ class IeltsSpeakingController extends Controller
 
     public function practiceIndexPart(int $part)
     {
+        $studentResults = Auth::check()
+            ? \App\Models\IeltsSpeakingPracticeResult::where('user_id', Auth::id())
+                ->where('part', $part)
+                ->get()
+                ->keyBy('topic_slug')
+            : collect();
+
         if ($part === 1) {
             $topics = $this->getIeltsSpeakingTopics->part1Practice();
-            return view('assignments.ielts.speaking.part1', compact('topics'));
+            return view('assignments.ielts.speaking.part1', compact('topics', 'studentResults'));
         }
 
         if ($part === 2) {
             $topics = $this->getIeltsSpeakingTopics->part2();
-            return view('assignments.ielts.speaking.part2', compact('topics'));
+            return view('assignments.ielts.speaking.part2', compact('topics', 'studentResults'));
         }
 
         if ($part === 3) {
             $topics = $this->getIeltsSpeakingTopics->part3();
-            return view('assignments.ielts.speaking.part3', compact('topics'));
+            return view('assignments.ielts.speaking.part3', compact('topics', 'studentResults'));
         }
 
         return redirect()->route('assignments.ielts-academic.speaking.practice.index')
@@ -70,19 +77,27 @@ class IeltsSpeakingController extends Controller
     public function index(Request $request)
     {
         if ($request->has('part')) {
-            if ($request->part == 1) {
+            $part = (int) $request->part;
+            $studentResults = Auth::check()
+                ? \App\Models\IeltsSpeakingPracticeResult::where('user_id', Auth::id())
+                    ->where('part', $part)
+                    ->get()
+                    ->keyBy('topic_slug')
+                : collect();
+
+            if ($part == 1) {
                 $topics = $this->getIeltsSpeakingTopics->part1();
-                return view('assignments.ielts.speaking.part1', compact('topics'));
+                return view('assignments.ielts.speaking.part1', compact('topics', 'studentResults'));
             }
 
-            if ($request->part == 2) {
+            if ($part == 2) {
                 $topics = $this->getIeltsSpeakingTopics->part2();
-                return view('assignments.ielts.speaking.part2', compact('topics'));
+                return view('assignments.ielts.speaking.part2', compact('topics', 'studentResults'));
             }
 
-            if ($request->part == 3) {
+            if ($part == 3) {
                 $topics = $this->getIeltsSpeakingTopics->part3();
-                return view('assignments.ielts.speaking.part3', compact('topics'));
+                return view('assignments.ielts.speaking.part3', compact('topics', 'studentResults'));
             }
         }
 
@@ -162,6 +177,45 @@ class IeltsSpeakingController extends Controller
         if (!$topic) {
             return redirect()->route('assignments.ielts-academic.speaking.index', ['part' => 1])
                 ->with('error', 'Topic not found');
+        }
+
+        $part = (int) ($topic['part'] ?? ($request->query('part') ?? 1));
+
+        if (Auth::check() && $request->has('retry')) {
+            \App\Models\IeltsSpeakingPracticeResult::where('user_id', Auth::id())
+                ->where('part', $part)
+                ->where('topic_slug', $slug)
+                ->delete();
+
+            session()->forget([
+                'speaking_evaluation_result',
+                'speaking_evaluation_topic_title',
+                'speaking_evaluation_topic_slug',
+                'speaking_evaluation_part',
+            ]);
+
+            $params = ['topic' => $slug];
+            if ($part > 1) {
+                $params['part'] = $part;
+            }
+            if ($subtopicSlug) {
+                $params['subtopic'] = $subtopicSlug;
+            }
+            return redirect()->route('assignments.ielts-academic.speaking.practice', $params);
+        }
+
+        if (Auth::check() && !$isMockResult && !$subtopicSlug) {
+            $existingResult = \App\Models\IeltsSpeakingPracticeResult::where('user_id', Auth::id())
+                ->where('part', $part)
+                ->where('topic_slug', $slug)
+                ->first();
+
+            if ($existingResult) {
+                return redirect()->route('assignments.ielts-academic.speaking.evaluation', [
+                    'topic' => $slug,
+                    'part' => $part,
+                ]);
+            }
         }
 
         if (isset($topic['subtopics']) && is_array($topic['subtopics'])) {
@@ -329,6 +383,28 @@ class IeltsSpeakingController extends Controller
                 'transcripts' => $transcriptsData
             ];
 
+            if (Auth::check()) {
+                $topicModel = \App\Models\IeltsSpeakingTopic::where('slug', $topicSlug)->first();
+                \App\Models\IeltsSpeakingPracticeResult::updateOrCreate(
+                    [
+                        'user_id' => Auth::id(),
+                        'part' => $part,
+                        'topic_slug' => $topicSlug,
+                    ],
+                    [
+                        'topic_id' => $topicModel?->id,
+                        'overall_score' => 0.0,
+                        'fluency_score' => 0.0,
+                        'lexical_score' => 0.0,
+                        'grammar_score' => 0.0,
+                        'pronunciation_score' => 0.0,
+                        'scores_data' => $result,
+                        'transcripts_data' => $transcriptsData,
+                        'general_feedback' => $result['general_feedback'] ?? null,
+                    ]
+                );
+            }
+
             session([
                 'speaking_evaluation_result' => $result,
                 'speaking_evaluation_topic_title' => $topicTitle,
@@ -338,7 +414,7 @@ class IeltsSpeakingController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug])
+                'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug, 'part' => $part])
             ]);
         }
 
@@ -366,6 +442,28 @@ class IeltsSpeakingController extends Controller
             ];
         }
 
+        if (Auth::check()) {
+            $topicModel = \App\Models\IeltsSpeakingTopic::where('slug', $topicSlug)->first();
+            \App\Models\IeltsSpeakingPracticeResult::updateOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'part' => $part,
+                    'topic_slug' => $topicSlug,
+                ],
+                [
+                    'topic_id' => $topicModel?->id,
+                    'overall_score' => (float) ($result['overall_score'] ?? 0.0),
+                    'fluency_score' => isset($result['categories']['fluency_coherence']['score']) ? (float) $result['categories']['fluency_coherence']['score'] : null,
+                    'lexical_score' => isset($result['categories']['lexical_resource']['score']) ? (float) $result['categories']['lexical_resource']['score'] : null,
+                    'grammar_score' => isset($result['categories']['grammatical_range']['score']) ? (float) $result['categories']['grammatical_range']['score'] : null,
+                    'pronunciation_score' => isset($result['categories']['pronunciation']['score']) ? (float) $result['categories']['pronunciation']['score'] : null,
+                    'scores_data' => $result,
+                    'transcripts_data' => $transcriptsData,
+                    'general_feedback' => $result['general_feedback'] ?? null,
+                ]
+            );
+        }
+
         session([
             'speaking_evaluation_result' => $result,
             'speaking_evaluation_topic_title' => $topicTitle,
@@ -375,7 +473,7 @@ class IeltsSpeakingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug])
+            'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug, 'part' => $part])
         ]);
     }
 
@@ -468,15 +566,38 @@ class IeltsSpeakingController extends Controller
     public function evaluation(Request $request)
     {
         $result = session('speaking_evaluation_result');
+        $topicSlug = $request->query('topic') ?? session('speaking_evaluation_topic_slug', 'speaking-practice');
+        $part = (int) ($request->query('part') ?? session('speaking_evaluation_part', 1));
+
+        if (!$result && Auth::check()) {
+            $savedResult = \App\Models\IeltsSpeakingPracticeResult::where('user_id', Auth::id())
+                ->where('part', $part)
+                ->where('topic_slug', $topicSlug)
+                ->latest('id')
+                ->first();
+
+            if ($savedResult) {
+                $result = $savedResult->scores_data;
+                if (!isset($result['transcripts']) && !empty($savedResult->transcripts_data)) {
+                    $result['transcripts'] = $savedResult->transcripts_data;
+                }
+            }
+        }
 
         if (!$result) {
-            return redirect()->route('assignments.ielts-academic.speaking.index', ['part' => 1])->with('error', 'No evaluation results found.');
+            return redirect()->route('assignments.ielts-academic.speaking.index', ['part' => $part])->with('error', 'No evaluation results found.');
+        }
+
+        $topicTitle = session('speaking_evaluation_topic_title');
+        if (!$topicTitle) {
+            $topicModel = \App\Models\IeltsSpeakingTopic::where('slug', $topicSlug)->first();
+            $topicTitle = $topicModel ? ($part === 3 ? ($topicModel->part3_title ?? $topicModel->title) : $topicModel->title) : ucwords(str_replace('-', ' ', $topicSlug));
         }
 
         $topic = [
-            'title' => session('speaking_evaluation_topic_title', 'Speaking Practice'),
-            'slug' => session('speaking_evaluation_topic_slug', 'speaking-practice'),
-            'part' => session('speaking_evaluation_part', 1),
+            'title' => $topicTitle,
+            'slug' => $topicSlug,
+            'part' => $part,
         ];
 
         return view('assignments.ielts.speaking.evaluation', compact('result', 'topic'));

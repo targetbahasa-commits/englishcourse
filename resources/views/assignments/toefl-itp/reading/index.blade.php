@@ -25,7 +25,7 @@
         @endif
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-8 pb-24">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div class="relative w-96">
@@ -127,7 +127,7 @@
                 @endif
                 
                 @php
-                    $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                    $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? $batchProgram?->classPeriods?->first()?->id ?? '';
                     $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
                 @endphp
                 @if($calendarClassPeriodId)
@@ -142,9 +142,16 @@
                 @foreach($meetings as $meeting)
                 <div class="meeting-card bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative" data-id="{{ $meeting->id }}">
                     <div class="flex justify-between items-start mb-4">
-                        <span class="px-3 py-1 {{ $meeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-white text-blue-600' }} rounded-full text-xs font-bold">
-                            {{ $meeting->is_locked ? 'LOCKED' : 'OPEN' }}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 {{ $meeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-white text-blue-600' }} rounded-full text-xs font-bold">
+                                {{ $meeting->is_locked ? 'LOCKED' : 'OPEN' }}
+                            </span>
+                            @if(!empty($meeting->completed))
+                                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                                    ✓ Skor: {{ round($meeting->user_score) }}
+                                </span>
+                            @endif
+                        </div>
                         
                         <div class="flex items-center gap-2">
                             <!-- Drag Handle -->
@@ -201,6 +208,13 @@
                     <h3 class="text-xl font-bold text-gray-800 mb-1 line-clamp-2" title="{{ $meeting->title }}">{{ $meeting->title }}</h3>
                     <p class="text-gray-500 text-sm mb-4">Reading Lesson</p>
                     
+                    @if(!empty($meeting->completed))
+                        <div class="mb-3 py-2 px-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-emerald-700 uppercase">Nilai Terakhir</span>
+                            <span class="font-black text-emerald-800">{{ round($meeting->user_score) }}</span>
+                        </div>
+                    @endif
+
                     @if(!$meeting->is_locked)
                         <a href="{{ route('assignments.toefl-itp.reading.meeting', $meeting->meeting_number) }}" class="block w-full py-2 text-center rounded-xl font-bold transition bg-blue-600 text-white hover:bg-blue-700">Start Lesson</a>
                     @else
@@ -209,22 +223,41 @@
                     
                     @php
                         $classMeeting = !empty($selectedClassPeriod) ? $selectedClassPeriod->classMeetings->firstWhere('meeting_number', $meeting->meeting_number) : null;
+                        $canEditRecording = Auth::user()->isAdmin() || Auth::user()->isTeacher();
                     @endphp
-                    @if($classMeeting)
+                    @if($classMeeting || ($canEditRecording && !empty($selectedClassPeriod)))
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <div class="flex flex-col gap-2">
-                                <div class="flex items-center gap-2 text-xs text-gray-600">
-                                    <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <span>{{ $classMeeting->meeting_date ? $classMeeting->meeting_date->format('d M Y') : 'TBA' }}</span>
-                                    <span class="mx-0.5">•</span>
-                                    <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>{{ $classMeeting->start_time ? $classMeeting->start_time->format('H:i') . ' - ' . $classMeeting->end_time->format('H:i') . ' WIB' : 'TBA' }}</span>
-                                </div>
-                                @if($classMeeting->meeting_link)
-                                    <a href="{{ $classMeeting->meeting_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 mt-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                        Join Virtual Class
-                                    </a>
+                                @if($classMeeting)
+                                    <div class="flex items-center gap-2 text-xs text-gray-600">
+                                        <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span>{{ $classMeeting->meeting_date ? $classMeeting->meeting_date->format('d M Y') : 'TBA' }}</span>
+                                        <span class="mx-0.5">•</span>
+                                        <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <x-class-meeting-time
+                                            :meeting-id="$meeting->id"
+                                            :class-period-id="$selectedClassPeriod->id"
+                                            :start-time="$classMeeting->start_time?->format('H:i')"
+                                            :end-time="$classMeeting->end_time?->format('H:i')"
+                                            :can-edit="$canEditRecording"
+                                        />
+                                    </div>
+                                    @if($classMeeting->meeting_link)
+                                        <a href="{{ $classMeeting->meeting_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 mt-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Join Virtual Class
+                                        </a>
+                                    @endif
+                                @endif
+                                @if(!empty($selectedClassPeriod))
+                                    <x-class-meeting-recording-link
+                                        :meeting-id="$meeting->id"
+                                        :class-period-id="$selectedClassPeriod->id"
+                                        :recording-urls="$classMeeting->recording_urls ?? []"
+                                        :recording-passwords="$classMeeting->recording_passwords ?? []"
+                                        :can-edit="$canEditRecording"
+                                        size="xs"
+                                    />
                                 @endif
                             </div>
                         </div>
@@ -324,5 +357,6 @@
         }
     </script>
     @include('components.meetings-calendar-modal')
+    <x-meeting-progress-bar tracker-key="toefl-itp-reading" :total-meetings="count($meetings ?? []) ?: 20" />
 </body>
 </html>

@@ -155,13 +155,13 @@
                                         @endif
                                         
                                         <div class="mb-2">
-                                            <input type="text"
-                                                   name="userAnswers[sentences][{{ $idx }}]"
-                                                   value="{{ old('userAnswers.sentences.'.$idx, $userAnswers['sentences'][$idx] ?? '') }}"
-                                                   class="w-full p-3 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
-                                                   placeholder="Translate to English..."
-                                                   {{ $submitted ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea rows="1"
+                                                      name="userAnswers[sentences][{{ $idx }}]"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg leading-relaxed focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
+                                                      placeholder="Translate to English..."
+                                                      {{ $submitted ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('userAnswers.sentences.'.$idx, $userAnswers['sentences'][$idx] ?? '') }}</textarea>
                                             
                                             @if($submitted && isset($results['sentences'][$idx]))
                                                 @if($results['sentences'][$idx]['score'] == 100)
@@ -243,7 +243,8 @@
                                     <textarea
                                         name="userAnswers[paragraph]"
                                         rows="8"
-                                        class="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
+                                        style="field-sizing: content;"
+                                        class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg leading-relaxed focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
                                         placeholder="Translate the paragraph to English..."
                                         {{ $submitted ? 'readonly' : '' }}
                                         autocomplete="off">{{ old('userAnswers.paragraph', $userAnswers['paragraph'] ?? '') }}</textarea>

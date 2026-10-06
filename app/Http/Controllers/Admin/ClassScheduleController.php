@@ -171,6 +171,8 @@ class ClassScheduleController extends Controller
                     'meeting_number' => $meeting->meeting_number,
                     'topic' => $meeting->topic,
                     'meeting_link' => $meeting->meeting_link,
+                    'recording_urls' => $meeting->recording_urls ?? [],
+                    'recording_passwords' => $meeting->recording_passwords ?? [],
                     'teacher_name' => $classPeriod->teacher ? $classPeriod->teacher->name : 'No Teacher',
                     'students_count' => $classPeriod->users_count ?? 0,
                     'learning_mode' => ucfirst($classPeriod->learning_mode ?? 'Online'),
@@ -271,6 +273,11 @@ class ClassScheduleController extends Controller
             'end_time' => 'nullable|date_format:H:i',
             'topic' => 'nullable|string|max:255',
             'meeting_link' => 'nullable|url|max:1000',
+            'recording_urls' => 'nullable|array',
+            'recording_urls.*' => 'url|max:1000',
+            'recording_passwords' => 'nullable|array',
+            'recording_passwords.*.label' => 'nullable|string|max:100',
+            'recording_passwords.*.password' => 'nullable|string|max:255',
         ]);
 
         $meetingDate = $validated['meeting_date'] ?? optional($meeting->meeting_date)->format('Y-m-d');
@@ -296,6 +303,15 @@ class ClassScheduleController extends Controller
         }
         if (array_key_exists('meeting_link', $validated)) {
             $meeting->meeting_link = $validated['meeting_link'];
+        }
+        if (array_key_exists('recording_urls', $validated)) {
+            $meeting->recording_urls = array_values(array_unique(array_filter($validated['recording_urls'] ?? [])));
+        }
+        if (array_key_exists('recording_passwords', $validated)) {
+            $meeting->recording_passwords = array_values(array_filter(
+                $validated['recording_passwords'] ?? [],
+                fn ($entry) => !empty($entry['password'])
+            ));
         }
 
         // Guard: reject the reschedule if it overlaps another meeting taught by the same teacher.
@@ -326,6 +342,149 @@ class ClassScheduleController extends Controller
         return response()->json([
             'message' => 'Meeting updated successfully',
             'meeting' => $meeting
+        ]);
+    }
+
+    /**
+     * Lightweight sibling of update() for the inline "Tonton Rekaman Kelas"
+     * editor on each program's meeting card grid (grammar-writing-track,
+     * speaking-track, toefl-itp/ielts index pages) - admins AND teachers can
+     * use this (route middleware is 'role:teacher', which also lets admins
+     * through via RoleMiddleware's own top-level admin bypass), unlike the
+     * full update() endpoint above which is admin-only. Keyed by
+     * (meeting_id, class_period_id) rather than a ClassMeeting id, since a
+     * card's ClassMeeting row may not have been created yet (it's normally
+     * auto-seeded by syncClassPeriodMeetings() the first time an admin opens
+     * the Class Schedule calendar - a teacher setting a recording link from
+     * the card first shouldn't be blocked on that ever having happened).
+     */
+    public function updateRecordingLink(Request $request)
+    {
+        $validated = $request->validate([
+            'meeting_id' => 'required|integer|exists:meetings,id',
+            'class_period_id' => 'required|integer|exists:class_periods,id',
+            'recording_urls' => 'nullable|array',
+            'recording_urls.*' => 'url|max:1000',
+            'recording_passwords' => 'nullable|array',
+            'recording_passwords.*.label' => 'nullable|string|max:100',
+            'recording_passwords.*.password' => 'nullable|string|max:255',
+        ]);
+
+        $classPeriod = ClassPeriod::findOrFail($validated['class_period_id']);
+        $user = Auth::user();
+
+        // Admins may edit any class period's link; a teacher may only edit
+        // one they actually teach.
+        if ($user->role !== 'admin' && $classPeriod->teacher_id !== $user->id) {
+            abort(403, 'Anda tidak mengajar kelas ini.');
+        }
+
+        $meeting = Meeting::findOrFail($validated['meeting_id']);
+        $urls = array_values(array_unique(array_filter($validated['recording_urls'] ?? [])));
+
+        $attributes = [
+            'recording_urls' => $urls,
+            'meeting_number' => $meeting->meeting_number,
+        ];
+        // Only touch passwords if the caller actually sent the field - this
+        // endpoint is also called from the "add another link" flow (which
+        // never includes recording_passwords), and that request shouldn't
+        // silently wipe out passwords saved earlier from the full Class
+        // Schedule form or a previous password-only save here. The client
+        // always resends the FULL current list on every add/remove (same
+        // pattern as recording_urls above), so there's no separate
+        // add/remove endpoint needed.
+        if (array_key_exists('recording_passwords', $validated)) {
+            $attributes['recording_passwords'] = array_values(array_filter(
+                $validated['recording_passwords'] ?? [],
+                fn ($entry) => !empty($entry['password'])
+            ));
+        }
+
+        $classMeeting = ClassMeeting::updateOrCreate(
+            ['class_period_id' => $classPeriod->id, 'meeting_id' => $meeting->id],
+            $attributes
+        );
+
+        return response()->json([
+            'message' => 'Link rekaman berhasil disimpan.',
+            'recording_urls' => $classMeeting->recording_urls ?? [],
+            'recording_passwords' => $classMeeting->recording_passwords ?? [],
+        ]);
+    }
+
+    /**
+     * Lightweight sibling of update() for the inline "Jam Kelas" (start/end
+     * time) editor on each meeting card - same admin+teacher access as
+     * updateRecordingLink() above, and reuses update()'s own
+     * date+time-combining and same-teacher overlap guard. Only ever touches
+     * an EXISTING ClassMeeting row (found by meeting_id + class_period_id) -
+     * unlike the recording link editor, setting a time without a real
+     * scheduled meeting_date wouldn't mean anything, and every meeting shown
+     * on these cards already has its date auto-seeded by
+     * syncClassPeriodMeetings(), so the card's own inline editor is only
+     * ever rendered once a ClassMeeting row (and therefore a date) exists.
+     */
+    public function updateClassTime(Request $request)
+    {
+        $validated = $request->validate([
+            'meeting_id' => 'required|integer|exists:meetings,id',
+            'class_period_id' => 'required|integer|exists:class_periods,id',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
+        ]);
+
+        $classPeriod = ClassPeriod::findOrFail($validated['class_period_id']);
+        $user = Auth::user();
+
+        if ($user->role !== 'admin' && $classPeriod->teacher_id !== $user->id) {
+            abort(403, 'Anda tidak mengajar kelas ini.');
+        }
+
+        $meeting = Meeting::findOrFail($validated['meeting_id']);
+
+        $classMeeting = ClassMeeting::where('class_period_id', $classPeriod->id)
+            ->where('meeting_id', $meeting->id)
+            ->first();
+
+        if (!$classMeeting || !$classMeeting->meeting_date) {
+            return response()->json([
+                'message' => 'Tanggal meeting ini belum diatur - atur tanggalnya dulu di Class Schedule.',
+            ], 422);
+        }
+
+        $meetingDate = $classMeeting->meeting_date->format('Y-m-d');
+
+        $newStartTime = !empty($validated['start_time']) ? Carbon::parse($meetingDate . ' ' . $validated['start_time']) : null;
+        $newEndTime = !empty($validated['end_time']) ? Carbon::parse($meetingDate . ' ' . $validated['end_time']) : null;
+
+        // Guard: reject if it overlaps another meeting taught by the same teacher.
+        if ($newStartTime && $newEndTime && $classPeriod->teacher_id) {
+            $conflict = ClassMeeting::whereHas('classPeriod', function ($query) use ($classPeriod) {
+                    $query->where('teacher_id', $classPeriod->teacher_id);
+                })
+                ->where('id', '!=', $classMeeting->id)
+                ->whereNotNull('start_time')
+                ->whereNotNull('end_time')
+                ->where('start_time', '<', $newEndTime)
+                ->where('end_time', '>', $newStartTime)
+                ->exists();
+
+            if ($conflict) {
+                return response()->json([
+                    'message' => 'Jadwal ini bentrok dengan jadwal mengajar guru yang sama pada waktu tersebut.',
+                ], 422);
+            }
+        }
+
+        $classMeeting->start_time = $newStartTime;
+        $classMeeting->end_time = $newEndTime;
+        $classMeeting->save();
+
+        return response()->json([
+            'message' => 'Jam kelas berhasil disimpan.',
+            'start_time' => $classMeeting->start_time?->format('H:i'),
+            'end_time' => $classMeeting->end_time?->format('H:i'),
         ]);
     }
 }

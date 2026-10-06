@@ -12,9 +12,16 @@ class ToeflStructureMeeting5Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 5)->firstOrFail();
-        
-        // Clear existing questions for this meeting
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 5],
+            [
+                'title' => 'Adverbial Clause',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
+        // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
         $questions = [
@@ -93,11 +100,11 @@ class ToeflStructureMeeting5Seeder extends Seeder
             [
                 'question_number' => 9,
                 'question_text' => 'In Watch the Skies, Curtis Peebles ____ attempt to explain America\'s belief in flying saucers.',
-                'option_a' => 'makes a fascinating',
+                'option_a' => 'fascination made a',
                 'option_b' => 'making a fascinating',
                 'option_c' => 'fascination with making',
-                'option_d' => 'fascination made a',
-                'correct_answer' => 'A',
+                'option_d' => 'makes a fascinating',
+                'correct_answer' => 'D',
             ],
             [
                 'question_number' => 10,
@@ -120,6 +127,7 @@ class ToeflStructureMeeting5Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

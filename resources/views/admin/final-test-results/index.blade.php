@@ -1,10 +1,19 @@
 @extends('layouts.admin')
 
 @section('header')
-<div class="flex justify-between items-center">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Final Tests Results') }}
-    </h2>
+<div class="flex justify-between items-center" x-data>
+    <div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Final Tests Results') }}
+        </h2>
+        <p class="text-xs text-gray-500 mt-0.5">Hasil ujian akhir dan penerbitan sertifikat siswa</p>
+    </div>
+    <button type="button" @click="$dispatch('open-manual-certificate-modal')" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+        Terbitkan Sertifikat Manual
+    </button>
 </div>
 @endsection
 
@@ -277,4 +286,6 @@
         </div>
     </div>
 </div>
+
+@include('components.manual-certificate-modal')
 @endsection

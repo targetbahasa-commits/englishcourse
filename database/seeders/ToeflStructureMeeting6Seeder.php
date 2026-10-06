@@ -12,17 +12,15 @@ class ToeflStructureMeeting6Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 6)->first();
-        
-        if (!$meeting) {
-            $meeting = \App\Models\ToeflStructureMeeting::create([
-                'meeting_number' => 6,
-                'title' => 'Adverbial Clause',
-                'description' => 'Structure Meeting 6',
-                'is_locked' => false
-            ]);
-        }
-        
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 6],
+            [
+                'title' => 'Noun Clause',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
         // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
@@ -74,7 +72,7 @@ class ToeflStructureMeeting6Seeder extends Seeder
             ],
             [
                 'question_number' => 6,
-                'question_text' => "The Sun's gravity severely distorted the path of the comet ______ entered its wildly erratic orbit around Jupiter.",
+                'question_text' => 'The Sun\'s gravity severely distorted the path of the comet ______ entered its wildly erratic orbit around Jupiter.',
                 'option_a' => 'it',
                 'option_b' => 'when',
                 'option_c' => 'after the comet came into it',
@@ -83,7 +81,7 @@ class ToeflStructureMeeting6Seeder extends Seeder
             ],
             [
                 'question_number' => 7,
-                'question_text' => "Each object ______ Jupiter's magnetic field is deluged with electrical charges.",
+                'question_text' => 'Each object ______ Jupiter\'s magnetic field is deluged with electrical charges.',
                 'option_a' => 'enters',
                 'option_b' => 'it enters',
                 'option_c' => 'entering',
@@ -101,7 +99,7 @@ class ToeflStructureMeeting6Seeder extends Seeder
             ],
             [
                 'question_number' => 9,
-                'question_text' => "One of the largest and most powerful birds of prey in the world, ______ a six-foot wingspan and legs and talons roughly the size of a man's arms and legs.",
+                'question_text' => 'One of the largest and most powerful birds of prey in the world, ______ a six-foot wingspan and legs and talons roughly the size of a man\'s arms and legs.',
                 'option_a' => 'so the harpy has',
                 'option_b' => 'the harpy having',
                 'option_c' => 'with the harpy having',
@@ -129,6 +127,7 @@ class ToeflStructureMeeting6Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

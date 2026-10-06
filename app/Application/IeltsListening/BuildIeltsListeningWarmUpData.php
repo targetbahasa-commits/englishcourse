@@ -42,6 +42,12 @@ class BuildIeltsListeningWarmUpData
             'direction' => 'Listen and write down the directions or location instructions you hear.',
         ];
 
+        if ($type === 'spelling') {
+            $practice = max(1, min(30, $practice));
+            $audioFiles['spelling'] = "audio/ielts/listening/warmup/spelling_practice_{$practice}.mp3";
+            $titles['spelling'] = "Spelling Practice - Paket {$practice}";
+        }
+
         if ($type === 'names' && $practice === 2) {
             $practiceAudio = 'audio/ielts/listening/warmup/names_practice_2.mp3';
             $audioFiles['names'] = file_exists(public_path($practiceAudio)) ? $practiceAudio : $audioFiles['names'];
@@ -58,6 +64,7 @@ class BuildIeltsListeningWarmUpData
                 'description' => $descriptions[$type] ?? 'Listen to the audio.',
             ],
             'type' => $type,
+            'practice' => $practice,
         ];
     }
 }

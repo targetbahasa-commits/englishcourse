@@ -3,7 +3,7 @@
 @section('title', 'IELTS Listening')
 
 @section('content')
-<div class="container mx-auto px-4 py-8" x-data="{ 
+<div class="container mx-auto px-4 py-8 pb-24" x-data="{ 
     showModal: false, 
     editingMeeting: null,
     formData: {
@@ -90,7 +90,7 @@
             @endif
 
             @php
-                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? $batchProgram?->classPeriods?->first()?->id ?? '';
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
@@ -235,22 +235,40 @@
                     
                     @php
                         $classMeeting = $dbMeeting && !empty($selectedClassPeriod) ? $selectedClassPeriod->classMeetings->firstWhere('meeting_id', $dbMeeting->id) : null;
+                        $canEditRecording = Auth::user()->isAdmin() || Auth::user()->isTeacher();
                     @endphp
-                    @if($classMeeting)
+                    @if($classMeeting || ($canEditRecording && $dbMeeting && !empty($selectedClassPeriod)))
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <div class="flex flex-col gap-2">
-                                <div class="flex items-center gap-2 text-sm text-gray-600">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <span>{{ $classMeeting->meeting_date ? $classMeeting->meeting_date->format('d M Y') : 'TBA' }}</span>
-                                    <span class="mx-1">•</span>
-                                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>{{ $classMeeting->start_time ? $classMeeting->start_time->format('H:i') . ' - ' . $classMeeting->end_time->format('H:i') . ' WIB' : 'TBA' }}</span>
-                                </div>
-                                @if($classMeeting->meeting_link)
-                                    <a href="{{ $classMeeting->meeting_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 mt-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                        Join Virtual Class
-                                    </a>
+                                @if($classMeeting)
+                                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span>{{ $classMeeting->meeting_date ? $classMeeting->meeting_date->format('d M Y') : 'TBA' }}</span>
+                                        <span class="mx-1">•</span>
+                                        <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <x-class-meeting-time
+                                            :meeting-id="$dbMeeting->id"
+                                            :class-period-id="$selectedClassPeriod->id"
+                                            :start-time="$classMeeting->start_time?->format('H:i')"
+                                            :end-time="$classMeeting->end_time?->format('H:i')"
+                                            :can-edit="$canEditRecording"
+                                        />
+                                    </div>
+                                    @if($classMeeting->meeting_link)
+                                        <a href="{{ $classMeeting->meeting_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 mt-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Join Virtual Class
+                                        </a>
+                                    @endif
+                                @endif
+                                @if($dbMeeting && !empty($selectedClassPeriod))
+                                    <x-class-meeting-recording-link
+                                        :meeting-id="$dbMeeting->id"
+                                        :class-period-id="$selectedClassPeriod->id"
+                                        :recording-urls="$classMeeting->recording_urls ?? []"
+                                        :recording-passwords="$classMeeting->recording_passwords ?? []"
+                                        :can-edit="$canEditRecording"
+                                    />
                                 @endif
                             </div>
                         </div>
@@ -262,5 +280,6 @@
 
 
     @include('components.meetings-calendar-modal')
+    <x-meeting-progress-bar program-slug="ielts-academic-listening" :total-meetings="count($meetings ?? []) ?: 10" />
 </div>
 @endsection

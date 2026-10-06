@@ -75,6 +75,16 @@
                 </div>
             </div>
 
+            @if(($missingClassTimeCount ?? 0) > 0)
+                <a href="{{ route('admin.class-schedules.index') }}" class="mb-8 flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition">
+                    <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-amber-800">{{ $missingClassTimeCount }} jadwal kelas (7 hari terakhir) belum diisi Jam Kelas-nya</p>
+                        <p class="text-xs text-amber-700 mt-0.5">Tanpa Jam Kelas, absensi otomatis siswa untuk meeting tersebut tidak akan tercatat secara presisi. Klik untuk buka Class Schedule.</p>
+                    </div>
+                </a>
+            @endif
+
             <!-- Main Content Area based on Section -->
             @if(request('section') === 'guest_free_tests')
                 @include('guest.components.free-tests-content')

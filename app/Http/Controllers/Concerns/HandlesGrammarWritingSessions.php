@@ -72,10 +72,25 @@ trait HandlesGrammarWritingSessions
             $programId = \App\Models\Program::where('slug', 'fast-track-grammar-for-writing')->value('id') ?? Auth::user()?->program_id;
 
             if ($programId) {
+                // Deliberately NOT filtering by is_reported here. is_reported
+                // just means "class period hadn't ended yet at submission
+                // time" (see saveMeetingScore()) - it was never meant to be
+                // a permanent grade-lock, but a student whose class period
+                // has no end_date set (common data-entry gap - see the
+                // admin dashboard's Jam Kelas reminder) computes is_reported
+                // = true forever. With the old is_reported = false filter,
+                // that row was never deleted here, so every meetingN() view
+                // builder's own "fall back to the DB score row" logic kept
+                // re-locking the page to the scored/readonly view on every
+                // load no matter how many times the student clicked "Ulangi
+                // Latihan" - the button looked like it worked (it redirected)
+                // but silently did nothing. This button is the ONLY
+                // self-service redo path students are given, so honor it
+                // unconditionally when they explicitly click it. Only ever
+                // touches the clicking user's own row.
                 MeetingScore::where('user_id', Auth::id())
                     ->where('meeting_number', $meetingNumber)
                     ->where('program_id', $programId)
-                    ->where('is_reported', false)
                     ->delete();
 
                 // "Ulangi Soal Ini" only used to forget session keys above,
@@ -92,6 +107,25 @@ trait HandlesGrammarWritingSessions
                         ->where('program_id', $programId)
                         ->delete();
                 } catch (\Throwable $e) {}
+
+                // meetingDraft() autosave writes these with a 24h TTL and
+                // BuildGrammarWritingMeetingXViewData reads Cache before
+                // session/AssignmentDraft, so without this the old answers
+                // silently reappeared on the very next load even though
+                // session and the DB were already cleared above.
+                $cacheKeyMeetings = [$meetingNumber];
+                // meetingDraft() mirrors meeting 6 and 10 into each other's
+                // cache keys, so a reset of either one must clear both.
+                if ($meetingNumber === 6) {
+                    $cacheKeyMeetings[] = 10;
+                } elseif ($meetingNumber === 10) {
+                    $cacheKeyMeetings[] = 6;
+                }
+                foreach ($cacheKeyMeetings as $m) {
+                    \Illuminate\Support\Facades\Cache::forget('user_' . Auth::id() . '_meeting' . $m . '_user_answers');
+                    \Illuminate\Support\Facades\Cache::forget('user_' . Auth::id() . '_meeting' . $m . '_user_paragraph_answer');
+                    \Illuminate\Support\Facades\Cache::forget('user_' . Auth::id() . '_meeting' . $m . '_user_answers_saved_at');
+                }
             }
         }
 

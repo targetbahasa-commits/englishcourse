@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use App\Models\Enrollment;
 use App\Models\Meeting;
 use App\Models\Program;
@@ -10,11 +11,1264 @@ use Illuminate\Support\Facades\Auth;
 
 class SpeakingAdminController extends Controller
 {
+    use HandlesAssignmentAccess;
+
     /**
      * SpeakingAdminController
      *
      * Handles speaking classes selector and speaking lessons management.
      */
+
+    public function __construct()
+    {
+        $this->registerAssignmentAccessMiddleware();
+    }
+
+    /**
+     * Curriculum picker shown at /assignments/speaking - the 5 existing
+     * levels (First through Super Point Speaking) all live under Cambridge
+     * Curriculum here; Kampung Inggris Curriculum is a second, separate
+     * curriculum track alongside it (currently a single placeholder class -
+     * see speakingKampungInggris()).
+     */
+    public function speakingCurriculums()
+    {
+        return view('assignments.speaking-curriculums');
+    }
+
+    /**
+     * Kampung Inggris Curriculum - 3 levels (Beginner/Intermediate/Advanced)
+     * of practical, everyday-conversation speaking content. Deliberately a
+     * separate, much simpler content system from Cambridge's speakingTracks()
+     * (no Program/Enrollment/meeting-lock backing, no games) - this is an
+     * open-access preview curriculum, not yet a sold/enrolled program.
+     */
+    public function speakingKampungInggris()
+    {
+        $tracks = $this->kampungInggrisTracks();
+        return view('assignments.speaking-kampung-inggris', compact('tracks'));
+    }
+
+    public function kampungInggrisLevel(string $level)
+    {
+        $tracks = $this->kampungInggrisTracks();
+        if (! isset($tracks[$level])) {
+            abort(404);
+        }
+
+        return view('assignments.speaking-kampung-inggris-track', [
+            'level' => $level,
+            'trackData' => $tracks[$level],
+        ]);
+    }
+
+    public function kampungInggrisMeeting(string $level, int $meeting)
+    {
+        $tracks = $this->kampungInggrisTracks();
+        if (! isset($tracks[$level]) || ! isset($tracks[$level]['meetings'][$meeting])) {
+            abort(404);
+        }
+
+        return view('assignments.speaking-kampung-inggris-meeting', [
+            'level' => $level,
+            'trackData' => $tracks[$level],
+            'meetingNumber' => $meeting,
+            'meetingData' => $tracks[$level]['meetings'][$meeting],
+        ]);
+    }
+
+    /**
+     * Static curriculum data for Kampung Inggris - keyed by level, then by
+     * 1-indexed meeting number. Each meeting carries a topic, a short focus
+     * description, a vocabulary/phrase list (en/id pairs), a short example
+     * dialogue, and practice prompts for the student to speak out loud.
+     */
+    private function kampungInggrisTracks(): array
+    {
+        return [
+            'beginner' => [
+                'title' => 'Beginner',
+                'description' => 'Bahasa Inggris dasar untuk percakapan sehari-hari: perkenalan, angka, keluarga, arah jalan, belanja, dan memesan makanan.',
+                'accent' => 'blue',
+                'gradient' => 'from-blue-500 to-blue-700',
+                'meetings' => [
+                    1 => [
+                        'topic' => 'Greetings & Self-Introduction',
+                        'description' => 'Menyapa orang lain dan memperkenalkan diri dengan percaya diri.',
+                        'vocabulary' => [
+                            ['en' => 'Good morning / afternoon / evening', 'id' => 'Selamat pagi / siang / malam'],
+                            ['en' => 'Nice to meet you', 'id' => 'Senang bertemu denganmu'],
+                            ['en' => 'My name is...', 'id' => 'Nama saya...'],
+                            ['en' => 'I am from...', 'id' => 'Saya berasal dari...'],
+                            ['en' => 'How are you?', 'id' => 'Apa kabar?'],
+                            ['en' => "I'm fine, thank you", 'id' => 'Saya baik, terima kasih'],
+                            ['en' => 'What do you do?', 'id' => 'Apa pekerjaanmu?'],
+                            ['en' => 'See you later', 'id' => 'Sampai jumpa lagi'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Good morning! My name is Dika. Nice to meet you.'],
+                            ['speaker' => 'B', 'en' => "Nice to meet you too, Dika. I'm Sarah."],
+                            ['speaker' => 'A', 'en' => 'Where are you from, Sarah?'],
+                            ['speaker' => 'B', 'en' => "I'm from Surabaya. How about you?"],
+                            ['speaker' => 'A', 'en' => "I'm from Jakarta. What do you do, Sarah?"],
+                            ['speaker' => 'B', 'en' => "I'm a student. See you later!"],
+                        ],
+                        'practice' => [
+                            'Perkenalkan dirimu ke teman sekelasmu: nama, asal, dan pekerjaan/sekolah.',
+                            'Latih dialog di atas bersama pasangan, lalu tukar peran.',
+                            'Sapa 3 orang berbeda menggunakan salam yang berbeda (pagi/siang/malam).',
+                        ],
+                    ],
+                    2 => [
+                        'topic' => 'Numbers, Time & Days',
+                        'description' => 'Menyebutkan angka, jam, dan hari dalam bahasa Inggris.',
+                        'vocabulary' => [
+                            ['en' => 'One, two, three... ten', 'id' => 'Satu, dua, tiga... sepuluh'],
+                            ['en' => "What time is it?", 'id' => 'Jam berapa sekarang?'],
+                            ['en' => "It's three o'clock", 'id' => 'Sekarang jam tiga'],
+                            ['en' => 'Half past seven', 'id' => 'Jam setengah delapan'],
+                            ['en' => 'Monday, Tuesday, Wednesday...', 'id' => 'Senin, Selasa, Rabu...'],
+                            ['en' => 'What day is it today?', 'id' => 'Hari ini hari apa?'],
+                            ['en' => 'Today is Friday', 'id' => 'Hari ini hari Jumat'],
+                            ['en' => 'See you next week', 'id' => 'Sampai jumpa minggu depan'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Excuse me, what time is it?'],
+                            ['speaker' => 'B', 'en' => "It's half past nine."],
+                            ['speaker' => 'A', 'en' => 'Thank you. What day is it today?'],
+                            ['speaker' => 'B', 'en' => "It's Wednesday."],
+                            ['speaker' => 'A', 'en' => 'Great, our class is on Friday at ten o\'clock.'],
+                        ],
+                        'practice' => [
+                            'Sebutkan jam sekarang dalam bahasa Inggris.',
+                            'Sebutkan tanggal lahirmu dan hari apa itu.',
+                            'Buat jadwal mingguan sederhana lalu ceritakan dalam bahasa Inggris.',
+                        ],
+                    ],
+                    3 => [
+                        'topic' => 'Family & Daily Routine',
+                        'description' => 'Menceritakan anggota keluarga dan aktivitas sehari-hari.',
+                        'vocabulary' => [
+                            ['en' => 'Father / Mother / Sibling', 'id' => 'Ayah / Ibu / Saudara kandung'],
+                            ['en' => 'I live with my family', 'id' => 'Saya tinggal dengan keluarga saya'],
+                            ['en' => 'I wake up at 6 AM', 'id' => 'Saya bangun jam 6 pagi'],
+                            ['en' => 'I have breakfast', 'id' => 'Saya sarapan'],
+                            ['en' => 'I go to work/school', 'id' => 'Saya pergi bekerja/sekolah'],
+                            ['en' => 'I usually... / I always...', 'id' => 'Saya biasanya... / Saya selalu...'],
+                            ['en' => 'In the evening, I...', 'id' => 'Pada malam hari, saya...'],
+                            ['en' => 'I go to bed at...', 'id' => 'Saya tidur jam...'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'How many people are in your family?'],
+                            ['speaker' => 'B', 'en' => 'There are four of us: my parents, my brother, and me.'],
+                            ['speaker' => 'A', 'en' => "What's your daily routine like?"],
+                            ['speaker' => 'B', 'en' => 'I wake up at six, have breakfast, and go to work at eight.'],
+                        ],
+                        'practice' => [
+                            'Ceritakan anggota keluargamu dalam 4-5 kalimat.',
+                            'Jelaskan rutinitas harianmu dari bangun tidur sampai tidur lagi.',
+                            'Tanyakan rutinitas harian pasanganmu lalu bandingkan dengan milikmu.',
+                        ],
+                    ],
+                    4 => [
+                        'topic' => 'Asking for Directions',
+                        'description' => 'Bertanya dan memberi arah jalan ke suatu tempat.',
+                        'vocabulary' => [
+                            ['en' => 'Excuse me, where is...?', 'id' => 'Permisi, di mana...?'],
+                            ['en' => 'Go straight ahead', 'id' => 'Jalan terus ke depan'],
+                            ['en' => 'Turn left / right', 'id' => 'Belok kiri / kanan'],
+                            ['en' => "It's next to / near / in front of", 'id' => 'Letaknya di sebelah / dekat / di depan'],
+                            ['en' => 'How far is it?', 'id' => 'Seberapa jauh jaraknya?'],
+                            ['en' => "It's about 5 minutes away", 'id' => 'Sekitar 5 menit dari sini'],
+                            ['en' => 'Is it walking distance?', 'id' => 'Apakah bisa dijangkau dengan jalan kaki?'],
+                            ['en' => 'Thank you for your help', 'id' => 'Terima kasih atas bantuannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Excuse me, where is the nearest hospital?'],
+                            ['speaker' => 'B', 'en' => 'Go straight ahead, then turn left at the traffic light.'],
+                            ['speaker' => 'A', 'en' => 'Is it far from here?'],
+                            ['speaker' => 'B', 'en' => "No, it's about five minutes away, next to the bank."],
+                            ['speaker' => 'A', 'en' => 'Thank you for your help!'],
+                        ],
+                        'practice' => [
+                            'Buat peta sederhana lalu beri arah ke 2 tempat berbeda dalam bahasa Inggris.',
+                            'Tanyakan arah ke tempat tertentu di kampung/kota tempat tinggalmu.',
+                            'Bermain peran: satu orang turis, satu orang penduduk lokal.',
+                        ],
+                    ],
+                    5 => [
+                        'topic' => 'Shopping & Prices',
+                        'description' => 'Berbelanja dan menanyakan harga barang.',
+                        'vocabulary' => [
+                            ['en' => 'How much is this?', 'id' => 'Berapa harga ini?'],
+                            ['en' => "It's fifty thousand rupiah", 'id' => 'Harganya lima puluh ribu rupiah'],
+                            ['en' => 'Can I get a discount?', 'id' => 'Bisa minta diskon?'],
+                            ['en' => "I'll take it", 'id' => 'Saya ambil ini'],
+                            ['en' => "Do you have a smaller/bigger size?", 'id' => 'Apakah ada ukuran lebih kecil/besar?'],
+                            ['en' => 'Can I try it on?', 'id' => 'Boleh saya coba?'],
+                            ['en' => 'Cash or card?', 'id' => 'Tunai atau kartu?'],
+                            ['en' => "Here's your change", 'id' => 'Ini kembaliannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Excuse me, how much is this shirt?'],
+                            ['speaker' => 'B', 'en' => "It's one hundred fifty thousand rupiah."],
+                            ['speaker' => 'A', 'en' => 'Can I get a discount? And can I try it on?'],
+                            ['speaker' => 'B', 'en' => 'Sure, the fitting room is over there.'],
+                            ['speaker' => 'A', 'en' => "It fits well. I'll take it."],
+                        ],
+                        'practice' => [
+                            'Latih dialog tawar-menawar di toko dengan pasanganmu.',
+                            'Sebutkan 5 benda di sekitarmu beserta perkiraan harganya dalam bahasa Inggris.',
+                            'Bermain peran sebagai penjual dan pembeli di pasar.',
+                        ],
+                    ],
+                    6 => [
+                        'topic' => 'Ordering Food at a Restaurant',
+                        'description' => 'Memesan makanan dan minuman di restoran.',
+                        'vocabulary' => [
+                            ['en' => 'Can I see the menu, please?', 'id' => 'Boleh lihat menunya?'],
+                            ['en' => "I'd like to order...", 'id' => 'Saya ingin memesan...'],
+                            ['en' => 'What do you recommend?', 'id' => 'Apa yang kamu rekomendasikan?'],
+                            ['en' => "I'm allergic to...", 'id' => 'Saya alergi...'],
+                            ['en' => 'Can I have the bill, please?', 'id' => 'Boleh minta bonnya?'],
+                            ['en' => "It's delicious!", 'id' => 'Ini enak sekali!'],
+                            ['en' => 'For here or to go?', 'id' => 'Makan di sini atau dibawa pulang?'],
+                            ['en' => 'Enjoy your meal', 'id' => 'Selamat menikmati makanannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Good evening! Can I see the menu, please?'],
+                            ['speaker' => 'B', 'en' => 'Of course, here you are. What do you recommend?'],
+                            ['speaker' => 'A', 'en' => 'Our fried rice is very popular.'],
+                            ['speaker' => 'B', 'en' => "I'd like to order fried rice and an iced tea, please."],
+                            ['speaker' => 'A', 'en' => 'Great choice! Enjoy your meal.'],
+                        ],
+                        'practice' => [
+                            'Buat menu restoran sederhana, lalu pesan makanan dari menu tersebut.',
+                            'Latih dialog memesan makanan dengan pasanganmu, lalu tukar peran pelayan/pelanggan.',
+                            'Ceritakan makanan favoritmu dan alasan kamu menyukainya.',
+                        ],
+                    ],
+                    7 => [
+                        'topic' => 'Hobbies & Free Time',
+                        'description' => 'Membicarakan hobi dan kegiatan di waktu luang.',
+                        'vocabulary' => [
+                            ['en' => 'What do you do in your free time?', 'id' => 'Apa yang kamu lakukan di waktu luang?'],
+                            ['en' => 'I like / I enjoy...', 'id' => 'Saya suka / Saya menikmati...'],
+                            ['en' => 'reading, cooking, playing football', 'id' => 'membaca, memasak, bermain sepak bola'],
+                            ['en' => 'How often do you...?', 'id' => 'Seberapa sering kamu...?'],
+                            ['en' => 'Every weekend / Twice a week', 'id' => 'Setiap akhir pekan / Dua kali seminggu'],
+                            ['en' => "That sounds fun!", 'id' => 'Kedengarannya seru!'],
+                            ['en' => 'Would you like to join me?', 'id' => 'Mau ikut bersamaku?'],
+                            ['en' => "I'd love to", 'id' => 'Aku mau sekali'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'What do you do in your free time?'],
+                            ['speaker' => 'B', 'en' => 'I enjoy playing badminton. How about you?'],
+                            ['speaker' => 'A', 'en' => 'I like cooking and watching movies.'],
+                            ['speaker' => 'B', 'en' => 'That sounds fun! Would you like to join me this weekend?'],
+                            ['speaker' => 'A', 'en' => "I'd love to!"],
+                        ],
+                        'practice' => [
+                            'Sebutkan 3 hobimu dan seberapa sering kamu melakukannya.',
+                            'Ajak temanmu melakukan suatu kegiatan menggunakan bahasa Inggris.',
+                            'Ceritakan hobi favoritmu secara singkat selama 1 menit.',
+                        ],
+                    ],
+                    8 => [
+                        'topic' => 'Describing People & Things',
+                        'description' => 'Mendeskripsikan penampilan orang dan ciri-ciri suatu benda.',
+                        'vocabulary' => [
+                            ['en' => 'tall / short, young / old', 'id' => 'tinggi / pendek, muda / tua'],
+                            ['en' => 'He/She has curly/straight hair', 'id' => 'Dia memiliki rambut keriting/lurus'],
+                            ['en' => 'friendly, funny, kind', 'id' => 'ramah, lucu, baik hati'],
+                            ['en' => 'It is big/small, new/old', 'id' => 'Ini besar/kecil, baru/lama'],
+                            ['en' => "It's made of...", 'id' => 'Ini terbuat dari...'],
+                            ['en' => 'What does he/she look like?', 'id' => 'Seperti apa penampilannya?'],
+                            ['en' => 'Can you describe it?', 'id' => 'Bisa kamu deskripsikan?'],
+                            ['en' => 'It looks like...', 'id' => 'Kelihatannya seperti...'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => "What does your best friend look like?"],
+                            ['speaker' => 'B', 'en' => 'She is tall with curly hair, and she is very friendly.'],
+                            ['speaker' => 'A', 'en' => 'Can you describe your new bag?'],
+                            ['speaker' => 'B', 'en' => "It's small, brown, and made of leather."],
+                        ],
+                        'practice' => [
+                            'Deskripsikan penampilan salah satu anggota keluargamu.',
+                            'Deskripsikan 3 benda yang ada di tasmu.',
+                            'Minta pasanganmu menebak orang/benda dari deskripsimu.',
+                        ],
+                    ],
+                    9 => [
+                            'topic' => 'Simple Present: Verbal Sentences',
+                            'description' => 'Membentuk kalimat verbal (aksi nyata) menggunakan kata kerja dasar (V1 / V-s/es) serta do/does.',
+                            'drillings' => [
+                                [
+                                    'title' => 'Drilling 1 (Basic Patterns & Pronoun Objects)',
+                                    'items' => [
+                                        [
+                                            'en' => 'She sings a song for him.',
+                                            'id' => 'Dia [perempuan] menyanyikan sebuah lagu untuk dia [laki-laki].',
+                                        ],
+                                        [
+                                            'en' => 'I tell you a secret.',
+                                            'id' => 'Saya menceritakan sebuah rahasia kepada kamu.',
+                                        ],
+                                        [
+                                            'en' => 'They play soccer with us.',
+                                            'id' => 'Mereka bermain sepak bola dengan kami.',
+                                        ],
+                                        [
+                                            'en' => 'He gives a gift to her.',
+                                            'id' => 'Dia [laki-laki] memberikan sebuah hadiah kepada dia [perempuan].',
+                                        ],
+                                        [
+                                            'en' => 'We see it in the park.',
+                                            'id' => 'Kami melihat itu di taman.',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'title' => 'Drilling 2 (Adverbs of Frequency & Time Expressions)',
+                                    'items' => [
+                                        [
+                                            'en' => 'They always send us an email from their office every morning.',
+                                            'id' => 'Mereka selalu mengirim email kepada kami dari kantor mereka setiap pagi.',
+                                        ],
+                                        [
+                                            'en' => 'She usually tells him funny jokes at the coffee shop after work.',
+                                            'id' => 'Dia [perempuan] biasanya menceritakan lelucon lucu kepada dia [laki-laki] di kedai kopi sepulang kerja.',
+                                        ],
+                                        [
+                                            'en' => 'I often see her walking her dog near the park on weekends.',
+                                            'id' => 'Saya sering melihat dia [perempuan] berjalan-jalan dengan anjingnya di dekat taman setiap akhir pekan.',
+                                        ],
+                                        [
+                                            'en' => 'We rarely visit them at their house because of the distance.',
+                                            'id' => 'Kami jarang mengunjungi mereka di rumah mereka karena jaraknya.',
+                                        ],
+                                        [
+                                            'en' => 'He sometimes brings it to the class, but only when the teacher asks for it.',
+                                            'id' => 'Dia [laki-laki] kadang-kadang membawanya ke kelas, tetapi hanya ketika gurunya memintanya.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            'dialogue_setting' => 'Dua orang teman, Ali dan Siti, bertemu di gerbang sekolah.',
+                            'dialogue_note' => 'It\'s = it is',
+                            'dialogue' => [
+                                [
+                                    'speaker' => 'Ali',
+                                    'en' => 'Hai, Siti. You look happy today. Do you like our new math class?',
+                                    'id' => 'Hai, Siti. Kamu terlihat senang hari ini. Kamu suka kelas matematika kita yang baru?',
+                                ],
+                                [
+                                    'speaker' => 'Siti',
+                                    'en' => 'Yes, I do! Mr. Budi teaches us very well. He makes it easy to understand.',
+                                    'id' => 'Ya! Pak Budi mengajar kami dengan sangat baik. Dia membuatnya mudah dipahami.',
+                                ],
+                                [
+                                    'speaker' => 'Ali',
+                                    'en' => 'Oh, I agree. He also gives me some extra help sometimes.',
+                                    'id' => 'Oh, saya setuju. Dia juga kadang-kadang memberikan saya bantuan ekstra.',
+                                ],
+                                [
+                                    'speaker' => 'Siti',
+                                    'en' => 'He is a great teacher. Do you like the new science teacher too?',
+                                    'id' => 'Dia guru yang hebat. Kamu suka guru IPA yang baru juga?',
+                                ],
+                                [
+                                    'speaker' => 'Ali',
+                                    'en' => 'Not really. She always gives us too much homework.',
+                                    'id' => 'Nggak terlalu. Dia selalu memberi kami terlalu banyak PR.',
+                                ],
+                                [
+                                    'speaker' => 'Siti',
+                                    'en' => 'I know. But she says it is important for our grades.',
+                                    'id' => 'Saya tahu. Tapi dia bilang itu penting untuk nilai-nilai kita.',
+                                ],
+                            ],
+                            'monologues' => [
+                                [
+                                    'title' => 'Monolog 1',
+                                    'style' => 'Baku',
+                                    'paragraphs' => [
+                                        'Saya seorang siswa. Saya pergi ke sekolah setiap pagi. Saya duduk di kelas bersama teman-teman saya. Guru kami mengajar dengan sabar.',
+                                        'Dia menulis di papan tulis, dan dia menjelaskan pelajaran. Kami mendengarkan guru dengan baik. Kadang kami bertanya, dan dia menjawab pertanyaan kami.',
+                                        'Saya suka matematika, tapi adik saya suka bahasa Inggris. Dia sering belajar di rumah, dan ibunya membantunya.',
+                                        'Kami selalu belajar bersama. Kami merasa bahagia, dan mereka juga merasa senang.',
+                                    ],
+                                ],
+                                [
+                                    'title' => 'Monolog 2',
+                                    'style' => 'Baku',
+                                    'paragraphs' => [
+                                        'Saya bermain gitar. Saya sering berlatih setiap sore. Musik membuat saya bahagia.',
+                                        'Adik saya punya hobi lain. Dia suka menggambar. Dia membawa pensil warna ke sekolah.',
+                                        'Kami kadang melakukan hobi kami bersama. Saya bermain gitar, dan dia menggambar. Kami tertawa bersama.',
+                                        'Kami juga punya seekor kucing. Namanya Miko. Dia lucu dan dia suka tidur di sofa. Kami memberi makan kucing kami setiap pagi. Mereka, teman-teman kami, juga suka bermain dengan Miko.',
+                                        'Saya sayang hobi saya, dan saya sayang hewan peliharaan saya.',
+                                    ],
+                                ],
+                                [
+                                    'title' => 'Monolog 3',
+                                    'style' => 'Tidak Baku (Santai)',
+                                    'paragraphs' => [
+                                        'Aku suka main gitar. Aku sering latihan sore-sore. Musik bikin aku seneng banget.',
+                                        'Adikku punya hobi lain. Dia demen gambar. Dia suka bawa pensil warna ke sekolah.',
+                                        'Kadang kita lakuin hobi bareng. Aku main gitar, dia gambar. Kita ketawa-ketawa bareng.',
+                                        'Kita juga punya kucing namanya Miko. Dia lucu banget. Dia doyan tidur di sofa. Kita kasih makan dia tiap pagi. Temen-temen kita juga suka main sama Miko.',
+                                        'Aku sayang banget sama hobiku, dan aku juga sayang sama kucingku.',
+                                    ],
+                                ],
+                                [
+                                    'title' => 'Monolog 4',
+                                    'style' => 'Tidak Baku (Gaul)',
+                                    'paragraphs' => [
+                                        'Gue sering nongkrong sama temen-temen gue abis sekolah. Kita biasanya ke warung kopi deket rumah. Gue suka minum es teh, tapi temen gue lebih suka kopi.',
+                                        'Kadang dia bawa gitar, terus kita nyanyi bareng. Kita ketawa-ketawa sampe malem. Mereka, temen-temen gue yang lain, juga sering gabung.',
+                                        'Kita ngobrol apa aja, dari sekolah sampe film baru. Gue seneng banget kalo nongkrong sama mereka.',
+                                    ],
+                                ],
+                            ],
+                            'partner_qa' => [
+                                'student_a' => [
+                                    'Kamu suka nasi padang gak?',
+                                    'Kamu olahraga tiap hari gak?',
+                                    'Temanmu biasanya pergi ke rumahmu gak?',
+                                    'Kamu sering nongkrong di mana sepulang sekolah?',
+                                    'Biasanya kamu belajar bareng temen nggak sebelum ujian?',
+                                    'Kamu suka banget pelajaran apa di sekolah?',
+                                    'Kamu sering ikutan ekskul apa aja?',
+                                    'Kamu biasanya makan siang bareng siapa di kantin?',
+                                    'Kamu suka apa dari kotamu?',
+                                ],
+                                'student_b' => [
+                                    'Kamu suka ayam geprek gak?',
+                                    'Kamu baca buku tiap hari gak?',
+                                    'Temanmu sering ngajak ke mall gak?',
+                                    'Kamu sering main game apa di rumah?',
+                                    'Kamu suka olahraga apa tiap sore?',
+                                    'Kamu sering dengerin musik apa kalau lagi santai?',
+                                    'Kamu biasanya pergi ke sekolah naik apa?',
+                                    'Kamu suka baca buku atau nonton film pas lagi senggang?',
+                                    'Kamu suka apa dari kotamu?',
+                                ],
+                            ],
+                            'impromptu_title' => 'Pertanyaan Lebih Sulit – Simple Present (Verbal)',
+                            'impromptu_questions' => [
+                                'Aktivitas apa saja yang selalu kamu lakukan sebelum meninggalkan rumah setiap pagi?',
+                                'Bagaimana kamu mengatur tugas-tugas harianmu dari pagi sampai malam?',
+                                'Kebiasaan apa yang membantu kamu tetap fokus saat belajar atau bekerja?',
+                                'Bagaimana kamu biasanya menyiapkan makananmu selama hari kerja?',
+                                'Apa yang biasanya kamu lakukan ketika sampai di rumah setelah sekolah atau bekerja?',
+                                'Bagaimana kamu menghabiskan waktumu secara produktif di akhir pekan?',
+                                'Apa yang kamu lakukan saat perlu menenangkan diri setelah hari yang penuh stres?',
+                                'Bagaimana kamu mendukung anggota keluargamu dalam rutinitas harian mereka?',
+                                'Aktivitas spesifik apa yang kamu lakukan untuk menjaga kesehatan tubuh dan pikiran?',
+                                'Bagaimana kamu meningkatkan kemampuan bahasa Inggrismu di luar kelas?',
+                                'Apa yang biasanya kamu lakukan untuk membantu komunitas atau lingkungan sekitarmu?',
+                                'Bagaimana kamu menjaga persahabatan melalui aktivitas harian atau mingguan?',
+                                'Apa yang kamu lakukan untuk mempersiapkan diri menghadapi presentasi atau ujian penting?',
+                                'Bagaimana kamu menangani tanggung jawabmu saat memiliki jadwal yang sibuk?',
+                                'Langkah apa yang kamu ambil saat memulai proyek atau tugas baru?',
+                                'Bagaimana kamu mengatur waktu antara belajar, bekerja, dan bersantai?',
+                                'Apa yang biasanya kamu lakukan saat bertemu orang baru untuk pertama kali?',
+                                'Bagaimana kamu tetap termotivasi untuk menyelesaikan tugas-tugas harianmu?',
+                                'Apa yang kamu lakukan untuk menyeimbangkan hobi dan kewajibanmu?',
+                                'Bagaimana kamu menjaga lingkungan dalam kehidupan sehari-hari?',
+                            ],
+                            'adverb_table' => [
+                                [
+                                    'en' => 'Always',
+                                    'id' => 'Selalu',
+                                    'pct' => '100%',
+                                    'example_en' => 'I always wake up early.',
+                                    'example_id' => 'Saya selalu bangun pagi.',
+                                ],
+                                [
+                                    'en' => 'Usually',
+                                    'id' => 'Biasanya',
+                                    'pct' => '±90%',
+                                    'example_en' => 'She usually goes to school by bus.',
+                                    'example_id' => 'Dia biasanya naik bus ke sekolah.',
+                                ],
+                                [
+                                    'en' => 'Often',
+                                    'id' => 'Sering',
+                                    'pct' => '±70%',
+                                    'example_en' => 'They often play football.',
+                                    'example_id' => 'Mereka sering main bola.',
+                                ],
+                                [
+                                    'en' => 'Frequently',
+                                    'id' => 'Sering / Kerap',
+                                    'pct' => '±70%',
+                                    'example_en' => 'He frequently reads books.',
+                                    'example_id' => 'Dia sering membaca buku.',
+                                ],
+                                [
+                                    'en' => 'Sometimes',
+                                    'id' => 'Kadang-kadang',
+                                    'pct' => '±50%',
+                                    'example_en' => 'We sometimes eat out.',
+                                    'example_id' => 'Kami kadang makan di luar.',
+                                ],
+                                [
+                                    'en' => 'Occasionally',
+                                    'id' => 'Sesekali / Kadang',
+                                    'pct' => '±30%',
+                                    'example_en' => 'She occasionally visits her grandma.',
+                                    'example_id' => 'Dia sesekali mengunjungi neneknya.',
+                                ],
+                                [
+                                    'en' => 'Seldom',
+                                    'id' => 'Jarang',
+                                    'pct' => '±10%',
+                                    'example_en' => 'I seldom drink soda.',
+                                    'example_id' => 'Saya jarang minum soda.',
+                                ],
+                                [
+                                    'en' => 'Rarely',
+                                    'id' => 'Jarang',
+                                    'pct' => '±10%',
+                                    'example_en' => 'He rarely watches TV.',
+                                    'example_id' => 'Dia jarang menonton TV.',
+                                ],
+                                [
+                                    'en' => 'Hardly ever',
+                                    'id' => 'Hampir tidak pernah',
+                                    'pct' => '±5%',
+                                    'example_en' => 'They hardly ever travel abroad.',
+                                    'example_id' => 'Mereka hampir tidak pernah bepergian ke luar negeri.',
+                                ],
+                                [
+                                    'en' => 'Never',
+                                    'id' => 'Tidak pernah',
+                                    'pct' => '0%',
+                                    'example_en' => 'We never skip class.',
+                                    'example_id' => 'Kami tidak pernah bolos kelas.',
+                                ],
+                            ],
+                            'common_verbs' => [
+                                [
+                                    'verb' => 'play',
+                                    'meaning' => 'bermain',
+                                ],
+                                [
+                                    'verb' => 'study',
+                                    'meaning' => 'belajar',
+                                ],
+                                [
+                                    'verb' => 'read',
+                                    'meaning' => 'membaca',
+                                ],
+                                [
+                                    'verb' => 'write',
+                                    'meaning' => 'menulis',
+                                ],
+                                [
+                                    'verb' => 'go',
+                                    'meaning' => 'pergi',
+                                ],
+                                [
+                                    'verb' => 'eat',
+                                    'meaning' => 'makan',
+                                ],
+                                [
+                                    'verb' => 'drink',
+                                    'meaning' => 'minum',
+                                ],
+                                [
+                                    'verb' => 'watch',
+                                    'meaning' => 'menonton',
+                                ],
+                                [
+                                    'verb' => 'help',
+                                    'meaning' => 'membantu',
+                                ],
+                                [
+                                    'verb' => 'like',
+                                    'meaning' => 'suka',
+                                ],
+                                [
+                                    'verb' => 'clean',
+                                    'meaning' => 'membersihkan',
+                                ],
+                                [
+                                    'verb' => 'cook',
+                                    'meaning' => 'memasak',
+                                ],
+                                [
+                                    'verb' => 'open',
+                                    'meaning' => 'membuka',
+                                ],
+                                [
+                                    'verb' => 'close',
+                                    'meaning' => 'menutup',
+                                ],
+                                [
+                                    'verb' => 'live',
+                                    'meaning' => 'tinggal',
+                                ],
+                                [
+                                    'verb' => 'work',
+                                    'meaning' => 'bekerja',
+                                ],
+                                [
+                                    'verb' => 'teach',
+                                    'meaning' => 'mengajar',
+                                ],
+                                [
+                                    'verb' => 'learn',
+                                    'meaning' => 'belajar (mempelajari)',
+                                ],
+                                [
+                                    'verb' => 'listen',
+                                    'meaning' => 'mendengarkan',
+                                ],
+                                [
+                                    'verb' => 'talk',
+                                    'meaning' => 'berbicara',
+                                ],
+                                [
+                                    'verb' => 'speak',
+                                    'meaning' => 'berbicara (formal)',
+                                ],
+                                [
+                                    'verb' => 'ask',
+                                    'meaning' => 'bertanya',
+                                ],
+                                [
+                                    'verb' => 'answer',
+                                    'meaning' => 'menjawab',
+                                ],
+                                [
+                                    'verb' => 'wash',
+                                    'meaning' => 'mencuci',
+                                ],
+                                [
+                                    'verb' => 'drive',
+                                    'meaning' => 'menyetir',
+                                ],
+                                [
+                                    'verb' => 'walk',
+                                    'meaning' => 'berjalan',
+                                ],
+                                [
+                                    'verb' => 'run',
+                                    'meaning' => 'berlari',
+                                ],
+                                [
+                                    'verb' => 'sing',
+                                    'meaning' => 'bernyanyi',
+                                ],
+                                [
+                                    'verb' => 'dance',
+                                    'meaning' => 'menari',
+                                ],
+                                [
+                                    'verb' => 'buy',
+                                    'meaning' => 'membeli',
+                                ],
+                            ],
+                            'verb_examples' => [
+                                [
+                                    'en' => 'They clean the class every morning.',
+                                    'id' => 'Mereka membersihkan kelas setiap pagi.',
+                                ],
+                                [
+                                    'en' => 'She teaches math at school.',
+                                    'id' => 'Dia mengajar matematika di sekolah.',
+                                ],
+                                [
+                                    'en' => 'We listen to music after class.',
+                                    'id' => 'Kami mendengarkan musik sepulang kelas.',
+                                ],
+                                [
+                                    'en' => 'He drives to work every day.',
+                                    'id' => 'Dia menyetir ke tempat kerja setiap hari.',
+                                ],
+                            ],
+                            'vocabulary' => [
+                                [
+                                    'en' => 'I / You / We / They speak English',
+                                    'id' => 'Saya / Kamu / Kita / Mereka berbicara bahasa Inggris',
+                                ],
+                                [
+                                    'en' => 'He / She / It speaks English',
+                                    'id' => 'Dia berbicara bahasa Inggris (tambah -s/-es)',
+                                ],
+                                [
+                                    'en' => 'I do not (don\'t) understand',
+                                    'id' => 'Saya tidak mengerti',
+                                ],
+                                [
+                                    'en' => 'She does not (doesn\'t) agree',
+                                    'id' => 'Dia tidak setuju',
+                                ],
+                                [
+                                    'en' => 'Do you practice every day?',
+                                    'id' => 'Apakah kamu berlatih setiap hari?',
+                                ],
+                                [
+                                    'en' => 'Does he live in Jakarta?',
+                                    'id' => 'Apakah dia tinggal di Jakarta?',
+                                ],
+                                [
+                                    'en' => 'Yes, I do. / No, I don\'t',
+                                    'id' => 'Ya. / Tidak.',
+                                ],
+                                [
+                                    'en' => 'Yes, he does. / No, he doesn\'t',
+                                    'id' => 'Ya. / Tidak.',
+                                ],
+                            ],
+                            'listening' => [
+                                'title' => 'Short Listening: Daily Routines & Weekend Habits',
+                                'audio_script' => "Leo: Hi Maya! What time do you usually wake up on weekdays?
+Maya: I always wake up at 5:30 in the morning. I drink a glass of water and exercise for thirty minutes.
+Leo: That sounds great! Do you make breakfast by yourself?
+Maya: Yes, I do. I usually cook oatmeal and fry some eggs. What about you?
+Leo: I rarely cook in the morning. My mother prepares breakfast for our family, and then I ride my motorcycle to the office.
+Maya: Does your brother work at the same office with you?
+Leo: No, he doesn't. He teaches mathematics at a high school, so he leaves home very early.
+Maya: I see! What do you both do on weekends?
+Leo: On Saturdays, we often wash our cars together, and in the evening we play badminton with our neighbors.
+Maya: That sounds like a wonderful weekend routine!",
+                                'key_phrases' => [
+                                    ['en' => 'What time do you usually wake up on weekdays?', 'id' => 'Jam berapa kamu biasanya bangun di hari kerja?'],
+                                    ['en' => 'I always wake up at 5:30 in the morning.', 'id' => 'Saya selalu bangun jam 5:30 pagi.'],
+                                    ['en' => 'My mother prepares breakfast for our family.', 'id' => 'Ibu saya menyiapkan sarapan untuk keluarga kami.'],
+                                    ['en' => 'He teaches mathematics at a high school.', 'id' => 'Dia mengajar matematika di sebuah SMA.'],
+                                    ['en' => 'We often wash our cars together on Saturdays.', 'id' => 'Kami sering mencuci mobil bersama di hari Sabtu.'],
+                                ],
+                                'questions' => [
+                                    [
+                                        'q' => 'What does Maya do after waking up at 5:30 in the morning?',
+                                        'options' => [
+                                            'She drinks water and exercises for 30 minutes',
+                                            'She cooks fried rice for Leo',
+                                            'She rides her motorcycle to the office',
+                                            'She plays badminton with her neighbors',
+                                        ],
+                                        'answer' => 'She drinks water and exercises for 30 minutes',
+                                    ],
+                                    [
+                                        'q' => 'Who prepares breakfast in Leo\'s house?',
+                                        'options' => [
+                                            'His mother',
+                                            'Leo himself',
+                                            'Maya',
+                                            'His brother',
+                                        ],
+                                        'answer' => 'His mother',
+                                    ],
+                                    [
+                                        'q' => 'What is Leo\'s brother\'s occupation?',
+                                        'options' => [
+                                            'He teaches mathematics at a high school',
+                                            'He is a software engineer',
+                                            'He works in the same office as Leo',
+                                            'He manages a coffee shop',
+                                        ],
+                                        'answer' => 'He teaches mathematics at a high school',
+                                    ],
+                                    [
+                                        'q' => 'What do Leo and his brother do together on Saturday evenings?',
+                                        'options' => [
+                                            'Play badminton with their neighbors',
+                                            'Wash their cars',
+                                            'Teach an online English course',
+                                            'Study mathematics',
+                                        ],
+                                        'answer' => 'Play badminton with their neighbors',
+                                    ],
+                                ],
+                            ],
+                            'practice' => [
+                                'Sebutkan 3 hal yang selalu kamu lakukan setiap hari (gunakan I + V1).',
+                                'Ceritakan 2 hal yang saudara/temanmu lakukan setiap hari (gunakan He/She + V-s/es).',
+                                'Tanyakan 3 kebiasaan pasangan bicaramu menggunakan "Do you...?" atau "Does your friend...?".',
+                                'Ubah kalimat positif menjadi negatif (contoh: "I like milk" -> "I don\'t like milk").',
+                            ],
+                        ],
+                    10 => [
+                        'topic' => 'Simple Present: Nominal Sentences',
+                        'description' => 'Membentuk kalimat nominal tanpa kata kerja aksi, melainkan to be (am, is, are) + profesi, sifat, atau tempat.',
+                        'vocabulary' => [
+                            ['en' => 'I am a student / teacher', 'id' => 'Saya adalah seorang siswa / guru (noun)'],
+                            ['en' => 'She is smart and diligent', 'id' => 'Dia pintar dan rajin (adjective)'],
+                            ['en' => 'They are in the classroom', 'id' => 'Mereka ada di dalam kelas (adverb of place)'],
+                            ['en' => 'I am not tired right now', 'id' => 'Saya tidak sedang lelah saat ini'],
+                            ['en' => 'He isn\'t at home today', 'id' => 'Dia tidak sedang di rumah hari ini'],
+                            ['en' => 'Are you ready for the speaking test?', 'id' => 'Apakah kamu siap untuk ujian speaking?'],
+                            ['en' => 'Is she from Kampung Inggris?', 'id' => 'Apakah dia berasal dari Kampung Inggris?'],
+                            ['en' => 'Yes, I am. / No, I\'m not.', 'id' => 'Ya, benar. / Tidak.'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Hello! Are you new here at Target Bahasa?'],
+                            ['speaker' => 'B', 'en' => 'Yes, I am. I am a new speaking student.'],
+                            ['speaker' => 'A', 'en' => 'Welcome! Is your teacher Mr. David?'],
+                            ['speaker' => 'B', 'en' => 'No, he isn\'t. My teacher is Ms. Ratna. She is very friendly and patient.'],
+                            ['speaker' => 'A', 'en' => 'That\'s awesome! We are in room 3. Are you ready for class?'],
+                            ['speaker' => 'B', 'en' => 'Yes, I am totally ready!'],
+                        ],
+                        'practice' => [
+                            'Perkenalkan profesi dan statusmu menggunakan "I am...".',
+                            'Deskripsikan sifat 2 temanmu menggunakan to be + kata sifat (contoh: "He is humble", "She is cheerful").',
+                            'Sebutkan posisimu dan barang-barangmu sekarang menggunakan to be + keterangan tempat (contoh: "I am in the room", "The book is on the table").',
+                            'Latih bertanya kabar dan status dengan "Are you...?" dan "Is your mother...?".',
+                        ],
+                    ],
+                    11 => [
+                        'topic' => 'Simple Present: Passive Voice',
+                        'description' => 'Membentuk kalimat pasif (dikenai tindakan: di- / ter-) dengan pola Subject + am/is/are + Verb 3 (Past Participle).',
+                        'vocabulary' => [
+                            ['en' => 'English is spoken worldwide', 'id' => 'Bahasa Inggris dituturkan di seluruh dunia'],
+                            ['en' => 'Coffee is served hot', 'id' => 'Kopi disajikan panas'],
+                            ['en' => 'The class is taught by experienced tutors', 'id' => 'Kelas ini diajar oleh tutor berpengalaman'],
+                            ['en' => 'These books are written in English', 'id' => 'Buku-buku ini ditulis dalam bahasa Inggris'],
+                            ['en' => 'Rice is eaten as a staple food in Indonesia', 'id' => 'Beras dimakan sebagai makanan pokok di Indonesia'],
+                            ['en' => 'Is this coffee made locally?', 'id' => 'Apakah kopi ini dibuat secara lokal?'],
+                            ['en' => 'It is produced in Aceh', 'id' => 'Kopi ini diproduksi di Aceh'],
+                            ['en' => 'Credit cards are accepted here', 'id' => 'Kartu kredit diterima di sini'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'Customer', 'en' => 'Excuse me, is this traditional tea made from fresh leaves?'],
+                            ['speaker' => 'Barista', 'en' => 'Yes, it is! The tea is harvested directly from local farms in Java.'],
+                            ['speaker' => 'Customer', 'en' => 'Sounds delicious. How is it served?'],
+                            ['speaker' => 'Barista', 'en' => 'It is served with organic honey and fresh lemon slices.'],
+                            ['speaker' => 'Customer', 'en' => 'Perfect! Are credit cards accepted here?'],
+                            ['speaker' => 'Barista', 'en' => 'Yes, all digital payments and cards are accepted.'],
+                        ],
+                        'practice' => [
+                            'Ubah kalimat aktif menjadi pasif (contoh: "People speak English" -> "English is spoken").',
+                            'Ceritakan 3 produk atau makanan khas daerahmu menggunakan pola pasif ("... is made of...", "... is grown in...").',
+                            'Tanyakan asal barang temanmu dengan kalimat pasif: "Where is your watch made?" atau "Is it imported?".',
+                            'Jelaskan bagaimana kelas speaking di Target Bahasa dijalankan menggunakan kalimat pasif ("The lesson is guided by the tutor", "Rules are explained clearly").',
+                        ],
+                    ],
+                ],
+            ],
+            'intermediate' => [
+                'title' => 'Intermediate',
+                'description' => 'Percakapan yang lebih kompleks: pengalaman, rencana, opini, telepon, perjalanan, dan kesehatan.',
+                'accent' => 'amber',
+                'gradient' => 'from-amber-500 to-orange-600',
+                'meetings' => [
+                    1 => [
+                        'topic' => 'Talking About Past Experiences',
+                        'description' => 'Menceritakan pengalaman masa lalu menggunakan simple past & present perfect.',
+                        'vocabulary' => [
+                            ['en' => 'Have you ever...?', 'id' => 'Apakah kamu pernah...?'],
+                            ['en' => 'Yes, I have. / No, I haven\'t', 'id' => 'Ya, pernah. / Tidak, belum pernah'],
+                            ['en' => 'Last year, I went to...', 'id' => 'Tahun lalu, saya pergi ke...'],
+                            ['en' => 'It was an amazing experience', 'id' => 'Itu pengalaman yang luar biasa'],
+                            ['en' => 'What happened next?', 'id' => 'Lalu apa yang terjadi?'],
+                            ['en' => 'I was surprised/nervous/excited', 'id' => 'Saya terkejut/gugup/bersemangat'],
+                            ['en' => 'How did you feel?', 'id' => 'Bagaimana perasaanmu?'],
+                            ['en' => "I'll never forget it", 'id' => 'Saya tidak akan pernah melupakannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Have you ever traveled abroad?'],
+                            ['speaker' => 'B', 'en' => 'Yes, I have. Last year, I went to Singapore.'],
+                            ['speaker' => 'A', 'en' => 'Wow, how was it?'],
+                            ['speaker' => 'B', 'en' => "It was an amazing experience. I'll never forget the food there!"],
+                        ],
+                        'practice' => [
+                            'Ceritakan pengalaman paling berkesan dalam hidupmu.',
+                            'Tanyakan ke pasanganmu "Have you ever...?" minimal 3 pertanyaan berbeda.',
+                            'Ceritakan sebuah kejadian lucu/memalukan yang pernah kamu alami.',
+                        ],
+                    ],
+                    2 => [
+                        'topic' => 'Making Plans & Invitations',
+                        'description' => 'Mengajak orang lain dan membuat rencana kegiatan.',
+                        'vocabulary' => [
+                            ['en' => 'Are you free this weekend?', 'id' => 'Apakah kamu luang akhir pekan ini?'],
+                            ['en' => 'Would you like to...?', 'id' => 'Maukah kamu...?'],
+                            ['en' => "I'm busy, maybe next time", 'id' => 'Saya sibuk, mungkin lain kali'],
+                            ['en' => "Sure, I'd love to!", 'id' => 'Tentu, aku mau!'],
+                            ['en' => "Let's meet at...", 'id' => 'Ayo bertemu di...'],
+                            ['en' => 'What time works for you?', 'id' => 'Jam berapa yang cocok untukmu?'],
+                            ['en' => "I'll pick you up at...", 'id' => 'Aku akan jemput kamu jam...'],
+                            ['en' => 'See you then!', 'id' => 'Sampai ketemu nanti!'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Are you free this weekend? Would you like to watch a movie?'],
+                            ['speaker' => 'B', 'en' => "Sure, I'd love to! What time works for you?"],
+                            ['speaker' => 'A', 'en' => "Let's meet at the mall at two o'clock."],
+                            ['speaker' => 'B', 'en' => 'Sounds good. See you then!'],
+                        ],
+                        'practice' => [
+                            'Ajak pasanganmu melakukan 2 kegiatan berbeda, lengkap dengan waktu dan tempat.',
+                            'Latih menolak ajakan dengan sopan dan memberi alasan.',
+                            'Buat rencana akhir pekan bersama teman dalam bahasa Inggris.',
+                        ],
+                    ],
+                    3 => [
+                        'topic' => 'Giving Opinions & Agreeing/Disagreeing',
+                        'description' => 'Menyampaikan pendapat serta setuju atau tidak setuju dengan sopan.',
+                        'vocabulary' => [
+                            ['en' => 'In my opinion...', 'id' => 'Menurut pendapat saya...'],
+                            ['en' => 'I think that...', 'id' => 'Saya pikir bahwa...'],
+                            ['en' => 'I agree with you', 'id' => 'Saya setuju denganmu'],
+                            ['en' => "I'm afraid I disagree", 'id' => 'Maaf, saya tidak setuju'],
+                            ['en' => 'That\'s a good point, but...', 'id' => 'Itu poin yang bagus, tapi...'],
+                            ['en' => 'What do you think about...?', 'id' => 'Menurutmu bagaimana tentang...?'],
+                            ['en' => 'I see your point', 'id' => 'Saya mengerti maksudmu'],
+                            ['en' => 'Let\'s agree to disagree', 'id' => 'Mari kita sepakat untuk berbeda pendapat'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'What do you think about working from home?'],
+                            ['speaker' => 'B', 'en' => 'In my opinion, it\'s more productive. I can focus better at home.'],
+                            ['speaker' => 'A', 'en' => "I'm afraid I disagree. I think office work is better for teamwork."],
+                            ['speaker' => 'B', 'en' => "That's a good point. Let's agree to disagree!"],
+                        ],
+                        'practice' => [
+                            'Pilih satu topik (gadget, pendidikan online, dll) dan sampaikan pendapatmu.',
+                            'Latih setuju dan tidak setuju dengan pendapat pasanganmu secara bergantian.',
+                            'Diskusikan topik kontroversial ringan dengan sopan menggunakan frasa di atas.',
+                        ],
+                    ],
+                    4 => [
+                        'topic' => 'Phone Calls & Making Appointments',
+                        'description' => 'Melakukan panggilan telepon dan membuat janji temu.',
+                        'vocabulary' => [
+                            ['en' => 'Hello, this is... speaking', 'id' => 'Halo, ini... yang bicara'],
+                            ['en' => 'Can I speak to...?', 'id' => 'Bisa saya bicara dengan...?'],
+                            ['en' => "He's not available right now", 'id' => 'Dia sedang tidak ada sekarang'],
+                            ['en' => 'Can I take a message?', 'id' => 'Boleh saya sampaikan pesan?'],
+                            ['en' => "I'd like to make an appointment", 'id' => 'Saya ingin membuat janji temu'],
+                            ['en' => 'What time is convenient for you?', 'id' => 'Jam berapa yang nyaman untukmu?'],
+                            ['en' => "I'll call you back", 'id' => 'Saya akan menelepon balik'],
+                            ['en' => 'Thanks for calling', 'id' => 'Terima kasih sudah menelepon'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => "Hello, this is Rina speaking. Can I speak to Dr. Amir?"],
+                            ['speaker' => 'B', 'en' => "I'm sorry, he's not available right now. Can I take a message?"],
+                            ['speaker' => 'A', 'en' => "Yes, I'd like to make an appointment for tomorrow."],
+                            ['speaker' => 'B', 'en' => 'Sure, what time is convenient for you?'],
+                        ],
+                        'practice' => [
+                            'Latih percakapan telepon membuat janji temu dengan dokter/kantor.',
+                            'Latih meninggalkan pesan telepon untuk seseorang yang tidak ada.',
+                            'Buat dialog menelepon untuk memesan tempat/reservasi.',
+                        ],
+                    ],
+                    5 => [
+                        'topic' => 'Travel & Transportation',
+                        'description' => 'Membicarakan perjalanan, moda transportasi, dan memesan tiket.',
+                        'vocabulary' => [
+                            ['en' => 'How do I get to...?', 'id' => 'Bagaimana cara saya menuju ke...?'],
+                            ['en' => 'by bus / train / plane', 'id' => 'dengan bus / kereta / pesawat'],
+                            ['en' => "I'd like to book a ticket to...", 'id' => 'Saya ingin memesan tiket ke...'],
+                            ['en' => 'One-way or round-trip?', 'id' => 'Sekali jalan atau pulang-pergi?'],
+                            ['en' => 'What time does it depart/arrive?', 'id' => 'Jam berapa berangkat/tiba?'],
+                            ['en' => 'Is there a layover?', 'id' => 'Apakah ada transit?'],
+                            ['en' => "I'm running late", 'id' => 'Saya terlambat'],
+                            ['en' => 'Have a safe trip', 'id' => 'Semoga perjalanannya aman'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => "I'd like to book a ticket to Bali, please."],
+                            ['speaker' => 'B', 'en' => 'One-way or round-trip?'],
+                            ['speaker' => 'A', 'en' => 'Round-trip. What time does the flight depart?'],
+                            ['speaker' => 'B', 'en' => 'It departs at 9 AM and arrives at 11 AM.'],
+                        ],
+                        'practice' => [
+                            'Latih memesan tiket perjalanan (pesawat/bus/kereta) dengan pasanganmu.',
+                            'Ceritakan pengalaman perjalanan terakhirmu, termasuk transportasi yang digunakan.',
+                            'Jelaskan rencana liburan impianmu, termasuk cara menuju ke sana.',
+                        ],
+                    ],
+                    6 => [
+                        'topic' => 'Health, Symptoms & Seeing a Doctor',
+                        'description' => 'Menjelaskan gejala sakit dan berkonsultasi dengan dokter.',
+                        'vocabulary' => [
+                            ['en' => "What's wrong?", 'id' => 'Ada apa? / Kenapa?'],
+                            ['en' => 'I have a headache/fever/cough', 'id' => 'Saya sakit kepala/demam/batuk'],
+                            ['en' => 'I feel dizzy/nauseous', 'id' => 'Saya merasa pusing/mual'],
+                            ['en' => 'How long have you felt this way?', 'id' => 'Sudah berapa lama kamu merasa begini?'],
+                            ['en' => 'Since yesterday', 'id' => 'Sejak kemarin'],
+                            ['en' => 'You should take some rest', 'id' => 'Kamu sebaiknya istirahat'],
+                            ['en' => 'Take this medicine twice a day', 'id' => 'Minum obat ini dua kali sehari'],
+                            ['en' => 'Get well soon', 'id' => 'Semoga cepat sembuh'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => "Good morning. What's wrong?"],
+                            ['speaker' => 'B', 'en' => 'I have a fever and a headache since yesterday.'],
+                            ['speaker' => 'A', 'en' => 'I see. You should take some rest and drink plenty of water.'],
+                            ['speaker' => 'B', 'en' => 'Thank you, doctor.'],
+                        ],
+                        'practice' => [
+                            'Bermain peran sebagai pasien dan dokter menjelaskan gejala sakit.',
+                            'Sebutkan 5 gejala sakit berbeda dalam bahasa Inggris.',
+                            'Latih memberi saran kesehatan sederhana ke pasanganmu.',
+                        ],
+                    ],
+                    7 => [
+                        'topic' => 'Comparing Things & Making Decisions',
+                        'description' => 'Membandingkan dua hal atau lebih untuk mengambil keputusan.',
+                        'vocabulary' => [
+                            ['en' => 'This one is cheaper/bigger than that one', 'id' => 'Yang ini lebih murah/besar dari yang itu'],
+                            ['en' => 'Which one do you prefer?', 'id' => 'Mana yang kamu lebih suka?'],
+                            ['en' => 'I prefer... because...', 'id' => 'Saya lebih suka... karena...'],
+                            ['en' => 'This is the best option', 'id' => 'Ini pilihan terbaik'],
+                            ['en' => 'On the other hand...', 'id' => 'Di sisi lain...'],
+                            ['en' => 'It depends on...', 'id' => 'Itu tergantung pada...'],
+                            ['en' => "Let's go with this one", 'id' => 'Ayo kita pilih yang ini'],
+                            ['en' => "I can't decide", 'id' => 'Saya tidak bisa memutuskan'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'Which laptop do you prefer, this one or that one?'],
+                            ['speaker' => 'B', 'en' => 'I prefer this one because it\'s lighter and cheaper.'],
+                            ['speaker' => 'A', 'en' => 'But that one has a better camera.'],
+                            ['speaker' => 'B', 'en' => "It depends on what you need it for. Let's go with this one."],
+                        ],
+                        'practice' => [
+                            'Bandingkan 2 barang (HP, motor, dll) dan jelaskan pilihanmu.',
+                            'Diskusikan dengan pasanganmu memilih antara 2 opsi liburan.',
+                            'Latih memberi alasan atas keputusan yang kamu ambil.',
+                        ],
+                    ],
+                    8 => [
+                        'topic' => 'Talking About Future Plans & Goals',
+                        'description' => 'Membicarakan rencana dan tujuan masa depan.',
+                        'vocabulary' => [
+                            ['en' => 'What are your plans for...?', 'id' => 'Apa rencanamu untuk...?'],
+                            ['en' => "I'm planning to...", 'id' => 'Saya berencana untuk...'],
+                            ['en' => 'In five years, I will...', 'id' => 'Dalam lima tahun, saya akan...'],
+                            ['en' => 'My goal is to...', 'id' => 'Tujuan saya adalah...'],
+                            ['en' => "I'm looking forward to...", 'id' => 'Saya menantikan...'],
+                            ['en' => 'I hope to...', 'id' => 'Saya berharap untuk...'],
+                            ['en' => "I'm determined to achieve...", 'id' => 'Saya bertekad untuk mencapai...'],
+                            ['en' => 'Good luck with your plans', 'id' => 'Semoga sukses dengan rencanamu'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'What are your plans after you graduate?'],
+                            ['speaker' => 'B', 'en' => "I'm planning to work abroad for a few years."],
+                            ['speaker' => 'A', 'en' => "That's a great goal. What are you looking forward to the most?"],
+                            ['speaker' => 'B', 'en' => "I'm looking forward to learning new cultures. How about you?"],
+                        ],
+                        'practice' => [
+                            'Ceritakan 3 rencanamu untuk tahun depan.',
+                            'Jelaskan tujuan karirmu dalam 5-10 tahun ke depan.',
+                            'Tanyakan rencana masa depan pasanganmu dan beri tanggapan.',
+                        ],
+                    ],
+                ],
+            ],
+            'advanced' => [
+                'title' => 'Advanced',
+                'description' => 'Diskusi kompleks: wawancara kerja, presentasi, debat, idiom, storytelling, dan public speaking.',
+                'accent' => 'purple',
+                'gradient' => 'from-purple-600 to-indigo-700',
+                'meetings' => [
+                    1 => [
+                        'topic' => 'Job Interviews',
+                        'description' => 'Menjawab pertanyaan wawancara kerja dengan percaya diri.',
+                        'vocabulary' => [
+                            ['en' => 'Tell me about yourself', 'id' => 'Ceritakan tentang dirimu'],
+                            ['en' => 'What are your strengths/weaknesses?', 'id' => 'Apa kelebihan/kekuranganmu?'],
+                            ['en' => 'Why do you want to work here?', 'id' => 'Mengapa kamu ingin bekerja di sini?'],
+                            ['en' => 'Where do you see yourself in 5 years?', 'id' => 'Kamu melihat dirimu di mana dalam 5 tahun?'],
+                            ['en' => "I'm a quick learner", 'id' => 'Saya cepat belajar'],
+                            ['en' => 'I have experience in...', 'id' => 'Saya punya pengalaman di...'],
+                            ['en' => 'What is the salary range?', 'id' => 'Berapa kisaran gajinya?'],
+                            ['en' => 'Thank you for this opportunity', 'id' => 'Terima kasih atas kesempatan ini'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'Interviewer', 'en' => 'Tell me about yourself.'],
+                            ['speaker' => 'Candidate', 'en' => "I'm a marketing graduate with two years of experience in digital advertising. I'm a quick learner and enjoy working in a team."],
+                            ['speaker' => 'Interviewer', 'en' => 'Why do you want to work here?'],
+                            ['speaker' => 'Candidate', 'en' => 'I admire this company\'s innovative culture, and I believe my skills align well with this role.'],
+                        ],
+                        'practice' => [
+                            'Latih menjawab 5 pertanyaan wawancara kerja paling umum.',
+                            'Bermain peran sebagai pewawancara dan kandidat secara bergantian.',
+                            'Siapkan jawaban untuk "What is your weakness?" yang tetap terdengar positif.',
+                        ],
+                    ],
+                    2 => [
+                        'topic' => 'Giving a Short Presentation',
+                        'description' => 'Menyusun dan menyampaikan presentasi singkat dengan struktur yang jelas.',
+                        'vocabulary' => [
+                            ['en' => "Today, I'll be talking about...", 'id' => 'Hari ini, saya akan membahas tentang...'],
+                            ['en' => "Let's start with...", 'id' => 'Mari kita mulai dengan...'],
+                            ['en' => 'Moving on to the next point...', 'id' => 'Lanjut ke poin berikutnya...'],
+                            ['en' => 'As you can see from this data...', 'id' => 'Seperti yang bisa dilihat dari data ini...'],
+                            ['en' => 'In summary...', 'id' => 'Sebagai ringkasan...'],
+                            ['en' => 'Does anyone have any questions?', 'id' => 'Apakah ada yang punya pertanyaan?'],
+                            ['en' => "That's a great question", 'id' => 'Itu pertanyaan yang bagus'],
+                            ['en' => 'Thank you for your attention', 'id' => 'Terima kasih atas perhatiannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'Presenter', 'en' => "Today, I'll be talking about the benefits of remote work. Let's start with flexibility."],
+                            ['speaker' => 'Audience', 'en' => 'Can you give an example?'],
+                            ['speaker' => 'Presenter', 'en' => "That's a great question. For example, employees can choose their own working hours."],
+                            ['speaker' => 'Presenter', 'en' => 'In summary, remote work increases flexibility and productivity. Thank you for your attention.'],
+                        ],
+                        'practice' => [
+                            'Siapkan presentasi 2 menit tentang topik yang kamu kuasai.',
+                            'Latih transisi antar poin menggunakan frasa penghubung di atas.',
+                            'Latih menjawab pertanyaan dadakan dari audiens setelah presentasi.',
+                        ],
+                    ],
+                    3 => [
+                        'topic' => 'Debating & Persuading',
+                        'description' => 'Menyampaikan argumen dan meyakinkan lawan bicara dalam sebuah debat.',
+                        'vocabulary' => [
+                            ['en' => 'I strongly believe that...', 'id' => 'Saya sangat percaya bahwa...'],
+                            ['en' => 'The evidence suggests that...', 'id' => 'Bukti menunjukkan bahwa...'],
+                            ['en' => "Let me explain why...", 'id' => 'Biar saya jelaskan mengapa...'],
+                            ['en' => 'That argument doesn\'t hold up because...', 'id' => 'Argumen itu tidak kuat karena...'],
+                            ['en' => 'On the contrary...', 'id' => 'Sebaliknya...'],
+                            ['en' => 'To put it simply...', 'id' => 'Singkatnya...'],
+                            ['en' => 'I understand your point, but...', 'id' => 'Saya mengerti maksudmu, tapi...'],
+                            ['en' => 'In conclusion, I urge you to...', 'id' => 'Sebagai kesimpulan, saya mendorong kalian untuk...'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'I strongly believe that online learning is more effective than traditional classrooms.'],
+                            ['speaker' => 'B', 'en' => 'I understand your point, but students often lack discipline when studying alone.'],
+                            ['speaker' => 'A', 'en' => 'On the contrary, the evidence suggests self-paced learning improves retention.'],
+                            ['speaker' => 'B', 'en' => "That's a fair point, but it depends on the student's learning style."],
+                        ],
+                        'practice' => [
+                            'Pilih topik debat ringan, lalu bela satu sisi argumen selama 1 menit.',
+                            'Latih menyanggah argumen lawan bicara dengan sopan tapi tegas.',
+                            'Lakukan debat singkat dengan pasangan, lalu tukar posisi pro/kontra.',
+                        ],
+                    ],
+                    4 => [
+                        'topic' => 'Common Idioms & Expressions',
+                        'description' => 'Menggunakan idiom dan ungkapan umum agar bicara terdengar lebih natural.',
+                        'vocabulary' => [
+                            ['en' => "Break the ice", 'id' => 'Mencairkan suasana'],
+                            ['en' => "Hit the books", 'id' => 'Belajar dengan giat'],
+                            ['en' => "Piece of cake", 'id' => 'Sangat mudah'],
+                            ['en' => "Under the weather", 'id' => 'Sedang kurang sehat'],
+                            ['en' => "Costs an arm and a leg", 'id' => 'Sangat mahal'],
+                            ['en' => "Once in a blue moon", 'id' => 'Sangat jarang terjadi'],
+                            ['en' => "Hit the nail on the head", 'id' => 'Tepat sasaran / benar sekali'],
+                            ['en' => "Let the cat out of the bag", 'id' => 'Membocorkan rahasia'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => "How was the exam?"],
+                            ['speaker' => 'B', 'en' => "Honestly, it was a piece of cake because I hit the books all week."],
+                            ['speaker' => 'A', 'en' => "Nice! By the way, did you hear about the surprise party?"],
+                            ['speaker' => 'B', 'en' => "Shh, don't let the cat out of the bag!"],
+                        ],
+                        'practice' => [
+                            'Buat 5 kalimat menggunakan idiom-idiom di atas.',
+                            'Ceritakan sebuah situasi nyata lalu sisipkan idiom yang sesuai.',
+                            'Tebak-tebakan idiom dengan pasangan: satu memberi arti, satu menebak idiomnya.',
+                        ],
+                    ],
+                    5 => [
+                        'topic' => 'Storytelling & Narrating Events',
+                        'description' => 'Menceritakan sebuah kejadian atau kisah secara runtut dan menarik.',
+                        'vocabulary' => [
+                            ['en' => 'Once upon a time... / One day...', 'id' => 'Pada suatu waktu... / Suatu hari...'],
+                            ['en' => 'Suddenly...', 'id' => 'Tiba-tiba...'],
+                            ['en' => 'After that... / Then...', 'id' => 'Setelah itu... / Kemudian...'],
+                            ['en' => 'To make a long story short...', 'id' => 'Singkat cerita...'],
+                            ['en' => 'In the end...', 'id' => 'Pada akhirnya...'],
+                            ['en' => 'I couldn\'t believe my eyes', 'id' => 'Saya tidak percaya dengan apa yang saya lihat'],
+                            ['en' => 'It turned out that...', 'id' => 'Ternyata...'],
+                            ['en' => 'And that\'s how it happened', 'id' => 'Dan begitulah kejadiannya'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'One day, I was walking home when suddenly it started raining heavily.'],
+                            ['speaker' => 'B', 'en' => 'What did you do?'],
+                            ['speaker' => 'A', 'en' => 'I ran to the nearest store. It turned out my old friend worked there!'],
+                            ['speaker' => 'B', 'en' => 'Wow, what a coincidence! And that\'s how it happened?'],
+                        ],
+                        'practice' => [
+                            'Ceritakan sebuah kejadian tak terduga yang pernah kamu alami.',
+                            'Ceritakan ulang sebuah film/buku favoritmu secara singkat.',
+                            'Latih menggunakan kata penghubung cerita (suddenly, after that, in the end).',
+                        ],
+                    ],
+                    6 => [
+                        'topic' => 'Problem-Solving Discussions',
+                        'description' => 'Mendiskusikan masalah dan mengusulkan solusi bersama.',
+                        'vocabulary' => [
+                            ['en' => "The main issue here is...", 'id' => 'Masalah utamanya di sini adalah...'],
+                            ['en' => 'One possible solution is...', 'id' => 'Salah satu solusi yang mungkin adalah...'],
+                            ['en' => 'What if we tried...?', 'id' => 'Bagaimana jika kita coba...?'],
+                            ['en' => 'That could work, but...', 'id' => 'Itu bisa berhasil, tapi...'],
+                            ['en' => "Let's weigh the pros and cons", 'id' => 'Mari kita timbang untung-ruginya'],
+                            ['en' => 'We need to prioritize...', 'id' => 'Kita perlu memprioritaskan...'],
+                            ['en' => "I propose that we...", 'id' => 'Saya mengusulkan agar kita...'],
+                            ['en' => "Let's move forward with this plan", 'id' => 'Mari kita lanjutkan dengan rencana ini'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'The main issue here is that our team keeps missing deadlines.'],
+                            ['speaker' => 'B', 'en' => 'One possible solution is to set shorter weekly targets.'],
+                            ['speaker' => 'A', 'en' => 'That could work. What if we also added daily check-ins?'],
+                            ['speaker' => 'B', 'en' => "I propose we try both for a month. Let's move forward with this plan."],
+                        ],
+                        'practice' => [
+                            'Pilih sebuah masalah sehari-hari, lalu diskusikan 3 kemungkinan solusi.',
+                            'Latih menimbang untung-rugi (pros and cons) dari sebuah keputusan.',
+                            'Lakukan diskusi kelompok memecahkan studi kasus sederhana.',
+                        ],
+                    ],
+                    7 => [
+                        'topic' => 'Discussing Culture & Traditions',
+                        'description' => 'Membicarakan budaya, tradisi, dan perbandingan antarbudaya.',
+                        'vocabulary' => [
+                            ['en' => "In my culture, we usually...", 'id' => 'Di budaya saya, kami biasanya...'],
+                            ['en' => "That's an interesting tradition", 'id' => 'Itu tradisi yang menarik'],
+                            ['en' => 'How is it celebrated?', 'id' => 'Bagaimana cara merayakannya?'],
+                            ['en' => 'It\'s similar to / different from...', 'id' => 'Itu mirip dengan / berbeda dari...'],
+                            ['en' => 'What does this tradition symbolize?', 'id' => 'Apa makna dari tradisi ini?'],
+                            ['en' => 'It has been passed down for generations', 'id' => 'Itu sudah diwariskan selama beberapa generasi'],
+                            ['en' => "I'd love to experience that someday", 'id' => 'Saya ingin sekali merasakannya suatu saat'],
+                            ['en' => 'Every region has its own customs', 'id' => 'Setiap daerah punya adat masing-masing'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'A', 'en' => 'In my culture, we celebrate the harvest festival every year.'],
+                            ['speaker' => 'B', 'en' => "That's an interesting tradition. How is it celebrated?"],
+                            ['speaker' => 'A', 'en' => 'We gather as a community, share food, and perform traditional dances.'],
+                            ['speaker' => 'B', 'en' => 'It sounds similar to a festival we have too! I\'d love to experience it someday.'],
+                        ],
+                        'practice' => [
+                            'Ceritakan satu tradisi daerahmu kepada pasangan bicaramu.',
+                            'Bandingkan satu tradisi Indonesia dengan tradisi negara lain.',
+                            'Diskusikan mengapa melestarikan budaya itu penting.',
+                        ],
+                    ],
+                    8 => [
+                        'topic' => 'Public Speaking & Confidence Building',
+                        'description' => 'Melatih kepercayaan diri dan teknik berbicara di depan umum.',
+                        'vocabulary' => [
+                            ['en' => 'Take a deep breath before you start', 'id' => 'Tarik napas dalam sebelum mulai'],
+                            ['en' => 'Make eye contact with the audience', 'id' => 'Lakukan kontak mata dengan audiens'],
+                            ['en' => 'Speak clearly and confidently', 'id' => 'Bicara dengan jelas dan percaya diri'],
+                            ['en' => "Don't be afraid to pause", 'id' => 'Jangan takut untuk berhenti sejenak'],
+                            ['en' => 'Practice makes perfect', 'id' => 'Latihan membuat sempurna'],
+                            ['en' => "It's okay to make mistakes", 'id' => 'Tidak apa-apa jika membuat kesalahan'],
+                            ['en' => 'Believe in yourself', 'id' => 'Percayalah pada dirimu sendiri'],
+                            ['en' => 'You did a great job!', 'id' => 'Kamu melakukannya dengan baik!'],
+                        ],
+                        'dialogue' => [
+                            ['speaker' => 'Coach', 'en' => 'Before you go on stage, take a deep breath and make eye contact with the audience.'],
+                            ['speaker' => 'Student', 'en' => "I'm a bit nervous."],
+                            ['speaker' => 'Coach', 'en' => "That's normal. Remember, it's okay to make mistakes. Just speak clearly and confidently."],
+                            ['speaker' => 'Student', 'en' => "Thank you, I'll believe in myself."],
+                        ],
+                        'practice' => [
+                            'Latih berbicara di depan cermin selama 1 menit tanpa membaca teks.',
+                            'Rekam dirimu berbicara, lalu dengarkan dan evaluasi sendiri.',
+                            'Beri satu sama lain umpan balik positif setelah tampil bicara di depan kelas.',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
 
     public function speakingClasses()
     {
@@ -77,7 +1331,7 @@ class SpeakingAdminController extends Controller
             }
 
             if (! in_array($trackData['program_slug'], $enrolledSlugs, true) && ! in_array('speaking', $enrolledSlugs, true)) {
-                return redirect()->route('assignments.speaking.classes')
+                return redirect()->route('assignments.speaking.cambridge')
                     ->with('error', 'Anda tidak memiliki akses ke kelas ini. Silakan daftar program yang sesuai.');
             }
         }
@@ -187,7 +1441,7 @@ class SpeakingAdminController extends Controller
             }
 
             if (! in_array($trackData['program_slug'], $enrolledSlugs, true) && ! in_array('speaking', $enrolledSlugs, true)) {
-                return redirect()->route('assignments.speaking.classes')
+                return redirect()->route('assignments.speaking.cambridge')
                     ->with('error', 'Anda tidak memiliki akses ke kelas ini.');
             }
         }
@@ -249,7 +1503,23 @@ class SpeakingAdminController extends Controller
         // see every game, mirroring how meeting-level locking already
         // bypasses for them above. Never let the filter empty the list
         // entirely - fall back to showing everything rather than a blank tab.
-        $rawGames = $meetingDetails['games'] ?? [];
+                $rawGames = $meetingDetails['games'] ?? [];
+        if (empty($rawGames) && !empty($meetingDetails['subtopics'])) {
+            $collected = [];
+            foreach ($meetingDetails['subtopics'] as $st) {
+                $g = $st['games'] ?? ($st['game'] ?? null);
+                if ($g) {
+                    if (is_array($g) && array_is_list($g)) {
+                        foreach ($g as $subG) {
+                            if ($subG) $collected[] = $subG;
+                        }
+                    } else {
+                        $collected[] = $g;
+                    }
+                }
+            }
+            $rawGames = $collected;
+        }
         $allGames = (is_array($rawGames) && array_is_list($rawGames)) ? $rawGames : [$rawGames];
 
         $games = $allGames;
@@ -290,7 +1560,14 @@ class SpeakingAdminController extends Controller
             )->values();
         }
 
+        $rawMateri = $meetingDetails['materi'] ?? [];
+        if (empty($rawMateri) && !empty($meetingDetails['subtopics'])) {
+            $rawMateri = array_map(fn($st) => $st['materi'] ?? [], $meetingDetails['subtopics']);
+        }
+        $materiBlocks = (is_array($rawMateri) && array_is_list($rawMateri)) ? $rawMateri : [$rawMateri];
+
         return view('assignments.speaking-meeting', [
+            'subtopics' => $meetingDetails['subtopics'] ?? [],
             'level' => $level,
             'meetingNumber' => $meeting,
             'meetingData' => $meetingDetails,
@@ -517,7 +1794,23 @@ class SpeakingAdminController extends Controller
             default => $this->getIntroductoryMeetingContent($meetingNumber),
         };
 
-        $rawGames = $meetingDetails['games'] ?? [];
+                $rawGames = $meetingDetails['games'] ?? [];
+        if (empty($rawGames) && !empty($meetingDetails['subtopics'])) {
+            $collected = [];
+            foreach ($meetingDetails['subtopics'] as $st) {
+                $g = $st['games'] ?? ($st['game'] ?? null);
+                if ($g) {
+                    if (is_array($g) && array_is_list($g)) {
+                        foreach ($g as $subG) {
+                            if ($subG) $collected[] = $subG;
+                        }
+                    } else {
+                        $collected[] = $g;
+                    }
+                }
+            }
+            $rawGames = $collected;
+        }
 
         return (is_array($rawGames) && array_is_list($rawGames)) ? $rawGames : [$rawGames];
     }
@@ -573,7 +1866,7 @@ class SpeakingAdminController extends Controller
         ];
     }
 
-    private function buildIntroductoryMeetings(): array
+        private function buildIntroductoryMeetings(): array
     {
         $topics = [
             1 => [
@@ -586,7 +1879,7 @@ class SpeakingAdminController extends Controller
             ],
             3 => [
                 'topic' => 'Telling Ordinal Numbers & Telling Dates',
-                'description' => 'Telling ordinal numbers (1st to 31st+), calendar dates & formats, months, 7 days of the week, and date prepositions (in, on).',
+                'description' => 'Telling ordinal numbers (1st to 1,000,000th), rankings, calendar months, days, years (BC/AD), date formats, and prepositions IN & ON.',
             ],
             4 => [
                 'topic' => 'Preposition of Place, There is / There are & Imperatives',
@@ -628,7 +1921,7 @@ class SpeakingAdminController extends Controller
                 'title' => ($i === 11) ? 'Final Exam' : ('Meeting ' . $i),
                 'source_meeting_number' => $i,
                 'topic' => $item['topic'],
-                'description' => $item['description'],
+                'description' => $item['description'] ?? '',
                 'route_name' => 'assignments.speaking.meeting',
                 'route_parameters' => ['level' => 'introductory', 'meeting' => $i],
                 'available' => true,
@@ -885,4311 +2178,5678 @@ class SpeakingAdminController extends Controller
     private function getIntroductoryMeetingContent(int $meeting): array
     {
         $data = [
-                        1 => [
-                'topic' => 'Introduction and Greetings',
-                'focus' => 'Greetings & Farewells, Basic Self-Introduction, Personal Pronouns & To Be, Likes & Hobbies',
-                'materi' => [
-                    'greetings' => [
-                        'formal' => [
-                            ['en' => 'Good morning', 'id' => 'Selamat pagi (06:00 - 12:00)'],
-                            ['en' => 'Good afternoon', 'id' => 'Selamat siang / sore (12:00 - 18:00)'],
-                            ['en' => 'Good evening', 'id' => 'Selamat malam (18:00+)'],
-                        ],
-                        'informal' => [
-                            ['en' => 'Hi!', 'id' => 'Hai!'],
-                            ['en' => 'Hey! How\'s it going?', 'id' => 'Hei! Bagaimana kabarmu?'],
-                        ],
-                        'closing' => [
-                            ['en' => 'Goodbye', 'id' => 'Selamat tinggal / Sampai jumpa'],
-                            ['en' => 'See you later', 'id' => 'Sampai jumpa lagi nanti'],
-                            ['en' => 'Have a nice day', 'id' => 'Semoga harimu menyenangkan'],
-                        ]
-                    ],
-                    'self_intro_templates' => [
-                        ['label' => 'Name', 'pattern' => 'My name is [Name] / I\'m [Name]', 'example' => 'My name is Student A / I\'m Student B.'],
-                        ['label' => 'Age', 'pattern' => 'I am [number] years old', 'example' => 'I am 20 years old / She is 25 years old.'],
-                        ['label' => 'Origin', 'pattern' => 'I am from [Country/City]', 'example' => 'I am from Jakarta, Indonesia / I am from Sydney, Australia.'],
-                        ['label' => 'Profession', 'pattern' => 'I am a/an [Profession]', 'example' => 'I am an English teacher / I am an English instructor.'],
-                    ],
-                    'grammar_basics' => [
-                        'subject_pronouns' => ['I', 'You', 'He', 'She', 'It', 'We', 'They'],
-                        'to_be_conjugations' => [
-                            ['subject' => 'I', 'to_be' => 'am', 'contraction' => 'I\'m', 'example' => 'I am an English teacher.'],
-                            ['subject' => 'You', 'to_be' => 'are', 'contraction' => 'You\'re', 'example' => 'You are my partner.'],
-                            ['subject' => 'We', 'to_be' => 'are', 'contraction' => 'We\'re', 'example' => 'We are learning English together.'],
-                            ['subject' => 'They', 'to_be' => 'are', 'contraction' => 'They\'re', 'example' => 'They are friendly classmates.'],
-                            ['subject' => 'He', 'to_be' => 'is', 'contraction' => 'He\'s', 'example' => 'He is 20 years old.'],
-                            ['subject' => 'She', 'to_be' => 'is', 'contraction' => 'She\'s', 'example' => 'She is from Sydney, Australia.'],
-                            ['subject' => 'It', 'to_be' => 'is', 'contraction' => 'It\'s', 'example' => 'It is nice to meet you.'],
-                        ]
-                    ],
-                    'likes_hobbies' => [
-                        'patterns' => ['I like + [Noun / V-ing]', 'I don\'t like + [Noun / V-ing]', 'I enjoy + [V-ing]'],
-                        'examples' => [
-                            ['en' => 'In my free time, I like reading books and playing football.', 'id' => 'Di waktu luang, saya suka membaca buku dan bermain sepak bola.'],
-                            ['en' => 'I enjoy hiking in the mountains.', 'id' => 'Saya menikmati mendaki gunung.'],
-                            ['en' => 'I don\'t like waking up late.', 'id' => 'Saya tidak suka bangun terlambat.'],
-                        ]
-                    ],
-                    'template' => "Hello everyone! Good morning.
-
-My name is [Full Name]. I am [Age] years old. You can call me [Nick Name].
-
-I am from [City/Country].
-
-I am a/an [Profession].
-
-In my free time, I like [Hobbies/Likes].
-
-It is nice to meet you all. Thank you!",
-                    'example' => "Hello! Good morning. How's it going?
-
-My name is Student A. I am 20 years old.
-
-I am from Jakarta, Indonesia, and I am an English teacher.
-
-In my free time, I like reading books and playing football.
-
-It is very nice to meet you all. Have a nice day!"
-                ],
-                'listening' => [
-                    'title' => 'Short Listening: Student Introduction & Dialogue Practice',
-                    'audio_script' => "Student A: Hello! Good morning. How's it going? Student B: Hi! Good morning. Everything is going great, thank you! My name is Student B. What is your name? Student A: My name is Student A. I'm 20 years old. Where are you from, Student B? Student B: I am from Sydney, Australia. I am an English instructor. What is your profession, Student A? Student A: I am an English teacher from Jakarta, Indonesia. In my free time, I like reading books and playing football. Student B: That is wonderful! I enjoy hiking in the mountains. It is very nice to meet you, Student A! Student A: It is nice to meet you too, Student B! Have a nice day and see you later!",
-                    'key_phrases' => [
-                        'How\'s it going? Everything is going great, thank you!',
-                        'I am from Sydney, Australia. I am an English instructor.',
-                        'I am an English teacher from Jakarta, Indonesia.',
-                        'In my free time, I like reading books and playing football.',
-                        'That is wonderful! I enjoy hiking in the mountains.',
-                        'It is nice to meet you too! Have a nice day and see you later!',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'Where is Student B from and what is her profession?',
-                            'options' => [
-                                'From Sydney, Australia; English instructor',
-                                'From Jakarta, Indonesia; English teacher',
-                                'From Bandung, Indonesia; Doctor',
-                                'From London, UK; Engineer',
+            1 => [
+                'topic' => 'Introducing Yourself & Alphabet',
+                'focus' => 'Greetings & Farewells, Basic Self-Introduction, Personal Pronouns & To Be, English Alphabet Phonetics (IPA), Spelling Names & Words, 22 Jobs & Occupations',
+                'subtopics' => [
+                    // =========================================================================
+                    // SUBTOPIK 01: GREETINGS & SELF-INTRODUCTION
+                    // =========================================================================
+                    [
+                        'id' => 'sec-m1-sub-1',
+                        'num' => '01',
+                        'title' => 'Greetings & Self-Introduction',
+                        'subtitle' => 'Greetings, Farewells & 4 Pillars of Self-Introduction',
+                        'desc' => 'Salam formal/informal, perkenalan nama, usia, asal, profesi, likes/hobbies, dan kata kerja To Be.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'greetings' => [
+                                'formal' => [
+                                    ['en' => 'Good morning', 'id' => 'Selamat pagi (06:00 - 12:00)'],
+                                    ['en' => 'Good afternoon', 'id' => 'Selamat siang / sore (12:00 - 18:00)'],
+                                    ['en' => 'Good evening', 'id' => 'Selamat malam (18:00+)'],
+                                ],
+                                'informal' => [
+                                    ['en' => 'Hi!', 'id' => 'Hai!'],
+                                    ['en' => 'Hey! How\'s it going?', 'id' => 'Hei! Bagaimana kabarmu?'],
+                                ],
+                                'closing' => [
+                                    ['en' => 'Goodbye', 'id' => 'Selamat tinggal / Sampai jumpa'],
+                                    ['en' => 'See you later', 'id' => 'Sampai jumpa lagi nanti'],
+                                    ['en' => 'Have a nice day', 'id' => 'Semoga harimu menyenangkan'],
+                                ]
                             ],
-                            'answer' => 'From Sydney, Australia; English instructor',
-                        ],
-                        [
-                            'q' => 'Where is Student A from and what is his profession?',
-                            'options' => [
-                                'From Jakarta, Indonesia; English teacher',
-                                'From Sydney, Australia; English instructor',
-                                'From Tokyo, Japan; Pilot',
-                                'From Melbourne, Australia; Doctor',
+                            'self_intro_templates' => [
+                                ['label' => 'Name', 'pattern' => 'My name is [Name] / I\'m [Name]', 'example' => 'My name is Student A / I\'m Student B.'],
+                                ['label' => 'Age', 'pattern' => 'I am [number] years old', 'example' => 'I am 20 years old / She is 25 years old.'],
+                                ['label' => 'Origin', 'pattern' => 'I am from [Country/City]', 'example' => 'I am from Jakarta, Indonesia / I am from Sydney, Australia.'],
+                                ['label' => 'Profession', 'pattern' => 'I am a/an [Profession]', 'example' => 'I am an English teacher / I am an English instructor.'],
                             ],
-                            'answer' => 'From Jakarta, Indonesia; English teacher',
-                        ],
-                        [
-                            'q' => 'What hobbies are mentioned by Student A and Student B?',
-                            'options' => [
-                                'Student A likes reading & football; Student B enjoys hiking',
-                                'Student A likes swimming; Student B likes cooking',
-                                'Both students like playing video games',
-                                'Student A likes dancing; Student B likes singing',
+                            'grammar_basics' => [
+                                'subject_pronouns' => ['I', 'You', 'He', 'She', 'It', 'We', 'They'],
+                                'to_be_conjugations' => [
+                                    ['subject' => 'I', 'to_be' => 'am', 'contraction' => 'I\'m', 'example' => 'I am an English teacher.'],
+                                    ['subject' => 'You', 'to_be' => 'are', 'contraction' => 'You\'re', 'example' => 'You are my partner.'],
+                                    ['subject' => 'We', 'to_be' => 'are', 'contraction' => 'We\'re', 'example' => 'We are learning English together.'],
+                                    ['subject' => 'They', 'to_be' => 'are', 'contraction' => 'They\'re', 'example' => 'They are friendly classmates.'],
+                                    ['subject' => 'He', 'to_be' => 'is', 'contraction' => 'He\'s', 'example' => 'He is 20 years old.'],
+                                    ['subject' => 'She', 'to_be' => 'is', 'contraction' => 'She\'s', 'example' => 'She is from Sydney, Australia.'],
+                                    ['subject' => 'It', 'to_be' => 'is', 'contraction' => 'It\'s', 'example' => 'It is nice to meet you.'],
+                                ]
                             ],
-                            'answer' => 'Student A likes reading & football; Student B enjoys hiking',
+                            'likes_hobbies' => [
+                                'patterns' => ['I like + [Noun / V-ing]', 'I don\'t like + [Noun / V-ing]', 'I enjoy + [V-ing]'],
+                                'examples' => [
+                                    ['en' => 'In my free time, I like reading books and playing football.', 'id' => 'Di waktu luang, saya suka membaca buku dan bermain sepak bola.'],
+                                    ['en' => 'I enjoy hiking in the mountains.', 'id' => 'Saya menikmati mendaki gunung.'],
+                                    ['en' => 'I don\'t like waking up late.', 'id' => 'Saya tidak suka bangun terlambat.'],
+                                ]
+                            ],
+                            'template' => "Hello everyone! Good morning.\n\nMy name is [Full Name]. I am [Age] years old. You can call me [Nick Name].\n\nI am from [City/Country].\n\nI am a/an [Profession].\n\nIn my free time, I like [Hobbies/Likes].\n\nIt is nice to meet you all. Thank you!",
+                            'example' => "Hello! Good morning. How\'s it going?\n\nMy name is Student A. I am 20 years old.\n\nI am from Jakarta, Indonesia, and I am an English teacher.\n\nIn my free time, I like reading books and playing football.\n\nIt is very nice to meet you all. Have a nice day!"
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Networking at an International Tech Summit in Bali',
+                            'audio_script' => "Sarah: Hello! Good morning. Is anyone sitting here?
+Dimas: Hi! Good morning. No, it is completely free. Please, have a seat!
+Sarah: Thank you so much! My name is Sarah. I am from Sydney, Australia. What is your name?
+Dimas: Nice to meet you, Sarah! My name is Dimas. I am from Jakarta, Indonesia.
+Sarah: Wonderful to meet you, Dimas! What do you do here in Bali?
+Dimas: I am a software engineer at an educational tech startup. How about you?
+Sarah: I am a digital product designer at a global travel platform. It is very nice to meet you!",
+                            'key_phrases' => [
+                                'Hello! Good morning. Is anyone sitting here?',
+                                'My name is Sarah. I am from Sydney, Australia.',
+                                'Nice to meet you, Sarah! My name is Dimas.',
+                                'I am a software engineer at an educational tech startup.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'Where is Sarah from?',
+                                    'options' => [
+                                        'Sydney, Australia',
+                                        'Jakarta, Indonesia',
+                                        'London, UK',
+                                        'Tokyo, Japan',
+                                    ],
+                                    'answer' => 'Sydney, Australia',
+                                ],
+                                [
+                                    'q' => 'Where does Dimas come from?',
+                                    'options' => [
+                                        'Jakarta, Indonesia',
+                                        'Bali, Indonesia',
+                                        'Melbourne, Australia',
+                                        'Singapore',
+                                    ],
+                                    'answer' => 'Jakarta, Indonesia',
+                                ],
+                                [
+                                    'q' => 'What is Dimas\'s profession?',
+                                    'options' => [
+                                        'Software engineer',
+                                        'Product designer',
+                                        'Travel guide',
+                                        'Hotel receptionist',
+                                    ],
+                                    'answer' => 'Software engineer',
+                                ],
+                            ],
+                        ],
+'drilling1' => [
+                            ['en' => 'Hello everyone! Good morning, my name is Student A.', 'id' => 'Halo semuanya! Selamat pagi, nama saya Student A.'],
+                            ['en' => 'I am twenty years old, and you can call me Student A.', 'id' => 'Saya berumur dua puluh tahun, dan Anda bisa memanggil saya Student A.'],
+                            ['en' => 'I am from Jakarta, Indonesia, and I am an English teacher.', 'id' => 'Saya berasal dari Jakarta, Indonesia, dan saya seorang guru bahasa Inggris.'],
+                            ['en' => 'In my free time, I like reading books and playing football.', 'id' => 'Di waktu luang saya, saya suka membaca buku dan bermain sepak bola.'],
+                            ['en' => 'It is very nice to meet all of you today.', 'id' => 'Sangat senang bertemu dengan Anda semua hari ini.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'Hi! Good morning. How\'s it going? Everything is going great, thank you!', 'id' => 'Hai! Selamat pagi. Bagaimana kabarmu? Semuanya baik-baik saja, terima kasih!'],
+                            ['en' => 'I am from Sydney, Australia, and I am an English instructor.', 'id' => 'Saya berasal dari Sydney, Australia, dan saya seorang instruktur bahasa Inggris.'],
+                            ['en' => 'What is your profession, and where are you from, Student A?', 'id' => 'Apa profesimu, dan dari mana asalmu, Student A?'],
+                            ['en' => 'That is wonderful! In my free time, I enjoy hiking in the mountains.', 'id' => 'Luar biasa! Di waktu luang, saya menikmati mendaki gunung.'],
+                            ['en' => 'It is nice to meet you too, Student B! Have a nice day and see you later!', 'id' => 'Senang berkenalan denganmu juga, Student B! Semoga harimu menyenangkan dan sampai jumpa lagi!'],
+                        ],
+                        'grammar_note' => "Subject Pronouns (I, You, He, She, It, We, They) & Verb 'To Be' (am / is / are) | Contractions: I'm, You're, He's, She's, It's, We're, They're",
+                        'dialogue_setting' => 'Dua peserta kursus, Student A dan Student B, saling berkenalan di hari pertama kelas First Point Speaking.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Hello! Good morning. How\'s it going?',
+                                'id' => 'Halo! Selamat pagi. Bagaimana kabarmu?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'Hi! Good morning. Everything is going great, thank you! My name is Student B. What is your name?',
+                                'id' => 'Hai! Selamat pagi. Semuanya baik-baik saja, terima kasih! Nama saya Student B. Siapa nama kamu?',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'My name is Student A. I\'m 20 years old. Where are you from, Student B?',
+                                'id' => 'Nama saya Student A. Saya berumur 20 tahun. Dari mana asalmu, Student B?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'I am from Sydney, Australia. I am an English instructor. What is your profession, Student A?',
+                                'id' => 'Saya berasal dari Sydney, Australia. Saya seorang instruktur bahasa Inggris. Apa profesimu, Student A?',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'I am an English teacher from Jakarta, Indonesia. In my free time, I like reading books and playing football.',
+                                'id' => 'Saya seorang guru bahasa Inggris dari Jakarta, Indonesia. Di waktu luang, saya suka membaca buku dan bermain sepak bola.',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'That is wonderful! I enjoy hiking in the mountains. It is very nice to meet you, Student A!',
+                                'id' => 'Luar biasa! Saya menikmati mendaki gunung. Sangat senang berkenalan denganmu, Student A!',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'It is nice to meet you too, Student B! Have a nice day and see you later!',
+                                'id' => 'Senang berkenalan denganmu juga, Student B! Semoga harimu menyenangkan dan sampai jumpa lagi!',
+                            ],
+                        ],
+                        'games' => [
+                            'title' => 'Zoom Speaking Game: Class Ice-Breaker Survey (Level A1 - Simple Present)',
+                            'participation_type' => 'individual',
+                            'activity' => 'Whole class: speaking',
+                            'aim' => 'To find out personal information and daily habits of classmates using only Simple Present Tense (habits, routines, likes, personal details).',
+                            'grammar_functions' => 'Simple Present Tense (do / does, is / am / are, verb 1, routines & habits).',
+                            'vocabulary' => 'Personal details, Hometown, Family, Food, Drinks, Hobbies, Daily routines, and Preferences.',
+                            'time' => '15 to 20 minutes',
+                            'cards' => [
+                                [
+                                    'id' => 1,
+                                    'title' => "What is your favourite colour?",
+                                    'question' => "What is your favourite colour?",
+                                    'sample_answer' => "My favourite colour is [Blue / Red / Green / Black].",
+                                    'category' => 'Favorites',
+                                    'badge' => 'Colour Survey',
+                                    'image' => '/images/speaking/a1_present/card_1.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 2,
+                                    'title' => "What do you do in your free time?",
+                                    'question' => "What do you do in your free time?",
+                                    'sample_answer' => "In my free time, I [read books / play football / listen to music / watch movies].",
+                                    'category' => 'Hobbies',
+                                    'badge' => 'Free Time Routine',
+                                    'image' => '/images/speaking/a1_present/card_2.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 3,
+                                    'title' => "What time do you usually wake up?",
+                                    'question' => "What time do you usually wake up every morning?",
+                                    'sample_answer' => "I usually wake up at [6:00 AM / 7:00 AM] every morning.",
+                                    'category' => 'Habits',
+                                    'badge' => 'Morning Routine',
+                                    'image' => '/images/speaking/a1_present/card_3.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 4,
+                                    'title' => "What do you eat for breakfast?",
+                                    'question' => "What do you usually eat for breakfast?",
+                                    'sample_answer' => "I usually eat [fried rice / two eggs / bread / noodles] for breakfast.",
+                                    'category' => 'Food & Routine',
+                                    'badge' => 'Breakfast Habit',
+                                    'image' => '/images/speaking/a1_present/card_4.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 5,
+                                    'title' => "Where do you live?",
+                                    'question' => "Where are you from and where do you live right now?",
+                                    'sample_answer' => "I am from [City/Country], and I live in [City].",
+                                    'category' => 'Location',
+                                    'badge' => 'Hometown & Living',
+                                    'image' => '/images/speaking/a1_present/card_5.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 6,
+                                    'title' => "What do you do on weekends?",
+                                    'question' => "What do you usually do on weekends?",
+                                    'sample_answer' => "On weekends, I usually [clean my room / visit my family / study English / relax at home].",
+                                    'category' => 'Routine',
+                                    'badge' => 'Weekend Habit',
+                                    'image' => '/images/speaking/a1_present/card_6.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 7,
+                                    'title' => "How many people are in your family?",
+                                    'question' => "How many people are there in your family?",
+                                    'sample_answer' => "There are [4 / 5 / 6] people in my family: [my parents, siblings, and me].",
+                                    'category' => 'Family',
+                                    'badge' => 'Family Size',
+                                    'image' => '/images/speaking/a1_present/card_7.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 8,
+                                    'title' => "Where do you go on holidays?",
+                                    'question' => "Where do you usually go for your holidays?",
+                                    'sample_answer' => "For holidays, I usually go to [the beach / Bali / Bandung / Yogyakarta].",
+                                    'category' => 'Travel',
+                                    'badge' => 'Holiday Destination',
+                                    'image' => '/images/speaking/a1_present/card_8.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 9,
+                                    'title' => "Do you have any pets at home?",
+                                    'question' => "Do you have any pets at home?",
+                                    'sample_answer' => "Yes, I have [a cat / a dog / two birds]. / No, I do not have any pets.",
+                                    'category' => 'Personal Info',
+                                    'badge' => 'Pets Survey',
+                                    'image' => '/images/speaking/a1_present/card_9.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 10,
+                                    'title' => "Do you like watching movies?",
+                                    'question' => "Do you like watching movies?",
+                                    'sample_answer' => "Yes, I like watching [action / comedy / animation] movies at the cinema / at home.",
+                                    'category' => 'Entertainment',
+                                    'badge' => 'Movie Taste',
+                                    'image' => '/images/speaking/a1_present/card_10.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 11,
+                                    'title' => "When is your birthday?",
+                                    'question' => "When is your birthday?",
+                                    'sample_answer' => "My birthday is on [the 15th of September / in August].",
+                                    'category' => 'Dates & Personal',
+                                    'badge' => 'Birthday Month',
+                                    'image' => '/images/speaking/a1_present/card_11.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 12,
+                                    'title' => "What kind of music do you like?",
+                                    'question' => "What kind of music do you like listening to?",
+                                    'sample_answer' => "I like listening to [Pop / Rock / Jazz / Classical / R&B] music.",
+                                    'category' => 'Music & Taste',
+                                    'badge' => 'Music Genre',
+                                    'image' => '/images/speaking/a1_present/card_12.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 13,
+                                    'title' => "What is your job or daily activity?",
+                                    'question' => "What do you do every day? Are you a student or working?",
+                                    'sample_answer' => "I am a [student at school / university / working as a professional].",
+                                    'category' => 'Profession',
+                                    'badge' => 'Job & Study',
+                                    'image' => '/images/speaking/a1_present/card_13.png?v=2026_aesthetic',
+                                ],
+                                [
+                                    'id' => 14,
+                                    'title' => "What is your favourite drink?",
+                                    'question' => "What is your favourite drink or beverage?",
+                                    'sample_answer' => "My favourite drink is [mineral water / iced tea / coffee / fresh fruit juice].",
+                                    'category' => 'Drinks',
+                                    'badge' => 'Favourite Drink',
+                                    'image' => '/images/speaking/a1_present/card_14.png?v=2026_aesthetic',
+                                ],
+                            ],
+                            'report_examples' => [
+                                'In our class, most students like Fried Rice and Iced Tea.',
+                                'Most of my classmates wake up around 6:00 AM every morning.',
+                                'In our group, 7 out of 10 students have pets at home.',
+                                'Most students in our class relax at home or hang out with friends on weekends.'
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "Hello! Welcome to your speaking practice session. Let\'s start with an introduction: What is your full name, and what should I call you?",
+                                'hint' => "Answer: 'Hello! My full name is [Your Name], and you can call me [Nickname].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "Nice to meet you! Where are you originally from, and where do you live right now?",
+                                'hint' => "Answer: 'I am from [City/Country], and I currently live in [City].'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "Great! What is your current job or daily activity? Are you a student or are you working?",
+                                'hint' => "Answer: 'I am a student at [School/University] / I work as a [Job].'",
+                            ],
+                            [
+                                'id' => 4,
+                                'question' => "Interesting! What do you usually like doing in your free time or on weekends?",
+                                'hint' => "Answer: 'In my free time, I really enjoy [reading / playing sports / watching movies].'",
+                            ],
+                            [
+                                'id' => 5,
+                                'question' => "Wonderful! Why do you want to learn and improve your English speaking skills?",
+                                'hint' => "Answer: 'I want to improve my English because [for my career / study / travel abroad].'",
+                            ],
+                        ],
+                        'monolog_baku' => [
+                            "Hello everyone! Good morning. My name is Budi Sugeng. I am 20 years old. You can call me Budi. I am from Jakarta, Indonesia. I am an English teacher. In my free time, I like reading books and playing football. It is nice to meet you all. Thank you!",
+                            "Good afternoon, ladies and gentlemen. I am delighted to introduce myself. My name is Sarah Miller, and I am from Sydney, Australia. I work as an instructor, and I enjoy reading historical novels in my leisure time. It is a pleasure to meet everyone."
+                        ],
+                        'monolog_tidak_baku' => [
+                            "Hi guys! Hey, how\'s it going? I\'m Budi, 20 years old from Jakarta. I teach English and in my spare time I really love hanging out with friends and playing football. Super stoked to meet you all!",
+                            "Hey everyone! What\'s up? I\'m Sarah from Sydney. I\'m into reading and outdoor hiking when I\'m not working. Great to be here with you guys!"
+                        ],
+                        'questions_part_a' => [
+                            'What is your full name and what is your nickname?',
+                            'How old are you?',
+                            'Where are you from (City & Country)?',
+                            'What is your current profession or field of study?',
+                            'What do you like doing in your free time?',
+                        ],
+                        'questions_part_b' => [
+                            'How do you greet someone formally in the morning, afternoon, and evening?',
+                            'What is the difference between "I like reading" and "I don\'t like reading"?',
+                            'Can you introduce your best friend using "He is..." or "She is..."?',
+                            'How do you say goodbye politely to your teacher at the end of class?',
+                        ],
+                        'impromptu_title' => 'Pertanyaan & Aktivitas Final – Complete Self-Introduction Showcase',
+                        'impromptu' => [
+                            'Aktivitas 1: Sampaikan perkenalan diri lengkapmu tanpa membaca teks selama 60 detik mengikuti template Budi Sugeng!',
+                            'Aktivitas 2: Lakukan perkenalan santai (informal greeting) seolah-olah kamu sedang berkenalan di kafe internasional.',
+                            'Aktivitas 3: Jelaskan 3 hal yang paling kamu sukai (likes) dan 2 hal yang tidak kamu sukai (dislikes) dalam kehidupan sehari-hari.',
+                            'Aktivitas 4: Rekam suaramu pada fitur Voice Recorder di bawah dan dengarkan kembali intonasimu!',
+                        ],
+                                                'vocabulary' => [
+                            ['word' => 'Good morning', 'ipa' => '/ɡʊd ˈmɔː.nɪŋ/', 'meaning' => 'Selamat pagi (06:00 - 12:00)', 'example' => 'Good morning, everyone! Welcome to our speaking class.'],
+                            ['word' => 'Good afternoon', 'ipa' => '/ɡʊd ˌɑːf.təˈnuːn/', 'meaning' => 'Selamat siang / sore (12:00 - 18:00)', 'example' => 'Good afternoon, ladies and gentlemen.'],
+                            ['word' => 'Good evening', 'ipa' => '/ɡʊd ˈiːv.nɪŋ/', 'meaning' => 'Selamat malam (18:00 ke atas)', 'example' => 'Good evening! It is nice to meet you tonight.'],
+                            ['word' => "How's it going?", 'ipa' => '/haʊz ɪt ˈɡoʊ.ɪŋ/', 'meaning' => 'Bagaimana kabarmu? (Informal)', 'example' => "Hey! How's it going? Everything is going great."],
+                            ['word' => 'Nice to meet you', 'ipa' => '/naɪs tuː miːt juː/', 'meaning' => 'Senang berkenalan / bertemu denganmu', 'example' => 'It is very nice to meet you all today.'],
+                            ['word' => 'Have a nice day', 'ipa' => '/hæv ə naɪs deɪ/', 'meaning' => 'Semoga harimu menyenangkan', 'example' => 'Goodbye! Have a nice day ahead.'],
+                            ['word' => 'See you later', 'ipa' => '/siː juː ˈleɪ.tər/', 'meaning' => 'Sampai jumpa lagi nanti', 'example' => 'Thank you and see you later!'],
+                            ['word' => 'Full Name', 'ipa' => '/fʊl neɪm/', 'meaning' => 'Nama lengkap', 'example' => 'My full name is Dimas Pratama.'],
+                            ['word' => 'Nickname', 'ipa' => '/ˈnɪk.neɪm/', 'meaning' => 'Nama panggilan', 'example' => 'You can call me Dimas for short.'],
+                            ['word' => 'Age', 'ipa' => '/eɪdʒ/', 'meaning' => 'Usia / Umur', 'example' => 'I am twenty-eight years old.'],
+                            ['word' => 'Hometown', 'ipa' => '/ˈhoʊm.taʊn/', 'meaning' => 'Kota asal / Daerah asal', 'example' => 'My hometown is Jakarta, Indonesia.'],
+                            ['word' => 'Origin', 'ipa' => '/ˈɒr.ɪ.dʒɪn/', 'meaning' => 'Asal negara / kota', 'example' => 'I am from Melbourne, Australia.'],
+                            ['word' => 'Profession', 'ipa' => '/prəˈfeʃ.ən/', 'meaning' => 'Profesi / Pekerjaan', 'example' => 'I work as a software engineer.'],
+                            ['word' => 'Free Time', 'ipa' => '/friː taɪm/', 'meaning' => 'Waktu luang / waktu senggang', 'example' => 'In my free time, I really like landscape photography.'],
+                            ['word' => 'Hobby', 'ipa' => '/ˈhɒb.i/', 'meaning' => 'Hobi / Kegemaran', 'example' => 'My hobby is reading mystery novels and playing guitar.'],
+                            ['word' => 'Introduce', 'ipa' => '/ˌɪn.trəˈdjuːs/', 'meaning' => 'Memperkenalkan diri / orang lain', 'example' => 'Allow me to introduce myself to the group.'],
+                            ['word' => 'Subject Pronoun', 'ipa' => '/ˈsʌb.dʒɪkt ˈproʊ.naʊn/', 'meaning' => 'Kata ganti subjek (I, You, He, She, It, We, They)', 'example' => 'Subject pronouns replace nouns as sentence subjects.'],
+                            ['word' => "Verb 'To Be'", 'ipa' => '/vɜːb tuː biː/', 'meaning' => 'Kata kerja to be (am, is, are)', 'example' => 'I am a student, and she is an instructor.'],
+                            ['word' => 'Contraction', 'ipa' => '/kənˈtræk.ʃən/', 'meaning' => "Bentuk singkatan (I'm, You're, He's, It's)", 'example' => "I'm 20 years old and it's nice to meet you."],
+                            ['word' => 'Classmate', 'ipa' => '/ˈklɑːs.meɪt/', 'meaning' => 'Teman sekelas', 'example' => 'They are friendly classmates in our speaking course.'],
+                            ['word' => 'Partner', 'ipa' => '/ˈpɑːt.nər/', 'meaning' => 'Rekan / Pasangan latihan', 'example' => 'You are my speaking partner today.'],
+                            ['word' => 'Daily Routine', 'ipa' => '/ˈdeɪ.li ruːˈtiːn/', 'meaning' => 'Rutinitas sehari-hari', 'example' => 'What time do you usually wake up every morning?'],
+                            ['word' => 'Breakfast', 'ipa' => '/ˈbrek.fəst/', 'meaning' => 'Sarapan pagi', 'example' => 'I usually eat fried rice and two eggs for breakfast.'],
+                            ['word' => 'Weekend', 'ipa' => '/ˌwiːkˈend/', 'meaning' => 'Akhir pekan (Sabtu & Minggu)', 'example' => 'On weekends, I relax at home and study English.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
-                    ['en' => 'Hello everyone! Good morning, my name is Student A.', 'id' => 'Halo semuanya! Selamat pagi, nama saya Student A.'],
-                    ['en' => 'I am twenty years old, and you can call me Student A.', 'id' => 'Saya berumur dua puluh tahun, dan Anda bisa memanggil saya Student A.'],
-                    ['en' => 'I am from Jakarta, Indonesia, and I am an English teacher.', 'id' => 'Saya berasal dari Jakarta, Indonesia, dan saya seorang guru bahasa Inggris.'],
-                    ['en' => 'In my free time, I like reading books and playing football.', 'id' => 'Di waktu luang saya, saya suka membaca buku dan bermain sepak bola.'],
-                    ['en' => 'It is very nice to meet all of you today.', 'id' => 'Sangat senang bertemu dengan Anda semua hari ini.'],
-                ],
-                'drilling2' => [
-                    ['en' => 'Hi! Good morning. How\'s it going? Everything is going great, thank you!', 'id' => 'Hai! Selamat pagi. Bagaimana kabarmu? Semuanya baik-baik saja, terima kasih!'],
-                    ['en' => 'I am from Sydney, Australia, and I am an English instructor.', 'id' => 'Saya berasal dari Sydney, Australia, dan saya seorang instruktur bahasa Inggris.'],
-                    ['en' => 'What is your profession, and where are you from, Student A?', 'id' => 'Apa profesimu, dan dari mana asalmu, Student A?'],
-                    ['en' => 'That is wonderful! In my free time, I enjoy hiking in the mountains.', 'id' => 'Luar biasa! Di waktu luang, saya menikmati mendaki gunung.'],
-                    ['en' => 'It is nice to meet you too, Student B! Have a nice day and see you later!', 'id' => 'Senang berkenalan denganmu juga, Student B! Semoga harimu menyenangkan dan sampai jumpa lagi!'],
-                ],
-                'grammar_note' => "Subject Pronouns (I, You, He, She, It, We, They) & Verb 'To Be' (am / is / are) | Contractions: I'm, You're, He's, She's, It's, We're, They're",
-                'dialogue_setting' => 'Dua peserta kursus, Student A dan Student B, saling berkenalan di hari pertama kelas First Point Speaking.',
-                'dialogue' => [
+                    // =========================================================================
+                    // SUBTOPIK 02: ALPHABET PHONETICS & SPELLING
+                    // =========================================================================
                     [
-                        'speaker' => 'Student A',
-                        'en' => 'Hello! Good morning. How\'s it going?',
-                        'id' => 'Halo! Selamat pagi. Bagaimana kabarmu?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'en' => 'Hi! Good morning. Everything is going great, thank you! My name is Student B. What is your name?',
-                        'id' => 'Hai! Selamat pagi. Semuanya baik-baik saja, terima kasih! Nama saya Student B. Siapa nama kamu?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'en' => 'My name is Student A. I\'m 20 years old. Where are you from, Student B?',
-                        'id' => 'Nama saya Student A. Saya berumur 20 tahun. Dari mana asalmu, Student B?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'en' => 'I am from Sydney, Australia. I am an English instructor. What is your profession, Student A?',
-                        'id' => 'Saya berasal dari Sydney, Australia. Saya seorang instruktur bahasa Inggris. Apa profesimu, Student A?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'en' => 'I am an English teacher from Jakarta, Indonesia. In my free time, I like reading books and playing football.',
-                        'id' => 'Saya seorang guru bahasa Inggris dari Jakarta, Indonesia. Di waktu luang, saya suka membaca buku dan bermain sepak bola.',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'en' => 'That is wonderful! I enjoy hiking in the mountains. It is very nice to meet you, Student A!',
-                        'id' => 'Luar biasa! Saya menikmati mendaki gunung. Sangat senang berkenalan denganmu, Student A!',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'en' => 'It is nice to meet you too, Student B! Have a nice day and see you later!',
-                        'id' => 'Senang berkenalan denganmu juga, Student B! Semoga harimu menyenangkan dan sampai jumpa lagi!',
-                    ],
-                ],
-                'games' => [
-                    'title' => 'Zoom Speaking Game: Class Ice-Breaker Survey (Level A1 - Simple Present)',
-                    'participation_type' => 'individual',
-                    'activity' => 'Whole class: speaking',
-                    'aim' => 'To find out personal information and daily habits of classmates using only Simple Present Tense (habits, routines, likes, personal details).',
-                    'grammar_functions' => 'Simple Present Tense (do / does, is / am / are, verb 1, routines & habits).',
-                    'vocabulary' => 'Personal details, Hometown, Family, Food, Drinks, Hobbies, Daily routines, and Preferences.',
-                    'time' => '15 to 20 minutes',
-                    'cards' => [
-                        [
-                            'id' => 1,
-                            'title' => "What is your favourite colour?",
-                            'question' => "What is your favourite colour?",
-                            'sample_answer' => "My favourite colour is [Blue / Red / Green / Black].",
-                            'category' => 'Favorites',
-                            'badge' => 'Colour Survey',
-                            'image' => '/images/speaking/a1_present/card_1.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 2,
-                            'title' => "What do you do in your free time?",
-                            'question' => "What do you do in your free time?",
-                            'sample_answer' => "In my free time, I [read books / play football / listen to music / watch movies].",
-                            'category' => 'Hobbies',
-                            'badge' => 'Free Time Routine',
-                            'image' => '/images/speaking/a1_present/card_2.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 3,
-                            'title' => "What time do you usually wake up?",
-                            'question' => "What time do you usually wake up every morning?",
-                            'sample_answer' => "I usually wake up at [6:00 AM / 7:00 AM] every morning.",
-                            'category' => 'Habits',
-                            'badge' => 'Morning Routine',
-                            'image' => '/images/speaking/a1_present/card_3.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 4,
-                            'title' => "What do you eat for breakfast?",
-                            'question' => "What do you usually eat for breakfast?",
-                            'sample_answer' => "I usually eat [fried rice / two eggs / bread / noodles] for breakfast.",
-                            'category' => 'Food & Routine',
-                            'badge' => 'Breakfast Habit',
-                            'image' => '/images/speaking/a1_present/card_4.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 5,
-                            'title' => "Where do you live?",
-                            'question' => "Where are you from and where do you live right now?",
-                            'sample_answer' => "I am from [City/Country], and I live in [City].",
-                            'category' => 'Location',
-                            'badge' => 'Hometown & Living',
-                            'image' => '/images/speaking/a1_present/card_5.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 6,
-                            'title' => "What do you do on weekends?",
-                            'question' => "What do you usually do on weekends?",
-                            'sample_answer' => "On weekends, I usually [clean my room / visit my family / study English / relax at home].",
-                            'category' => 'Routine',
-                            'badge' => 'Weekend Habit',
-                            'image' => '/images/speaking/a1_present/card_6.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 7,
-                            'title' => "How many people are in your family?",
-                            'question' => "How many people are there in your family?",
-                            'sample_answer' => "There are [4 / 5 / 6] people in my family: [my parents, siblings, and me].",
-                            'category' => 'Family',
-                            'badge' => 'Family Size',
-                            'image' => '/images/speaking/a1_present/card_7.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 8,
-                            'title' => "Where do you go on holidays?",
-                            'question' => "Where do you usually go for your holidays?",
-                            'sample_answer' => "For holidays, I usually go to [the beach / Bali / Bandung / Yogyakarta].",
-                            'category' => 'Travel',
-                            'badge' => 'Holiday Destination',
-                            'image' => '/images/speaking/a1_present/card_8.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 9,
-                            'title' => "Do you have any pets at home?",
-                            'question' => "Do you have any pets at home?",
-                            'sample_answer' => "Yes, I have [a cat / a dog / two birds]. / No, I do not have any pets.",
-                            'category' => 'Personal Info',
-                            'badge' => 'Pets Survey',
-                            'image' => '/images/speaking/a1_present/card_9.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 10,
-                            'title' => "Do you like watching movies?",
-                            'question' => "Do you like watching movies?",
-                            'sample_answer' => "Yes, I like watching [action / comedy / animation] movies at the cinema / at home.",
-                            'category' => 'Entertainment',
-                            'badge' => 'Movie Taste',
-                            'image' => '/images/speaking/a1_present/card_10.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 11,
-                            'title' => "When is your birthday?",
-                            'question' => "When is your birthday?",
-                            'sample_answer' => "My birthday is on [the 15th of September / in August].",
-                            'category' => 'Dates & Personal',
-                            'badge' => 'Birthday Month',
-                            'image' => '/images/speaking/a1_present/card_11.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 12,
-                            'title' => "What kind of music do you like?",
-                            'question' => "What kind of music do you like listening to?",
-                            'sample_answer' => "I like listening to [Pop / Rock / Jazz / Classical / R&B] music.",
-                            'category' => 'Music & Taste',
-                            'badge' => 'Music Genre',
-                            'image' => '/images/speaking/a1_present/card_12.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 13,
-                            'title' => "What is your job or daily activity?",
-                            'question' => "What do you do every day? Are you a student or working?",
-                            'sample_answer' => "I am a [student at school / university / working as a professional].",
-                            'category' => 'Profession',
-                            'badge' => 'Job & Study',
-                            'image' => '/images/speaking/a1_present/card_13.png?v=2026_aesthetic',
-                        ],
-                        [
-                            'id' => 14,
-                            'title' => "What is your favourite drink?",
-                            'question' => "What is your favourite drink or beverage?",
-                            'sample_answer' => "My favourite drink is [mineral water / iced tea / coffee / fresh fruit juice].",
-                            'category' => 'Drinks',
-                            'badge' => 'Favourite Drink',
-                            'image' => '/images/speaking/a1_present/card_14.png?v=2026_aesthetic',
-                        ],
-                    ],
-                    'report_examples' => [
-                        'In our class, most students like Fried Rice and Iced Tea.',
-                        'Most of my classmates wake up around 6:00 AM every morning.',
-                        'In our group, 7 out of 10 students have pets at home.',
-                        'Most students in our class relax at home or hang out with friends on weekends.'
-                    ],
-                ],
-                'ai_interview' => [
-                    [
-                        'id' => 1,
-                        'question' => "Hello! Welcome to your speaking practice session. Let's start with an introduction: What is your full name, and what should I call you?",
-                        'hint' => "Answer: 'Hello! My full name is [Your Name], and you can call me [Nickname].'",
-                    ],
-                    [
-                        'id' => 2,
-                        'question' => "Nice to meet you! Where are you originally from, and where do you live right now?",
-                        'hint' => "Answer: 'I am from [City/Country], and I currently live in [City].'",
-                    ],
-                    [
-                        'id' => 3,
-                        'question' => "Great! What is your current job or daily activity? Are you a student or are you working?",
-                        'hint' => "Answer: 'I am a student at [School/University] / I work as a [Job].'",
-                    ],
-                    [
-                        'id' => 4,
-                        'question' => "Interesting! What do you usually like doing in your free time or on weekends?",
-                        'hint' => "Answer: 'In my free time, I really enjoy [reading / playing sports / watching movies].'",
-                    ],
-                    [
-                        'id' => 5,
-                        'question' => "Wonderful! Why do you want to learn and improve your English speaking skills?",
-                        'hint' => "Answer: 'I want to improve my English because [for my career / study / travel abroad].'",
-                    ],
-                ],
-                'monolog_baku' => [
-                    "Hello everyone! Good morning. My name is Budi Sugeng. I am 20 years old. You can call me Budi. I am from Jakarta, Indonesia. I am an English teacher. In my free time, I like reading books and playing football. It is nice to meet you all. Thank you!",
-                    "Good afternoon, ladies and gentlemen. I am delighted to introduce myself. My name is Sarah Miller, and I am from Sydney, Australia. I work as an instructor, and I enjoy reading historical novels in my leisure time. It is a pleasure to meet everyone."
-                ],
-                'monolog_tidak_baku' => [
-                    "Hi guys! Hey, how's it going? I'm Budi, 20 years old from Jakarta. I teach English and in my spare time I really love hanging out with friends and playing football. Super stoked to meet you all!",
-                    "Hey everyone! What's up? I'm Sarah from Sydney. I'm into reading and outdoor hiking when I'm not working. Great to be here with you guys!"
-                ],
-                'questions_part_a' => [
-                    'What is your full name and what is your nickname?',
-                    'How old are you?',
-                    'Where are you from (City & Country)?',
-                    'What is your current profession or field of study?',
-                    'What do you like doing in your free time?',
-                ],
-                'questions_part_b' => [
-                    'How do you greet someone formally in the morning, afternoon, and evening?',
-                    'What is the difference between "I like reading" and "I don\'t like reading"?',
-                    'Can you introduce your best friend using "He is..." or "She is..."?',
-                    'How do you say goodbye politely to your teacher at the end of class?',
-                ],
-                'impromptu_title' => 'Pertanyaan & Aktivitas Final – Complete Self-Introduction Showcase',
-                'impromptu' => [
-                    'Aktivitas 1: Sampaikan perkenalan diri lengkapmu tanpa membaca teks selama 60 detik mengikuti template Budi Sugeng!',
-                    'Aktivitas 2: Lakukan perkenalan santai (informal greeting) seolah-olah kamu sedang berkenalan di kafe internasional.',
-                    'Aktivitas 3: Jelaskan 3 hal yang paling kamu sukai (likes) dan 2 hal yang tidak kamu sukai (dislikes) dalam kehidupan sehari-hari.',
-                    'Aktivitas 4: Rekam suaramu pada fitur Voice Recorder di bawah dan dengarkan kembali intonasimu!',
-                ],
-            ],
-            2 => [
-                'topic' => 'Alphabet Pronunciation & Jobs / Occupations',
-                'focus' => 'English Alphabet Phonetics (IPA), Spelling Names & Words, Jobs & Occupations Vocabulary, Half a Crossword Speaking Activity',
-                'materi' => [
-                    'alphabet_list' => [
-                        ['letter' => 'A', 'ipa' => 'eɪ', 'id_sound' => 'ei', 'example' => 'Actor / Apple'],
-                        ['letter' => 'B', 'ipa' => 'biː', 'id_sound' => 'bi', 'example' => 'Baker / Barber'],
-                        ['letter' => 'C', 'ipa' => 'siː', 'id_sound' => 'si', 'example' => 'Chef / Carpenter'],
-                        ['letter' => 'D', 'ipa' => 'diː', 'id_sound' => 'di', 'example' => 'Dentist / Dustman'],
-                        ['letter' => 'E', 'ipa' => 'iː', 'id_sound' => 'i', 'example' => 'Engineer / Eagle'],
-                        ['letter' => 'F', 'ipa' => 'ɛf', 'id_sound' => 'ef', 'example' => 'Farmer / Food'],
-                        ['letter' => 'G', 'ipa' => 'ʤiː', 'id_sound' => 'ji', 'example' => 'Green / Guide'],
-                        ['letter' => 'H', 'ipa' => 'eɪʧ', 'id_sound' => 'eich', 'example' => 'Hairdresser / House'],
-                        ['letter' => 'I', 'ipa' => 'aɪ', 'id_sound' => 'ai', 'example' => 'Ice / Island'],
-                        ['letter' => 'J', 'ipa' => 'ʤeɪ', 'id_sound' => 'jei', 'example' => 'Journalist / Job'],
-                        ['letter' => 'K', 'ipa' => 'keɪ', 'id_sound' => 'kei', 'example' => 'King / Key'],
-                        ['letter' => 'L', 'ipa' => 'ɛl', 'id_sound' => 'el', 'example' => 'Librarian / Lion'],
-                        ['letter' => 'M', 'ipa' => 'ɛm', 'id_sound' => 'em', 'example' => 'Miner / Moon'],
-                        ['letter' => 'N', 'ipa' => 'ɛn', 'id_sound' => 'en', 'example' => 'Nurse / Night'],
-                        ['letter' => 'O', 'ipa' => 'oʊ', 'id_sound' => 'ou', 'example' => 'Ocean / Office'],
-                        ['letter' => 'P', 'ipa' => 'piː', 'id_sound' => 'pi', 'example' => 'Pilot / Police'],
-                        ['letter' => 'Q', 'ipa' => 'kjuː', 'id_sound' => 'kyu', 'example' => 'Queen / Quiet'],
-                        ['letter' => 'R', 'ipa' => 'ɑːr', 'id_sound' => 'ar', 'example' => 'Red / Radio'],
-                        ['letter' => 'S', 'ipa' => 'ɛs', 'id_sound' => 'es', 'example' => 'Secretary / Salesman'],
-                        ['letter' => 'T', 'ipa' => 'tiː', 'id_sound' => 'ti', 'example' => 'Traffic warden / Teacher'],
-                        ['letter' => 'U', 'ipa' => 'juː', 'id_sound' => 'yu', 'example' => 'Uniform / University'],
-                        ['letter' => 'V', 'ipa' => 'viː', 'id_sound' => 'vi', 'example' => 'Vet (Veterinarian) / Village'],
-                        ['letter' => 'W', 'ipa' => 'ˈdʌbəljuː', 'id_sound' => 'dabel-yu', 'example' => 'Waiter / Warden'],
-                        ['letter' => 'X', 'ipa' => 'ɛks', 'id_sound' => 'eks', 'example' => 'X-ray / Expert'],
-                        ['letter' => 'Y', 'ipa' => 'waɪ', 'id_sound' => 'wai', 'example' => 'Yellow / Young'],
-                        ['letter' => 'Z', 'ipa' => 'ziː', 'id_sound' => 'zi (zee)', 'example' => 'Zoo / Zebra'],
-                    ],
-                    'alphabet_groups' => [
-                        [
-                            'group_title' => 'Group 1: /eɪ/, /aɪ/, /kjuː/, /waɪ/',
-                            'theme' => 'blue',
-                            'letters' => [
+                        'id' => 'sec-m1-sub-2',
+                        'num' => '02',
+                        'title' => 'Alphabet Phonetics & Spelling',
+                        'subtitle' => 'English Alphabet Phonetics (IPA), Spelling & 22 Jobs/Occupations',
+                        'desc' => 'Pelafalan huruf A-Z dengan simbol fonetik IPA, cara mengeja nama/kata, serta kosa kata 22 profesi.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'alphabet_list' => [
                                 ['letter' => 'A', 'ipa' => 'eɪ', 'id_sound' => 'ei', 'example' => 'Actor / Apple'],
-                                ['letter' => 'I', 'ipa' => 'aɪ', 'id_sound' => 'ai', 'example' => 'Ice / Island'],
-                                ['letter' => 'Q', 'ipa' => 'kjuː', 'id_sound' => 'kyu', 'example' => 'Queen / Quiet'],
-                                ['letter' => 'Y', 'ipa' => 'waɪ', 'id_sound' => 'wai', 'example' => 'Yellow / Young'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 2: /biː/, /ʤeɪ/, /ɑːr/, /ziː/',
-                            'theme' => 'amber',
-                            'letters' => [
                                 ['letter' => 'B', 'ipa' => 'biː', 'id_sound' => 'bi', 'example' => 'Baker / Barber'],
-                                ['letter' => 'J', 'ipa' => 'ʤeɪ', 'id_sound' => 'jei', 'example' => 'Journalist / Job'],
-                                ['letter' => 'R', 'ipa' => 'ɑːr', 'id_sound' => 'ar', 'example' => 'Red / Radio'],
-                                ['letter' => 'Z', 'ipa' => 'ziː', 'id_sound' => 'zi (zee)', 'example' => 'Zoo / Zebra'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 3: /siː/, /keɪ/, /ɛs/',
-                            'theme' => 'emerald',
-                            'letters' => [
                                 ['letter' => 'C', 'ipa' => 'siː', 'id_sound' => 'si', 'example' => 'Chef / Carpenter'],
-                                ['letter' => 'K', 'ipa' => 'keɪ', 'id_sound' => 'kei', 'example' => 'King / Key'],
-                                ['letter' => 'S', 'ipa' => 'ɛs', 'id_sound' => 'es', 'example' => 'Secretary / Salesman'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 4: /diː/, /ɛl/, /tiː/',
-                            'theme' => 'indigo',
-                            'letters' => [
                                 ['letter' => 'D', 'ipa' => 'diː', 'id_sound' => 'di', 'example' => 'Dentist / Dustman'],
-                                ['letter' => 'L', 'ipa' => 'ɛl', 'id_sound' => 'el', 'example' => 'Librarian / Lion'],
-                                ['letter' => 'T', 'ipa' => 'tiː', 'id_sound' => 'ti', 'example' => 'Traffic warden / Teacher'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 5: /iː/, /ɛm/, /juː/',
-                            'theme' => 'purple',
-                            'letters' => [
                                 ['letter' => 'E', 'ipa' => 'iː', 'id_sound' => 'i', 'example' => 'Engineer / Eagle'],
-                                ['letter' => 'M', 'ipa' => 'ɛm', 'id_sound' => 'em', 'example' => 'Miner / Moon'],
-                                ['letter' => 'U', 'ipa' => 'juː', 'id_sound' => 'yu', 'example' => 'Uniform / University'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 6: /ɛf/, /ɛn/, /viː/',
-                            'theme' => 'sky',
-                            'letters' => [
                                 ['letter' => 'F', 'ipa' => 'ɛf', 'id_sound' => 'ef', 'example' => 'Farmer / Food'],
-                                ['letter' => 'N', 'ipa' => 'ɛn', 'id_sound' => 'en', 'example' => 'Nurse / Night'],
-                                ['letter' => 'V', 'ipa' => 'viː', 'id_sound' => 'vi', 'example' => 'Vet (Veterinarian) / Village'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 7: /ʤiː/, /oʊ/, /ˈdʌbəljuː/',
-                            'theme' => 'orange',
-                            'letters' => [
                                 ['letter' => 'G', 'ipa' => 'ʤiː', 'id_sound' => 'ji', 'example' => 'Green / Guide'],
-                                ['letter' => 'O', 'ipa' => 'oʊ', 'id_sound' => 'ou', 'example' => 'Ocean / Office'],
-                                ['letter' => 'W', 'ipa' => 'ˈdʌbəljuː', 'id_sound' => 'dabel-yu', 'example' => 'Waiter / Warden'],
-                            ]
-                        ],
-                        [
-                            'group_title' => 'Group 8: /eɪʧ/, /piː/, /ɛks/',
-                            'theme' => 'rose',
-                            'letters' => [
                                 ['letter' => 'H', 'ipa' => 'eɪʧ', 'id_sound' => 'eich', 'example' => 'Hairdresser / House'],
-                                ['letter' => 'P', 'ipa' => 'piː', 'id_sound' => 'pi', 'example' => 'Pilot / Police'],
-                                ['letter' => 'X', 'ipa' => 'ɛks', 'id_sound' => 'eks', 'example' => 'X-ray / Expert'],
+                                ['letter' => 'I', 'ipa' => 'aɪ', 'id_sound' => 'ai', 'example' => 'Instructor / Island'],
+                                ['letter' => 'J', 'ipa' => 'ʤeɪ', 'id_sound' => 'jei', 'example' => 'Journalist / Juice'],
+                                ['letter' => 'K', 'ipa' => 'keɪ', 'id_sound' => 'kei', 'example' => 'King / Kitchen'],
+                                ['letter' => 'L', 'ipa' => 'ɛl', 'id_sound' => 'el', 'example' => 'Lawyer / Lion'],
+                                ['letter' => 'M', 'ipa' => 'ɛm', 'id_sound' => 'em', 'example' => 'Mechanic / Moon'],
+                                ['letter' => 'N', 'ipa' => 'ɛn', 'id_sound' => 'en', 'example' => 'Nurse / Nest'],
+                                ['letter' => 'O', 'ipa' => 'oʊ', 'id_sound' => 'ou', 'example' => 'Optician / Orange'],
+                                ['letter' => 'P', 'ipa' => 'piː', 'id_sound' => 'pi', 'example' => 'Pilot / Plumber'],
+                                ['letter' => 'Q', 'ipa' => 'kjuː', 'id_sound' => 'kyu', 'example' => 'Queen / Quiet'],
+                                ['letter' => 'R', 'ipa' => 'ɑːr', 'id_sound' => 'ar', 'example' => 'Receptionist / River'],
+                                ['letter' => 'S', 'ipa' => 'ɛs', 'id_sound' => 'es', 'example' => 'Scientist / Sun'],
+                                ['letter' => 'T', 'ipa' => 'tiː', 'id_sound' => 'ti', 'example' => 'Teacher / Tailor'],
+                                ['letter' => 'U', 'ipa' => 'juː', 'id_sound' => 'yu', 'example' => 'Umbrella / Unit'],
+                                ['letter' => 'V', 'ipa' => 'viː', 'id_sound' => 'vi', 'example' => 'Vet / Violin'],
+                                ['letter' => 'W', 'ipa' => 'ˈdʌbəl.juː', 'id_sound' => 'dabel-yu', 'example' => 'Writer / Water'],
+                                ['letter' => 'X', 'ipa' => 'ɛks', 'id_sound' => 'eks', 'example' => 'Xylophone / Box'],
+                                ['letter' => 'Y', 'ipa' => 'waɪ', 'id_sound' => 'wai', 'example' => 'Yellow / Yoga'],
+                                ['letter' => 'Z', 'ipa' => 'zɛd / ziː', 'id_sound' => 'zed / zi', 'example' => 'Zoo / Zebra'],
+                            ],
+                            'alphabet_groups' => [
+                                ['group' => '/eɪ/ sound (ei)', 'letters' => ['A', 'H', 'J', 'K'], 'desc' => 'Bunyi vokal berakhir "ei"'],
+                                ['group' => '/iː/ sound (i)', 'letters' => ['B', 'C', 'D', 'E', 'G', 'P', 'T', 'V', 'Z (US)'], 'desc' => 'Bunyi vokal panjang "i"'],
+                                ['group' => '/ɛ/ sound (e)', 'letters' => ['F', 'L', 'M', 'N', 'S', 'X', 'Z (UK)'], 'desc' => 'Bunyi diawali vokal pendek "e"'],
+                                ['group' => '/aɪ/ sound (ai)', 'letters' => ['I', 'Y'], 'desc' => 'Bunyi diftong "ai"'],
+                                ['group' => '/uː/ sound (u)', 'letters' => ['Q', 'U', 'W'], 'desc' => 'Bunyi vokal panjang "u"'],
+                                ['group' => 'Unique sound', 'letters' => ['O /oʊ/', 'R /ɑːr/'], 'desc' => 'Bunyi fonetik unik mandiri'],
+                            ],
+                            'spelling_rules' => [
+                                ['title' => 'Asking for Spelling', 'en' => 'How do you spell your first / last name?', 'id' => 'Bagaimana cara mengeja nama depan / belakang Anda?'],
+                                ['title' => 'Double Letters', 'en' => 'Double O (OO) / Double L (LL)', 'id' => 'Gunakan kata "double" untuk dua huruf yang sama berturut-turut.'],
+                                ['title' => 'Clarifying Letters', 'en' => 'Is that B for Bravo or P for Papa?', 'id' => 'Konfirmasi fonetik untuk menghindari salah dengar huruf.'],
+                            ],
+                            'vocabulary_jobs' => [
+                                ['job' => 'Actor / Actress', 'ipa' => '/ˈæk.tər/', 'id' => 'Aktor / Aktris', 'desc' => 'A person who acts in plays, movies, or TV shows.'],
+                                ['job' => 'Baker', 'ipa' => '/ˈbeɪ.kər/', 'id' => 'Tukang Roti', 'desc' => 'A person who bakes and sells bread and cakes.'],
+                                ['job' => 'Barber', 'ipa' => '/ˈbɑː.bər/', 'id' => 'Tukang Cukur Pria', 'desc' => 'A person whose job is to cut men\'s hair and shave beards.'],
+                                ['job' => 'Carpenter', 'ipa' => '/ˈkɑː.pɪn.tər/', 'id' => 'Tukang Kayu', 'desc' => 'A person who makes and repairs wooden objects.'],
+                                ['job' => 'Chef / Cook', 'ipa' => '/ʃef/', 'id' => 'Koki / Juru Masak', 'desc' => 'A professional skilled cook in a restaurant.'],
+                                ['job' => 'Dentist', 'ipa' => '/ˈden.tɪst/', 'id' => 'Dokter Gigi', 'desc' => 'A doctor who treats diseases of the teeth.'],
+                                ['job' => 'Doctor', 'ipa' => '/ˈdɒk.tər/', 'id' => 'Dokter', 'desc' => 'A person qualified to treat sick people.'],
+                                ['job' => 'Dustman / Refuse Collector', 'ipa' => '/ˈdʌst.mən/', 'id' => 'Petugas Kebersihan', 'desc' => 'A person employed to collect refuse / trash from houses.'],
+                                ['job' => 'Engineer', 'ipa' => '/ˌen.dʒɪˈnɪər/', 'id' => 'Insinyur / Ahli Teknik', 'desc' => 'A person who designs, builds, or maintains engines and structures.'],
+                                ['job' => 'Farmer', 'ipa' => '/ˈfɑː.mər/', 'id' => 'Petani / Peternak', 'desc' => 'A person who owns or manages a farm.'],
+                                ['job' => 'Firefighter', 'ipa' => '/ˈfaɪəˌfaɪ.tər/', 'id' => 'Pemadam Kebakaran', 'desc' => 'A person whose job is to extinguish fires.'],
+                                ['job' => 'Hairdresser', 'ipa' => '/ˈheəˌdres.ər/', 'id' => 'Penata Rambut', 'desc' => 'A person who cuts and styles hair, especially women\'s hair.'],
+                                ['job' => 'Instructor', 'ipa' => '/ɪnˈstrʌk.tər/', 'id' => 'Instruktur / Pelatih', 'desc' => 'A person who teaches a practical skill or sport.'],
+                                ['job' => 'Journalist', 'ipa' => '/ˈdʒɜː.nə.lɪst/', 'id' => 'Wartawan / Jurnalis', 'desc' => 'A person who writes for newspapers, magazines, or news websites.'],
+                                ['job' => 'Lawyer', 'ipa' => '/ˈlɔː.jər/', 'id' => 'Pengacara / Advokat', 'desc' => 'A person who practices or studies law.'],
+                                ['job' => 'Mechanic', 'ipa' => '/mɪˈkæn.ɪk/', 'id' => 'Mekanik / Montir', 'desc' => 'A person who repairs and maintains machinery and vehicle engines.'],
+                                ['job' => 'Nurse', 'ipa' => '/nɜːs/', 'id' => 'Perawat', 'desc' => 'A person trained to care for the sick or infirm.'],
+                                ['job' => 'Optician', 'ipa' => '/ɒpˈtɪʃ.ən/', 'id' => 'Ahli Kacamata / Optik', 'desc' => 'A person qualified to prescribe and dispense glasses and contact lenses.'],
+                                ['job' => 'Pilot', 'ipa' => '/ˈpaɪ.lət/', 'id' => 'Pilot', 'desc' => 'A person who operates the flying controls of an aircraft.'],
+                                ['job' => 'Plumber', 'ipa' => '/ˈplʌm.ər/', 'id' => 'Tukang Pipa', 'desc' => 'A person who installs and repairs water pipes and plumbing systems.'],
+                                ['job' => 'Receptionist', 'ipa' => '/rɪˈsep.ʃən.ɪst/', 'id' => 'Resepsionis', 'desc' => 'A person employed to greet visitors and answer telephone calls.'],
+                                ['job' => 'Scientist', 'ipa' => '/ˈsaɪən.tɪst/', 'id' => 'Ilmuwan / Peneliti', 'desc' => 'A person who studies or has expert knowledge of science.'],
+                                ['job' => 'Tailor', 'ipa' => '/ˈteɪ.lər/', 'id' => 'Penjahit', 'desc' => 'A person whose occupation is making fitted clothes.'],
+                                ['job' => 'Teacher', 'ipa' => '/ˈtiː.tʃər/', 'id' => 'Guru / Pendidik', 'desc' => 'A person who helps students to acquire knowledge and competence.'],
+                                ['job' => 'Vet / Veterinarian', 'ipa' => '/vet/', 'id' => 'Dokter Hewan', 'desc' => 'A doctor qualified to treat diseased or injured animals.'],
+                                ['job' => 'Writer / Author', 'ipa' => '/ˈraɪ.tər/', 'id' => 'Penulis', 'desc' => 'A person who writes books, articles, or stories.'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Hotel Check-In & Name Spelling at the Front Desk',
+                            'audio_script' => "Putri: Good afternoon! Welcome to the Grand Heritage Hotel in Bandung. How may I assist you today?
+Mr. Miller: Hello, good afternoon! I have a room reservation for two nights, please.
+Putri: Certainly, sir! May I please have your full name?
+Mr. Miller: Yes, my name is Arthur Miller.
+Putri: Could you please spell your last name for me, Mr. Miller?
+Mr. Miller: Sure! It is M - I - L - L - E - R. Miller.
+Putri: Thank you, Mr. Miller! And could you spell your first name as well?
+Mr. Miller: Of course! A - R - T - H - U - R. Arthur.
+Putri: Perfect! I found your booking in our system. Here is your keycard for room 405!",
+                            'key_phrases' => [
+                                'Welcome to the Grand Heritage Hotel in Bandung.',
+                                'I have a room reservation for two nights, please.',
+                                'Could you please spell your last name for me?',
+                                'It is M - I - L - L - E - R. Miller.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'Where does this conversation take place?',
+                                    'options' => [
+                                        'At a hotel front desk in Bandung',
+                                        'At an airport baggage counter',
+                                        'Inside a restaurant',
+                                        'At a train station',
+                                    ],
+                                    'answer' => 'At a hotel front desk in Bandung',
+                                ],
+                                [
+                                    'q' => 'How does the guest spell his last name?',
+                                    'options' => [
+                                        'M - I - L - L - E - R',
+                                        'M - Y - L - E - R',
+                                        'M - I - L - L - O - R',
+                                        'M - E - L - L - E - R',
+                                    ],
+                                    'answer' => 'M - I - L - L - E - R',
+                                ],
+                                [
+                                    'q' => 'What room number is assigned to Mr. Miller?',
+                                    'options' => [
+                                        'Room 405',
+                                        'Room 204',
+                                        'Room 305',
+                                        'Room 504',
+                                    ],
+                                    'answer' => 'Room 405',
+                                ],
+                            ],
+                        ],
+'drilling1' => [
+                            ['en' => 'Could you please spell your first name and last name?', 'id' => 'Bisakah Anda mengeja nama depan dan nama belakang Anda?'],
+                            ['en' => 'My name is Michael, spelled M-I-C-H-A-E-L.', 'id' => 'Nama saya Michael, dieja M-I-C-H-A-E-L.'],
+                            ['en' => 'That is with a double E: E-N-G-I-N-E-E-R.', 'id' => 'Itu dengan double E: E-N-G-I-N-E-E-R.'],
+                            ['en' => 'Is that B for Bravo or P for Papa?', 'id' => 'Apakah itu B untuk Bravo atau P untuk Papa?'],
+                            ['en' => 'She is an optician, spelled O-P-T-I-C-I-A-N.', 'id' => 'Dia seorang ahli optik, dieja O-P-T-I-C-I-A-N.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'What is your job? I work as a civil engineer.', 'id' => 'Apa pekerjaanmu? Saya bekerja sebagai insinyur sipil.'],
+                            ['en' => 'A plumber fixes broken water pipes in buildings.', 'id' => 'Seorang tukang pipa memperbaiki pipa air yang rusak di gedung.'],
+                            ['en' => 'A vet cures sick and injured animals.', 'id' => 'Seorang dokter hewan mengobati hewan yang sakit dan terluka.'],
+                            ['en' => 'The receptionist welcomed all the guests politely.', 'id' => 'Resepsionis menyambut semua tamu dengan sopan.'],
+                            ['en' => 'An optician checks your eyes and prescribes glasses.', 'id' => 'Seorang ahli kacamata memeriksa mata dan meresepkan kacamata.'],
+                        ],
+                        'grammar_note' => "Articles with Professions: Use 'a' before consonant sounds (a doctor, a baker, a vet) and 'an' before vowel sounds (an engineer, an optician, an actor, an instructor).",
+                        'dialogue_setting' => 'Siswa A berperan sebagai resepsionis hotel dan Siswa B sebagai tamu yang mengeja nama dan profesinya.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A (Receptionist)',
+                                'en' => 'Good morning! Welcome to our international conference. May I have your full name, please?',
+                                'id' => 'Selamat pagi! Selamat datang di konferensi internasional kami. Boleh saya tahu nama lengkap Anda?',
+                            ],
+                            [
+                                'speaker' => 'Student B (Guest)',
+                                'en' => 'Good morning! My name is Jonathan Parker.',
+                                'id' => 'Selamat pagi! Nama saya Jonathan Parker.',
+                            ],
+                            [
+                                'speaker' => 'Student A (Receptionist)',
+                                'en' => 'How do you spell your last name, Mr. Parker?',
+                                'id' => 'Bagaimana cara mengeja nama belakang Anda, Tuan Parker?',
+                            ],
+                            [
+                                'speaker' => 'Student B (Guest)',
+                                'en' => 'It is P - A - R - K - E - R.',
+                                'id' => 'Dieja P - A - R - K - E - R.',
+                            ],
+                            [
+                                'speaker' => 'Student A (Receptionist)',
+                                'en' => 'Thank you. And what is your profession for your badge?',
+                                'id' => 'Terima kasih. Dan apa profesi Anda untuk kartu pengenal Anda?',
+                            ],
+                            [
+                                'speaker' => 'Student B (Guest)',
+                                'en' => 'I am a software architect and researcher.',
+                                'id' => 'Saya seorang arsitek perangkat lunak dan peneliti.',
+                            ],
+                        ],
+        'games' => [
+                            'title' => 'Zoom Speaking Game: Half a Crossword (Jobs and Occupations - Group A & Group B)',
+                            'type' => 'half_a_crossword',
+                            'participation_type' => 'pair',
+                            'activity' => 'Pair work / Group work: Speaking & Guessing',
+                            'aim' => 'To complete the crossword puzzle by describing and asking for missing job words without saying the target words.',
+                            'grammar_functions' => 'Relative clauses: "A person who + [Verb]...", "What\'s [number] across/down?", Spelling words letter by letter.',
+                            'vocabulary' => '22 Jobs: actor, carpenter, dentist, hairdresser, vet, baker, chef, doctor, librarian, waiter, butcher, architect, farmer, miner, pilot, secretary, barber, journalist, nurse, salesman, traffic warden, dustman.',
+                            'time' => '20 to 25 minutes',
+                            'drilling_game' => [
+                                [
+                                    'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
+                                    'en' => "What is 3 across?",
+                                    'id' => "Apa nomor 3 mendatar?",
+                                ],
+                                [
+                                    'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
+                                    'en' => "3 across is farmer.",
+                                    'id' => "3 mendatar adalah farmer.",
+                                ],
+                                [
+                                    'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
+                                    'en' => "How do you spell it?",
+                                    'id' => "Bagaimana Anda mengejanya?",
+                                ],
+                                [
+                                    'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
+                                    'en' => "It is F. A. R. M. E. R.",
+                                    'id' => "Yaitu F. A. R. M. E. R.",
+                                ],
+                                [
+                                    'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
+                                    'en' => "What is 8 down?",
+                                    'id' => "Apa nomor 8 menurun?",
+                                ],
+                                [
+                                    'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
+                                    'en' => "8 down is waiter.",
+                                    'id' => "8 menurun adalah waiter.",
+                                ],
+                                [
+                                    'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
+                                    'en' => "How do you spell it?",
+                                    'id' => "Bagaimana Anda mengejanya?",
+                                ],
+                                [
+                                    'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
+                                    'en' => "It is W. A. I. T. E. R.",
+                                    'id' => "Yaitu W. A. I. T. E. R.",
+                                ],
+                                [
+                                    'category' => '3. Contoh Percakapan Lengkap (Pemain B Bertanya ke Pemain A)',
+                                    'en' => "What is 4 across? 4 across is actor. How do you spell it? It is A. C. T. O. R.",
+                                    'id' => "Apa nomor 4 mendatar? 4 mendatar adalah actor. Bagaimana mengejanya? Yaitu A. C. T. O. R.",
+                                ],
+                                [
+                                    'category' => '3. Contoh Percakapan Lengkap (Pemain A Bertanya ke Pemain B)',
+                                    'en' => "What is 14 down? 14 down is architect. How do you spell it? It is A. R. C. H. I. T. E. C. T.",
+                                    'id' => "Apa nomor 14 menurun? 14 menurun adalah architect. Bagaimana mengejanya? Yaitu A. R. C. H. I. T. E. C. T.",
+                                ],
+                            ],
+                            'group_a_image' => '/images/speaking/worksheet2/group_a_crossword.png',
+                            'group_b_image' => '/images/speaking/worksheet2/group_b_crossword.png',
+                            'group_a_words' => ['actor', 'carpenter', 'dentist', 'hairdresser', 'vet', 'baker', 'chef', 'doctor', 'librarian', 'waiter', 'butcher'],
+                            'group_b_words' => ['architect', 'farmer', 'miner', 'pilot', 'secretary', 'barber', 'journalist', 'nurse', 'salesman', 'traffic warden', 'dustman'],
+                            'group_a_missing' => [
+                                ['id' => '3A', 'number' => '3 Across', 'question' => 'What is 3 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 3 across', 'target_word' => 'FARMER', 'letters' => ['F', 'A', 'R', 'M', 'E', 'R'], 'answer_preview' => '3 across is farmer. F - A - R - M - E - R.'],
+                                ['id' => '2D', 'number' => '2 Down', 'question' => 'What is 2 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 2 down', 'target_word' => 'SECRETARY', 'letters' => ['S', 'E', 'C', 'R', 'E', 'T', 'A', 'R', 'Y'], 'answer_preview' => '2 down is secretary. S - E - C - R - E - T - A - R - Y.'],
+                                ['id' => '5D', 'number' => '5 Down', 'question' => 'What is 5 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 5 down', 'target_word' => 'JOURNALIST', 'letters' => ['J', 'O', 'U', 'R', 'N', 'A', 'L', 'I', 'S', 'T'], 'answer_preview' => '5 down is journalist. J - O - U - R - N - A - L - I - S - T.'],
+                                ['id' => '9A', 'number' => '9 Across', 'question' => 'What is 9 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 9 across', 'target_word' => 'SALESMAN', 'letters' => ['S', 'A', 'L', 'E', 'S', 'M', 'A', 'N'], 'answer_preview' => '9 across is salesman. S - A - L - E - S - M - A - N.'],
+                                ['id' => '11A', 'number' => '11 Across', 'question' => 'What is 11 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 11 across', 'target_word' => 'PILOT', 'letters' => ['P', 'I', 'L', 'O', 'T'], 'answer_preview' => '11 across is pilot. P - I - L - O - T.'],
+                                ['id' => '12A', 'number' => '12 Across', 'question' => 'What is 12 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 12 across', 'target_word' => 'BARBER', 'letters' => ['B', 'A', 'R', 'B', 'E', 'R'], 'answer_preview' => '12 across is barber. B - A - R - B - E - R.'],
+                                ['id' => '13A', 'number' => '13 Across', 'question' => 'What is 13 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 13 across', 'target_word' => 'TRAFFIC WARDEN', 'letters' => ['T', 'R', 'A', 'F', 'F', 'I', 'C', ' ', 'W', 'A', 'R', 'D', 'E', 'N'], 'answer_preview' => '13 across is traffic warden. T - R - A - F - F - I - C   W - A - R - D - E - N.'],
+                                ['id' => '14D', 'number' => '14 Down', 'question' => 'What is 14 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 14 down', 'target_word' => 'ARCHITECT', 'letters' => ['A', 'R', 'C', 'H', 'I', 'T', 'E', 'C', 'T'], 'answer_preview' => '14 down is architect. A - R - C - H - I - T - E - C - T.'],
+                                ['id' => '15D', 'number' => '15 Down', 'question' => 'What is 15 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 15 down', 'target_word' => 'DUSTMAN', 'letters' => ['D', 'U', 'S', 'T', 'M', 'A', 'N'], 'answer_preview' => '15 down is dustman. D - U - S - T - M - A - N.'],
+                                ['id' => '16D', 'number' => '16 Down', 'question' => 'What is 16 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 16 down', 'target_word' => 'NURSE', 'letters' => ['N', 'U', 'R', 'S', 'E'], 'answer_preview' => '16 down is nurse. N - U - R - S - E.'],
+                                ['id' => '19A', 'number' => '19 Across', 'question' => 'What is 19 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 19 across', 'target_word' => 'MINER', 'letters' => ['M', 'I', 'N', 'E', 'R'], 'answer_preview' => '19 across is miner. M - I - N - E - R.'],
+                            ],
+                            'group_b_missing' => [
+                                ['id' => '4A', 'number' => '4 Across', 'question' => 'What is 4 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 4 across', 'target_word' => 'ACTOR', 'letters' => ['A', 'C', 'T', 'O', 'R'], 'answer_preview' => '4 across is actor. A - C - T - O - R.'],
+                                ['id' => '20A', 'number' => '20 Across', 'question' => 'What is 20 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 20 across', 'target_word' => 'CARPENTER', 'letters' => ['C', 'A', 'R', 'P', 'E', 'N', 'T', 'E', 'R'], 'answer_preview' => '20 across is carpenter. C - A - R - P - E - N - T - E - R.'],
+                                ['id' => '18A', 'number' => '18 Across', 'question' => 'What is 18 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 18 across', 'target_word' => 'DENTIST', 'letters' => ['D', 'E', 'N', 'T', 'I', 'S', 'T'], 'answer_preview' => '18 across is dentist. D - E - N - T - I - S - T.'],
+                                ['id' => '1D', 'number' => '1 Down', 'question' => 'What is 1 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 1 down', 'target_word' => 'HAIRDRESSER', 'letters' => ['H', 'A', 'I', 'R', 'D', 'R', 'E', 'S', 'S', 'E', 'R'], 'answer_preview' => '1 down is hairdresser. H - A - I - R - D - R - E - S - S - E - R.'],
+                                ['id' => '6A', 'number' => '6 Across', 'question' => 'What is 6 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 6 across', 'target_word' => 'VET', 'letters' => ['V', 'E', 'T'], 'answer_preview' => '6 across is vet. V - E - T.'],
+                                ['id' => '7D', 'number' => '7 Down', 'question' => 'What is 7 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 7 down', 'target_word' => 'BAKER', 'letters' => ['B', 'A', 'K', 'E', 'R'], 'answer_preview' => '7 down is baker. B - A - K - E - R.'],
+                                ['id' => '12D', 'number' => '12 Down', 'question' => 'What is 12 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 12 down', 'target_word' => 'CHEF', 'letters' => ['C', 'H', 'E', 'F'], 'answer_preview' => '12 down is chef. C - H - E - F.'],
+                                ['id' => '17A', 'number' => '17 Across', 'question' => 'What is 17 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 17 across', 'target_word' => 'DOCTOR', 'letters' => ['D', 'O', 'C', 'T', 'O', 'R'], 'answer_preview' => '17 across is doctor. D - O - C - T - O - R.'],
+                                ['id' => '10D', 'number' => '10 Down', 'question' => 'What is 10 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 10 down', 'target_word' => 'LIBRARIAN', 'letters' => ['L', 'I', 'B', 'R', 'A', 'R', 'I', 'A', 'N'], 'answer_preview' => '10 down is librarian. L - I - B - R - A - R - I - A - N.'],
+                                ['id' => '8D', 'number' => '8 Down', 'question' => 'What is 8 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 8 down', 'target_word' => 'WAITER', 'letters' => ['W', 'A', 'I', 'T', 'E', 'R'], 'answer_preview' => '8 down is waiter. W - A - I - T - E - R.'],
+                                ['id' => '21A', 'number' => '21 Across', 'question' => 'What is 21 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 21 across', 'target_word' => 'BUTCHER', 'letters' => ['B', 'U', 'T', 'C', 'H', 'E', 'R'], 'answer_preview' => '21 across is butcher. B - U - T - C - H - E - R.'],
+                            ],
+                            'words' => [
+                                '1D' => ['id' => '1D', 'num' => 1, 'dir' => 'down', 'label' => '1 Down', 'cells' => ['0_8', '1_8', '2_8', '3_8', '4_8', '5_8', '6_8', '7_8', '8_8', '9_8', '10_8']],
+                                '2D' => ['id' => '2D', 'num' => 2, 'dir' => 'down', 'label' => '2 Down', 'cells' => ['0_11', '1_11', '2_11', '3_11', '4_11', '5_11', '6_11', '7_11', '8_11']],
+                                '3A' => ['id' => '3A', 'num' => 3, 'dir' => 'across', 'label' => '3 Across', 'cells' => ['1_7', '1_8', '1_9', '1_10', '1_11', '1_12']],
+                                '4A' => ['id' => '4A', 'num' => 4, 'dir' => 'across', 'label' => '4 Across', 'cells' => ['3_4', '3_5', '3_6', '3_7', '3_8']],
+                                '5D' => ['id' => '5D', 'num' => 5, 'dir' => 'down', 'label' => '5 Down', 'cells' => ['2_1', '3_1', '4_1', '5_1', '6_1', '7_1', '8_1', '9_1', '10_1', '11_1']],
+                                '6A' => ['id' => '6A', 'num' => 6, 'dir' => 'across', 'label' => '6 Across', 'cells' => ['4_10', '4_11', '4_12']],
+                                '7D' => ['id' => '7D', 'num' => 7, 'dir' => 'down', 'label' => '7 Down', 'cells' => ['5_6', '6_6', '7_6', '8_6', '9_6']],
+                                '8D' => ['id' => '8D', 'num' => 8, 'dir' => 'down', 'label' => '8 Down', 'cells' => ['5_16', '6_16', '7_16', '8_16', '9_16', '10_16']],
+                                '9A' => ['id' => '9A', 'num' => 9, 'dir' => 'across', 'label' => '9 Across', 'cells' => ['6_5', '6_6', '6_7', '6_8', '6_9', '6_10', '6_11', '6_12']],
+                                '10D' => ['id' => '10D', 'num' => 10, 'dir' => 'down', 'label' => '10 Down', 'cells' => ['5_3', '6_3', '7_3', '8_3', '9_3', '10_3', '11_3', '12_3', '13_3']],
+                                '11A' => ['id' => '11A', 'num' => 11, 'dir' => 'across', 'label' => '11 Across', 'cells' => ['7_15', '7_16', '7_17', '7_18', '7_19']],
+                                '12A' => ['id' => '12A', 'num' => 12, 'dir' => 'across', 'label' => '12 Across', 'cells' => ['7_0', '7_1', '7_2', '7_3', '7_4', '7_5']],
+                                '13A' => ['id' => '13A', 'num' => 13, 'dir' => 'across', 'label' => '13 Across', 'cells' => ['10_7', '10_8', '10_9', '10_10', '10_11', '10_12', '10_13', '10_14', '10_15', '10_16', '10_17', '10_18', '10_19']],
+                                '14D' => ['id' => '14D', 'num' => 14, 'dir' => 'down', 'label' => '14 Down', 'cells' => ['10_9', '11_9', '12_9', '13_9', '14_9', '15_9', '16_9', '17_9', '18_9']],
+                                '15D' => ['id' => '15D', 'num' => 15, 'dir' => 'down', 'label' => '15 Down', 'cells' => ['10_17', '11_17', '12_17', '13_17', '14_17', '15_17', '16_17']],
+                                '16D' => ['id' => '16D', 'num' => 16, 'dir' => 'down', 'label' => '16 Down', 'cells' => ['10_19', '11_19', '12_19', '13_19', '14_19']],
+                                '17A' => ['id' => '17A', 'num' => 17, 'dir' => 'across', 'label' => '17 Across', 'cells' => ['12_7', '12_8', '12_9', '12_10', '12_11', '12_12']],
+                                '18A' => ['id' => '18A', 'num' => 18, 'dir' => 'across', 'label' => '18 Across', 'cells' => ['13_14', '13_15', '13_16', '13_17', '13_18', '13_19', '13_20']],
+                                '19A' => ['id' => '19A', 'num' => 19, 'dir' => 'across', 'label' => '19 Across', 'cells' => ['14_8', '14_9', '14_10', '14_11', '14_12']],
+                                '20A' => ['id' => '20A', 'num' => 20, 'dir' => 'across', 'label' => '20 Across', 'cells' => ['16_5', '16_6', '16_7', '16_8', '16_9', '16_10', '16_11', '16_12', '16_13']],
+                                '12D' => ['id' => '12D', 'num' => 12, 'dir' => 'down', 'label' => '12 Down', 'cells' => ['16_5', '17_5', '18_5', '19_5']],
+                                '21A' => ['id' => '21A', 'num' => 21, 'dir' => 'across', 'label' => '21 Across', 'cells' => ['18_7', '18_8', '18_9', '18_10', '18_11', '18_12', '18_13']],
+                            ],
+                            'grid_rows' => 20,
+                            'grid_cols' => 21,
+                            'grid_cells' => [
+                                '0_11' => ['r' => 0, 'c' => 11, 'char' => 'S', 'num' => 2, 'groups' => ['B']],
+                                '0_8' => ['r' => 0, 'c' => 8, 'char' => 'H', 'num' => 1, 'groups' => ['A']],
+                                '10_1' => ['r' => 10, 'c' => 1, 'char' => 'S', 'num' => null, 'groups' => ['B']],
+                                '10_10' => ['r' => 10, 'c' => 10, 'char' => 'F', 'num' => null, 'groups' => ['B']],
+                                '10_11' => ['r' => 10, 'c' => 11, 'char' => 'F', 'num' => null, 'groups' => ['B']],
+                                '10_12' => ['r' => 10, 'c' => 12, 'char' => 'I', 'num' => null, 'groups' => ['B']],
+                                '10_13' => ['r' => 10, 'c' => 13, 'char' => 'C', 'num' => null, 'groups' => ['B']],
+                                '10_14' => ['r' => 10, 'c' => 14, 'char' => 'W', 'num' => null, 'groups' => ['B']],
+                                '10_15' => ['r' => 10, 'c' => 15, 'char' => 'A', 'num' => null, 'groups' => ['B']],
+                                '10_16' => ['r' => 10, 'c' => 16, 'char' => 'R', 'num' => null, 'groups' => ['A', 'B']],
+                                '10_17' => ['r' => 10, 'c' => 17, 'char' => 'D', 'num' => 15, 'groups' => ['B']],
+                                '10_18' => ['r' => 10, 'c' => 18, 'char' => 'E', 'num' => null, 'groups' => ['B']],
+                                '10_19' => ['r' => 10, 'c' => 19, 'char' => 'N', 'num' => 16, 'groups' => ['B']],
+                                '10_3' => ['r' => 10, 'c' => 3, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '10_7' => ['r' => 10, 'c' => 7, 'char' => 'T', 'num' => 13, 'groups' => ['B']],
+                                '10_8' => ['r' => 10, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A', 'B']],
+                                '10_9' => ['r' => 10, 'c' => 9, 'char' => 'A', 'num' => 14, 'groups' => ['B']],
+                                '11_1' => ['r' => 11, 'c' => 1, 'char' => 'T', 'num' => null, 'groups' => ['B']],
+                                '11_17' => ['r' => 11, 'c' => 17, 'char' => 'U', 'num' => null, 'groups' => ['B']],
+                                '11_19' => ['r' => 11, 'c' => 19, 'char' => 'U', 'num' => null, 'groups' => ['B']],
+                                '11_3' => ['r' => 11, 'c' => 3, 'char' => 'I', 'num' => null, 'groups' => ['A']],
+                                '11_9' => ['r' => 11, 'c' => 9, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '12_10' => ['r' => 12, 'c' => 10, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '12_11' => ['r' => 12, 'c' => 11, 'char' => 'O', 'num' => null, 'groups' => ['A']],
+                                '12_12' => ['r' => 12, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '12_17' => ['r' => 12, 'c' => 17, 'char' => 'S', 'num' => null, 'groups' => ['B']],
+                                '12_19' => ['r' => 12, 'c' => 19, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '12_3' => ['r' => 12, 'c' => 3, 'char' => 'A', 'num' => null, 'groups' => ['A']],
+                                '12_7' => ['r' => 12, 'c' => 7, 'char' => 'D', 'num' => 17, 'groups' => ['A']],
+                                '12_8' => ['r' => 12, 'c' => 8, 'char' => 'O', 'num' => null, 'groups' => ['A']],
+                                '12_9' => ['r' => 12, 'c' => 9, 'char' => 'C', 'num' => null, 'groups' => ['B', 'A']],
+                                '13_14' => ['r' => 13, 'c' => 14, 'char' => 'D', 'num' => 18, 'groups' => ['A']],
+                                '13_15' => ['r' => 13, 'c' => 15, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '13_16' => ['r' => 13, 'c' => 16, 'char' => 'N', 'num' => null, 'groups' => ['A']],
+                                '13_17' => ['r' => 13, 'c' => 17, 'char' => 'T', 'num' => null, 'groups' => ['B', 'A']],
+                                '13_18' => ['r' => 13, 'c' => 18, 'char' => 'I', 'num' => null, 'groups' => ['A']],
+                                '13_19' => ['r' => 13, 'c' => 19, 'char' => 'S', 'num' => null, 'groups' => ['B', 'A']],
+                                '13_20' => ['r' => 13, 'c' => 20, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '13_3' => ['r' => 13, 'c' => 3, 'char' => 'N', 'num' => null, 'groups' => ['A']],
+                                '13_9' => ['r' => 13, 'c' => 9, 'char' => 'H', 'num' => null, 'groups' => ['B']],
+                                '14_10' => ['r' => 14, 'c' => 10, 'char' => 'N', 'num' => null, 'groups' => ['B']],
+                                '14_11' => ['r' => 14, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B']],
+                                '14_12' => ['r' => 14, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '14_17' => ['r' => 14, 'c' => 17, 'char' => 'M', 'num' => null, 'groups' => ['B']],
+                                '14_19' => ['r' => 14, 'c' => 19, 'char' => 'E', 'num' => null, 'groups' => ['B']],
+                                '14_8' => ['r' => 14, 'c' => 8, 'char' => 'M', 'num' => 19, 'groups' => ['B']],
+                                '14_9' => ['r' => 14, 'c' => 9, 'char' => 'I', 'num' => null, 'groups' => ['B']],
+                                '15_17' => ['r' => 15, 'c' => 17, 'char' => 'A', 'num' => null, 'groups' => ['B']],
+                                '15_9' => ['r' => 15, 'c' => 9, 'char' => 'T', 'num' => null, 'groups' => ['B']],
+                                '16_10' => ['r' => 16, 'c' => 10, 'char' => 'N', 'num' => null, 'groups' => ['A']],
+                                '16_11' => ['r' => 16, 'c' => 11, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '16_12' => ['r' => 16, 'c' => 12, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '16_13' => ['r' => 16, 'c' => 13, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '16_17' => ['r' => 16, 'c' => 17, 'char' => 'N', 'num' => null, 'groups' => ['B']],
+                                '16_5' => ['r' => 16, 'c' => 5, 'char' => 'C', 'num' => 20, 'groups' => ['A']],
+                                '16_6' => ['r' => 16, 'c' => 6, 'char' => 'A', 'num' => null, 'groups' => ['A']],
+                                '16_7' => ['r' => 16, 'c' => 7, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '16_8' => ['r' => 16, 'c' => 8, 'char' => 'P', 'num' => null, 'groups' => ['A']],
+                                '16_9' => ['r' => 16, 'c' => 9, 'char' => 'E', 'num' => null, 'groups' => ['B', 'A']],
+                                '17_5' => ['r' => 17, 'c' => 5, 'char' => 'H', 'num' => null, 'groups' => ['A']],
+                                '17_9' => ['r' => 17, 'c' => 9, 'char' => 'C', 'num' => null, 'groups' => ['B']],
+                                '18_10' => ['r' => 18, 'c' => 10, 'char' => 'C', 'num' => null, 'groups' => ['A']],
+                                '18_11' => ['r' => 18, 'c' => 11, 'char' => 'H', 'num' => null, 'groups' => ['A']],
+                                '18_12' => ['r' => 18, 'c' => 12, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '18_13' => ['r' => 18, 'c' => 13, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '18_5' => ['r' => 18, 'c' => 5, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '18_7' => ['r' => 18, 'c' => 7, 'char' => 'B', 'num' => 21, 'groups' => ['A']],
+                                '18_8' => ['r' => 18, 'c' => 8, 'char' => 'U', 'num' => null, 'groups' => ['A']],
+                                '18_9' => ['r' => 18, 'c' => 9, 'char' => 'T', 'num' => null, 'groups' => ['B', 'A']],
+                                '19_5' => ['r' => 19, 'c' => 5, 'char' => 'F', 'num' => null, 'groups' => ['A']],
+                                '1_10' => ['r' => 1, 'c' => 10, 'char' => 'M', 'num' => null, 'groups' => ['B']],
+                                '1_11' => ['r' => 1, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B']],
+                                '1_12' => ['r' => 1, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '1_7' => ['r' => 1, 'c' => 7, 'char' => 'F', 'num' => 3, 'groups' => ['B']],
+                                '1_8' => ['r' => 1, 'c' => 8, 'char' => 'A', 'num' => null, 'groups' => ['A', 'B']],
+                                '1_9' => ['r' => 1, 'c' => 9, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '2_1' => ['r' => 2, 'c' => 1, 'char' => 'J', 'num' => 5, 'groups' => ['B']],
+                                '2_11' => ['r' => 2, 'c' => 11, 'char' => 'C', 'num' => null, 'groups' => ['B']],
+                                '2_8' => ['r' => 2, 'c' => 8, 'char' => 'I', 'num' => null, 'groups' => ['A']],
+                                '3_1' => ['r' => 3, 'c' => 1, 'char' => 'O', 'num' => null, 'groups' => ['B']],
+                                '3_11' => ['r' => 3, 'c' => 11, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '3_4' => ['r' => 3, 'c' => 4, 'char' => 'A', 'num' => 4, 'groups' => ['A']],
+                                '3_5' => ['r' => 3, 'c' => 5, 'char' => 'C', 'num' => null, 'groups' => ['A']],
+                                '3_6' => ['r' => 3, 'c' => 6, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '3_7' => ['r' => 3, 'c' => 7, 'char' => 'O', 'num' => null, 'groups' => ['A']],
+                                '3_8' => ['r' => 3, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '4_1' => ['r' => 4, 'c' => 1, 'char' => 'U', 'num' => null, 'groups' => ['B']],
+                                '4_10' => ['r' => 4, 'c' => 10, 'char' => 'V', 'num' => 6, 'groups' => ['A']],
+                                '4_11' => ['r' => 4, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B', 'A']],
+                                '4_12' => ['r' => 4, 'c' => 12, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '4_8' => ['r' => 4, 'c' => 8, 'char' => 'D', 'num' => null, 'groups' => ['A']],
+                                '5_1' => ['r' => 5, 'c' => 1, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '5_11' => ['r' => 5, 'c' => 11, 'char' => 'T', 'num' => null, 'groups' => ['B']],
+                                '5_16' => ['r' => 5, 'c' => 16, 'char' => 'W', 'num' => 8, 'groups' => ['A']],
+                                '5_3' => ['r' => 5, 'c' => 3, 'char' => 'L', 'num' => 10, 'groups' => ['A']],
+                                '5_6' => ['r' => 5, 'c' => 6, 'char' => 'B', 'num' => 7, 'groups' => ['A']],
+                                '5_8' => ['r' => 5, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '6_1' => ['r' => 6, 'c' => 1, 'char' => 'N', 'num' => null, 'groups' => ['B']],
+                                '6_10' => ['r' => 6, 'c' => 10, 'char' => 'M', 'num' => null, 'groups' => ['B']],
+                                '6_11' => ['r' => 6, 'c' => 11, 'char' => 'A', 'num' => null, 'groups' => ['B']],
+                                '6_12' => ['r' => 6, 'c' => 12, 'char' => 'N', 'num' => null, 'groups' => ['B']],
+                                '6_16' => ['r' => 6, 'c' => 16, 'char' => 'A', 'num' => null, 'groups' => ['A']],
+                                '6_3' => ['r' => 6, 'c' => 3, 'char' => 'I', 'num' => null, 'groups' => ['A']],
+                                '6_5' => ['r' => 6, 'c' => 5, 'char' => 'S', 'num' => 9, 'groups' => ['B']],
+                                '6_6' => ['r' => 6, 'c' => 6, 'char' => 'A', 'num' => null, 'groups' => ['A', 'B']],
+                                '6_7' => ['r' => 6, 'c' => 7, 'char' => 'L', 'num' => null, 'groups' => ['B']],
+                                '6_8' => ['r' => 6, 'c' => 8, 'char' => 'E', 'num' => null, 'groups' => ['A', 'B']],
+                                '6_9' => ['r' => 6, 'c' => 9, 'char' => 'S', 'num' => null, 'groups' => ['B']],
+                                '7_0' => ['r' => 7, 'c' => 0, 'char' => 'B', 'num' => 12, 'groups' => ['B']],
+                                '7_1' => ['r' => 7, 'c' => 1, 'char' => 'A', 'num' => null, 'groups' => ['B']],
+                                '7_11' => ['r' => 7, 'c' => 11, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '7_15' => ['r' => 7, 'c' => 15, 'char' => 'P', 'num' => 11, 'groups' => ['B']],
+                                '7_16' => ['r' => 7, 'c' => 16, 'char' => 'I', 'num' => null, 'groups' => ['A', 'B']],
+                                '7_17' => ['r' => 7, 'c' => 17, 'char' => 'L', 'num' => null, 'groups' => ['B']],
+                                '7_18' => ['r' => 7, 'c' => 18, 'char' => 'O', 'num' => null, 'groups' => ['B']],
+                                '7_19' => ['r' => 7, 'c' => 19, 'char' => 'T', 'num' => null, 'groups' => ['B']],
+                                '7_2' => ['r' => 7, 'c' => 2, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '7_3' => ['r' => 7, 'c' => 3, 'char' => 'B', 'num' => null, 'groups' => ['A', 'B']],
+                                '7_4' => ['r' => 7, 'c' => 4, 'char' => 'E', 'num' => null, 'groups' => ['B']],
+                                '7_5' => ['r' => 7, 'c' => 5, 'char' => 'R', 'num' => null, 'groups' => ['B']],
+                                '7_6' => ['r' => 7, 'c' => 6, 'char' => 'K', 'num' => null, 'groups' => ['A']],
+                                '7_8' => ['r' => 7, 'c' => 8, 'char' => 'S', 'num' => null, 'groups' => ['A']],
+                                '8_1' => ['r' => 8, 'c' => 1, 'char' => 'L', 'num' => null, 'groups' => ['B']],
+                                '8_11' => ['r' => 8, 'c' => 11, 'char' => 'Y', 'num' => null, 'groups' => ['B']],
+                                '8_16' => ['r' => 8, 'c' => 16, 'char' => 'T', 'num' => null, 'groups' => ['A']],
+                                '8_3' => ['r' => 8, 'c' => 3, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '8_6' => ['r' => 8, 'c' => 6, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '8_8' => ['r' => 8, 'c' => 8, 'char' => 'S', 'num' => null, 'groups' => ['A']],
+                                '9_1' => ['r' => 9, 'c' => 1, 'char' => 'I', 'num' => null, 'groups' => ['B']],
+                                '9_16' => ['r' => 9, 'c' => 16, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                                '9_3' => ['r' => 9, 'c' => 3, 'char' => 'A', 'num' => null, 'groups' => ['A']],
+                                '9_6' => ['r' => 9, 'c' => 6, 'char' => 'R', 'num' => null, 'groups' => ['A']],
+                                '9_8' => ['r' => 9, 'c' => 8, 'char' => 'E', 'num' => null, 'groups' => ['A']],
+                            ],
+                            'cards' => [
+                                // Group A cards
+                                ['id' => 1, 'group' => 'A', 'number' => '4 Across', 'word' => 'ACTOR', 'badge' => 'Group A • 4 Across', 'definition' => 'A person who acts in plays, movies, or TV shows.', 'clue_prompt' => 'A person who performs in theater or films.', 'spelling' => 'A - C - T - O - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 2, 'group' => 'A', 'number' => '20 Across', 'word' => 'CARPENTER', 'badge' => 'Group A • 20 Across', 'definition' => 'A person who makes and repairs wooden objects and structures.', 'clue_prompt' => 'Someone who builds tables, chairs, and roofs with wood.', 'spelling' => 'C - A - R - P - E - N - T - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 3, 'group' => 'A', 'number' => '18 Across', 'word' => 'DENTIST', 'badge' => 'Group A • 18 Across', 'definition' => 'A person qualified to treat teeth and dental diseases.', 'clue_prompt' => 'A doctor who cleans and fixes your teeth.', 'spelling' => 'D - E - N - T - I - S - T', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 4, 'group' => 'A', 'number' => '1 Down', 'word' => 'HAIRDRESSER', 'badge' => 'Group A • 1 Down', 'definition' => 'A person who cuts, washes, colors, and styles hair.', 'clue_prompt' => 'Someone who styles and cuts people\'s hair in a salon.', 'spelling' => 'H - A - I - R - D - R - E - S - S - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 5, 'group' => 'A', 'number' => '6 Across', 'word' => 'VET', 'badge' => 'Group A • 6 Across', 'definition' => 'A doctor who specializes in treating sick and injured animals.', 'clue_prompt' => 'A medical doctor for pets, cats, dogs, and horses.', 'spelling' => 'V - E - T', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 6, 'group' => 'A', 'number' => '7 Down', 'word' => 'BAKER', 'badge' => 'Group A • 7 Down', 'definition' => 'A person who bakes and sells fresh bread, pastries, and cakes.', 'clue_prompt' => 'Someone who makes delicious bread in an oven.', 'spelling' => 'B - A - K - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 7, 'group' => 'A', 'number' => '12 Down', 'word' => 'CHEF', 'badge' => 'Group A • 12 Down', 'definition' => 'A professional cook in a restaurant kitchen.', 'clue_prompt' => 'A skilled master cook in a fine restaurant.', 'spelling' => 'C - H - E - F', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 8, 'group' => 'A', 'number' => '17 Across', 'word' => 'DOCTOR', 'badge' => 'Group A • 17 Across', 'definition' => 'A licensed medical professional who treats patients in a clinic.', 'clue_prompt' => 'A person in a white coat who cures sick people.', 'spelling' => 'D - O - C - T - O - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 9, 'group' => 'A', 'number' => '10 Down', 'word' => 'LIBRARIAN', 'badge' => 'Group A • 10 Down', 'definition' => 'A person in charge of books and resources in a library.', 'clue_prompt' => 'Someone who organizes books and helps you study quietly.', 'spelling' => 'L - I - B - R - A - R - I - A - N', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 10, 'group' => 'A', 'number' => '8 Down', 'word' => 'WAITER', 'badge' => 'Group A • 8 Down', 'definition' => 'A person who brings food and drinks to your table in a restaurant.', 'clue_prompt' => 'Someone who takes your food order and serves your meal.', 'spelling' => 'W - A - I - T - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+                                ['id' => 11, 'group' => 'A', 'number' => '21 Across', 'word' => 'BUTCHER', 'badge' => 'Group A • 21 Across', 'definition' => 'A person who cuts, prepares, and sells meat in a butcher shop.', 'clue_prompt' => 'Someone who sells fresh beef, chicken, and steaks.', 'spelling' => 'B - U - T - C - H - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
+
+                                // Group B cards
+                                ['id' => 12, 'group' => 'B', 'number' => '14 Down', 'word' => 'ARCHITECT', 'badge' => 'Group B • 14 Down', 'definition' => 'A person who designs buildings and blueprints.', 'clue_prompt' => 'Someone who draws plans for houses, skyscrapers, and bridges.', 'spelling' => 'A - R - C - H - I - T - E - C - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 13, 'group' => 'B', 'number' => '3 Across', 'word' => 'FARMER', 'badge' => 'Group B • 3 Across', 'definition' => 'A person who owns or works on a farm growing crops and animals.', 'clue_prompt' => 'Someone who works in rice fields and raises cows/crops.', 'spelling' => 'F - A - R - M - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 14, 'group' => 'B', 'number' => '19 Across', 'word' => 'MINER', 'badge' => 'Group B • 19 Across', 'definition' => 'A person who works underground digging coal, gold, and minerals.', 'clue_prompt' => 'Someone who digs deep underground in a mine.', 'spelling' => 'M - I - N - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 15, 'group' => 'B', 'number' => '11 Across', 'word' => 'PILOT', 'badge' => 'Group B • 11 Across', 'definition' => 'A person qualified to fly airplanes or helicopters.', 'clue_prompt' => 'Someone who sits in the cockpit and flies passengers across the sky.', 'spelling' => 'P - I - L - O - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 16, 'group' => 'B', 'number' => '2 Down', 'word' => 'SECRETARY', 'badge' => 'Group B • 2 Down', 'definition' => 'An office worker who organizes appointments, calls, and files.', 'clue_prompt' => 'Someone who assists the manager with emails, schedules, and typing.', 'spelling' => 'S - E - C - R - E - T - A - R - Y', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 17, 'group' => 'B', 'number' => '12 Across', 'word' => 'BARBER', 'badge' => 'Group B • 12 Across', 'definition' => 'A person whose job is cutting men\'s hair and shaving beards.', 'clue_prompt' => 'Someone who trims men\'s hair, mustaches, and beards.', 'spelling' => 'B - A - R - B - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 18, 'group' => 'B', 'number' => '5 Down', 'word' => 'JOURNALIST', 'badge' => 'Group B • 5 Down', 'definition' => 'A person who reports news stories for newspapers, TV, or websites.', 'clue_prompt' => 'Someone who interviews people and writes news reports.', 'spelling' => 'J - O - U - R - N - A - L - I - S - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 19, 'group' => 'B', 'number' => '16 Down', 'word' => 'NURSE', 'badge' => 'Group B • 16 Down', 'definition' => 'A person trained to care for patients in a hospital alongside doctors.', 'clue_prompt' => 'Someone who gives medicine and takes care of sick people in hospital beds.', 'spelling' => 'N - U - R - S - E', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 20, 'group' => 'B', 'number' => '9 Across', 'word' => 'SALESMAN', 'badge' => 'Group B • 9 Across', 'definition' => 'A person whose job is selling products and helping customers.', 'clue_prompt' => 'Someone who offers products and convinces clients to buy them.', 'spelling' => 'S - A - L - E - S - M - A - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 21, 'group' => 'B', 'number' => '13 Across', 'word' => 'TRAFFIC WARDEN', 'badge' => 'Group B • 13 Across', 'definition' => 'An officer who controls parking rules and directs road traffic.', 'clue_prompt' => 'Someone in uniform who checks parking tickets and stops traffic.', 'spelling' => 'T - R - A - F - F - I - C   W - A - R - D - E - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                                ['id' => 22, 'group' => 'B', 'number' => '15 Down', 'word' => 'DUSTMAN', 'badge' => 'Group B • 15 Down', 'definition' => 'A person employed to collect household trash and garbage bins.', 'clue_prompt' => 'Someone who rides the garbage truck and empties household bins.', 'spelling' => 'D - U - S - T - M - A - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "Can you spell your full name letter by letter using clear English pronunciation?",
+                                'hint' => "Answer: 'My first name is spelled [A-B-C] and my last name is spelled [X-Y-Z].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "What is your profession, and what does a person in your job do every day?",
+                                'hint' => "Answer: 'I am a/an [Profession]. Every day, I [main task/responsibility].'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "Which English letter sounds do you find most challenging to pronounce, and why?",
+                                'hint' => "Answer: 'I find letters like [G and J / V and F / W and Y] challenging because...'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Spelling & Vocabulary Challenge',
+                        'impromptu' => [
+                            'Aktivitas 1: Eja nama kotamu, nama jalan tempat tinggalmu, dan nama lengkap salah satu teman sekelasmu!',
+                            'Aktivitas 2: Berikan definisi bahasa Inggris untuk 3 profesi tanpa menyebutkan nama profesinya, biarkan partnermu menebak!',
+                            'Aktivitas 3: Sebutkan alfabet A sampai Z dalam bahasa Inggris dalam waktu kurang dari 20 detik!',
+                        ],
+                                                'vocabulary' => [
+                            ['word' => 'Alphabet', 'ipa' => '/ˈæl.fə.bet/', 'meaning' => 'Alfabet / Abjad (A - Z)', 'example' => 'The English alphabet consists of 26 letters.'],
+                            ['word' => 'Phonetics', 'ipa' => '/fəˈnet.ɪks/', 'meaning' => 'Fonetik / Tata bunyi ujaran', 'example' => 'Phonetics helps you pronounce English words accurately.'],
+                            ['word' => 'IPA (Phonetic Symbols)', 'ipa' => '/ˌaɪ.piːˈeɪ/', 'meaning' => 'Simbol fonetik internasional baku', 'example' => 'Each IPA symbol represents one specific spoken sound.'],
+                            ['word' => 'Spelling', 'ipa' => '/ˈspel.ɪŋ/', 'meaning' => 'Ejaan / Mengeja huruf demi huruf', 'example' => 'Could you please spell your last name for me?'],
+                            ['word' => 'Double Letter', 'ipa' => '/ˈdʌb.əl ˈlet.ər/', 'meaning' => 'Dua huruf kembar berturut-turut', 'example' => 'Engineer is spelled with a double E: E-N-G-I-N-E-E-R.'],
+                            ['word' => 'Vowel', 'ipa' => '/ˈvaʊ.əl/', 'meaning' => 'Huruf vokal (A, E, I, O, U)', 'example' => "Use the article 'an' before a vowel sound."],
+                            ['word' => 'Consonant', 'ipa' => '/ˈkɒn.sə.nənt/', 'meaning' => 'Huruf konsonan / huruf mati', 'example' => "Use the article 'a' before a consonant sound."],
+                            ['word' => 'Actor / Actress', 'ipa' => '/ˈæk.tər / ˈæk.trəs/', 'meaning' => 'Aktor / Aktris', 'example' => 'The actor performed brilliantly in the theater.'],
+                            ['word' => 'Architect', 'ipa' => '/ˈɑː.kɪ.tekt/', 'meaning' => 'Arsitek', 'example' => 'The architect designed the modern glass building.'],
+                            ['word' => 'Baker', 'ipa' => '/ˈbeɪ.kər/', 'meaning' => 'Tukang Roti', 'example' => 'The baker bakes fresh bread and cakes every morning.'],
+                            ['word' => 'Barber', 'ipa' => '/ˈbɑː.bər/', 'meaning' => 'Tukang Cukur Pria', 'example' => 'He visits the barber to get a sharp haircut.'],
+                            ['word' => 'Butcher', 'ipa' => '/ˈbʊtʃ.ər/', 'meaning' => 'Tukang Daging', 'example' => 'The butcher prepares fresh beef and steak cuts.'],
+                            ['word' => 'Carpenter', 'ipa' => '/ˈkɑː.pɪn.tər/', 'meaning' => 'Tukang Kayu', 'example' => 'The carpenter built a sturdy wooden dining table.'],
+                            ['word' => 'Chef / Cook', 'ipa' => '/ʃef / kʊk/', 'meaning' => 'Koki / Juru Masak', 'example' => 'The chef prepares delicious gourmet meals in the restaurant.'],
+                            ['word' => 'Dentist', 'ipa' => '/ˈden.tɪst/', 'meaning' => 'Dokter Gigi', 'example' => 'The dentist cleaned my teeth and checked for cavities.'],
+                            ['word' => 'Doctor', 'ipa' => '/ˈdɒk.tər/', 'meaning' => 'Dokter', 'example' => 'The doctor examined the sick patient in the clinic.'],
+                            ['word' => 'Dustman', 'ipa' => '/ˈdʌst.mən/', 'meaning' => 'Petugas Kebersihan / Pengangkut Sampah', 'example' => 'The dustman collects household waste every Tuesday morning.'],
+                            ['word' => 'Engineer', 'ipa' => '/ˌen.dʒɪˈnɪər/', 'meaning' => 'Insinyur / Ahli Teknik', 'example' => 'The aerospace engineer designed the new aircraft engine.'],
+                            ['word' => 'Farmer', 'ipa' => '/ˈfɑː.mər/', 'meaning' => 'Petani / Peternak', 'example' => 'The farmer grows organic vegetables and raises cattle.'],
+                            ['word' => 'Firefighter', 'ipa' => '/ˈfaɪəˌfaɪ.tər/', 'meaning' => 'Pemadam Kebakaran', 'example' => 'The brave firefighter extinguished the blazing fire.'],
+                            ['word' => 'Hairdresser', 'ipa' => '/ˈheəˌdres.ər/', 'meaning' => 'Penata Rambut', 'example' => 'The hairdresser styled her hair for the wedding ceremony.'],
+                            ['word' => 'Instructor', 'ipa' => '/ɪnˈstrʌk.tər/', 'meaning' => 'Instruktur / Pelatih', 'example' => 'Our speaking instructor gives helpful pronunciation feedback.'],
+                            ['word' => 'Journalist', 'ipa' => '/ˈdʒɜː.nə.lɪst/', 'meaning' => 'Wartawan / Jurnalis', 'example' => 'The journalist wrote an investigative news article.'],
+                            ['word' => 'Lawyer', 'ipa' => '/ˈlɔː.jər/', 'meaning' => 'Pengacara / Advokat', 'example' => 'The lawyer represented his client professionally in court.'],
+                            ['word' => 'Librarian', 'ipa' => '/laɪˈbreə.ri.ən/', 'meaning' => 'Pustakawan', 'example' => 'The librarian helped us find historical reference books.'],
+                            ['word' => 'Mechanic', 'ipa' => '/mɪˈkæn.ɪk/', 'meaning' => 'Mekanik / Montir', 'example' => "The mechanic repaired the car's engine fault quickly."],
+                            ['word' => 'Miner', 'ipa' => '/ˈmaɪ.nər/', 'meaning' => 'Penambang', 'example' => 'The miner works deep underground extracting coal and minerals.'],
+                            ['word' => 'Nurse', 'ipa' => '/nɜːs/', 'meaning' => 'Perawat', 'example' => 'The nurse administered medication with great care.'],
+                            ['word' => 'Optician', 'ipa' => '/ɒpˈtɪʃ.ən/', 'meaning' => 'Ahli Kacamata / Optik', 'example' => 'The optician tested my eyes and prescribed new glasses.'],
+                            ['word' => 'Pilot', 'ipa' => '/ˈpaɪ.lət/', 'meaning' => 'Pilot', 'example' => 'The pilot safely landed the aircraft during bad weather.'],
+                            ['word' => 'Plumber', 'ipa' => '/ˈplʌm.ər/', 'meaning' => 'Tukang Pipa', 'example' => 'The plumber fixed the leaking pipe under the sink.'],
+                            ['word' => 'Receptionist', 'ipa' => '/rɪˈsep.ʃən.ɪst/', 'meaning' => 'Resepsionis', 'example' => 'The receptionist welcomed guests politely at the front desk.'],
+                            ['word' => 'Salesman', 'ipa' => '/ˈseɪlz.mən/', 'meaning' => 'Wiraniaga / Pramuniaga', 'example' => 'The salesman explained the product features convincingly.'],
+                            ['word' => 'Scientist', 'ipa' => '/ˈsaɪən.tɪst/', 'meaning' => 'Ilmuwan / Peneliti', 'example' => 'The scientist conducted groundbreaking experiments in the lab.'],
+                            ['word' => 'Secretary', 'ipa' => '/ˈsek.rə.tər.i/', 'meaning' => 'Sekretaris', 'example' => "The secretary organized the executive director's appointments."],
+                            ['word' => 'Tailor', 'ipa' => '/ˈteɪ.lər/', 'meaning' => 'Penjahit', 'example' => 'The tailor custom-made a formal suit for the conference.'],
+                            ['word' => 'Teacher', 'ipa' => '/ˈtiː.tʃər/', 'meaning' => 'Guru / Pendidik', 'example' => 'The teacher inspires students to speak English confidently.'],
+                            ['word' => 'Traffic Warden', 'ipa' => '/ˈtræf.ɪk ˌwɔː.dən/', 'meaning' => 'Petugas Pengatur Lalu Lintas', 'example' => 'The traffic warden directed vehicles safely at the busy crossing.'],
+                            ['word' => 'Vet / Veterinarian', 'ipa' => '/vet / ˌvet.rɪˈneə.ri.ən/', 'meaning' => 'Dokter Hewan', 'example' => 'The vet treated our injured puppy with gentle care.'],
+                            ['word' => 'Waiter / Waitress', 'ipa' => '/ˈweɪ.tər / ˈweɪ.trəs/', 'meaning' => 'Pelayan Restoran', 'example' => 'The waiter served warm soup and drinks to our table.'],
+                            ['word' => 'Writer / Author', 'ipa' => '/ˈraɪ.tər / ˈɔː.θər/', 'meaning' => 'Penulis', 'example' => 'The writer published a bestselling novel this year.'],
+                        ],
+                    ],
+                ],
+            ],
+
+            2 => [
+                'topic' => 'Telling Cardinal Numbers & Telling Time',
+                'focus' => 'Telling Cardinal Numbers (0 to 45 Billion+), Counting Rules, Price Tags & Currency, Telling Time Masterclass (British Past & To, American Digital AM/PM), Flight & Train Schedules, Time Prepositions (At, From...to, Until)',
+                'subtopics' => [
+                    // =========================================================================
+                    // SUBTOPIK 01: TELLING CARDINAL NUMBERS
+                    // =========================================================================
+                    [
+                        'id' => 'sec-m2-sub-1',
+                        'num' => '01',
+                        'title' => 'Telling Cardinal Numbers',
+                        'subtitle' => 'Cardinal Numbers Matrix (0 s.d. 45 Miliar+), Counting Rules & Price Tags',
+                        'desc' => 'Angka pokok, nominal harga, nomor telepon, aturan pengucapan ratusan, ribuan, jutaan hingga miliaran.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'cardinal_numbers',
+                            'title' => 'Telling Cardinal Numbers Matrix',
+                            'focus' => 'Cardinal Numbers: 0 - 20 (Basic), 21 - 99 (Tens), 100 - 999 (Hundreds), 1,000 - 999,999 (Thousands), 1,000,000+ (Millions & Billions)',
+                            'cardinal_numbers' => [
+                                ['num' => '0', 'words' => 'Zero / Null / O', 'ipa' => '/ˈzɪə.rəʊ/', 'id' => 'Nol / Kosong'],
+                                ['num' => '1', 'words' => 'One', 'ipa' => '/wʌn/', 'id' => 'Satu'],
+                                ['num' => '2', 'words' => 'Two', 'ipa' => '/tuː/', 'id' => 'Dua'],
+                                ['num' => '3', 'words' => 'Three', 'ipa' => '/θriː/', 'id' => 'Tiga'],
+                                ['num' => '4', 'words' => 'Four', 'ipa' => '/fɔːr/', 'id' => 'Empat'],
+                                ['num' => '5', 'words' => 'Five', 'ipa' => '/faɪv/', 'id' => 'Lima'],
+                                ['num' => '6', 'words' => 'Six', 'ipa' => '/sɪks/', 'id' => 'Enam'],
+                                ['num' => '7', 'words' => 'Seven', 'ipa' => '/ˈsev.ən/', 'id' => 'Tujuh'],
+                                ['num' => '8', 'words' => 'Eight', 'ipa' => '/eɪt/', 'id' => 'Delapan'],
+                                ['num' => '9', 'words' => 'Nine', 'ipa' => '/naɪn/', 'id' => 'Sembilan'],
+                                ['num' => '10', 'words' => 'Ten', 'ipa' => '/ten/', 'id' => 'Sepuluh'],
+                                ['num' => '11', 'words' => 'Eleven', 'ipa' => '/ɪˈlev.ən/', 'id' => 'Sebelas'],
+                                ['num' => '12', 'words' => 'Twelve', 'ipa' => '/twelv/', 'id' => 'Dua Belas'],
+                                ['num' => '13', 'words' => 'Thirteen', 'ipa' => '/θɜːˈtiːn/', 'id' => 'Tiga Belas'],
+                                ['num' => '14', 'words' => 'Fourteen', 'ipa' => '/ˌfɔːˈtiːn/', 'id' => 'Empat Belas'],
+                                ['num' => '15', 'words' => 'Fifteen', 'ipa' => '/ˌfɪfˈtiːn/', 'id' => 'Lima Belas'],
+                                ['num' => '16', 'words' => 'Sixteen', 'ipa' => '/ˌsɪkˈstiːn/', 'id' => 'Enam Belas'],
+                                ['num' => '17', 'words' => 'Seventeen', 'ipa' => '/ˌsev.ənˈtiːn/', 'id' => 'Tujuh Belas'],
+                                ['num' => '18', 'words' => 'Eighteen', 'ipa' => '/ˌeɪˈtiːn/', 'id' => 'Delapan Belas'],
+                                ['num' => '19', 'words' => 'Nineteen', 'ipa' => '/ˌnaɪnˈtiːn/', 'id' => 'Sembilan Belas'],
+                                ['num' => '20', 'words' => 'Twenty', 'ipa' => '/ˈtwen.ti/', 'id' => 'Dua Puluh'],
+                                ['num' => '30', 'words' => 'Thirty', 'ipa' => '/ˈθɜː.ti/', 'id' => 'Tiga Puluh'],
+                                ['num' => '40', 'words' => 'Forty', 'ipa' => '/ˈfɔː.ti/', 'id' => 'Empat Puluh'],
+                                ['num' => '50', 'words' => 'Fifty', 'ipa' => '/ˈfɪf.ti/', 'id' => 'Lima Puluh'],
+                                ['num' => '60', 'words' => 'Sixty', 'ipa' => '/ˈsɪk.sti/', 'id' => 'Enam Puluh'],
+                                ['num' => '70', 'words' => 'Seventy', 'ipa' => '/ˈsev.ən.ti/', 'id' => 'Tujuh Puluh'],
+                                ['num' => '80', 'words' => 'Eighty', 'ipa' => '/ˈeɪ.ti/', 'id' => 'Delapan Puluh'],
+                                ['num' => '90', 'words' => 'Ninety', 'ipa' => '/ˈnaɪn.ti/', 'id' => 'Sembilan Puluh'],
+                                ['num' => '100', 'words' => 'One hundred', 'ipa' => '/wʌn ˈhʌn.drəd/', 'id' => 'Seratus'],
+                                ['num' => '1,000', 'words' => 'One thousand', 'ipa' => '/wʌn ˈθaʊ.zənd/', 'id' => 'Seribu'],
+                                ['num' => '1,000,000', 'words' => 'One million', 'ipa' => '/wʌn ˈmɪl.jən/', 'id' => 'Satu Juta'],
+                                ['num' => '1,000,000,000', 'words' => 'One billion', 'ipa' => '/wʌn ˈbɪl.jən/', 'id' => 'Satu Miliar'],
+                            ],
+                            'rules' => [
+                                ['rule' => 'Hyphen (-) on 21 - 99', 'desc' => 'Gunakan tanda hubung untuk puluhan & satuan', 'example' => 'twenty-one, ninety-nine'],
+                                ['rule' => 'No plural -s on Hundred/Thousand', 'desc' => 'Jangan tambahkan -s jika diawali angka', 'example' => 'Three hundred (bukan three hundreds)'],
+                                ['rule' => 'British "And"', 'desc' => 'Gunakan "and" setelah hundred pada gaya British', 'example' => 'one hundred and twenty-five'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Purchasing Handmade Batik & Artisan Coffee in Yogyakarta',
+                            'audio_script' => "Maya: Good afternoon! Welcome to our artisan boutique in Yogyakarta. Can I help you with anything?
+James: Hi, good afternoon! Yes, I love this handmade silk batik scarf. How much is it?
+Maya: That silk scarf is 350,000 rupiah, sir.
+James: That is a wonderful price! And how much are these two bags of roasted Arabica coffee?
+Maya: Each bag is 75,000 rupiah, so two bags are 150,000 rupiah.
+James: Great! So the total is 500,000 rupiah, right?
+Maya: Exactly! 350,000 plus 150,000 is 500,000 rupiah.
+James: Here is 500,000 rupiah. Thank you very much!
+Maya: Thank you, James! Enjoy your holiday in Yogyakarta!",
+                            'key_phrases' => [
+                                'How much is this handmade silk batik scarf?',
+                                'That silk scarf is 350,000 rupiah, sir.',
+                                'Each bag is 75,000 rupiah, so two bags are 150,000 rupiah.',
+                                'The total is 500,000 rupiah, right?',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'How much is the silk batik scarf?',
+                                    'options' => [
+                                        '350,000 rupiah',
+                                        '150,000 rupiah',
+                                        '75,000 rupiah',
+                                        '500,000 rupiah',
+                                    ],
+                                    'answer' => '350,000 rupiah',
+                                ],
+                                [
+                                    'q' => 'How much do the two bags of coffee cost in total?',
+                                    'options' => [
+                                        '150,000 rupiah',
+                                        '75,000 rupiah',
+                                        '350,000 rupiah',
+                                        '200,000 rupiah',
+                                    ],
+                                    'answer' => '150,000 rupiah',
+                                ],
+                                [
+                                    'q' => 'What is the total amount that James pays to Maya?',
+                                    'options' => [
+                                        '500,000 rupiah',
+                                        '450,000 rupiah',
+                                        '600,000 rupiah',
+                                        '350,000 rupiah',
+                                    ],
+                                    'answer' => '500,000 rupiah',
+                                ],
+                            ],
+                        ],
+'drilling1' => [
+                            ['en' => 'There are forty-five students registered in our English program.', 'id' => 'Ada empat puluh lima siswa yang terdaftar dalam program bahasa Inggris kami.'],
+                            ['en' => 'The population of the city is eight hundred ninety-three thousand people.', 'id' => 'Populasi kota ini adalah delapan ratus sembilan puluh tiga ribu orang.'],
+                            ['en' => 'The company invested twelve million five hundred thousand dollars in research.', 'id' => 'Perusahaan menginvestasikan dua belas juta lima ratus ribu dolar dalam penelitian.'],
+                            ['en' => 'My telephone number is zero eight one two, three four five six, seven eight nine zero.', 'id' => 'Nomor telepon saya adalah 0812-3456-7890.'],
+                            ['en' => 'One thousand four hundred and fifty people attended the conference.', 'id' => 'Seribu empat ratus lima puluh orang menghadiri konferensi tersebut.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'How much does this laptop cost? It costs one thousand two hundred dollars.', 'id' => 'Berapa harga laptop ini? Harganya seribu dua ratus dolar.'],
+                            ['en' => 'The flight ticket is two hundred forty-seven dollars and fifty cents.', 'id' => 'Tiket pesawat seharga dua ratus empat puluh tujuh dolar lima puluh sen.'],
+                            ['en' => 'Can you give me fifty thousand rupiahs in change, please?', 'id' => 'Bisakah Anda memberi saya kembalian lima puluh ribu rupiah?'],
+                            ['en' => 'Our target is to reach one hundred thousand active learners this year.', 'id' => 'Target kami adalah mencapai seratus ribu pembelajar aktif tahun ini.'],
+                            ['en' => 'The total bill is eighty-four dollars and twenty cents.', 'id' => 'Total tagihannya adalah delapan puluh empat dolar dua puluh sen.'],
+                        ],
+                        'grammar_note' => "Cardinal numbers answer 'How many?' and 'How much?'. Do not add '-s' to hundred, thousand, million, or billion when preceded by a number (e.g., three thousand, not three thousands).",
+                        'dialogue_setting' => 'Percakapan di toko elektronik dan pakaian mengenai harga barang, diskon, dan total pembayaran.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'Excuse me, could you tell me how much this camera and tripod cost?',
+                                'id' => 'Permisi, bisakah Anda memberi tahu saya berapa harga kamera dan tripod ini?',
+                            ],
+                            [
+                                'speaker' => 'Shop Assistant (Student B)',
+                                'en' => 'Certainly! The digital camera is five hundred eighty dollars ($580), and the tripod is forty-five dollars ($45).',
+                                'id' => 'Tentu saja! Kamera digital seharga lima ratus delapan puluh dolar ($580), dan tripod seharga empat puluh lima dolar ($45).',
+                            ],
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'Is there any discount if I buy both today?',
+                                'id' => 'Apakah ada diskon jika saya membeli keduanya hari ini?',
+                            ],
+                            [
+                                'speaker' => 'Shop Assistant (Student B)',
+                                'en' => 'Yes, we have a twenty-five dollar discount! So the total is six hundred dollars ($600) exactly.',
+                                'id' => 'Ya, kami ada diskon dua puluh lima dolar! Jadi totalnya tepat enam ratus dolar ($600).',
+                            ],
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'That sounds great. I will take them. Here is six hundred dollars.',
+                                'id' => 'Terdengar bagus. Saya akan mengambilnya. Ini uang enam ratus dolar.',
+                            ],
+                        ],
+                        'games' => [
+                            'type' => 'how_many_kitchen',
+                            'title' => 'How many? (Kitchen Objects & Spiders)',
+                            'participation_type' => 'pair',
+                            'activity' => 'Game berbicara berpasangan (2 orang). Siswa A memegang Dapur A dan Siswa B memegang Dapur B. Jangan saling memperlihatkan gambar—saling bertanyalah dalam bahasa Inggris untuk mengisi tabel hitungan dan mencari tahu siapa pemilik barang terbanyak!',
+                            'aim' => 'To practice asking "How many... are there?" and answering with cardinal numbers "There is... / There are..." accurately.',
+                            'time' => '15 to 20 minutes',
+                            'items' => [
+                                ['key' => 'teapots', 'name' => 'Teapots (Teko Teh)', 'icon' => '🫖', 'count_a' => 1, 'count_b' => 1, 'note' => 'A: 1 on table | B: 1 on counter'],
+                                ['key' => 'pans', 'name' => 'Pans (Panci / Wajan)', 'icon' => '🍳', 'count_a' => 2, 'count_b' => 3, 'note' => 'A: 2 in cupboard | B: 3 on counter'],
+                                ['key' => 'forks', 'name' => 'Forks (Garpu)', 'icon' => '🍴', 'count_a' => 4, 'count_b' => 6, 'note' => 'A: 4 on table | B: 6 on table'],
+                                ['key' => 'knives', 'name' => 'Knives (Pisau)', 'icon' => '🔪', 'count_a' => 4, 'count_b' => 18, 'note' => 'A: 4 on table | B: 18 in drawer (marked 18)'],
+                                ['key' => 'spoons', 'name' => 'Spoons (Sendok)', 'icon' => '🥄', 'count_a' => 6, 'count_b' => 6, 'note' => 'A: 6 in drawer | B: 6 on table'],
+                                ['key' => 'cups', 'name' => 'Cups (Cangkir)', 'icon' => '☕', 'count_a' => 10, 'count_b' => 8, 'note' => 'A: 10 on upper rack (2 rows of 5) | B: 8 on table'],
+                                ['key' => 'saucers', 'name' => 'Saucers (Tatakan Cangkir)', 'icon' => '🍽️', 'count_a' => 11, 'count_b' => 6, 'note' => 'A: 11 stacked (marked 11) | B: 6 on table'],
+                                ['key' => 'glasses', 'name' => 'Glasses (Gelas)', 'icon' => '🥛', 'count_a' => 13, 'count_b' => 13, 'note' => 'A: 13 in cupboard (marked 13) | B: 13 in cupboard (4+5+4)'],
+                                ['key' => 'plates', 'name' => 'Plates (Piring)', 'icon' => '🍽️', 'count_a' => 16, 'count_b' => 34, 'note' => 'A: 16 stacked (marked 16) | B: 20 on wall racks (8+8+4) + 14 on table (marked 14) = 34'],
+                                ['key' => 'bowls', 'name' => 'Bowls (Mangkuk)', 'icon' => '🥣', 'count_a' => 4, 'count_b' => 4, 'note' => 'A: 4 on table | B: 4 on table'],
+                                ['key' => 'spiders', 'name' => 'Spiders (Laba-laba)', 'icon' => '🕷️', 'count_a' => 11, 'count_b' => 11, 'note' => 'A: 11 spiders | B: 11 spiders'],
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'How many teapots are there in your kitchen?',
+                                    'a' => 'There is one teapot on the table.',
+                                    'audio' => 'How many teapots are there in your kitchen? There is one teapot on the table.',
+                                ],
+                                [
+                                    'q' => 'How many cups are there in your kitchen?',
+                                    'a' => 'There are ten cups on the shelf / There are eight cups on the table.',
+                                    'audio' => 'How many cups are there in your kitchen? There are ten cups on the shelf.',
+                                ],
+                                [
+                                    'q' => 'How many knives are there in your kitchen?',
+                                    'a' => 'There are eighteen knives in the drawer.',
+                                    'audio' => 'How many knives are there in your kitchen? There are eighteen knives in the drawer.',
+                                ],
+                                [
+                                    'q' => 'Who has the most plates in their kitchen?',
+                                    'a' => 'Kitchen B has the most plates with thirty-four plates!',
+                                    'audio' => 'Who has the most plates in their kitchen? Kitchen B has the most plates!',
+                                ],
+                                [
+                                    'q' => 'How many spiders can you find in your kitchen?',
+                                    'a' => 'There are eleven spiders crawling around the room!',
+                                    'audio' => 'How many spiders can you find in your kitchen? There are eleven spiders crawling around the room!',
+                                ],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "How much does a typical lunch cost in your city, and what do you usually get for that price?",
+                                'hint' => "Answer: 'A typical lunch in my city costs around [number] rupiahs / dollars, and I usually get [food and drink].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "Can you read these numbers out loud clearly: 1,450 | 85,200 | 1,500,000 | 45,000,000,000?",
+                                'hint' => "Answer: 'One thousand four hundred fifty; Eighty-five thousand two hundred; One million five hundred thousand; Forty-five billion.'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "If you won one million dollars today, what three things would you spend that money on?",
+                                'hint' => "Answer: 'If I won one million dollars, I would first buy [item], then invest [amount], and finally donate to [cause].'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Cardinal Numbers Spoken Fluency Drills',
+                        'impromptu' => [
+                            'Aktivitas 1: Sebutkan nomor teleponmu, perkiraan harga sewa tempat tinggalmu per bulan, dan harga barang termahal yang kamu miliki dalam bahasa Inggris!',
+                            'Aktivitas 2: Berhitung maju kelipatan 15 dari 0 sampai 150 dalam bahasa Inggris secepat mungkin!',
+                            'Aktivitas 3: Simulasikan transaksi kasir di supermarket dengan total belanja $187.35 dan uang bayar $200.00!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Zero', 'ipa' => '/ˈzɪə.rəʊ/', 'meaning' => 'Nol / Kosong (0)', 'example' => 'The temperature dropped to zero degrees.'],
+                            ['word' => 'One', 'ipa' => '/wʌn/', 'meaning' => 'Satu (1)', 'example' => 'I only need one minute to finish.'],
+                            ['word' => 'Two', 'ipa' => '/tuː/', 'meaning' => 'Dua (2)', 'example' => 'She ordered two cups of hot chocolate.'],
+                            ['word' => 'Three', 'ipa' => '/θriː/', 'meaning' => 'Tiga (3)', 'example' => 'There are three speaking practice rooms available.'],
+                            ['word' => 'Four', 'ipa' => '/fɔːr/', 'meaning' => 'Empat (4)', 'example' => 'There are four distinct seasons in the UK.'],
+                            ['word' => 'Five', 'ipa' => '/faɪv/', 'meaning' => 'Lima (5)', 'example' => 'We will take a five-minute break.'],
+                            ['word' => 'Six', 'ipa' => '/sɪks/', 'meaning' => 'Enam (6)', 'example' => 'The class begins at six o\'clock.'],
+                            ['word' => 'Seven', 'ipa' => '/ˈsev.ən/', 'meaning' => 'Tujuh (7)', 'example' => 'There are seven days in a week.'],
+                            ['word' => 'Eight', 'ipa' => '/eɪt/', 'meaning' => 'Delapan (8)', 'example' => 'He works eight hours every business day.'],
+                            ['word' => 'Nine', 'ipa' => '/naɪn/', 'meaning' => 'Sembilan (9)', 'example' => 'The morning briefing starts at nine sharp.'],
+                            ['word' => 'Ten', 'ipa' => '/ten/', 'meaning' => 'Sepuluh (10)', 'example' => 'This course features ten comprehensive modules.'],
+                            ['word' => 'Eleven', 'ipa' => '/ɪˈlev.ən/', 'meaning' => 'Sebelas (11)', 'example' => 'Meeting eleven is our final evaluation exam.'],
+                            ['word' => 'Twelve', 'ipa' => '/twelv/', 'meaning' => 'Dua belas (12)', 'example' => 'There are twelve months in one year.'],
+                            ['word' => 'Thirteen', 'ipa' => '/θɜːˈtiːn/', 'meaning' => 'Tiga belas (13)', 'example' => 'Thirteen candidates attended the interview.'],
+                            ['word' => 'Fourteen', 'ipa' => '/ˌfɔːˈtiːn/', 'meaning' => 'Empat belas (14)', 'example' => 'We spent fourteen days traveling across Europe.'],
+                            ['word' => 'Fifteen', 'ipa' => '/ˌfɪfˈtiːn/', 'meaning' => 'Lima belas (15)', 'example' => 'A quarter of an hour equals fifteen minutes.'],
+                            ['word' => 'Twenty', 'ipa' => '/ˈtwen.ti/', 'meaning' => 'Dua puluh (20)', 'example' => 'The price of the textbook is twenty dollars.'],
+                            ['word' => 'Thirty', 'ipa' => '/ˈθɜː.ti/', 'meaning' => 'Tiga puluh (30)', 'example' => 'Half an hour is equal to thirty minutes.'],
+                            ['word' => 'Forty', 'ipa' => '/ˈfɔː.ti/', 'meaning' => 'Empat puluh (40)', 'example' => 'Forty active participants joined our live webinar.'],
+                            ['word' => 'Fifty', 'ipa' => '/ˈfɪf.ti/', 'meaning' => 'Lima puluh (50)', 'example' => 'Can you change this fifty-dollar bill, please?'],
+                            ['word' => 'Hundred', 'ipa' => '/ˈhʌn.drəd/', 'meaning' => 'Ratus / Seratus (100)', 'example' => 'Over one hundred students passed the speaking test.'],
+                            ['word' => 'Thousand', 'ipa' => '/ˈθaʊ.zənd/', 'meaning' => 'Ribu / Seribu (1,000)', 'example' => 'The flight ticket costs one thousand dollars.'],
+                            ['word' => 'Million', 'ipa' => '/ˈmɪl.jən/', 'meaning' => 'Juta / Sejuta (1,000,000)', 'example' => 'The company invested two million dollars in research.'],
+                            ['word' => 'Billion', 'ipa' => '/ˈbɪl.jən/', 'meaning' => 'Miliar / Semiliar (1,000,000,000)', 'example' => 'The global population has passed eight billion.'],
+                            ['word' => 'Price', 'ipa' => '/praɪs/', 'meaning' => 'Harga barang', 'example' => 'What is the regular price of this leather jacket?'],
+                            ['word' => 'Cost', 'ipa' => '/kɒst/', 'meaning' => 'Biaya / Berharga', 'example' => 'How much does this laptop computer cost?'],
+                            ['word' => 'Discount', 'ipa' => '/ˈdɪs.kaʊnt/', 'meaning' => 'Potongan harga / Diskon', 'example' => 'We offer a twenty percent discount for new students.'],
+                            ['word' => 'Total', 'ipa' => '/ˈtoʊ.təl/', 'meaning' => 'Total / Jumlah keseluruhan', 'example' => 'Your total purchase amount comes to $247.50.'],
+                            ['word' => 'Change', 'ipa' => '/tʃeɪndʒ/', 'meaning' => 'Uang kembalian', 'example' => 'Here is your change: two dollars and fifty cents.'],
+                            ['word' => 'Cash', 'ipa' => '/kæʃ/', 'meaning' => 'Uang tunai', 'example' => 'Will you be paying in cash or by credit card?'],
+                            ['word' => 'Receipt', 'ipa' => '/rɪˈsiːt/', 'meaning' => 'Struk pembayaran / Tanda terima', 'example' => 'Please keep your payment receipt for your records.'],
+                            ['word' => 'Currency', 'ipa' => '/ˈkʌr.ən.si/', 'meaning' => 'Mata uang', 'example' => 'The Indonesian Rupiah is our national currency.'],
+                        ],
+                    ],
+                    // =========================================================================
+                    // SUBTOPIK 02: TELLING TIME
+                    // =========================================================================
+                    [
+                        'id' => 'sec-m2-sub-2',
+                        'num' => '02',
+                        'title' => 'Telling Time',
+                        'subtitle' => 'Telling Time Masterclass (British vs American Style) & Time Prepositions',
+                        'desc' => 'Penyebutan jam British (Past, To, Half, Quarter), American digital (AM/PM), jadwal keberangkatan transportasi, dan preposisi waktu (At, From...to, Until).',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'telling_time',
+                            'title' => 'Telling Time Masterclass',
+                            'telling_time' => [
+                                'british_rules' => [
+                                    ['pattern' => 'A quarter past [Hour]', 'meaning' => 'Jam [Hour] lebih 15 menit (seperempat)', 'example' => '04:15 -> A quarter past four'],
+                                    ['pattern' => 'A quarter to [Next Hour]', 'meaning' => 'Jam [Next Hour] kurang 15 menit (seperempat)', 'example' => '04:45 -> A quarter to five'],
+                                    ['pattern' => 'Half past [Hour]', 'meaning' => 'Jam setengah [Hour] (lebih 30 menit)', 'example' => '06:30 -> Half past six'],
+                                    ['pattern' => "[Hour] O'clock", 'meaning' => 'Jam [Hour] tepat (tanpa lebih menit)', 'example' => "07:00 -> Seven o'clock"],
+                                ],
+                                'american_rules' => [
+                                    ['term' => 'AM (Ante Meridiem)', 'meaning' => 'Pagi (12:00 tengah malam s.d. 11:59 siang)', 'example' => '07:30 AM -> Seven thirty in the morning'],
+                                    ['term' => 'PM (Post Meridiem)', 'meaning' => 'Siang / Malam (12:00 siang s.d. 11:59 malam)', 'example' => '07:30 PM -> Seven thirty in the evening'],
+                                    ['term' => 'Digital Direct Form', 'meaning' => 'Membaca jam lalu menit secara langsung', 'example' => '04:15 -> Four fifteen | 06:30 -> Six thirty'],
+                                ],
+                                'other_formats' => [
+                                    ['term' => 'Sharp (Tepat)', 'meaning' => 'Menyatakan waktu yang sangat presisi / tanpa toleransi', 'example' => 'The meeting starts at 4 sharp (Tepat jam 4).'],
+                                    ['term' => 'Hundred (24-Hour International)', 'meaning' => 'Format 24 jam militer / internasional', 'example' => '14:00 -> Fourteen hundred | 13:00 -> Thirteen hundred'],
+                                ],
+                                'prepositions' => [
+                                    ['prep' => 'AT', 'use_for' => 'Jam Spesifik & Waktu Tepat (Exact Clock Time & Moments)', 'example' => "at 4 o'clock, at 7:30 PM, at noon, at midnight"],
+                                    ['prep' => 'FROM ... TO', 'use_for' => 'Rentang Waktu Mulai s.d. Selesai', 'example' => 'from 08:00 AM to 05:00 PM'],
+                                    ['prep' => 'UNTIL', 'use_for' => 'Batas Waktu Berakhir', 'example' => 'until 10:00 PM'],
+                                    ['prep' => 'AROUND / ABOUT', 'use_for' => 'Perkiraan Jam (Sekitar / Kurang Lebih)', 'example' => 'around half past six (sekitar jam 06:30)'],
+                                ],
+                                'qna' => [
+                                    ['q' => 'What time is it now?', 'a' => "It is a quarter past four in the afternoon (04:15 PM)."],
+                                    ['q' => 'What time does our class start?', 'a' => "Our class starts at a quarter past eight in the morning (08:15 AM)."],
+                                    ['q' => 'What time do you usually wake up?', 'a' => "I usually wake up at half past six in the morning (06:30 AM)."],
+                                ]
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Airport Shuttle Schedule & Flight Boarding Times',
+                            'audio_script' => "Emma: Excuse me! Could you tell me what time the airport express shuttle leaves for central Jakarta?
+Rizky: Good morning! The next shuttle departs at quarter past eight (8:15 AM).
+Emma: Oh, perfect! What time is it right now?
+Rizky: It is exactly seven forty-five (7:45 AM), so you have thirty minutes to purchase your ticket.
+Emma: Great! And how long does the journey take to reach the central station?
+Rizky: It takes about forty-five minutes, so you will arrive at nine o'clock sharp (9:00 AM).
+Emma: Wonderful! Thank you so much for your assistance.
+Rizky: You are very welcome! Have a pleasant and safe trip, Emma!",
+                            'key_phrases' => [
+                                'Could you tell me what time the airport express shuttle leaves?',
+                                'The next shuttle departs at quarter past eight.',
+                                'It is exactly seven forty-five.',
+                                'You will arrive at nine o\'clock sharp.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'What time does the next shuttle depart?',
+                                    'options' => [
+                                        'Quarter past eight (8:15 AM)',
+                                        'Seven forty-five (7:45 AM)',
+                                        'Nine o\'clock (9:00 AM)',
+                                        'Eight o\'clock (8:00 AM)',
+                                    ],
+                                    'answer' => 'Quarter past eight (8:15 AM)',
+                                ],
+                                [
+                                    'q' => 'What time is it when Emma asks Rizky for information?',
+                                    'options' => [
+                                        'Seven forty-five (7:45 AM)',
+                                        'Eight fifteen (8:15 AM)',
+                                        'Nine o\'clock (9:00 AM)',
+                                        'Seven thirty (7:30 AM)',
+                                    ],
+                                    'answer' => 'Seven forty-five (7:45 AM)',
+                                ],
+                                [
+                                    'q' => 'What time is the shuttle scheduled to arrive at the central station?',
+                                    'options' => [
+                                        'Nine o\'clock sharp (9:00 AM)',
+                                        'Eight thirty (8:30 AM)',
+                                        'Ten o\'clock (10:00 AM)',
+                                        'Nine forty-five (9:45 AM)',
+                                    ],
+                                    'answer' => 'Nine o\'clock sharp (9:00 AM)',
+                                ],
+                            ],
+                        ],
+'drilling1' => [
+                            ['en' => 'My English speaking class starts at a quarter past four in the afternoon (04:15 PM).', 'id' => 'Kelas speaking bahasa Inggris saya mulai jam empat lebih seperempat sore (04:15 PM).'],
+                            ['en' => 'The express train will arrive at half past six sharp (06:30 sharp).', 'id' => 'Kereta api ekspres akan tiba jam setengah tujuh tepat (06:30 sharp).'],
+                            ['en' => 'Did you say a quarter to five or a quarter past five?', 'id' => 'Apakah Anda mengatakan jam lima kurang seperempat atau jam lima lebih seperempat?'],
+                            ['en' => 'Our morning briefing starts at nine o\'clock sharp.', 'id' => 'Briefing pagi kita dimulai tepat jam sembilan.'],
+                            ['en' => 'It is twenty-five past ten; we must start our session right away.', 'id' => 'Sekarang jam sepuluh lebih dua puluh lima menit; kita harus segera memulai sesi kita.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'The flight from Jakarta departs at a quarter past eight in the morning.', 'id' => 'Penerbangan dari Jakarta berangkat pukul delapan lebih seperempat pagi.'],
+                            ['en' => 'Boarding starts at a quarter to eight sharp at Gate 24.', 'id' => 'Boarding dimulai pukul delapan kurang seperempat tepat di Gate 24.'],
+                            ['en' => 'We will land in London at half past six in the evening.', 'id' => 'Kita akan mendarat di London pada pukul setengah tujuh malam.'],
+                            ['en' => 'The airport shuttle train runs every thirty minutes until midnight.', 'id' => 'Kereta bandara beroperasi setiap tiga puluh menit hingga tengah malam.'],
+                            ['en' => 'Could you meet me at around seven thirty tomorrow morning?', 'id' => 'Bisakah Anda menemui saya sekitar jam tujuh tiga puluh besok pagi?'],
+                        ],
+                        'grammar_note' => "Telling Time Prepositions: Use 'at' for clock times (at 4 o'clock, at 7:30 PM), 'from...to' for time intervals, and 'until' for end times.",
+                        'dialogue_setting' => 'Siswa A berperan sebagai petugas informasi bandara / travel agent dan Siswa B sebagai penumpang yang menanyakan jadwal keberangkatan.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'Good morning! What time does the express train to the airport leave?',
+                                'id' => 'Selamat pagi! Jam berapa kereta ekspres ke bandara berangkat?',
+                            ],
+                            [
+                                'speaker' => 'Officer (Student B)',
+                                'en' => 'Good morning! It leaves at a quarter past eight in the morning (08:15 AM) from Platform 3.',
+                                'id' => 'Selamat pagi! Kereta berangkat pukul delapan lebih seperempat pagi (08:15 AM) dari Peron 3.',
+                            ],
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'Thank you! And what time will it arrive at the terminal?',
+                                'id' => 'Terima kasih! Dan jam berapa kereta akan tiba di terminal?',
+                            ],
+                            [
+                                'speaker' => 'Officer (Student B)',
+                                'en' => 'It will arrive at a quarter to nine in the morning (08:45 AM) sharp.',
+                                'id' => 'Kereta akan tiba pukul sembilan kurang seperempat pagi (08:45 AM) tepat.',
+                            ],
+                            [
+                                'speaker' => 'Customer (Student A)',
+                                'en' => 'Perfect. That gives me plenty of time before my ten o\'clock flight!',
+                                'id' => 'Sempurna. Itu memberi saya banyak waktu sebelum penerbangan jam sepuluh saya!',
+                            ],
+                        ],
+                        'games' => [
+                            'type' => 'different_lives',
+                            'title' => 'Worksheet 20: Different Lives (Daily Routines & Telling Time)',
+                            'participation_type' => 'pair',
+                            'activity' => 'Pairwork Speaking: Daily Routine Exchange & Time Reconstruction',
+                            'aim' => 'To describe a typical day using pictures and telling the time accurately in English.',
+                            'grammar_functions' => 'Telling the time (British & American), Present simple: you, he, she, I, Simple past: yesterday.',
+                            'vocabulary' => 'Everyday activities: get up, have breakfast, arrive at school, arrive at work, start the housework, have a cup of tea/coffee, have lunch at home, have lunch in a restaurant, finish work, finish school, go shopping, go to the gym, play football, cook dinner, have dinner, do homework, play with the children, read, watch television, visit friends, meet friends in a café, go to bed.',
+                            'time' => '40 minutes',
+                            'default_routine_a' => [1, 2, 4, 6, 8, 9, 12, 14, 19, 22],
+                            'default_routine_b' => [1, 2, 3, 21, 7, 10, 13, 16, 15, 18, 22],
+                            'cards' => [
+                                [
+                                    'id' => 1,
+                                    'key' => 'get_up',
+                                    'image' => '/images/speaking/different_lives/card_01.png?v=full_color_v3',
+                                    'name' => 'get up',
+                                    'id_name' => 'Bangun tidur',
+                                    'third_person' => 'gets up',
+                                    'past' => 'got up',
+                                    'default_time_a' => '06:30',
+                                    'default_time_b' => '07:15',
+                                ],
+                                [
+                                    'id' => 2,
+                                    'key' => 'have_breakfast',
+                                    'image' => '/images/speaking/different_lives/card_02.png?v=full_color_v3',
+                                    'name' => 'have breakfast',
+                                    'id_name' => 'Sarapan pagi',
+                                    'third_person' => 'has breakfast',
+                                    'past' => 'had breakfast',
+                                    'default_time_a' => '07:00',
+                                    'default_time_b' => '07:45',
+                                ],
+                                [
+                                    'id' => 3,
+                                    'key' => 'arrive_at_school',
+                                    'image' => '/images/speaking/different_lives/card_03.png?v=full_color_v3',
+                                    'name' => 'arrive at school',
+                                    'id_name' => 'Tiba di sekolah / kampus',
+                                    'third_person' => 'arrives at school',
+                                    'past' => 'arrived at school',
+                                    'default_time_a' => '07:45',
+                                    'default_time_b' => '08:30',
+                                ],
+                                [
+                                    'id' => 4,
+                                    'key' => 'arrive_at_work',
+                                    'image' => '/images/speaking/different_lives/card_04.png?v=full_color_v3',
+                                    'name' => 'arrive at work',
+                                    'id_name' => 'Tiba di tempat kerja',
+                                    'third_person' => 'arrives at work',
+                                    'past' => 'arrived at work',
+                                    'default_time_a' => '08:00',
+                                    'default_time_b' => '09:00',
+                                ],
+                                [
+                                    'id' => 5,
+                                    'key' => 'start_the_housework',
+                                    'image' => '/images/speaking/different_lives/card_05.png?v=full_color_v3',
+                                    'name' => 'start the housework',
+                                    'id_name' => 'Mulai pekerjaan rumah tangga',
+                                    'third_person' => 'starts the housework',
+                                    'past' => 'started the housework',
+                                    'default_time_a' => '09:00',
+                                    'default_time_b' => '09:30',
+                                ],
+                                [
+                                    'id' => 6,
+                                    'key' => 'have_a_cup_of_tea_coffee',
+                                    'image' => '/images/speaking/different_lives/card_06.png?v=full_color_v3',
+                                    'name' => 'have a cup of tea/coffee',
+                                    'id_name' => 'Minum secangkir teh/kopi',
+                                    'third_person' => 'has a cup of tea/coffee',
+                                    'past' => 'had a cup of tea/coffee',
+                                    'default_time_a' => '10:15',
+                                    'default_time_b' => '10:45',
+                                ],
+                                [
+                                    'id' => 7,
+                                    'key' => 'have_lunch_at_home',
+                                    'image' => '/images/speaking/different_lives/card_07.png?v=full_color_v3',
+                                    'name' => 'have lunch at home',
+                                    'id_name' => 'Makan siang di rumah',
+                                    'third_person' => 'has lunch at home',
+                                    'past' => 'had lunch at home',
+                                    'default_time_a' => '12:00',
+                                    'default_time_b' => '12:30',
+                                ],
+                                [
+                                    'id' => 8,
+                                    'key' => 'have_lunch_in_a_restaurant',
+                                    'image' => '/images/speaking/different_lives/card_08.png?v=full_color_v3',
+                                    'name' => 'have lunch in a restaurant',
+                                    'id_name' => 'Makan siang di restoran',
+                                    'third_person' => 'has lunch in a restaurant',
+                                    'past' => 'had lunch in a restaurant',
+                                    'default_time_a' => '12:30',
+                                    'default_time_b' => '13:15',
+                                ],
+                                [
+                                    'id' => 9,
+                                    'key' => 'finish_work',
+                                    'image' => '/images/speaking/different_lives/card_09.png?v=full_color_v3',
+                                    'name' => 'finish work',
+                                    'id_name' => 'Selesai bekerja',
+                                    'third_person' => 'finishes work',
+                                    'past' => 'finished work',
+                                    'default_time_a' => '17:00',
+                                    'default_time_b' => '17:30',
+                                ],
+                                [
+                                    'id' => 10,
+                                    'key' => 'finish_school',
+                                    'image' => '/images/speaking/different_lives/card_10.png?v=full_color_v3',
+                                    'name' => 'finish school',
+                                    'id_name' => 'Selesai sekolah',
+                                    'third_person' => 'finishes school',
+                                    'past' => 'finished school',
+                                    'default_time_a' => '15:15',
+                                    'default_time_b' => '15:30',
+                                ],
+                                [
+                                    'id' => 11,
+                                    'key' => 'go_shopping',
+                                    'image' => '/images/speaking/different_lives/card_11.png?v=full_color_v3',
+                                    'name' => 'go shopping',
+                                    'id_name' => 'Pergi berbelanja',
+                                    'third_person' => 'goes shopping',
+                                    'past' => 'went shopping',
+                                    'default_time_a' => '17:45',
+                                    'default_time_b' => '16:30',
+                                ],
+                                [
+                                    'id' => 12,
+                                    'key' => 'go_to_the_gym',
+                                    'image' => '/images/speaking/different_lives/card_12.png?v=full_color_v3',
+                                    'name' => 'go to the gym',
+                                    'id_name' => 'Pergi ke gym / olahraga',
+                                    'third_person' => 'goes to the gym',
+                                    'past' => 'went to the gym',
+                                    'default_time_a' => '18:00',
+                                    'default_time_b' => '17:15',
+                                ],
+                                [
+                                    'id' => 13,
+                                    'key' => 'play_football',
+                                    'image' => '/images/speaking/different_lives/card_13.png?v=full_color_v3',
+                                    'name' => 'play football',
+                                    'id_name' => 'Bermain sepak bola',
+                                    'third_person' => 'plays football',
+                                    'past' => 'played football',
+                                    'default_time_a' => '16:30',
+                                    'default_time_b' => '16:45',
+                                ],
+                                [
+                                    'id' => 14,
+                                    'key' => 'cook_dinner',
+                                    'image' => '/images/speaking/different_lives/card_14.png?v=full_color_v3',
+                                    'name' => 'cook dinner',
+                                    'id_name' => 'Memasak makan malam',
+                                    'third_person' => 'cooks dinner',
+                                    'past' => 'cooked dinner',
+                                    'default_time_a' => '19:15',
+                                    'default_time_b' => '18:30',
+                                ],
+                                [
+                                    'id' => 15,
+                                    'key' => 'have_dinner',
+                                    'image' => '/images/speaking/different_lives/card_15.png?v=full_color_v3',
+                                    'name' => 'have dinner',
+                                    'id_name' => 'Makan malam',
+                                    'third_person' => 'has dinner',
+                                    'past' => 'had dinner',
+                                    'default_time_a' => '19:45',
+                                    'default_time_b' => '19:15',
+                                ],
+                                [
+                                    'id' => 16,
+                                    'key' => 'do_homework',
+                                    'image' => '/images/speaking/different_lives/card_16.png?v=full_color_v3',
+                                    'name' => 'do homework',
+                                    'id_name' => 'Mengerjakan PR / tugas',
+                                    'third_person' => 'does homework',
+                                    'past' => 'did homework',
+                                    'default_time_a' => '20:15',
+                                    'default_time_b' => '18:45',
+                                ],
+                                [
+                                    'id' => 17,
+                                    'key' => 'play_with_the_children',
+                                    'image' => '/images/speaking/different_lives/card_17.png?v=full_color_v3',
+                                    'name' => 'play with the children',
+                                    'id_name' => 'Bermain bersama anak-anak',
+                                    'third_person' => 'plays with the children',
+                                    'past' => 'played with the children',
+                                    'default_time_a' => '17:30',
+                                    'default_time_b' => '18:00',
+                                ],
+                                [
+                                    'id' => 18,
+                                    'key' => 'read',
+                                    'image' => '/images/speaking/different_lives/card_18.png?v=full_color_v3',
+                                    'name' => 'read',
+                                    'id_name' => 'Membaca buku / novel',
+                                    'third_person' => 'reads',
+                                    'past' => 'read',
+                                    'default_time_a' => '21:15',
+                                    'default_time_b' => '21:30',
+                                ],
+                                [
+                                    'id' => 19,
+                                    'key' => 'watch_television',
+                                    'image' => '/images/speaking/different_lives/card_19.png?v=full_color_v3',
+                                    'name' => 'watch television',
+                                    'id_name' => 'Menonton televisi',
+                                    'third_person' => 'watches television',
+                                    'past' => 'watched television',
+                                    'default_time_a' => '20:30',
+                                    'default_time_b' => '21:00',
+                                ],
+                                [
+                                    'id' => 20,
+                                    'key' => 'visit_friends',
+                                    'image' => '/images/speaking/different_lives/card_20.png?v=full_color_v3',
+                                    'name' => 'visit friends',
+                                    'id_name' => 'Mengunjungi teman',
+                                    'third_person' => 'visits friends',
+                                    'past' => 'visited friends',
+                                    'default_time_a' => '15:45',
+                                    'default_time_b' => '19:30',
+                                ],
+                                [
+                                    'id' => 21,
+                                    'key' => 'meet_friends_in_a_cafe',
+                                    'image' => '/images/speaking/different_lives/card_21.png?v=full_color_v3',
+                                    'name' => 'meet friends in a café',
+                                    'id_name' => 'Bertemu teman di kafe',
+                                    'third_person' => 'meets friends in a café',
+                                    'past' => 'met friends in a café',
+                                    'default_time_a' => '16:15',
+                                    'default_time_b' => '11:30',
+                                ],
+                                [
+                                    'id' => 22,
+                                    'key' => 'go_to_bed',
+                                    'image' => '/images/speaking/different_lives/card_22.png?v=full_color_v3',
+                                    'name' => 'go to bed',
+                                    'id_name' => 'Tidur malam',
+                                    'third_person' => 'goes to bed',
+                                    'past' => 'went to bed',
+                                    'default_time_a' => '23:00',
+                                    'default_time_b' => '22:30',
+                                ],
+                                [
+                                    'id' => 23,
+                                    'key' => 'custom_activity_1',
+                                    'image' => '/images/speaking/different_lives/card_23.png?v=full_color_v3',
+                                    'name' => 'take an online English course',
+                                    'id_name' => 'Kartu Kustom 1 (Aktivitas Pilihan)',
+                                    'third_person' => 'takes an online English course',
+                                    'past' => 'took an online English course',
+                                    'default_time_a' => '19:00',
+                                    'default_time_b' => '19:30',
+                                ],
+                                [
+                                    'id' => 24,
+                                    'key' => 'custom_activity_2',
+                                    'image' => '/images/speaking/different_lives/card_24.png?v=full_color_v3',
+                                    'name' => 'walk the dog in the park',
+                                    'id_name' => 'Kartu Kustom 2 (Aktivitas Pilihan)',
+                                    'third_person' => 'walks the dog in the park',
+                                    'past' => 'walked the dog in the park',
+                                    'default_time_a' => '06:00',
+                                    'default_time_b' => '06:45',
+                                ],
+                            ],
+                            'teacher_guide' => [
+                                'activity' => 'Pairwork: speaking',
+                                'aim' => 'To describe a typical day using pictures.',
+                                'grammar_functions' => 'Telling the time; Present simple: you, he, she; Simple past: yesterday',
+                                'vocabulary' => 'Everyday activities (get up, have breakfast, arrive at school/work, etc.)',
+                                'preparation' => 'Make one copy of the worksheet for each student in the class and cut the pictures out as indicated.',
+                                'time' => '40 minutes',
+                                'procedures' => [
+                                    '1. Minta siswa memikirkan hari biasa dalam hidup mereka (typical day). Tanyakan apakah setiap hari sama, jika tidak, pilih satu hari tertentu. Jelaskan mereka akan mendeskripsikan hari ini menggunakan gambar.',
+                                    '2. Setiap siswa memilih gambar aktivitas sehari-hari mereka dan menunjukkan jam pelaksanaannya dengan menggambar jarum jam pada masing-masing kartu gambar.',
+                                    '3. Setelah selesai, siswa berpasangan (Pairwork). Tukar kartu gambar tanpa berbicara terlebih dahulu. Siswa menyusun kartu milik partner sesuai urutan kronologis jam.',
+                                    '4. Bergantian mendeskripsikan hari biasa milik partner menggunakan bahasa target. Contoh: "You get up at half past seven. You have breakfast at quarter to eight. You arrive at work at half past eight."',
+                                    '5. Setelah selesai bertukar informasi, siswa dapat bertukar kartu partner dan mencari pasangan baru di kelas.',
+                                    '6. Susun kartu partner asli dengan urutan benar dan ceritakan ke partner baru menggunakan sudut pandang orang ketiga (He / She): "He gets up at half past seven. She arrives at work at half past eight."',
+                                ],
+                                'options' => [
+                                    'Opsi 1 (Find Differences): Siswa mendeskripsikan harinya sendiri sambil mendengarkan partner, lalu mencatat perbedaan jadwal: "I get up at 7.30 and Zainab gets up at 7.45. I have lunch at home and she has a sandwich at school."',
+                                    'Opsi 2 (Mystery Guess Who): Tutor mengumpulkan kartu siswa dalam tumpukan terpisah, mengambil satu acak, lalu membacakan jadwalnya. Siswa lain menebak jadwal siapakah itu.',
+                                    'Opsi 3 (Family Member): Lakukan aktivitas yang sama untuk mendeskripsikan hari biasa dari anggota keluarga lain (ayah, ibu, saudara).',
+                                    'Opsi 4 (Simple Past): Gunakan gambar yang sama untuk melatih Simple Past Tense mendeskripsikan aktivitas kemarin: "Yesterday, you got up at half past seven."',
+                                ],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "What time do you usually wake up on weekdays, and what time on weekends?",
+                                'hint' => "Answer: 'On weekdays, I wake up at [time], but on weekends, I wake up at [time].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "How do you say 04:15 and 04:45 using British time expressions?",
+                                'hint' => "Answer: '04:15 is a quarter past four, and 04:45 is a quarter to five.'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "What is the most important schedule or routine in your daily life, and what time does it start?",
+                                'hint' => "Answer: 'The most important routine is my [work/study], which starts at [time] sharp.'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Telling Time Rapid Challenges',
+                        'impromptu' => [
+                            'Aktivitas 1: Sebutkan jadwal lengkap aktivitasmu dari jam 07:00 pagi hingga 22:00 malam menggunakan format British Time!',
+                            'Aktivitas 2: Konversikan 5 waktu berikut ke format British: 02:15, 08:30, 09:45, 01:20, dan 06:50!',
+                            'Aktivitas 3: Simulasikan pengumuman bandara / stasiun kereta untuk keberangkatan jam 08:15 dan boarding jam 07:45!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => "O'clock", 'ipa' => "/əˈklɒk/", 'meaning' => 'Tepat (pada jam)', 'example' => 'The morning class starts at eight o\'clock sharp.'],
+                            ['word' => 'A quarter past', 'ipa' => '/ə ˈkwɔː.tər pɑːst/', 'meaning' => 'Lebih 15 menit (seperempat)', 'example' => 'It is a quarter past four (04:15) in the afternoon.'],
+                            ['word' => 'A quarter to', 'ipa' => '/ə ˈkwɔː.tər tuː/', 'meaning' => 'Kurang 15 menit (seperempat)', 'example' => 'It is a quarter to five (04:45); we should leave now.'],
+                            ['word' => 'Half past', 'ipa' => '/hɑːf pɑːst/', 'meaning' => 'Lebih 30 menit (setengah)', 'example' => 'Lunch break begins at half past twelve (12:30).'],
+                            ['word' => 'AM (Ante Meridiem)', 'ipa' => '/ˌeɪ ˈem/', 'meaning' => 'Waktu pagi (12:00 tengah malam - 11:59 siang)', 'example' => 'The international flight departs at 08:15 AM.'],
+                            ['word' => 'PM (Post Meridiem)', 'ipa' => '/ˌpiː ˈem/', 'meaning' => 'Waktu siang/malam (12:00 siang - 11:59 malam)', 'example' => 'The team briefing concludes at 06:30 PM.'],
+                            ['word' => 'Noon / Midday', 'ipa' => '/nuːn/', 'meaning' => 'Tengah hari (jam 12:00 siang)', 'example' => 'Let us meet in the cafe at noon.'],
+                            ['word' => 'Midnight', 'ipa' => '/ˈmɪd.naɪt/', 'meaning' => 'Tengah malam (jam 00:00 / 24:00)', 'example' => 'The special promotion expires at midnight tonight.'],
+                            ['word' => 'Morning', 'ipa' => '/ˈmɔː.nɪŋ/', 'meaning' => 'Pagi hari', 'example' => 'I usually study English grammar every morning.'],
+                            ['word' => 'Afternoon', 'ipa' => '/ˌɑːf.təˈnuːn/', 'meaning' => 'Siang / Sore hari', 'example' => 'The interactive workshop is held in the afternoon.'],
+                            ['word' => 'Evening', 'ipa' => '/ˈiːv.nɪŋ/', 'meaning' => 'Malam hari', 'example' => 'We have family dinner at seven in the evening.'],
+                            ['word' => 'Night', 'ipa' => '/naɪt/', 'meaning' => 'Malam larut', 'example' => 'Good night! Have restful sleep and see you tomorrow.'],
+                            ['word' => 'Sharp', 'ipa' => '/ʃɑːp/', 'meaning' => 'Tepat / Presisi tanpa toleransi', 'example' => 'Please arrive at nine o\'clock sharp.'],
+                            ['word' => 'Schedule', 'ipa' => '/ˈʃedʒ.uːl/', 'meaning' => 'Jadwal / Rencana waktu', 'example' => 'Let me check the train departure schedule.'],
+                            ['word' => 'Departure', 'ipa' => '/dɪˈpɑː.tʃər/', 'meaning' => 'Keberangkatan', 'example' => 'The scheduled flight departure is at 08:15 AM.'],
+                            ['word' => 'Arrival', 'ipa' => '/əˈraɪ.vəl/', 'meaning' => 'Kedatangan', 'example' => 'Estimated arrival time in London is half past six.'],
+                            ['word' => 'Boarding', 'ipa' => '/ˈbɔː.dɪŋ/', 'meaning' => 'Waktu masuk pesawat / transportasi', 'example' => 'Boarding starts at a quarter to eight at Gate 24.'],
+                            ['word' => 'Delay', 'ipa' => '/dɪˈleɪ/', 'meaning' => 'Keterlambatan / Penundaan', 'example' => 'There was a brief fifteen-minute delay due to rain.'],
+                            ['word' => 'On time', 'ipa' => '/ɒn taɪm/', 'meaning' => 'Tepat waktu (sesuai jadwal)', 'example' => 'The airport express train always runs on time.'],
+                            ['word' => 'In time', 'ipa' => '/ɪn taɪm/', 'meaning' => 'Tepat pada waktunya (sebelum terlambat)', 'example' => 'We arrived just in time for the opening presentation.'],
+                            ['word' => 'Hour hand', 'ipa' => '/ˈaʊ.ər hænd/', 'meaning' => 'Jarum jam pendek', 'example' => 'The short hour hand points directly to four.'],
+                            ['word' => 'Minute hand', 'ipa' => '/ˈmɪn.ɪt hænd/', 'meaning' => 'Jarum menit panjang', 'example' => 'The long minute hand points to six for half past.'],
+                            ['word' => 'Time zone', 'ipa' => '/ˈtaɪm zəʊn/', 'meaning' => 'Zona waktu', 'example' => 'London and Jakarta operate in different time zones.'],
+                            ['word' => 'Preposition AT', 'ipa' => '/æt/', 'meaning' => 'Preposisi untuk jam spesifik', 'example' => 'The meeting begins at 4 o\'clock.'],
+                            ['word' => 'Preposition FROM...TO', 'ipa' => '/frɒm ... tuː/', 'meaning' => 'Rentang waktu mulai s.d. selesai', 'example' => 'The course runs from 8:00 AM to 5:00 PM.'],
+                            ['word' => 'Preposition UNTIL', 'ipa' => '/ənˈtɪl/', 'meaning' => 'Batas waktu berakhir', 'example' => 'The library remains open until 10:00 PM.'],
+                        ],
+                    ],
+                ],
+            ],
+
+            3 => [
+                'topic' => 'Telling Ordinal Numbers & Telling Dates',
+                'focus' => 'Telling Ordinal Numbers (1st to 1,000,000th), Rankings & Order, Calendar Months, 7 Days of the Week, Reading Years (BC/AD), Date Formats (British vs American), Prepositions of Dates (IN & ON)',
+                'subtopics' => [
+                    // =========================================================================
+                    // SUBTOPIK 01: TELLING ORDINAL NUMBERS
+                    // =========================================================================
+                    [
+                        'id' => 'sec-m3-sub-1',
+                        'num' => '01',
+                        'title' => 'Telling Ordinal Numbers',
+                        'subtitle' => 'Ordinal Numbers Matrix & Ranking (1st s.d. 1.000.000th)',
+                        'desc' => 'Angka urutan/tingkatan, peringkat kejuaraan, lantai gedung, abad, dan aturan penulisan (-st, -nd, -rd, -th).',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'ordinal_numbers',
+                            'title' => 'Telling Ordinal Numbers Matrix',
+                            'focus' => 'Ordinal Numbers: 1st - 20th (Basic), 21st - 99th (Tens), 100th - 999th (Hundreds), 1,000th - 999,999th (Thousands), 1,000,000th (Millions)',
+                            'ordinal_numbers' => [
+                                ['num' => '1st', 'words' => 'First', 'ipa' => '/fɜːst/', 'id' => 'Pertama / Kesatu'],
+                                ['num' => '2nd', 'words' => 'Second', 'ipa' => '/ˈsek.ənd/', 'id' => 'Kedua'],
+                                ['num' => '3rd', 'words' => 'Third', 'ipa' => '/θɜːd/', 'id' => 'Ketiga'],
+                                ['num' => '4th', 'words' => 'Fourth', 'ipa' => '/fɔːθ/', 'id' => 'Keempat'],
+                                ['num' => '5th', 'words' => 'Fifth', 'ipa' => '/fɪfθ/', 'id' => 'Kelima'],
+                                ['num' => '6th', 'words' => 'Sixth', 'ipa' => '/sɪksθ/', 'id' => 'Keenam'],
+                                ['num' => '7th', 'words' => 'Seventh', 'ipa' => '/ˈsev.ənθ/', 'id' => 'Ketujuh'],
+                                ['num' => '8th', 'words' => 'Eighth', 'ipa' => '/eɪtθ/', 'id' => 'Kedelapan'],
+                                ['num' => '9th', 'words' => 'Ninth', 'ipa' => '/naɪnθ/', 'id' => 'Kesembilan'],
+                                ['num' => '10th', 'words' => 'Tenth', 'ipa' => '/tenθ/', 'id' => 'Kesepuluh'],
+                                ['num' => '11th', 'words' => 'Eleventh', 'ipa' => '/ɪˈlev.ənθ/', 'id' => 'Kesebelas'],
+                                ['num' => '12th', 'words' => 'Twelfth', 'ipa' => '/twelfθ/', 'id' => 'Kedua belas'],
+                                ['num' => '13th', 'words' => 'Thirteenth', 'ipa' => '/θɜːˈtiːnθ/', 'id' => 'Ketiga belas'],
+                                ['num' => '14th', 'words' => 'Fourteenth', 'ipa' => '/fɔːˈtiːnθ/', 'id' => 'Keempat belas'],
+                                ['num' => '15th', 'words' => 'Fifteenth', 'ipa' => '/fɪfˈtiːnθ/', 'id' => 'Kelima belas'],
+                                ['num' => '16th', 'words' => 'Sixteenth', 'ipa' => '/sɪkˈstiːnθ/', 'id' => 'Keenam belas'],
+                                ['num' => '17th', 'words' => 'Seventeenth', 'ipa' => '/ˌsev.ənˈtiːnθ/', 'id' => 'Ketujuh belas'],
+                                ['num' => '18th', 'words' => 'Eighteenth', 'ipa' => '/eɪˈtiːnθ/', 'id' => 'Kedelapan belas'],
+                                ['num' => '19th', 'words' => 'Nineteenth', 'ipa' => '/ˌnaɪnˈtiːnθ/', 'id' => 'Kesembilan belas'],
+                                ['num' => '20th', 'words' => 'Twentieth', 'ipa' => '/ˈtwen.ti.əθ/', 'id' => 'Keduapuluh'],
+                                ['num' => '21st', 'words' => 'Twenty-first', 'ipa' => '/ˌtwen.ti ˈfɜːst/', 'id' => 'Kedua puluh satu'],
+                                ['num' => '22nd', 'words' => 'Twenty-second', 'ipa' => '/ˌtwen.ti ˈsek.ənd/', 'id' => 'Kedua puluh dua'],
+                                ['num' => '23rd', 'words' => 'Twenty-third', 'ipa' => '/ˌtwen.ti ˈθɜːd/', 'id' => 'Kedua puluh tiga'],
+                                ['num' => '24th', 'words' => 'Twenty-fourth', 'ipa' => '/ˌtwen.ti ˈfɔːrθ/', 'id' => 'Kedua puluh empat'],
+                                ['num' => '25th', 'words' => 'Twenty-fifth', 'ipa' => '/ˌtwen.ti ˈfɪfθ/', 'id' => 'Kedua puluh lima'],
+                                ['num' => '30th', 'words' => 'Thirtieth', 'ipa' => '/ˈθɜː.ti.əθ/', 'id' => 'Ketiga puluh'],
+                                ['num' => '40th', 'words' => 'Fortieth', 'ipa' => '/ˈfɔː.ti.əθ/', 'id' => 'Keempat puluh'],
+                                ['num' => '50th', 'words' => 'Fiftieth', 'ipa' => '/ˈfɪf.ti.əθ/', 'id' => 'Kelima puluh'],
+                                ['num' => '55th', 'words' => 'Fifty-fifth', 'ipa' => '/ˌfɪf.ti ˈfɪfθ/', 'id' => 'Kelima puluh lima'],
+                                ['num' => '60th', 'words' => 'Sixtieth', 'ipa' => '/ˈsɪk.sti.əθ/', 'id' => 'Keenam puluh'],
+                                ['num' => '67th', 'words' => 'Sixty-seventh', 'ipa' => '/ˌsɪk.sti ˈsev.ənθ/', 'id' => 'Keenam puluh tujuh'],
+                                ['num' => '80th', 'words' => 'Eightieth', 'ipa' => '/ˈeɪ.ti.əθ/', 'id' => 'Kedelapan puluh'],
+                                ['num' => '90th', 'words' => 'Ninetieth', 'ipa' => '/ˈnaɪn.ti.əθ/', 'id' => 'Kesembilan puluh'],
+                                ['num' => '99th', 'words' => 'Ninety-ninth', 'ipa' => '/ˌnaɪn.ti ˈnaɪnθ/', 'id' => 'Kesembilan puluh sembilan'],
+                                ['num' => '100th', 'words' => 'One hundredth', 'ipa' => '/wʌn ˈhʌn.drədθ/', 'id' => 'Keseratus'],
+                                ['num' => '101st', 'words' => 'One hundred (and) first', 'ipa' => '/wʌn ˈhʌn.drəd fɜːst/', 'id' => 'Keseratus satu'],
+                                ['num' => '111th', 'words' => 'One hundred (and) eleventh', 'ipa' => '/wʌn ˈhʌn.drəd ɪˈlev.ənθ/', 'id' => 'Keseratus sebelas'],
+                                ['num' => '587th', 'words' => 'Five hundred eighty-seventh', 'ipa' => '/faɪv ˈhʌn.drəd ˌeɪ.ti ˈsev.ənθ/', 'id' => 'Kelima ratus delapan puluh tujuh'],
+                                ['num' => '893rd', 'words' => 'Eight hundred ninety-third', 'ipa' => '/eɪt ˈhʌn.drəd ˌnaɪn.ti ˈθɜːd/', 'id' => 'Kedelapan ratus sembilan puluh tiga'],
+                                ['num' => '999th', 'words' => 'Nine hundred ninety-ninth', 'ipa' => '/naɪn ˈhʌn.drəd ˌnaɪn.ti ˈnaɪnθ/', 'id' => 'Kesembilan ratus sembilan puluh sembilan'],
+                                ['num' => '1,000th', 'words' => 'One thousandth', 'ipa' => '/wʌn ˈθaʊ.zəndθ/', 'id' => 'Keseribu'],
+                                ['num' => '1,004th', 'words' => 'One thousand fourth', 'ipa' => '/wʌn ˈθaʊ.zənd fɔːθ/', 'id' => 'Keseribu empat'],
+                                ['num' => '2,015th', 'words' => 'Two thousand fifteenth', 'ipa' => '/tuː ˈθaʊ.zənd ˌfɪfˈtiːnθ/', 'id' => 'Kedua ribu lima belas'],
+                                ['num' => '4,083rd', 'words' => 'Four thousand eighty-third', 'ipa' => '/fɔːr ˈθaʊ.zənd ˌeɪ.ti ˈθɜːd/', 'id' => 'Keempat ribu delapan puluh tiga'],
+                                ['num' => '1,000,000th', 'words' => 'One millionth', 'ipa' => '/wʌn ˈmɪl.jənθ/', 'id' => 'Kesatu juta'],
+                            ],
+                            'ordinal_rules' => [
+                                ['rule' => 'Ending in 1, 2, 3', 'desc' => 'Gunakan akhiran: 1st (First), 2nd (Second), 3rd (Third), KECUALI 11th, 12th, 13th.'],
+                                ['rule' => 'General Suffix -th', 'desc' => 'Semua angka lainnya diakhiri dengan -th: 4th (fourth), 5th (fifth), 10th (tenth), 100th (hundredth).'],
+                                ['rule' => 'Numbers Ending in -ty', 'desc' => 'Ubah "-ty" menjadi "-tieth": twenty -> twentieth (20th), thirty -> thirtieth (30th).'],
+                                ['rule' => 'Compound Ordinals', 'desc' => 'Pada angka puluhan/ratusan majemuk, hanya angka terakhir yang menjadi ordinal: 21st = twenty-first (bukan twentieth-first).'],
+                            ],
+                            'usage_examples' => [
+                                ['context' => 'Rankings / Peringkat', 'en' => 'He won first place in the speech competition.', 'id' => 'Dia meraih juara pertama dalam kompetisi pidato.'],
+                                ['context' => 'Floors / Tingkat Lantai', 'en' => 'Our office is located on the third floor.', 'id' => 'Kantor kami terletak di lantai tiga.'],
+                                ['context' => 'Centuries / Abad', 'en' => 'We live in the twenty-first century.', 'id' => 'Kita hidup di abad kedua puluh satu.'],
                             ]
                         ],
-                    ],
-                    'spelling_rules' => [
-                        ['label' => 'Ask for Spelling', 'pattern' => 'How do you spell your [name / job / city]?', 'example' => 'How do you spell your first name? -> It is J-O-H-N.'],
-                        ['label' => 'Clarify & Confirm', 'pattern' => 'Could you spell that please? / Did you say [Letter] or [Letter]?', 'example' => 'Did you say B as in Baker, or V as in Vet?'],
-                        ['label' => 'Double Letters', 'pattern' => 'Double [Letter]', 'example' => 'H-A-I-R-D-R-E-Double S-E-R (Hairdresser).'],
-                    ],
-                    'jobs_group_a' => [
-                        ['job' => 'actor', 'ipa' => '/ˈæk.tər/', 'id' => 'Aktor / Pemeran film/teater', 'definition' => 'A person who performs in plays, movies, or television shows.'],
-                        ['job' => 'carpenter', 'ipa' => '/ˈkɑː.pɪn.tər/', 'id' => 'Tukang kayu', 'definition' => 'A person whose job is making and repairing wooden objects and structures.'],
-                        ['job' => 'dentist', 'ipa' => '/ˈden.tɪst/', 'id' => 'Dokter gigi', 'definition' => 'A person qualified to treat diseases and conditions that affect the teeth and gums.'],
-                        ['job' => 'hairdresser', 'ipa' => '/ˈheəˌdres.ər/', 'id' => 'Penata rambut', 'definition' => 'A person who cuts, washes, colors, and styles people\'s hair.'],
-                        ['job' => 'vet', 'ipa' => '/vet/', 'id' => 'Dokter hewan (veterinarian)', 'definition' => 'A doctor who specializes in treating sick and injured animals.'],
-                        ['job' => 'baker', 'ipa' => '/ˈbeɪ.kər/', 'id' => 'Pembuat / Penjual roti', 'definition' => 'A person who bakes and sells bread, cakes, and pastries.'],
-                        ['job' => 'chef', 'ipa' => '/ʃef/', 'id' => 'Koki profesional', 'definition' => 'A skilled and trained professional cook who works in a restaurant or hotel.'],
-                        ['job' => 'doctor', 'ipa' => '/ˈdɒk.tər/', 'id' => 'Dokter', 'definition' => 'A person with medical qualification who treats people who are sick or injured.'],
-                        ['job' => 'librarian', 'ipa' => '/laɪˈbreə.ri.ən/', 'id' => 'Pustakawan', 'definition' => 'A person who works in or is in charge of a library.'],
-                        ['job' => 'waiter', 'ipa' => '/ˈweɪ.tər/', 'id' => 'Pelayan pria restoran', 'definition' => 'A person whose job is serving food and drinks to customers in a restaurant.'],
-                        ['job' => 'butcher', 'ipa' => '/ˈbʊtʃ.ər/', 'id' => 'Tukang daging', 'definition' => 'A person who cuts up, prepares, and sells meat in a shop.'],
-                    ],
-                    'jobs_group_b' => [
-                        ['job' => 'architect', 'ipa' => '/ˈɑː.kɪ.tekt/', 'id' => 'Arsitek', 'definition' => 'A person who designs buildings and oversees their construction.'],
-                        ['job' => 'farmer', 'ipa' => '/ˈfɑː.mər/', 'id' => 'Petani / Peternak', 'definition' => 'A person who owns or manages a farm and produces crops or raises livestock.'],
-                        ['job' => 'miner', 'ipa' => '/ˈmaɪ.nər/', 'id' => 'Penambang', 'definition' => 'A person who works underground extracting coal, gold, or other minerals.'],
-                        ['job' => 'pilot', 'ipa' => '/ˈpaɪ.lət/', 'id' => 'Pilot pesawat', 'definition' => 'A person who is licensed to fly aircraft such as airplanes or helicopters.'],
-                        ['job' => 'secretary', 'ipa' => '/ˈsek.rə.tər.i/', 'id' => 'Sekretaris kantor', 'definition' => 'A person employed in an office to assist with letters, appointments, and records.'],
-                        ['job' => 'barber', 'ipa' => '/ˈbɑː.bər/', 'id' => 'Pemangkas rambut pria', 'definition' => 'A person whose job is shaving men\'s beards and cutting men\'s hair.'],
-                        ['job' => 'journalist', 'ipa' => '/ˈdʒɜː.nə.lɪst/', 'id' => 'Wartawan / Jurnalis', 'definition' => 'A person who writes for newspapers, magazines, or broadcasts news on TV/radio.'],
-                        ['job' => 'nurse', 'ipa' => '/nɜːs/', 'id' => 'Perawat medis', 'definition' => 'A person trained to care for the sick or infirm, especially in a hospital.'],
-                        ['job' => 'salesman', 'ipa' => '/ˈseɪlz.mən/', 'id' => 'Pramuniaga / Penjual', 'definition' => 'A person whose job is selling goods or services in a store or to clients.'],
-                        ['job' => 'traffic warden', 'ipa' => '/ˈtræf.ɪk ˌwɔː.dən/', 'id' => 'Petugas pengatur lalu lintas & parkir', 'definition' => 'An official who checks that vehicles are not parked illegally and directs traffic.'],
-                        ['job' => 'dustman', 'ipa' => '/ˈdʌst.mən/', 'id' => 'Petugas kebersihan / Pengangkut sampah', 'definition' => 'A person employed by a local council to collect domestic refuse and rubbish.'],
-                    ],
-                    'clue_templates' => [
-                        'A person who...' => 'A person who treats sick animals (Vet)',
-                        'Someone whose job is...' => 'Someone whose job is cutting and selling meat (Butcher)',
-                        'They work in a...' => 'They work in a library and help people find books (Librarian)',
-                    ]
-                ],
-                'listening' => [
-                    'title' => 'Short Listening: Conference Registration & Spelling Names',
-                    'audio_script' => "Receptionist: Good morning! Welcome to the Global Careers Conference. May I have your full name, please?\n\nAttendee: Good morning! My name is Alexander Wright.\n\nReceptionist: Could you spell your last name for me, Mr. Wright?\n\nAttendee: Sure! It's W. R. I. G. H. T.\n\nReceptionist: Thank you. And what is your current occupation?\n\nAttendee: I work as an architect for a design firm in London.\n\nReceptionist: Wonderful. Let me print your conference badge: Alexander Wright, Architect. Here is your pass. Enjoy the event!\n\nAttendee: Thank you very much!",
-                    'key_phrases' => [
-                        'May I have your full name, please?',
-                        'Could you spell your last name for me? It\'s W. R. I. G. H. T.',
-                        'What is your current occupation? I work as an architect.',
-                        'Here is your conference pass. Enjoy the event!',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the attendee\'s last name?',
-                            'options' => [
-                                'Wright',
-                                'White',
-                                'Walker',
-                                'Wood',
+                                                'listening' => [
+                            'title' => 'Short Listening: Podium Ceremony at the International Public Speaking Championship',
+                            'audio_script' => "Mr. Christopher: Welcome, Putri! First of all, congratulations on reaching the grand finale of our Global Youth Oratory Championship!
+Putri: Thank you so much, Mr. Christopher! It is a great honor to represent Indonesia here in London.
+Mr. Christopher: Your speech on climate innovation was truly outstanding. I am delighted to announce that you won 2nd place in the global competition!
+Putri: Wow, the second place! That is unbelievable! Who won the first place?
+Mr. Christopher: Marcus from Canada took the 1st prize, you achieved the 2nd prize, and Elena from Spain secured the 3rd prize.
+Putri: That is fantastic! This is our academy's 10th anniversary, so this silver trophy is a memorable gift for our team.
+Mr. Christopher: You should be very proud, Putri. We look forward to seeing you in the 21st annual conference next year!",
+                            'key_phrases' => [
+                                'Congratulations on reaching the grand finale!',
+                                'I am delighted to announce that you won 2nd place.',
+                                'Marcus took the 1st prize, you achieved the 2nd prize, and Elena secured the 3rd prize.',
+                                'This is our academy\'s 10th anniversary.',
                             ],
-                            'answer' => 'Wright',
-                        ],
-                        [
-                            'q' => 'How is the last name spelled by the attendee?',
-                            'options' => [
-                                'W. R. I. G. H. T.',
-                                'W. I. G. H. T.',
-                                'R. I. G. H. T.',
-                                'W. R. I. T. E.',
+                            'questions' => [
+                                [
+                                    'q' => 'What prize did Putri win in the global championship?',
+                                    'options' => [
+                                        '2nd place (Second prize)',
+                                        '1st place (First prize)',
+                                        '3rd place (Third prize)',
+                                        '4th place (Fourth prize)',
+                                    ],
+                                    'answer' => '2nd place (Second prize)',
+                                ],
+                                [
+                                    'q' => 'Who won the 1st prize in the competition?',
+                                    'options' => [
+                                        'Marcus from Canada',
+                                        'Elena from Spain',
+                                        'Putri from Indonesia',
+                                        'Mr. Christopher',
+                                    ],
+                                    'answer' => 'Marcus from Canada',
+                                ],
+                                [
+                                    'q' => 'What milestone anniversary is Putri\'s academy celebrating?',
+                                    'options' => [
+                                        '10th anniversary',
+                                        '21st anniversary',
+                                        '2nd anniversary',
+                                        '50th anniversary',
+                                    ],
+                                    'answer' => '10th anniversary',
+                                ],
                             ],
-                            'answer' => 'W. R. I. G. H. T.',
                         ],
-                        [
-                            'q' => 'What is Alexander\'s current occupation?',
-                            'options' => [
-                                'Architect',
-                                'Journalist',
-                                'Doctor',
-                                'Dentist',
+'drilling1' => [
+                            ['en' => 'She won first place in the national marathon yesterday.', 'id' => 'Dia meraih juara pertama dalam maraton nasional kemarin.'],
+                            ['en' => 'Our new classroom is on the fifth floor of the building.', 'id' => 'Ruang kelas baru kami ada di lantai lima gedung tersebut.'],
+                            ['en' => 'Today is our company\'s twenty-fifth anniversary.', 'id' => 'Hari ini adalah hari jadi ke-25 perusahaan kami.'],
+                            ['en' => 'This is the third time I have visited this museum.', 'id' => 'Ini adalah ketiga kalinya saya mengunjungi museum ini.'],
+                            ['en' => 'We are living in the twenty-first century.', 'id' => 'Kita hidup di abad kedua puluh satu.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'Excuse me, is the library on the second floor or the fourth floor?', 'id' => 'Permisi, apakah perpustakaan ada di lantai dua atau lantai empat?'],
+                            ['en' => 'Who was the second person to arrive at the conference?', 'id' => 'Siapa orang kedua yang tiba di konferensi?'],
+                            ['en' => 'He finished in eighth place out of thirty competitors.', 'id' => 'Dia menyelesaikan lomba di peringkat kedelapan dari tiga puluh peserta.'],
+                            ['en' => 'Take the elevator to the seventeenth floor.', 'id' => 'Naiklah lift ke lantai tujuh belas.'],
+                            ['en' => 'This is my first time speaking English with a native speaker.', 'id' => 'Ini pertama kalinya saya berbicara bahasa Inggris dengan penutur asli.'],
+                        ],
+                        'grammar_note' => "Always use the definite article 'the' before ordinal numbers (e.g., 'the first floor', 'the 21st century', 'the third person').",
+                        'dialogue_setting' => 'Dua peserta berdiskusi tentang lokasi ruangan di gedung bertingkat dan posisi peringkat kompetisi.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Excuse me, do you know where the main seminar room is?',
+                                'id' => 'Permisi, apakah kamu tahu di mana ruang seminar utama berada?',
                             ],
-                            'answer' => 'Architect',
-                        ],
-                    ],
-                ],
-                'drilling1' => [
-                    ['en' => 'Good morning! Welcome to our English Course.', 'id' => 'Selamat pagi! Selamat datang di Kursus Bahasa Inggris kami.'],
-                    ['en' => 'Could you state your full name and spell your surname for registration?', 'id' => 'Bisakah Anda menyebutkan nama lengkap dan mengeja nama belakang Anda untuk pendaftaran?'],
-                    ['en' => 'Good morning! My name is Student B. My surname is spelled [spell your surname].', 'id' => 'Selamat pagi! Nama saya Student B. Nama belakang saya dieja [eja nama anda].'],
-                    ['en' => 'What is your current profession or occupation? I work as an architect.', 'id' => 'Apa profesi atau pekerjaan Anda saat ini? Saya bekerja sebagai seorang arsitek.'],
-                    ['en' => 'How do you spell architect? It is A. R. C. H. I. T. E. C. T.', 'id' => 'Bagaimana Anda mengeja arsitek? Yaitu A. R. C. H. I. T. E. C. T.'],
-                    ['en' => 'An architect is a person who designs modern buildings and homes.', 'id' => 'Seorang arsitek adalah seseorang yang merancang bangunan dan rumah modern.'],
-                ],
-                'drilling2' => [
-                    ['en' => 'Good afternoon! Welcome to the Grand Hotel.', 'id' => 'Selamat siang! Selamat datang di Grand Hotel.'],
-                    ['en' => 'Could you please spell your surname for check-in?', 'id' => 'Bisakah Anda mengeja nama keluarga Anda untuk check-in?'],
-                    ['en' => 'Good afternoon! My name is Student A. My surname is spelled [spell your surname].', 'id' => 'Selamat siang! Nama saya Student A. Nama keluarga saya dieja [eja nama anda].'],
-                    ['en' => 'May I also know your current occupation and email address?', 'id' => 'Boleh saya tahu profesi Anda saat ini dan alamat email Anda?'],
-                    ['en' => 'I work as a journalist for a news magazine. A journalist reports news.', 'id' => 'Saya bekerja sebagai jurnalis untuk majalah berita. Seorang jurnalis melaporkan berita.'],
-                    ['en' => 'How do you spell journalist? It is J. O. U. R. N. A. L. I. S. T.', 'id' => 'Bagaimana Anda mengeja jurnalis? Yaitu J. O. U. R. N. A. L. I. S. T.'],
-                ],
-                'grammar_note' => 'Rumus Percakapan Partnering: "Could you please spell your [name/surname]?" & "A [Job] is a person who + [Verb-s]..."',
-                'dialogue_setting' => 'Praktek Berpasangan 2 Ronde (Roleplay & Switch Roles): Ronde 1 di Front Desk Kursus Bahasa Inggris, lalu bertukar peran di Ronde 2 saat Check-in Hotel Internasional.',
-                'dialogue' => [
-                    // --- RONDE 1: FRONT DESK KURSUS BAHASA INGGRIS ---
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Front Desk Officer',
-                        'section_badge' => 'Ronde 1: Pendaftaran Kursus Bahasa Inggris (Student A: Resepsionis | Student B: Siswa Baru)',
-                        'en' => 'Good morning! Welcome to our English Course. Could you state your full name and spell your surname for registration?',
-                        'id' => 'Selamat pagi! Selamat datang di Kursus Bahasa Inggris kami. Bisakah Anda menyebutkan nama lengkap dan mengeja nama belakang Anda untuk pendaftaran?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'New Student',
-                        'en' => 'Good morning! My name is Student B. My surname is spelled [spell your surname].',
-                        'id' => 'Selamat pagi! Nama saya Student B. Nama belakang saya dieja [eja nama anda].',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Front Desk Officer',
-                        'en' => 'Thank you, Student B! What is your current profession or occupation?',
-                        'id' => 'Terima kasih, Student B! Apa profesi atau pekerjaan Anda saat ini?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'New Student',
-                        'en' => 'I work as an architect. An architect is a person who designs modern buildings and homes.',
-                        'id' => 'Saya bekerja sebagai seorang arsitek. Seorang arsitek adalah seseorang yang merancang bangunan dan rumah modern.',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Front Desk Officer',
-                        'en' => 'How do you spell architect? Is it A. R. C. H. I. T. E. C. T.?',
-                        'id' => 'Bagaimana Anda mengeja arsitek? Apakah A. R. C. H. I. T. E. C. T.?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'New Student',
-                        'en' => 'Yes, exactly! A. R. C. H. I. T. E. C. T. That is right!',
-                        'id' => 'Ya, tepat sekali! A. R. C. H. I. T. E. C. T. Itu benar!',
-                    ],
-
-                    // --- RONDE 2: TUKAR PERAN (SWITCH ROLES) - CHECK-IN HOTEL INTERNASIONAL ---
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Hotel Receptionist',
-                        'section_badge' => 'Ronde 2: Tukar Peran - Check-In Hotel Internasional (Student B: Resepsionis Hotel | Student A: Tamu Hotel)',
-                        'en' => 'Good afternoon! Welcome to the Grand Hotel. Could you please spell your surname for check-in?',
-                        'id' => 'Selamat siang! Selamat datang di Grand Hotel. Bisakah Anda mengeja nama keluarga Anda untuk check-in?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Hotel Guest',
-                        'en' => 'Good afternoon! My name is Student A. My surname is spelled [spell your surname].',
-                        'id' => 'Selamat siang! Nama saya Student A. Nama keluarga saya dieja [eja nama anda].',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Hotel Receptionist',
-                        'en' => 'Thank you, Student A! May I also know your current occupation and email address?',
-                        'id' => 'Terima kasih, Student A! Boleh saya tahu profesi Anda saat ini dan alamat email Anda?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Hotel Guest',
-                        'en' => 'Sure! I work as a journalist for a news magazine. A journalist is a person who reports news.',
-                        'id' => 'Tentu! Saya bekerja sebagai jurnalis untuk majalah berita. Seorang jurnalis adalah seseorang yang melaporkan berita.',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Hotel Receptionist',
-                        'en' => 'How do you spell journalist? Did you say J. O. U. R. N. A. L. I. S. T.?',
-                        'id' => 'Bagaimana Anda mengeja jurnalis? Apakah Anda mengatakan J. O. U. R. N. A. L. I. S. T.?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Hotel Guest',
-                        'en' => 'Yes, that is correct! J. O. U. R. N. A. L. I. S. T. Thank you!',
-                        'id' => 'Ya, itu benar! J. O. U. R. N. A. L. I. S. T. Terima kasih!',
-                    ],
-                ],
-                'questions_part_a' => [
-                    'Bisa tolong eja nama lengkap dan nama panggilanmu huruf demi huruf?',
-                    'Apa pekerjaan atau profesi impianmu di masa depan?',
-                    'Menurutmu, mengapa mengeja nama secara akurat sangat penting saat wawancara kerja atau pendaftaran resmi?',
-                    'Bagaimana cara membedakan pengucapan huruf B dan V, atau G dan J dalam bahasa Inggris?',
-                    'Jika kamu bekerja sebagai seorang jurnalis internasional, topik apa yang paling ingin kamu liput?',
-                    'Sebutkan 3 profesi di sekitarmu dan jelaskan apa tugas utama mereka menggunakan rumus "A person who..."!',
-                    'Menurutmu, profesi mana yang paling menantang: pilot, dokter, arsitek, atau penambang (miner)?',
-                    'Bagaimana cara mengeja kata "ARCHITECT" dan "SECRETARY" dengan benar?',
-                ],
-                'questions_part_b' => [
-                    'Mengapa seorang chef profesional harus memiliki disiplin dan keterampilan tinggi di dapur?',
-                    'Pernahkah kamu harus mengeja nama atau alamat emailmu kepada orang asing atau customer service berbahasa Inggris?',
-                    'Keahlian apa yang paling dibutuhkan oleh seorang tukang kayu modern (carpenter) saat ini?',
-                    'Menurutmu, apakah peran seorang pustakawan (librarian) masih sangat dibutuhkan di era digital saat ini?',
-                    'Sebutkan 3 huruf dalam abjad Inggris yang pengucapannya paling sering membingungkan bagi pembelajar pemula!',
-                    'Profesi apa yang menurutmu memiliki dampak paling besar bagi masyarakat?',
-                    'Bagaimana caramu menjelaskan pekerjaan seorang "dentist" dan "veterinarian" dalam bahasa Inggris?',
-                    'Jika kamu bisa bertukar peran pekerjaan selama satu hari dengan seorang pilot, ke negara mana kamu ingin terbang?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Professions, Spelling & Career Aspirations',
-                'impromptu' => [
-                    'Mengapa kemampuan mengeja nama dan istilah secara tepat (spelling) sangat penting dalam komunikasi profesional internasional?',
-                    'Jelaskan peran penting seorang arsitek (architect) dalam membangun kota masa depan yang ramah lingkungan!',
-                    'Bagaimana perkembangan teknologi kecerdasan buatan (AI) akan memengaruhi profesi seperti jurnalis, sekretaris, dan penerjemah?',
-                    'Ceritakan pengalamanmu saat harus berinteraksi dengan dokter atau dokter gigi, dan bagaimana mereka menjelaskan kondisi kesehatanmu!',
-                    'Jika kamu mendirikan perusahaan sendiri, profesi atau staf apa yang pertama kali akan kamu rekrut dan mengapa?',
-                    'Bagaimana profesi sektor pelayanan publik seperti traffic warden dan dustman berkontribusi pada keteraturan kehidupan perkotaan?',
-                    'Pilihlah salah satu dari 22 profesi pada game hari ini dan deskripsikan rutinitas kerja sehari-penuhnya dari pagi hingga malam!',
-                    'Apa saran terbaik yang akan kamu berikan kepada seseorang yang sedang bingung memilih jalur karir masa depannya?',
-                ],
-                'games' => [
-                    'title' => 'Zoom Speaking Game: Half a Crossword (Jobs and Occupations - Group A & Group B)',
-                    'type' => 'half_a_crossword',
-                    'participation_type' => 'pair',
-                    'activity' => 'Pair work / Group work: Speaking & Guessing',
-                    'aim' => 'To complete the crossword puzzle by describing and asking for missing job words without saying the target words.',
-                    'grammar_functions' => 'Relative clauses: "A person who + [Verb]...", "What\'s [number] across/down?", Spelling words letter by letter.',
-                    'vocabulary' => '22 Jobs: actor, carpenter, dentist, hairdresser, vet, baker, chef, doctor, librarian, waiter, butcher, architect, farmer, miner, pilot, secretary, barber, journalist, nurse, salesman, traffic warden, dustman.',
-                    'time' => '20 to 25 minutes',
-                    'drilling_game' => [
-                        [
-                            'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
-                            'en' => "What is 3 across?",
-                            'id' => "Apa nomor 3 mendatar?",
-                        ],
-                        [
-                            'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
-                            'en' => "3 across is farmer.",
-                            'id' => "3 mendatar adalah farmer.",
-                        ],
-                        [
-                            'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
-                            'en' => "How do you spell it?",
-                            'id' => "Bagaimana Anda mengejanya?",
-                        ],
-                        [
-                            'category' => '1. Giliran Tanya Jawab (Pemain A Bertanya ke Pemain B)',
-                            'en' => "It is F. A. R. M. E. R.",
-                            'id' => "Yaitu F. A. R. M. E. R.",
-                        ],
-                        [
-                            'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
-                            'en' => "What is 8 down?",
-                            'id' => "Apa nomor 8 menurun?",
-                        ],
-                        [
-                            'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
-                            'en' => "8 down is waiter.",
-                            'id' => "8 menurun adalah waiter.",
-                        ],
-                        [
-                            'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
-                            'en' => "How do you spell it?",
-                            'id' => "Bagaimana Anda mengejanya?",
-                        ],
-                        [
-                            'category' => '2. Giliran Tanya Jawab (Pemain B Bertanya ke Pemain A)',
-                            'en' => "It is W. A. I. T. E. R.",
-                            'id' => "Yaitu W. A. I. T. E. R.",
-                        ],
-                        [
-                            'category' => '3. Contoh Percakapan Lengkap (Pemain B Bertanya ke Pemain A)',
-                            'en' => "What is 4 across? 4 across is actor. How do you spell it? It is A. C. T. O. R.",
-                            'id' => "Apa nomor 4 mendatar? 4 mendatar adalah actor. Bagaimana mengejanya? Yaitu A. C. T. O. R.",
-                        ],
-                        [
-                            'category' => '3. Contoh Percakapan Lengkap (Pemain A Bertanya ke Pemain B)',
-                            'en' => "What is 14 down? 14 down is architect. How do you spell it? It is A. R. C. H. I. T. E. C. T.",
-                            'id' => "Apa nomor 14 menurun? 14 menurun adalah architect. Bagaimana mengejanya? Yaitu A. R. C. H. I. T. E. C. T.",
-                        ],
-                    ],
-                    'group_a_image' => '/images/speaking/worksheet2/group_a_crossword.png',
-                    'group_b_image' => '/images/speaking/worksheet2/group_b_crossword.png',
-                    'group_a_words' => ['actor', 'carpenter', 'dentist', 'hairdresser', 'vet', 'baker', 'chef', 'doctor', 'librarian', 'waiter', 'butcher'],
-                    'group_b_words' => ['architect', 'farmer', 'miner', 'pilot', 'secretary', 'barber', 'journalist', 'nurse', 'salesman', 'traffic warden', 'dustman'],
-                    'group_a_missing' => [
-                        ['id' => '3A', 'number' => '3 Across', 'question' => 'What is 3 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 3 across', 'target_word' => 'FARMER', 'letters' => ['F', 'A', 'R', 'M', 'E', 'R'], 'answer_preview' => '3 across is farmer. F - A - R - M - E - R.'],
-                        ['id' => '2D', 'number' => '2 Down', 'question' => 'What is 2 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 2 down', 'target_word' => 'SECRETARY', 'letters' => ['S', 'E', 'C', 'R', 'E', 'T', 'A', 'R', 'Y'], 'answer_preview' => '2 down is secretary. S - E - C - R - E - T - A - R - Y.'],
-                        ['id' => '5D', 'number' => '5 Down', 'question' => 'What is 5 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 5 down', 'target_word' => 'JOURNALIST', 'letters' => ['J', 'O', 'U', 'R', 'N', 'A', 'L', 'I', 'S', 'T'], 'answer_preview' => '5 down is journalist. J - O - U - R - N - A - L - I - S - T.'],
-                        ['id' => '9A', 'number' => '9 Across', 'question' => 'What is 9 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 9 across', 'target_word' => 'SALESMAN', 'letters' => ['S', 'A', 'L', 'E', 'S', 'M', 'A', 'N'], 'answer_preview' => '9 across is salesman. S - A - L - E - S - M - A - N.'],
-                        ['id' => '11A', 'number' => '11 Across', 'question' => 'What is 11 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 11 across', 'target_word' => 'PILOT', 'letters' => ['P', 'I', 'L', 'O', 'T'], 'answer_preview' => '11 across is pilot. P - I - L - O - T.'],
-                        ['id' => '12A', 'number' => '12 Across', 'question' => 'What is 12 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 12 across', 'target_word' => 'BARBER', 'letters' => ['B', 'A', 'R', 'B', 'E', 'R'], 'answer_preview' => '12 across is barber. B - A - R - B - E - R.'],
-                        ['id' => '13A', 'number' => '13 Across', 'question' => 'What is 13 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 13 across', 'target_word' => 'TRAFFIC WARDEN', 'letters' => ['T', 'R', 'A', 'F', 'F', 'I', 'C', ' ', 'W', 'A', 'R', 'D', 'E', 'N'], 'answer_preview' => '13 across is traffic warden. T - R - A - F - F - I - C   W - A - R - D - E - N.'],
-                        ['id' => '14D', 'number' => '14 Down', 'question' => 'What is 14 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 14 down', 'target_word' => 'ARCHITECT', 'letters' => ['A', 'R', 'C', 'H', 'I', 'T', 'E', 'C', 'T'], 'answer_preview' => '14 down is architect. A - R - C - H - I - T - E - C - T.'],
-                        ['id' => '15D', 'number' => '15 Down', 'question' => 'What is 15 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 15 down', 'target_word' => 'DUSTMAN', 'letters' => ['D', 'U', 'S', 'T', 'M', 'A', 'N'], 'answer_preview' => '15 down is dustman. D - U - S - T - M - A - N.'],
-                        ['id' => '16D', 'number' => '16 Down', 'question' => 'What is 16 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 16 down', 'target_word' => 'NURSE', 'letters' => ['N', 'U', 'R', 'S', 'E'], 'answer_preview' => '16 down is nurse. N - U - R - S - E.'],
-                        ['id' => '19A', 'number' => '19 Across', 'question' => 'What is 19 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group B untuk mengisi kotak kosong no. 19 across', 'target_word' => 'MINER', 'letters' => ['M', 'I', 'N', 'E', 'R'], 'answer_preview' => '19 across is miner. M - I - N - E - R.'],
-                    ],
-                    'group_b_missing' => [
-                        ['id' => '4A', 'number' => '4 Across', 'question' => 'What is 4 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 4 across', 'target_word' => 'ACTOR', 'letters' => ['A', 'C', 'T', 'O', 'R'], 'answer_preview' => '4 across is actor. A - C - T - O - R.'],
-                        ['id' => '20A', 'number' => '20 Across', 'question' => 'What is 20 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 20 across', 'target_word' => 'CARPENTER', 'letters' => ['C', 'A', 'R', 'P', 'E', 'N', 'T', 'E', 'R'], 'answer_preview' => '20 across is carpenter. C - A - R - P - E - N - T - E - R.'],
-                        ['id' => '18A', 'number' => '18 Across', 'question' => 'What is 18 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 18 across', 'target_word' => 'DENTIST', 'letters' => ['D', 'E', 'N', 'T', 'I', 'S', 'T'], 'answer_preview' => '18 across is dentist. D - E - N - T - I - S - T.'],
-                        ['id' => '1D', 'number' => '1 Down', 'question' => 'What is 1 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 1 down', 'target_word' => 'HAIRDRESSER', 'letters' => ['H', 'A', 'I', 'R', 'D', 'R', 'E', 'S', 'S', 'E', 'R'], 'answer_preview' => '1 down is hairdresser. H - A - I - R - D - R - E - S - S - E - R.'],
-                        ['id' => '6A', 'number' => '6 Across', 'question' => 'What is 6 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 6 across', 'target_word' => 'VET', 'letters' => ['V', 'E', 'T'], 'answer_preview' => '6 across is vet. V - E - T.'],
-                        ['id' => '7D', 'number' => '7 Down', 'question' => 'What is 7 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 7 down', 'target_word' => 'BAKER', 'letters' => ['B', 'A', 'K', 'E', 'R'], 'answer_preview' => '7 down is baker. B - A - K - E - R.'],
-                        ['id' => '12D', 'number' => '12 Down', 'question' => 'What is 12 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 12 down', 'target_word' => 'CHEF', 'letters' => ['C', 'H', 'E', 'F'], 'answer_preview' => '12 down is chef. C - H - E - F.'],
-                        ['id' => '17A', 'number' => '17 Across', 'question' => 'What is 17 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 17 across', 'target_word' => 'DOCTOR', 'letters' => ['D', 'O', 'C', 'T', 'O', 'R'], 'answer_preview' => '17 across is doctor. D - O - C - T - O - R.'],
-                        ['id' => '10D', 'number' => '10 Down', 'question' => 'What is 10 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 10 down', 'target_word' => 'LIBRARIAN', 'letters' => ['L', 'I', 'B', 'R', 'A', 'R', 'I', 'A', 'N'], 'answer_preview' => '10 down is librarian. L - I - B - R - A - R - I - A - N.'],
-                        ['id' => '8D', 'number' => '8 Down', 'question' => 'What is 8 down? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 8 down', 'target_word' => 'WAITER', 'letters' => ['W', 'A', 'I', 'T', 'E', 'R'], 'answer_preview' => '8 down is waiter. W - A - I - T - E - R.'],
-                        ['id' => '21A', 'number' => '21 Across', 'question' => 'What is 21 across? How do you spell it?', 'id_q' => 'Tanyakan ke Group A untuk mengisi kotak kosong no. 21 across', 'target_word' => 'BUTCHER', 'letters' => ['B', 'U', 'T', 'C', 'H', 'E', 'R'], 'answer_preview' => '21 across is butcher. B - U - T - C - H - E - R.'],
-                    ],
-                    'words' => [
-                        '1D' => ['id' => '1D', 'num' => 1, 'dir' => 'down', 'label' => '1 Down', 'cells' => ['0_8', '1_8', '2_8', '3_8', '4_8', '5_8', '6_8', '7_8', '8_8', '9_8', '10_8']],
-                        '2D' => ['id' => '2D', 'num' => 2, 'dir' => 'down', 'label' => '2 Down', 'cells' => ['0_11', '1_11', '2_11', '3_11', '4_11', '5_11', '6_11', '7_11', '8_11']],
-                        '3A' => ['id' => '3A', 'num' => 3, 'dir' => 'across', 'label' => '3 Across', 'cells' => ['1_7', '1_8', '1_9', '1_10', '1_11', '1_12']],
-                        '4A' => ['id' => '4A', 'num' => 4, 'dir' => 'across', 'label' => '4 Across', 'cells' => ['3_4', '3_5', '3_6', '3_7', '3_8']],
-                        '5D' => ['id' => '5D', 'num' => 5, 'dir' => 'down', 'label' => '5 Down', 'cells' => ['2_1', '3_1', '4_1', '5_1', '6_1', '7_1', '8_1', '9_1', '10_1', '11_1']],
-                        '6A' => ['id' => '6A', 'num' => 6, 'dir' => 'across', 'label' => '6 Across', 'cells' => ['4_10', '4_11', '4_12']],
-                        '7D' => ['id' => '7D', 'num' => 7, 'dir' => 'down', 'label' => '7 Down', 'cells' => ['5_6', '6_6', '7_6', '8_6', '9_6']],
-                        '8D' => ['id' => '8D', 'num' => 8, 'dir' => 'down', 'label' => '8 Down', 'cells' => ['5_16', '6_16', '7_16', '8_16', '9_16', '10_16']],
-                        '9A' => ['id' => '9A', 'num' => 9, 'dir' => 'across', 'label' => '9 Across', 'cells' => ['6_5', '6_6', '6_7', '6_8', '6_9', '6_10', '6_11', '6_12']],
-                        '10D' => ['id' => '10D', 'num' => 10, 'dir' => 'down', 'label' => '10 Down', 'cells' => ['5_3', '6_3', '7_3', '8_3', '9_3', '10_3', '11_3', '12_3', '13_3']],
-                        '11A' => ['id' => '11A', 'num' => 11, 'dir' => 'across', 'label' => '11 Across', 'cells' => ['7_15', '7_16', '7_17', '7_18', '7_19']],
-                        '12A' => ['id' => '12A', 'num' => 12, 'dir' => 'across', 'label' => '12 Across', 'cells' => ['7_0', '7_1', '7_2', '7_3', '7_4', '7_5']],
-                        '13A' => ['id' => '13A', 'num' => 13, 'dir' => 'across', 'label' => '13 Across', 'cells' => ['10_7', '10_8', '10_9', '10_10', '10_11', '10_12', '10_13', '10_14', '10_15', '10_16', '10_17', '10_18', '10_19']],
-                        '14D' => ['id' => '14D', 'num' => 14, 'dir' => 'down', 'label' => '14 Down', 'cells' => ['10_9', '11_9', '12_9', '13_9', '14_9', '15_9', '16_9', '17_9', '18_9']],
-                        '15D' => ['id' => '15D', 'num' => 15, 'dir' => 'down', 'label' => '15 Down', 'cells' => ['10_17', '11_17', '12_17', '13_17', '14_17', '15_17', '16_17']],
-                        '16D' => ['id' => '16D', 'num' => 16, 'dir' => 'down', 'label' => '16 Down', 'cells' => ['10_19', '11_19', '12_19', '13_19', '14_19']],
-                        '17A' => ['id' => '17A', 'num' => 17, 'dir' => 'across', 'label' => '17 Across', 'cells' => ['12_7', '12_8', '12_9', '12_10', '12_11', '12_12']],
-                        '18A' => ['id' => '18A', 'num' => 18, 'dir' => 'across', 'label' => '18 Across', 'cells' => ['13_14', '13_15', '13_16', '13_17', '13_18', '13_19', '13_20']],
-                        '19A' => ['id' => '19A', 'num' => 19, 'dir' => 'across', 'label' => '19 Across', 'cells' => ['14_8', '14_9', '14_10', '14_11', '14_12']],
-                        '20A' => ['id' => '20A', 'num' => 20, 'dir' => 'across', 'label' => '20 Across', 'cells' => ['16_5', '16_6', '16_7', '16_8', '16_9', '16_10', '16_11', '16_12', '16_13']],
-                        '12D' => ['id' => '12D', 'num' => 12, 'dir' => 'down', 'label' => '12 Down', 'cells' => ['16_5', '17_5', '18_5', '19_5']],
-                        '21A' => ['id' => '21A', 'num' => 21, 'dir' => 'across', 'label' => '21 Across', 'cells' => ['18_7', '18_8', '18_9', '18_10', '18_11', '18_12', '18_13']],
-                    ],
-                    'grid_rows' => 20,
-                    'grid_cols' => 21,
-                    'grid_cells' => [
-                        '0_11' => ['r' => 0, 'c' => 11, 'char' => 'S', 'num' => 2, 'groups' => ['B']],
-                        '0_8' => ['r' => 0, 'c' => 8, 'char' => 'H', 'num' => 1, 'groups' => ['A']],
-                        '10_1' => ['r' => 10, 'c' => 1, 'char' => 'S', 'num' => null, 'groups' => ['B']],
-                        '10_10' => ['r' => 10, 'c' => 10, 'char' => 'F', 'num' => null, 'groups' => ['B']],
-                        '10_11' => ['r' => 10, 'c' => 11, 'char' => 'F', 'num' => null, 'groups' => ['B']],
-                        '10_12' => ['r' => 10, 'c' => 12, 'char' => 'I', 'num' => null, 'groups' => ['B']],
-                        '10_13' => ['r' => 10, 'c' => 13, 'char' => 'C', 'num' => null, 'groups' => ['B']],
-                        '10_14' => ['r' => 10, 'c' => 14, 'char' => 'W', 'num' => null, 'groups' => ['B']],
-                        '10_15' => ['r' => 10, 'c' => 15, 'char' => 'A', 'num' => null, 'groups' => ['B']],
-                        '10_16' => ['r' => 10, 'c' => 16, 'char' => 'R', 'num' => null, 'groups' => ['A', 'B']],
-                        '10_17' => ['r' => 10, 'c' => 17, 'char' => 'D', 'num' => 15, 'groups' => ['B']],
-                        '10_18' => ['r' => 10, 'c' => 18, 'char' => 'E', 'num' => null, 'groups' => ['B']],
-                        '10_19' => ['r' => 10, 'c' => 19, 'char' => 'N', 'num' => 16, 'groups' => ['B']],
-                        '10_3' => ['r' => 10, 'c' => 3, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '10_7' => ['r' => 10, 'c' => 7, 'char' => 'T', 'num' => 13, 'groups' => ['B']],
-                        '10_8' => ['r' => 10, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A', 'B']],
-                        '10_9' => ['r' => 10, 'c' => 9, 'char' => 'A', 'num' => 14, 'groups' => ['B']],
-                        '11_1' => ['r' => 11, 'c' => 1, 'char' => 'T', 'num' => null, 'groups' => ['B']],
-                        '11_17' => ['r' => 11, 'c' => 17, 'char' => 'U', 'num' => null, 'groups' => ['B']],
-                        '11_19' => ['r' => 11, 'c' => 19, 'char' => 'U', 'num' => null, 'groups' => ['B']],
-                        '11_3' => ['r' => 11, 'c' => 3, 'char' => 'I', 'num' => null, 'groups' => ['A']],
-                        '11_9' => ['r' => 11, 'c' => 9, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '12_10' => ['r' => 12, 'c' => 10, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '12_11' => ['r' => 12, 'c' => 11, 'char' => 'O', 'num' => null, 'groups' => ['A']],
-                        '12_12' => ['r' => 12, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '12_17' => ['r' => 12, 'c' => 17, 'char' => 'S', 'num' => null, 'groups' => ['B']],
-                        '12_19' => ['r' => 12, 'c' => 19, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '12_3' => ['r' => 12, 'c' => 3, 'char' => 'A', 'num' => null, 'groups' => ['A']],
-                        '12_7' => ['r' => 12, 'c' => 7, 'char' => 'D', 'num' => 17, 'groups' => ['A']],
-                        '12_8' => ['r' => 12, 'c' => 8, 'char' => 'O', 'num' => null, 'groups' => ['A']],
-                        '12_9' => ['r' => 12, 'c' => 9, 'char' => 'C', 'num' => null, 'groups' => ['B', 'A']],
-                        '13_14' => ['r' => 13, 'c' => 14, 'char' => 'D', 'num' => 18, 'groups' => ['A']],
-                        '13_15' => ['r' => 13, 'c' => 15, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '13_16' => ['r' => 13, 'c' => 16, 'char' => 'N', 'num' => null, 'groups' => ['A']],
-                        '13_17' => ['r' => 13, 'c' => 17, 'char' => 'T', 'num' => null, 'groups' => ['B', 'A']],
-                        '13_18' => ['r' => 13, 'c' => 18, 'char' => 'I', 'num' => null, 'groups' => ['A']],
-                        '13_19' => ['r' => 13, 'c' => 19, 'char' => 'S', 'num' => null, 'groups' => ['B', 'A']],
-                        '13_20' => ['r' => 13, 'c' => 20, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '13_3' => ['r' => 13, 'c' => 3, 'char' => 'N', 'num' => null, 'groups' => ['A']],
-                        '13_9' => ['r' => 13, 'c' => 9, 'char' => 'H', 'num' => null, 'groups' => ['B']],
-                        '14_10' => ['r' => 14, 'c' => 10, 'char' => 'N', 'num' => null, 'groups' => ['B']],
-                        '14_11' => ['r' => 14, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B']],
-                        '14_12' => ['r' => 14, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '14_17' => ['r' => 14, 'c' => 17, 'char' => 'M', 'num' => null, 'groups' => ['B']],
-                        '14_19' => ['r' => 14, 'c' => 19, 'char' => 'E', 'num' => null, 'groups' => ['B']],
-                        '14_8' => ['r' => 14, 'c' => 8, 'char' => 'M', 'num' => 19, 'groups' => ['B']],
-                        '14_9' => ['r' => 14, 'c' => 9, 'char' => 'I', 'num' => null, 'groups' => ['B']],
-                        '15_17' => ['r' => 15, 'c' => 17, 'char' => 'A', 'num' => null, 'groups' => ['B']],
-                        '15_9' => ['r' => 15, 'c' => 9, 'char' => 'T', 'num' => null, 'groups' => ['B']],
-                        '16_10' => ['r' => 16, 'c' => 10, 'char' => 'N', 'num' => null, 'groups' => ['A']],
-                        '16_11' => ['r' => 16, 'c' => 11, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '16_12' => ['r' => 16, 'c' => 12, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '16_13' => ['r' => 16, 'c' => 13, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '16_17' => ['r' => 16, 'c' => 17, 'char' => 'N', 'num' => null, 'groups' => ['B']],
-                        '16_5' => ['r' => 16, 'c' => 5, 'char' => 'C', 'num' => 20, 'groups' => ['A']],
-                        '16_6' => ['r' => 16, 'c' => 6, 'char' => 'A', 'num' => null, 'groups' => ['A']],
-                        '16_7' => ['r' => 16, 'c' => 7, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '16_8' => ['r' => 16, 'c' => 8, 'char' => 'P', 'num' => null, 'groups' => ['A']],
-                        '16_9' => ['r' => 16, 'c' => 9, 'char' => 'E', 'num' => null, 'groups' => ['B', 'A']],
-                        '17_5' => ['r' => 17, 'c' => 5, 'char' => 'H', 'num' => null, 'groups' => ['A']],
-                        '17_9' => ['r' => 17, 'c' => 9, 'char' => 'C', 'num' => null, 'groups' => ['B']],
-                        '18_10' => ['r' => 18, 'c' => 10, 'char' => 'C', 'num' => null, 'groups' => ['A']],
-                        '18_11' => ['r' => 18, 'c' => 11, 'char' => 'H', 'num' => null, 'groups' => ['A']],
-                        '18_12' => ['r' => 18, 'c' => 12, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '18_13' => ['r' => 18, 'c' => 13, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '18_5' => ['r' => 18, 'c' => 5, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '18_7' => ['r' => 18, 'c' => 7, 'char' => 'B', 'num' => 21, 'groups' => ['A']],
-                        '18_8' => ['r' => 18, 'c' => 8, 'char' => 'U', 'num' => null, 'groups' => ['A']],
-                        '18_9' => ['r' => 18, 'c' => 9, 'char' => 'T', 'num' => null, 'groups' => ['B', 'A']],
-                        '19_5' => ['r' => 19, 'c' => 5, 'char' => 'F', 'num' => null, 'groups' => ['A']],
-                        '1_10' => ['r' => 1, 'c' => 10, 'char' => 'M', 'num' => null, 'groups' => ['B']],
-                        '1_11' => ['r' => 1, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B']],
-                        '1_12' => ['r' => 1, 'c' => 12, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '1_7' => ['r' => 1, 'c' => 7, 'char' => 'F', 'num' => 3, 'groups' => ['B']],
-                        '1_8' => ['r' => 1, 'c' => 8, 'char' => 'A', 'num' => null, 'groups' => ['A', 'B']],
-                        '1_9' => ['r' => 1, 'c' => 9, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '2_1' => ['r' => 2, 'c' => 1, 'char' => 'J', 'num' => 5, 'groups' => ['B']],
-                        '2_11' => ['r' => 2, 'c' => 11, 'char' => 'C', 'num' => null, 'groups' => ['B']],
-                        '2_8' => ['r' => 2, 'c' => 8, 'char' => 'I', 'num' => null, 'groups' => ['A']],
-                        '3_1' => ['r' => 3, 'c' => 1, 'char' => 'O', 'num' => null, 'groups' => ['B']],
-                        '3_11' => ['r' => 3, 'c' => 11, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '3_4' => ['r' => 3, 'c' => 4, 'char' => 'A', 'num' => 4, 'groups' => ['A']],
-                        '3_5' => ['r' => 3, 'c' => 5, 'char' => 'C', 'num' => null, 'groups' => ['A']],
-                        '3_6' => ['r' => 3, 'c' => 6, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '3_7' => ['r' => 3, 'c' => 7, 'char' => 'O', 'num' => null, 'groups' => ['A']],
-                        '3_8' => ['r' => 3, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '4_1' => ['r' => 4, 'c' => 1, 'char' => 'U', 'num' => null, 'groups' => ['B']],
-                        '4_10' => ['r' => 4, 'c' => 10, 'char' => 'V', 'num' => 6, 'groups' => ['A']],
-                        '4_11' => ['r' => 4, 'c' => 11, 'char' => 'E', 'num' => null, 'groups' => ['B', 'A']],
-                        '4_12' => ['r' => 4, 'c' => 12, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '4_8' => ['r' => 4, 'c' => 8, 'char' => 'D', 'num' => null, 'groups' => ['A']],
-                        '5_1' => ['r' => 5, 'c' => 1, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '5_11' => ['r' => 5, 'c' => 11, 'char' => 'T', 'num' => null, 'groups' => ['B']],
-                        '5_16' => ['r' => 5, 'c' => 16, 'char' => 'W', 'num' => 8, 'groups' => ['A']],
-                        '5_3' => ['r' => 5, 'c' => 3, 'char' => 'L', 'num' => 10, 'groups' => ['A']],
-                        '5_6' => ['r' => 5, 'c' => 6, 'char' => 'B', 'num' => 7, 'groups' => ['A']],
-                        '5_8' => ['r' => 5, 'c' => 8, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '6_1' => ['r' => 6, 'c' => 1, 'char' => 'N', 'num' => null, 'groups' => ['B']],
-                        '6_10' => ['r' => 6, 'c' => 10, 'char' => 'M', 'num' => null, 'groups' => ['B']],
-                        '6_11' => ['r' => 6, 'c' => 11, 'char' => 'A', 'num' => null, 'groups' => ['B']],
-                        '6_12' => ['r' => 6, 'c' => 12, 'char' => 'N', 'num' => null, 'groups' => ['B']],
-                        '6_16' => ['r' => 6, 'c' => 16, 'char' => 'A', 'num' => null, 'groups' => ['A']],
-                        '6_3' => ['r' => 6, 'c' => 3, 'char' => 'I', 'num' => null, 'groups' => ['A']],
-                        '6_5' => ['r' => 6, 'c' => 5, 'char' => 'S', 'num' => 9, 'groups' => ['B']],
-                        '6_6' => ['r' => 6, 'c' => 6, 'char' => 'A', 'num' => null, 'groups' => ['A', 'B']],
-                        '6_7' => ['r' => 6, 'c' => 7, 'char' => 'L', 'num' => null, 'groups' => ['B']],
-                        '6_8' => ['r' => 6, 'c' => 8, 'char' => 'E', 'num' => null, 'groups' => ['A', 'B']],
-                        '6_9' => ['r' => 6, 'c' => 9, 'char' => 'S', 'num' => null, 'groups' => ['B']],
-                        '7_0' => ['r' => 7, 'c' => 0, 'char' => 'B', 'num' => 12, 'groups' => ['B']],
-                        '7_1' => ['r' => 7, 'c' => 1, 'char' => 'A', 'num' => null, 'groups' => ['B']],
-                        '7_11' => ['r' => 7, 'c' => 11, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '7_15' => ['r' => 7, 'c' => 15, 'char' => 'P', 'num' => 11, 'groups' => ['B']],
-                        '7_16' => ['r' => 7, 'c' => 16, 'char' => 'I', 'num' => null, 'groups' => ['A', 'B']],
-                        '7_17' => ['r' => 7, 'c' => 17, 'char' => 'L', 'num' => null, 'groups' => ['B']],
-                        '7_18' => ['r' => 7, 'c' => 18, 'char' => 'O', 'num' => null, 'groups' => ['B']],
-                        '7_19' => ['r' => 7, 'c' => 19, 'char' => 'T', 'num' => null, 'groups' => ['B']],
-                        '7_2' => ['r' => 7, 'c' => 2, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '7_3' => ['r' => 7, 'c' => 3, 'char' => 'B', 'num' => null, 'groups' => ['A', 'B']],
-                        '7_4' => ['r' => 7, 'c' => 4, 'char' => 'E', 'num' => null, 'groups' => ['B']],
-                        '7_5' => ['r' => 7, 'c' => 5, 'char' => 'R', 'num' => null, 'groups' => ['B']],
-                        '7_6' => ['r' => 7, 'c' => 6, 'char' => 'K', 'num' => null, 'groups' => ['A']],
-                        '7_8' => ['r' => 7, 'c' => 8, 'char' => 'S', 'num' => null, 'groups' => ['A']],
-                        '8_1' => ['r' => 8, 'c' => 1, 'char' => 'L', 'num' => null, 'groups' => ['B']],
-                        '8_11' => ['r' => 8, 'c' => 11, 'char' => 'Y', 'num' => null, 'groups' => ['B']],
-                        '8_16' => ['r' => 8, 'c' => 16, 'char' => 'T', 'num' => null, 'groups' => ['A']],
-                        '8_3' => ['r' => 8, 'c' => 3, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '8_6' => ['r' => 8, 'c' => 6, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '8_8' => ['r' => 8, 'c' => 8, 'char' => 'S', 'num' => null, 'groups' => ['A']],
-                        '9_1' => ['r' => 9, 'c' => 1, 'char' => 'I', 'num' => null, 'groups' => ['B']],
-                        '9_16' => ['r' => 9, 'c' => 16, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                        '9_3' => ['r' => 9, 'c' => 3, 'char' => 'A', 'num' => null, 'groups' => ['A']],
-                        '9_6' => ['r' => 9, 'c' => 6, 'char' => 'R', 'num' => null, 'groups' => ['A']],
-                        '9_8' => ['r' => 9, 'c' => 8, 'char' => 'E', 'num' => null, 'groups' => ['A']],
-                    ],
-                    'cards' => [
-                        // Group A cards
-                        ['id' => 1, 'group' => 'A', 'number' => '4 Across', 'word' => 'ACTOR', 'badge' => 'Group A • 4 Across', 'definition' => 'A person who acts in plays, movies, or TV shows.', 'clue_prompt' => 'A person who performs in theater or films.', 'spelling' => 'A - C - T - O - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 2, 'group' => 'A', 'number' => '20 Across', 'word' => 'CARPENTER', 'badge' => 'Group A • 20 Across', 'definition' => 'A person who makes and repairs wooden objects and structures.', 'clue_prompt' => 'Someone who builds tables, chairs, and roofs with wood.', 'spelling' => 'C - A - R - P - E - N - T - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 3, 'group' => 'A', 'number' => '18 Across', 'word' => 'DENTIST', 'badge' => 'Group A • 18 Across', 'definition' => 'A person qualified to treat teeth and dental diseases.', 'clue_prompt' => 'A doctor who cleans and fixes your teeth.', 'spelling' => 'D - E - N - T - I - S - T', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 4, 'group' => 'A', 'number' => '1 Down', 'word' => 'HAIRDRESSER', 'badge' => 'Group A • 1 Down', 'definition' => 'A person who cuts, washes, colors, and styles hair.', 'clue_prompt' => 'Someone who styles and cuts people\'s hair in a salon.', 'spelling' => 'H - A - I - R - D - R - E - S - S - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 5, 'group' => 'A', 'number' => '6 Across', 'word' => 'VET', 'badge' => 'Group A • 6 Across', 'definition' => 'A doctor who specializes in treating sick and injured animals.', 'clue_prompt' => 'A medical doctor for pets, cats, dogs, and horses.', 'spelling' => 'V - E - T', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 6, 'group' => 'A', 'number' => '7 Down', 'word' => 'BAKER', 'badge' => 'Group A • 7 Down', 'definition' => 'A person who bakes and sells fresh bread, pastries, and cakes.', 'clue_prompt' => 'Someone who makes delicious bread in an oven.', 'spelling' => 'B - A - K - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 7, 'group' => 'A', 'number' => '12 Down', 'word' => 'CHEF', 'badge' => 'Group A • 12 Down', 'definition' => 'A professional cook in a restaurant kitchen.', 'clue_prompt' => 'A skilled master cook in a fine restaurant.', 'spelling' => 'C - H - E - F', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 8, 'group' => 'A', 'number' => '17 Across', 'word' => 'DOCTOR', 'badge' => 'Group A • 17 Across', 'definition' => 'A licensed medical professional who treats patients in a clinic.', 'clue_prompt' => 'A person in a white coat who cures sick people.', 'spelling' => 'D - O - C - T - O - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 9, 'group' => 'A', 'number' => '10 Down', 'word' => 'LIBRARIAN', 'badge' => 'Group A • 10 Down', 'definition' => 'A person in charge of books and resources in a library.', 'clue_prompt' => 'Someone who organizes books and helps you study quietly.', 'spelling' => 'L - I - B - R - A - R - I - A - N', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 10, 'group' => 'A', 'number' => '8 Down', 'word' => 'WAITER', 'badge' => 'Group A • 8 Down', 'definition' => 'A person who brings food and drinks to your table in a restaurant.', 'clue_prompt' => 'Someone who takes your food order and serves your meal.', 'spelling' => 'W - A - I - T - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-                        ['id' => 11, 'group' => 'A', 'number' => '21 Across', 'word' => 'BUTCHER', 'badge' => 'Group A • 21 Across', 'definition' => 'A person who cuts, prepares, and sells meat in a butcher shop.', 'clue_prompt' => 'Someone who sells fresh beef, chicken, and steaks.', 'spelling' => 'B - U - T - C - H - E - R', 'image' => '/images/speaking/worksheet2/group_a_crossword.png'],
-
-                        // Group B cards
-                        ['id' => 12, 'group' => 'B', 'number' => '14 Down', 'word' => 'ARCHITECT', 'badge' => 'Group B • 14 Down', 'definition' => 'A person who designs buildings and blueprints.', 'clue_prompt' => 'Someone who draws plans for houses, skyscrapers, and bridges.', 'spelling' => 'A - R - C - H - I - T - E - C - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 13, 'group' => 'B', 'number' => '3 Across', 'word' => 'FARMER', 'badge' => 'Group B • 3 Across', 'definition' => 'A person who owns or works on a farm growing crops and animals.', 'clue_prompt' => 'Someone who works in rice fields and raises cows/crops.', 'spelling' => 'F - A - R - M - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 14, 'group' => 'B', 'number' => '19 Across', 'word' => 'MINER', 'badge' => 'Group B • 19 Across', 'definition' => 'A person who works underground digging coal, gold, and minerals.', 'clue_prompt' => 'Someone who digs deep underground in a mine.', 'spelling' => 'M - I - N - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 15, 'group' => 'B', 'number' => '11 Across', 'word' => 'PILOT', 'badge' => 'Group B • 11 Across', 'definition' => 'A person qualified to fly airplanes or helicopters.', 'clue_prompt' => 'Someone who sits in the cockpit and flies passengers across the sky.', 'spelling' => 'P - I - L - O - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 16, 'group' => 'B', 'number' => '2 Down', 'word' => 'SECRETARY', 'badge' => 'Group B • 2 Down', 'definition' => 'An office worker who organizes appointments, calls, and files.', 'clue_prompt' => 'Someone who assists the manager with emails, schedules, and typing.', 'spelling' => 'S - E - C - R - E - T - A - R - Y', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 17, 'group' => 'B', 'number' => '12 Across', 'word' => 'BARBER', 'badge' => 'Group B • 12 Across', 'definition' => 'A person whose job is cutting men\'s hair and shaving beards.', 'clue_prompt' => 'Someone who trims men\'s hair, mustaches, and beards.', 'spelling' => 'B - A - R - B - E - R', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 18, 'group' => 'B', 'number' => '5 Down', 'word' => 'JOURNALIST', 'badge' => 'Group B • 5 Down', 'definition' => 'A person who reports news stories for newspapers, TV, or websites.', 'clue_prompt' => 'Someone who interviews people and writes news reports.', 'spelling' => 'J - O - U - R - N - A - L - I - S - T', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 19, 'group' => 'B', 'number' => '16 Down', 'word' => 'NURSE', 'badge' => 'Group B • 16 Down', 'definition' => 'A person trained to care for patients in a hospital alongside doctors.', 'clue_prompt' => 'Someone who gives medicine and takes care of sick people in hospital beds.', 'spelling' => 'N - U - R - S - E', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 20, 'group' => 'B', 'number' => '9 Across', 'word' => 'SALESMAN', 'badge' => 'Group B • 9 Across', 'definition' => 'A person whose job is selling products and helping customers.', 'clue_prompt' => 'Someone who offers products and convinces clients to buy them.', 'spelling' => 'S - A - L - E - S - M - A - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 21, 'group' => 'B', 'number' => '13 Across', 'word' => 'TRAFFIC WARDEN', 'badge' => 'Group B • 13 Across', 'definition' => 'An officer who controls parking rules and directs road traffic.', 'clue_prompt' => 'Someone in uniform who checks parking tickets and stops traffic.', 'spelling' => 'T - R - A - F - F - I - C   W - A - R - D - E - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                        ['id' => 22, 'group' => 'B', 'number' => '15 Down', 'word' => 'DUSTMAN', 'badge' => 'Group B • 15 Down', 'definition' => 'A person employed to collect household trash and garbage bins.', 'clue_prompt' => 'Someone who rides the garbage truck and empties household bins.', 'spelling' => 'D - U - S - T - M - A - N', 'image' => '/images/speaking/worksheet2/group_b_crossword.png'],
-                    ],
-                ],
-                'ai_interview' => [
-                    [
-                        'question' => "Hello! Welcome to Meeting 2: Alphabet and Occupations. Can you introduce yourself and spell your first name letter by letter?",
-                        'target' => "Perkenalkan diri dan eja nama depanmu huruf demi huruf (contoh: My name is Arthur, A-R-T-H-U-R).",
-                        'hint' => "Gunakan ejaan fonetik alfabet Inggris yang jelas!",
-                        'sample_answer' => "Hello! My name is Arthur, that is A-R-T-H-U-R. I am very excited to join this speaking lesson today."
-                    ],
-                    [
-                        'question' => "Wonderful! Now look at the English vowels. Can you pronounce the five vowel letters: A, E, I, O, and U?",
-                        'target' => "Lafalkan 5 huruf vokal bahasa Inggris: A (eɪ), E (i), I (aɪ), O (oʊ), dan U (ju).",
-                        'hint' => "Ingat: A = /eɪ/, E = /i/, I = /aɪ/, O = /oʊ/, U = /ju/.",
-                        'sample_answer' => "Sure! The five vowels are A /eɪ/, E /i/, I /aɪ/, O /oʊ/, and U /ju/."
-                    ],
-                    [
-                        'question' => "Great job! What is your current job or dream occupation, and what does someone in that job do every day?",
-                        'target' => "Ceritakan pekerjaan atau profesi impianmu dan apa tugas sehari-harinya.",
-                        'hint' => "Contoh: I am an architect / I want to be a pilot because I love flying.",
-                        'sample_answer' => "My dream job is to be an architect. An architect designs beautiful and safe modern buildings every day."
-                    ],
-                    [
-                        'question' => "Let's play a guessing game! I will give you a clue: 'A doctor who takes care of sick and injured animals.' What is this job, and how do you spell it?",
-                        'target' => "Tebak profesi dokter hewan (VET) dan eja katanya (V-E-T).",
-                        'hint' => "Jawab: That is a vet, spelled V-E-T!",
-                        'sample_answer' => "That is a vet! It is spelled V-E-T. A vet cures sick pets and animals."
-                    ],
-                    [
-                        'question' => "Excellent! Now it's your turn: please describe one job from our 22 vocabulary words without saying its name, and let me guess what it is!",
-                        'target' => "Berikan 1 petunjuk profesi (misal: 'A person who cuts and sells meat') tanpa menyebutkan nama pekerjaannya.",
-                        'hint' => "Gunakan pola: 'A person who works in / cuts / cooks...'",
-                        'sample_answer' => "Here is my clue: It is a person who bakes and sells delicious fresh bread and cakes in a bakery. What job is it?"
-                    ],
-                ]
-            ],
-            3 => [
-                'topic' => 'Telling Numbers & Dates',
-                'focus' => 'Cardinal & Ordinal Numbers (0 - 45 Billion+), Calendar Months, 7 Days of the Week, Reading Years (BC/AD), Date Formats, Prepositions IN & ON',
-                'materi' => [
-                    'cardinal_numbers' => [
-                        ['num' => '0', 'words' => 'Zero / Null / O', 'ipa' => '/ˈzɪə.rəʊ/', 'id' => 'Nol / Kosong'],
-                        ['num' => '1', 'words' => 'One', 'ipa' => '/wʌn/', 'id' => 'Satu'],
-                        ['num' => '2', 'words' => 'Two', 'ipa' => '/tuː/', 'id' => 'Dua'],
-                        ['num' => '3', 'words' => 'Three', 'ipa' => '/θriː/', 'id' => 'Tiga'],
-                        ['num' => '4', 'words' => 'Four', 'ipa' => '/fɔːr/', 'id' => 'Empat'],
-                        ['num' => '5', 'words' => 'Five', 'ipa' => '/faɪv/', 'id' => 'Lima'],
-                        ['num' => '6', 'words' => 'Six', 'ipa' => '/sɪks/', 'id' => 'Enam'],
-                        ['num' => '7', 'words' => 'Seven', 'ipa' => '/ˈsev.ən/', 'id' => 'Tujuh'],
-                        ['num' => '8', 'words' => 'Eight', 'ipa' => '/eɪt/', 'id' => 'Delapan'],
-                        ['num' => '9', 'words' => 'Nine', 'ipa' => '/naɪn/', 'id' => 'Sembilan'],
-                        ['num' => '10', 'words' => 'Ten', 'ipa' => '/ten/', 'id' => 'Sepuluh'],
-                        ['num' => '11', 'words' => 'Eleven', 'ipa' => '/ɪˈlev.ən/', 'id' => 'Sebelas'],
-                        ['num' => '12', 'words' => 'Twelve', 'ipa' => '/twelv/', 'id' => 'Dua belas'],
-                        ['num' => '13', 'words' => 'Thirteen', 'ipa' => '/θɜːˈtiːn/', 'id' => 'Tiga belas'],
-                        ['num' => '14', 'words' => 'Fourteen', 'ipa' => '/fɔːˈtiːn/', 'id' => 'Empat belas'],
-                        ['num' => '15', 'words' => 'Fifteen', 'ipa' => '/fɪfˈtiːn/', 'id' => 'Lima belas'],
-                        ['num' => '16', 'words' => 'Sixteen', 'ipa' => '/sɪkˈstiːn/', 'id' => 'Enam belas'],
-                        ['num' => '17', 'words' => 'Seventeen', 'ipa' => '/ˌsev.ənˈtiːn/', 'id' => 'Tujuh belas'],
-                        ['num' => '18', 'words' => 'Eighteen', 'ipa' => '/eɪˈtiːn/', 'id' => 'Delapan belas'],
-                        ['num' => '19', 'words' => 'Nineteen', 'ipa' => '/ˌnaɪnˈtiːn/', 'id' => 'Sembilan belas'],
-                        ['num' => '20', 'words' => 'Twenty', 'ipa' => '/ˈtwen.ti/', 'id' => 'Dua puluh'],
-                        ['num' => '21', 'words' => 'Twenty-one', 'ipa' => '/ˌtwen.ti ˈwʌn/', 'id' => 'Dua puluh satu'],
-                        ['num' => '22', 'words' => 'Twenty-two', 'ipa' => '/ˌtwen.ti ˈtuː/', 'id' => 'Dua puluh dua'],
-                        ['num' => '24', 'words' => 'Twenty-four', 'ipa' => '/ˌtwen.ti ˈfɔːr/', 'id' => 'Dua puluh empat'],
-                        ['num' => '25', 'words' => 'Twenty-five', 'ipa' => '/ˌtwen.ti ˈfaɪv/', 'id' => 'Dua puluh lima'],
-                        ['num' => '30', 'words' => 'Thirty', 'ipa' => '/ˈθɜː.ti/', 'id' => 'Tiga puluh'],
-                        ['num' => '40', 'words' => 'Forty', 'ipa' => '/ˈfɔː.ti/', 'id' => 'Empat puluh'],
-                        ['num' => '50', 'words' => 'Fifty', 'ipa' => '/ˈfɪf.ti/', 'id' => 'Lima puluh'],
-                        ['num' => '55', 'words' => 'Fifty-five', 'ipa' => '/ˌfɪf.ti ˈfaɪv/', 'id' => 'Lima puluh lima'],
-                        ['num' => '60', 'words' => 'Sixty', 'ipa' => '/ˈsɪk.sti/', 'id' => 'Enam puluh'],
-                        ['num' => '67', 'words' => 'Sixty-seven', 'ipa' => '/ˌsɪk.sti ˈsev.ən/', 'id' => 'Enam puluh tujuh'],
-                        ['num' => '80', 'words' => 'Eighty', 'ipa' => '/ˈeɪ.ti/', 'id' => 'Delapan puluh'],
-                        ['num' => '90', 'words' => 'Ninety', 'ipa' => '/ˈnaɪn.ti/', 'id' => 'Sembilan puluh'],
-                        ['num' => '99', 'words' => 'Ninety-nine', 'ipa' => '/ˌnaɪn.ti ˈnaɪn/', 'id' => 'Sembilan puluh sembilan'],
-                        ['num' => '100', 'words' => 'One hundred', 'ipa' => '/wʌn ˈhʌn.drəd/', 'id' => 'Seratus'],
-                        ['num' => '101', 'words' => 'One hundred (and) one', 'ipa' => '/wʌn ˈhʌn.drəd wʌn/', 'id' => 'Seratus satu'],
-                        ['num' => '104', 'words' => 'One hundred (and) four', 'ipa' => '/wʌn ˈhʌn.drəd fɔːr/', 'id' => 'Seratus empat'],
-                        ['num' => '111', 'words' => 'One hundred (and) eleven', 'ipa' => '/wʌn ˈhʌn.drəd ɪˈlev.ən/', 'id' => 'Seratus sebelas'],
-                        ['num' => '587', 'words' => 'Five hundred eighty-seven', 'ipa' => '/faɪv ˈhʌn.drəd ˌeɪ.ti ˈsev.ən/', 'id' => 'Lima ratus delapan puluh tujuh'],
-                        ['num' => '893', 'words' => 'Eight hundred ninety-three', 'ipa' => '/eɪt ˈhʌn.drəd ˌnaɪn.ti ˈθriː/', 'id' => 'Delapan ratus sembilan puluh tiga'],
-                        ['num' => '999', 'words' => 'Nine hundred ninety-nine', 'ipa' => '/naɪn ˈhʌn.drəd ˌnaɪn.ti ˈnaɪn/', 'id' => 'Sembilan ratus sembilan puluh sembilan'],
-                        ['num' => '1,000', 'words' => 'One thousand', 'ipa' => '/wʌn ˈθaʊ.zənd/', 'id' => 'Seribu'],
-                        ['num' => '1,004', 'words' => 'One thousand four', 'ipa' => '/wʌn ˈθaʊ.zənd fɔːr/', 'id' => 'Seribu empat'],
-                        ['num' => '2,015', 'words' => 'Two thousand fifteen', 'ipa' => '/tuː ˈθaʊ.zənd ˌfɪfˈtiːn/', 'id' => 'Dua ribu lima belas'],
-                        ['num' => '4,083', 'words' => 'Four thousand eighty-three', 'ipa' => '/fɔːr ˈθaʊ.zənd ˌeɪ.ti ˈθriː/', 'id' => 'Empat ribu delapan puluh tiga'],
-                        ['num' => '8,473', 'words' => 'Eight thousand four hundred seventy-three', 'ipa' => '/eɪt ˈθaʊ.zənd fɔːr ˈhʌn.drəd ˌsev.ən.ti ˈθriː/', 'id' => 'Delapan ribu empat ratus tujuh puluh tiga'],
-                        ['num' => '12,234', 'words' => 'Twelve thousand two hundred thirty-four', 'ipa' => '/twelv ˈθaʊ.zənd tuː ˈhʌn.drəd ˌθɜː.ti ˈfɔːr/', 'id' => 'Dua belas ribu dua ratus tiga puluh empat'],
-                        ['num' => '65,453', 'words' => 'Sixty-five thousand four hundred fifty-three', 'ipa' => '/ˌsɪk.sti faɪv ˈθaʊ.zənd fɔːr ˈhʌn.drəd ˌfɪf.ti ˈθriː/', 'id' => 'Enam puluh lima ribu empat ratus lima puluh tiga'],
-                        ['num' => '453,453', 'words' => 'Four hundred fifty-three thousand four hundred fifty-three', 'ipa' => '/fɔːr ˈhʌn.drəd ˌfɪf.ti θriː ˈθaʊ.zənd.../', 'id' => 'Empat ratus lima puluh tiga ribu empat ratus lima puluh tiga'],
-                        ['num' => '939,834', 'words' => 'Nine hundred thirty-nine thousand eight hundred thirty-four', 'ipa' => '/naɪn ˈhʌn.drəd ˌθɜː.ti naɪn ˈθaʊ.zənd.../', 'id' => 'Sembilan ratus tiga puluh sembilan ribu delapan ratus tiga puluh empat'],
-                        ['num' => '999,999', 'words' => 'Nine hundred ninety-nine thousand nine hundred ninety-nine', 'ipa' => '/naɪn ˈhʌn.drəd ˌnaɪn.ti naɪn ˈθaʊ.zənd.../', 'id' => 'Sembilan ratus sembilan puluh sembilan ribu sembilan ratus sembilan puluh sembilan'],
-                        ['num' => '1,000,000', 'words' => 'One million', 'ipa' => '/wʌn ˈmɪl.jən/', 'id' => 'Satu juta'],
-                        ['num' => '999,999,999', 'words' => 'Nine hundred ninety-nine million nine hundred ninety-nine thousand nine hundred ninety-nine', 'ipa' => '/.../', 'id' => 'Sembilan ratus sembilan puluh sembilan juta sembilan ratus sembilan puluh sembilan ribu sembilan ratus sembilan puluh sembilan'],
-                        ['num' => '1,000,000,000', 'words' => 'One billion', 'ipa' => '/wʌn ˈbɪl.jən/', 'id' => 'Satu miliar'],
-                        ['num' => '45,908,453,578', 'words' => 'Forty-five billion nine hundred eight million four hundred fifty-three thousand five hundred seventy-eight', 'ipa' => '/.../', 'id' => 'Empat puluh lima miliar sembilan ratus delapan juta empat ratus lima puluh tiga ribu lima ratus tujuh puluh delapan'],
-                    ],
-                    'ordinal_numbers' => [
-                        ['num' => '1st', 'words' => 'First', 'ipa' => '/fɜːst/', 'id' => 'Pertama / Kesatu'],
-                        ['num' => '2nd', 'words' => 'Second', 'ipa' => '/ˈsek.ənd/', 'id' => 'Kedua'],
-                        ['num' => '3rd', 'words' => 'Third', 'ipa' => '/θɜːd/', 'id' => 'Ketiga'],
-                        ['num' => '4th', 'words' => 'Fourth', 'ipa' => '/fɔːθ/', 'id' => 'Keempat'],
-                        ['num' => '5th', 'words' => 'Fifth', 'ipa' => '/fɪfθ/', 'id' => 'Kelima'],
-                        ['num' => '6th', 'words' => 'Sixth', 'ipa' => '/sɪksθ/', 'id' => 'Keenam'],
-                        ['num' => '7th', 'words' => 'Seventh', 'ipa' => '/ˈsev.ənθ/', 'id' => 'Ketujuh'],
-                        ['num' => '8th', 'words' => 'Eighth', 'ipa' => '/eɪtθ/', 'id' => 'Kedelapan'],
-                        ['num' => '9th', 'words' => 'Ninth', 'ipa' => '/naɪnθ/', 'id' => 'Kesembilan'],
-                        ['num' => '10th', 'words' => 'Tenth', 'ipa' => '/tenθ/', 'id' => 'Kesepuluh'],
-                        ['num' => '11th', 'words' => 'Eleventh', 'ipa' => '/ɪˈlev.ənθ/', 'id' => 'Kesebelas'],
-                        ['num' => '12th', 'words' => 'Twelfth', 'ipa' => '/twelfθ/', 'id' => 'Kedua belas'],
-                        ['num' => '13th', 'words' => 'Thirteenth', 'ipa' => '/θɜːˈtiːnθ/', 'id' => 'Ketiga belas'],
-                        ['num' => '14th', 'words' => 'Fourteenth', 'ipa' => '/fɔːˈtiːnθ/', 'id' => 'Keempat belas'],
-                        ['num' => '15th', 'words' => 'Fifteenth', 'ipa' => '/fɪfˈtiːnθ/', 'id' => 'Kelima belas'],
-                        ['num' => '16th', 'words' => 'Sixteenth', 'ipa' => '/sɪkˈstiːnθ/', 'id' => 'Keenam belas'],
-                        ['num' => '17th', 'words' => 'Seventeenth', 'ipa' => '/ˌsev.ənˈtiːnθ/', 'id' => 'Ketujuh belas'],
-                        ['num' => '18th', 'words' => 'Eighteenth', 'ipa' => '/eɪˈtiːnθ/', 'id' => 'Kedelapan belas'],
-                        ['num' => '19th', 'words' => 'Nineteenth', 'ipa' => '/ˌnaɪnˈtiːnθ/', 'id' => 'Kesembilan belas'],
-                        ['num' => '20th', 'words' => 'Twentieth', 'ipa' => '/ˈtwen.ti.əθ/', 'id' => 'Keduapuluh'],
-                        ['num' => '21st', 'words' => 'Twenty-first', 'ipa' => '/ˌtwen.ti ˈfɜːst/', 'id' => 'Kedua puluh satu'],
-                        ['num' => '22nd', 'words' => 'Twenty-second', 'ipa' => '/ˌtwen.ti ˈsek.ənd/', 'id' => 'Kedua puluh dua'],
-                        ['num' => '23rd', 'words' => 'Twenty-third', 'ipa' => '/ˌtwen.ti ˈθɜːd/', 'id' => 'Kedua puluh tiga'],
-                        ['num' => '24th', 'words' => 'Twenty-fourth', 'ipa' => '/ˌtwen.ti ˈfɔːθ/', 'id' => 'Kedua puluh empat'],
-                        ['num' => '25th', 'words' => 'Twenty-fifth', 'ipa' => '/ˌtwen.ti ˈfɪfθ/', 'id' => 'Kedua puluh lima'],
-                        ['num' => '30th', 'words' => 'Thirtieth', 'ipa' => '/ˈθɜː.ti.əθ/', 'id' => 'Ketiga puluh'],
-                        ['num' => '40th', 'words' => 'Fortieth', 'ipa' => '/ˈfɔː.ti.əθ/', 'id' => 'Keempat puluh'],
-                        ['num' => '50th', 'words' => 'Fiftieth', 'ipa' => '/ˈfɪf.ti.əθ/', 'id' => 'Kelima puluh'],
-                        ['num' => '55th', 'words' => 'Fifty-fifth', 'ipa' => '/ˌfɪf.ti ˈfɪfθ/', 'id' => 'Kelima puluh lima'],
-                        ['num' => '60th', 'words' => 'Sixtieth', 'ipa' => '/ˈsɪk.sti.əθ/', 'id' => 'Keenam puluh'],
-                        ['num' => '67th', 'words' => 'Sixty-seventh', 'ipa' => '/ˌsɪk.sti ˈsev.ənθ/', 'id' => 'Keenam puluh tujuh'],
-                        ['num' => '80th', 'words' => 'Eightieth', 'ipa' => '/ˈeɪ.ti.əθ/', 'id' => 'Kedelapan puluh'],
-                        ['num' => '90th', 'words' => 'Ninetieth', 'ipa' => '/ˈnaɪn.ti.əθ/', 'id' => 'Kesembilan puluh'],
-                        ['num' => '99th', 'words' => 'Ninety-ninth', 'ipa' => '/ˌnaɪn.ti ˈnaɪnθ/', 'id' => 'Kesembilan puluh sembilan'],
-                        ['num' => '100th', 'words' => 'One hundredth', 'ipa' => '/wʌn ˈhʌn.drədθ/', 'id' => 'Keseratus'],
-                        ['num' => '101st', 'words' => 'One hundred (and) first', 'ipa' => '/wʌn ˈhʌn.drəd fɜːst/', 'id' => 'Keseratus satu'],
-                        ['num' => '111th', 'words' => 'One hundred (and) eleventh', 'ipa' => '/wʌn ˈhʌn.drəd ɪˈlev.ənθ/', 'id' => 'Keseratus sebelas'],
-                        ['num' => '587th', 'words' => 'Five hundred eighty-seventh', 'ipa' => '/faɪv ˈhʌn.drəd ˌeɪ.ti ˈsev.ənθ/', 'id' => 'Kelima ratus delapan puluh tujuh'],
-                        ['num' => '893rd', 'words' => 'Eight hundred ninety-third', 'ipa' => '/eɪt ˈhʌn.drəd ˌnaɪn.ti ˈθɜːd/', 'id' => 'Kedelapan ratus sembilan puluh tiga'],
-                        ['num' => '999th', 'words' => 'Nine hundred ninety-ninth', 'ipa' => '/naɪn ˈhʌn.drəd ˌnaɪn.ti ˈnaɪnθ/', 'id' => 'Kesembilan ratus sembilan puluh sembilan'],
-                        ['num' => '1,000th', 'words' => 'One thousandth', 'ipa' => '/wʌn ˈθaʊ.zəndθ/', 'id' => 'Keseribu'],
-                        ['num' => '1,004th', 'words' => 'One thousand fourth', 'ipa' => '/wʌn ˈθaʊ.zənd fɔːθ/', 'id' => 'Keseribu empat'],
-                        ['num' => '2,015th', 'words' => 'Two thousand fifteenth', 'ipa' => '/tuː ˈθaʊ.zənd ˌfɪfˈtiːnθ/', 'id' => 'Kedua ribu lima belas'],
-                        ['num' => '4,083rd', 'words' => 'Four thousand eighty-third', 'ipa' => '/fɔːr ˈθaʊ.zənd ˌeɪ.ti ˈθɜːd/', 'id' => 'Keempat ribu delapan puluh tiga'],
-                        ['num' => '1,000,000th', 'words' => 'One millionth', 'ipa' => '/wʌn ˈmɪl.jənθ/', 'id' => 'Kesatu juta'],
-                    ],
-                    'telling_date' => [
-                        'months' => [
-                            ['en' => 'January', 'id' => 'Januari', 'days' => '31 hari'],
-                            ['en' => 'February', 'id' => 'Februari', 'days' => '28/29 hari'],
-                            ['en' => 'March', 'id' => 'Maret', 'days' => '31 hari'],
-                            ['en' => 'April', 'id' => 'April', 'days' => '30 hari'],
-                            ['en' => 'May', 'id' => 'Mei', 'days' => '31 hari'],
-                            ['en' => 'June', 'id' => 'Juni', 'days' => '30 hari'],
-                            ['en' => 'July', 'id' => 'Juli', 'days' => '31 hari'],
-                            ['en' => 'August', 'id' => 'Agustus', 'days' => '31 hari'],
-                            ['en' => 'September', 'id' => 'September', 'days' => '30 hari'],
-                            ['en' => 'October', 'id' => 'Oktober', 'days' => '31 hari'],
-                            ['en' => 'November', 'id' => 'November', 'days' => '30 hari'],
-                            ['en' => 'December', 'id' => 'Desember', 'days' => '31 hari'],
-                        ],
-                        'days' => [
-                            ['en' => 'Sunday', 'id' => 'Minggu'],
-                            ['en' => 'Monday', 'id' => 'Senin'],
-                            ['en' => 'Tuesday', 'id' => 'Selasa'],
-                            ['en' => 'Wednesday', 'id' => 'Rabu'],
-                            ['en' => 'Thursday', 'id' => 'Kamis'],
-                            ['en' => 'Friday', 'id' => 'Jumat'],
-                            ['en' => 'Saturday', 'id' => 'Sabtu'],
-                        ],
-                        'years' => [
-                            ['year' => '1999', 'read' => 'Nineteen ninety-nine', 'rule' => 'Dibagi 2 bagian: 19 (nineteen) + 99 (ninety-nine)'],
-                            ['year' => '2000', 'read' => 'Two thousand', 'rule' => 'Dibaca ribuan genap'],
-                            ['year' => '2001', 'read' => 'Two thousand (and) one / Twenty oh-one', 'rule' => 'Two thousand one atau Twenty oh-one'],
-                            ['year' => '2015', 'read' => 'Twenty fifteen / Two thousand fifteen', 'rule' => 'Dibaca 20 (twenty) + 15 (fifteen)'],
-                            ['year' => '1827', 'read' => 'Eighteen twenty-seven', 'rule' => 'Dibaca 18 (eighteen) + 27 (twenty-seven)'],
-                        ],
-                        'eras' => [
-                            ['term' => 'BC (Before Christ)', 'id' => 'Sebelum Masehi', 'example' => '400 BC (400 Sebelum Masehi)'],
-                            ['term' => 'AD (Anno Domini)', 'id' => 'Setelah Masehi (Tahun Masehi)', 'example' => '1492 AD (Tahun 1492 Masehi)'],
-                        ],
-                        'date_formats' => [
-                            ['format' => 'British Format', 'pattern' => 'Day + Month + Year', 'example' => '29th January 1492 (The twenty-ninth of January, fourteen ninety-two)'],
-                            ['format' => 'American Format', 'pattern' => 'Month + Day + Year', 'example' => 'January 29th, 1492 (January twenty-ninth, fourteen ninety-two)'],
-                        ],
-                        'prepositions' => [
-                            ['prep' => 'IN', 'use_for' => 'Bulan & Tahun (Month, Year, Century, Seasons)', 'example' => 'in January, in 1999, in the morning, in the summer'],
-                            ['prep' => 'ON', 'use_for' => 'Hari & Tanggal Spesifik (Days & Specific Dates)', 'example' => 'on Monday, on the 29th of January, on my birthday'],
-                            ['prep' => 'AT', 'use_for' => 'Jam Spesifik & Waktu Tepat (Exact Clock Time & Moments)', 'example' => "at 4 o'clock, at 7:30 PM, at noon, at midnight"],
-                        ],
-                        'qna' => [
-                            ['q' => 'When is your birthday?', 'a' => 'My birthday is in January. / It is on the 29th of January.'],
-                            ['q' => 'What time does our class start?', 'a' => "Our class starts at a quarter past seven in the morning (07:15 AM)."],
-                            ['q' => 'What day is today?', 'a' => 'Today is Wednesday, the 3rd of September.'],
-                        ]
-                    ],
-                ],
-                'listening' => [
-                    'title' => 'Short Listening: International Conference Registration & Important Dates',
-                    'audio_script' => "Coordinator: Welcome to the Global Youth Summit! What is your full name and date of birth?
-
-Participant: Hello! My name is Maya Lin. I was born on the twenty-ninth of January, nineteen ninety-nine (29th January 1999).
-
-Coordinator: Perfect! The conference will take place from Monday, the third of October until Friday, the seventh of October, twenty twenty-four.
-
-Participant: Wonderful! How many participants have registered so far?
-
-Coordinator: We have four thousand five hundred participants registered from sixty-five different countries!
-
-Participant: That is incredible. Thank you so much for the information!",
-                    'key_phrases' => [
-                        'I was born on the twenty-ninth of January, nineteen ninety-nine.',
-                        'The conference takes place from Monday, the third of October.',
-                        'The summit runs until Friday, the seventh of October, twenty twenty-four.',
-                        'We have four thousand five hundred participants registered from sixty-five countries.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the participant\'s date of birth?',
-                            'options' => [
-                                'On the 29th of January, 1999',
-                                'On the 19th of January, 1999',
-                                'On the 29th of June, 1999',
-                                'On the 15th of October, 2024',
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'Yes! The main seminar room is on the fourth floor (4th floor), right next to the library.',
+                                'id' => 'Ya! Ruang seminar utama ada di lantai empat (4th floor), tepat di samping perpustakaan.',
                             ],
-                            'answer' => 'On the 29th of January, 1999',
-                        ],
-                        [
-                            'q' => 'On what day does the conference start?',
-                            'options' => [
-                                'On Monday, the 3rd of October',
-                                'On Friday, the 7th of October',
-                                'On Wednesday, the 5th of October',
-                                'On Sunday, the 2nd of October',
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Thank you! And did you hear who won the speaking contest?',
+                                'id' => 'Terima kasih! Dan apakah kamu mendengar siapa yang memenangkan kontes speaking?',
                             ],
-                            'answer' => 'On Monday, the 3rd of October',
-                        ],
-                        [
-                            'q' => 'In what year does the summit take place?',
-                            'options' => [
-                                'In twenty twenty-four (2024)',
-                                'In nineteen ninety-nine (1999)',
-                                'In twenty twenty-five (2025)',
-                                'In twenty twenty-two (2022)',
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'Yes! Our classmate David won first place (1st), and Maria came in second place (2nd)!',
+                                'id' => 'Ya! Teman sekelas kita David meraih juara pertama (1st), dan Maria menempati posisi kedua (2nd)!',
                             ],
-                            'answer' => 'In twenty twenty-four (2024)',
-                        ],
-                        [
-                            'q' => 'How many participants have registered from how many countries?',
-                            'options' => [
-                                '4,500 participants from 65 countries',
-                                '4,000 participants from 55 countries',
-                                '5,500 participants from 60 countries',
-                                '3,500 participants from 75 countries',
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'That is wonderful news! This is the second year in a row that our class won.',
+                                'id' => 'Itu kabar yang luar biasa! Ini tahun kedua berturut-turut kelas kita menang.',
                             ],
-                            'answer' => '4,500 participants from 65 countries',
+                        ],
+                        'games' => [
+                            [
+                                'title' => 'Speaking Activity: Championship Ranking, Building Floors & Milestones Challenge',
+                            'participation_type' => 'individual',
+                            'activity' => 'Whole class & pairwork: ranking articulation, building floors, ordinal survey',
+                            'aim' => 'To master the fluent pronunciation of ordinal suffixes (-st, -nd, -rd, -th), building floors, competition rankings, anniversaries, and century milestones.',
+                            'time' => '15 to 20 minutes',
+                            'cards' => [
+                                [
+                                    'id' => 1,
+                                    'num' => '1st',
+                                    'title' => 'Gold Medal Champion',
+                                    'badge' => '1st Place',
+                                    'category' => 'Championships',
+                                    'desc' => 'Finding out about first-place victories or top accomplishments',
+                                    'question' => 'What is something you or someone in your family has won first (1st) place in?',
+                                    'sample_answer' => 'I won first place in [a running race / a spelling bee / a school debate contest].',
+                                    'read' => 'First place (/fɜːst pleɪs/)',
+                                ],
+                                [
+                                    'id' => 2,
+                                    'num' => '2nd',
+                                    'title' => 'Silver Medalist Runner-Up',
+                                    'badge' => '2nd Place',
+                                    'category' => 'Championships',
+                                    'desc' => 'Discussing second-place finishes and close competitions',
+                                    'question' => 'Have you ever come in second (2nd) place in a match or competition? What was it?',
+                                    'sample_answer' => 'Yes, our team finished in second place in [the regional tournament / a science fair].',
+                                    'read' => 'Second place (/ˈsek.ənd pleɪs/)',
+                                ],
+                                [
+                                    'id' => 3,
+                                    'num' => '3rd',
+                                    'title' => 'Bronze Podium Finisher',
+                                    'badge' => '3rd Place',
+                                    'category' => 'Championships',
+                                    'desc' => 'Finding who has achieved 3rd place podium honors or 3rd favorite goal',
+                                    'question' => 'What is the third (3rd) goal or skill on your wishlist to master this year?',
+                                    'sample_answer' => 'My third goal for this year is [learning to speak fluent English / traveling abroad / getting a promotion].',
+                                    'read' => 'Third place (/θɜːd pleɪs/)',
+                                ],
+                                [
+                                    'id' => 4,
+                                    'num' => '4th Floor',
+                                    'title' => 'The 4th Floor Sky Library',
+                                    'badge' => '4th Floor',
+                                    'category' => 'Floors & Rooms',
+                                    'desc' => 'Asking about apartment, office, or university floor levels',
+                                    'question' => 'Which floor is your bedroom, office, or favorite study space located on?',
+                                    'sample_answer' => 'My bedroom is located on the [first / second / third / fourth] floor of the building.',
+                                    'read' => 'The fourth floor (/ðə fɔːθ flɔːr/)',
+                                ],
+                                [
+                                    'id' => 5,
+                                    'num' => '5th',
+                                    'title' => '5th Year Milestone',
+                                    'badge' => '5th Milestone',
+                                    'category' => 'Milestones',
+                                    'desc' => 'Celebrating a fifth anniversary or 5-year habit',
+                                    'question' => 'What is something you have been doing or practicing for your fifth (5th) year now?',
+                                    'sample_answer' => 'This is my fifth year [studying English / working at my company / living in this city].',
+                                    'read' => 'The fifth milestone (/ðə fɪfθ ˈmaɪl.stəʊn/)',
+                                ],
+                                [
+                                    'id' => 6,
+                                    'num' => '6th',
+                                    'title' => 'Sixth Day of the Week',
+                                    'badge' => '6th Day',
+                                    'category' => 'Days & Routine',
+                                    'desc' => 'Discussing weekend routine on the 6th day (Saturday)',
+                                    'question' => 'What do you usually do on Saturday, the sixth (6th) day of the week?',
+                                    'sample_answer' => 'On the sixth day of the week, I usually [exercise / hang out with friends / relax at home].',
+                                    'read' => 'The sixth day (/ðə sɪksθ deɪ/)',
+                                ],
+                                [
+                                    'id' => 7,
+                                    'num' => '7th',
+                                    'title' => 'The Seventh Month Plans',
+                                    'badge' => '7th Month',
+                                    'category' => 'Months & Seasons',
+                                    'desc' => 'Exploring schedules in the 7th month of the year (July)',
+                                    'question' => 'Which is the seventh (7th) month of the year, and what do you usually do then?',
+                                    'sample_answer' => 'The seventh month is July, and I usually [go on summer vacation / visit my grandparents].',
+                                    'read' => 'The seventh month (/ðə ˈsev.ənθ mʌnθ/)',
+                                ],
+                                [
+                                    'id' => 8,
+                                    'num' => '8th',
+                                    'title' => 'Eighth Place in the Race',
+                                    'badge' => '8th Position',
+                                    'category' => 'Rankings',
+                                    'desc' => 'Discussing rankings and race standings',
+                                    'question' => 'If forty people enter a running race, how would you feel finishing in eighth (8th) position?',
+                                    'sample_answer' => 'Finishing in eighth position is [a great achievement / a respectable finish in the top ten].',
+                                    'read' => 'Eighth position (/eɪtθ pəˈzɪʃ.ən/)',
+                                ],
+                                [
+                                    'id' => 9,
+                                    'num' => '10th',
+                                    'title' => '10th Decade Anniversary',
+                                    'badge' => '10th Milestone',
+                                    'category' => 'Milestones',
+                                    'desc' => 'Celebrating a 10th anniversary or decade goal',
+                                    'question' => 'Where do you imagine yourself on your tenth (10th) work or study anniversary?',
+                                    'sample_answer' => 'On my tenth anniversary, I hope to [lead an international project / manage my own company].',
+                                    'read' => 'The tenth anniversary (/ðə tenθ ˌæn.ɪˈvɜː.sər.i/)',
+                                ],
+                                [
+                                    'id' => 10,
+                                    'num' => '12th',
+                                    'title' => 'The 12th Floor Penthouse',
+                                    'badge' => '12th Floor',
+                                    'category' => 'Floors & Rooms',
+                                    'desc' => 'Navigating high-rise skyscrapers and elevator floors',
+                                    'question' => 'Have you ever taken an elevator to the twelfth (12th) floor or higher in a tall tower?',
+                                    'sample_answer' => 'Yes, I visited the twelfth floor of [a hotel / an office building] and the view was breathtaking.',
+                                    'read' => 'The twelfth floor (/ðə twelfθ flɔːr/)',
+                                ],
+                                [
+                                    'id' => 11,
+                                    'num' => '15th',
+                                    'title' => 'The 15th Day of the Month',
+                                    'badge' => '15th Date',
+                                    'category' => 'Dates & Routine',
+                                    'desc' => 'Discussing mid-month routines on the 15th',
+                                    'question' => 'What is your usual schedule or priority on the fifteenth (15th) day of each month?',
+                                    'sample_answer' => 'On the fifteenth of each month, I usually [evaluate my monthly targets / review my expenses].',
+                                    'read' => 'The fifteenth (/ðə ˌfɪfˈtiːnθ/)',
+                                ],
+                                [
+                                    'id' => 12,
+                                    'num' => '20th',
+                                    'title' => 'Twentieth Birthday Milestone',
+                                    'badge' => '20th Birthday',
+                                    'category' => 'Milestones',
+                                    'desc' => 'Remembering or anticipating a 20th birthday',
+                                    'question' => 'How did you (or how will you) celebrate your twentieth (20th) birthday?',
+                                    'sample_answer' => 'For my twentieth birthday, I [celebrated with my best friends / had a family dinner / traveled].',
+                                    'read' => 'The twentieth birthday (/ðə ˈtwen.ti.əθ ˈbɜːθ.deɪ/)',
+                                ],
+                                [
+                                    'id' => 13,
+                                    'num' => '21st',
+                                    'title' => '21st Century Innovation',
+                                    'badge' => '21st Century',
+                                    'category' => 'Centuries & Tech',
+                                    'desc' => 'Discussing the 21st century lifestyle and modern breakthroughs',
+                                    'question' => 'What is the most useful invention of the twenty-first (21st) century for you?',
+                                    'sample_answer' => 'In my opinion, [artificial intelligence / online learning platforms / smartphones] is the best 21st century invention.',
+                                    'read' => 'The twenty-first century (/ðə ˌtwen.ti ˈfɜːst ˈsen.tʃər.i/)',
+                                ],
+                                [
+                                    'id' => 14,
+                                    'num' => '100th',
+                                    'title' => 'The 100th Customer Surprise',
+                                    'badge' => '100th Customer',
+                                    'category' => 'Milestones',
+                                    'desc' => 'Discussing the 100th visitor or centenary celebration',
+                                    'question' => 'If a coffee shop made you their one hundredth (100th) visitor today, what free treat would you choose?',
+                                    'sample_answer' => 'If I were the one hundredth customer, I would order [a free caramel macchiato / a slice of cheesecake].',
+                                    'read' => 'The one hundredth customer (/ðə wʌn ˈhʌn.drədθ ˈkʌs.tə.mər/)',
+                                ],
+                            ],
+                            'report_examples' => [
+                                'In our class survey, three students have won first (1st) place in competitions.',
+                                'Most classmates in our group have their bedrooms on the first (1st) or second (2nd) floor.',
+                                'David was excited to take the elevator all the way to the twelfth (12th) floor.',
+                                'Every student in our class agreed that AI is the most helpful tool of the twenty-first (21st) century.'
+                            ],
+                            ],
+                            [
+                                'type' => 'who_was_first',
+                                'title' => 'Logic Puzzle: Who Was First? (100m Race Ordinal Logic Challenge)',
+                                'participation_type' => 'pair',
+                                'activity' => 'Interactive logic puzzle & pairwork deduction: ordering 8 race runners using ordinal clues',
+                                'aim' => 'To master expressing finishing positions (1st, 2nd, 3rd, 4th, 5th, 6th, 7th, 8th), relative position words (in front of, behind, after, before, between, next to), and fluent ordinal pronunciation.',
+                                'time' => '15 to 20 minutes',
+                                'function_practised' => 'Expressing order, finishing ranks, and deductive reasoning with ordinal numbers',
+                                'structures' => [
+                                    'question_first' => 'Who was first in the 100m race?',
+                                    'answer_first' => 'The runner in the stripy shirt finished first (1st).',
+                                    'question_last' => 'Who was last in the race?',
+                                    'answer_last' => 'The runner in the cat shirt finished last (8th).',
+                                    'question_rank' => 'Which position did the runner in the [spotted / lightning / white] shirt finish in?',
+                                    'answer_rank' => 'He finished in [second (2nd) / third (3rd) / fourth (4th)] place.',
+                                ],
+                                'assets' => [
+                                    'worksheet_color' => '/images/speaking/who_was_first/who_was_first_worksheet_color.png?v=color_20260925',
+                                    'solution_color' => '/images/speaking/who_was_first/who_was_first_solution_color.png?v=color_20260925',
+                                    'scan_bw' => '/images/speaking/who_was_first/who_was_first_scan_bw.png?v=color_20260925',
+                                ],
+                                'logic_steps' => [
+                                    [
+                                        'step' => 1,
+                                        'target' => '3rd Place (Lightning Bolt)',
+                                        'clue' => 'I came after the runner in the spotted shirt but I came before five other runners.',
+                                        'explanation_en' => 'There are 8 runners in total. If 5 runners are behind him, his rank is 8 - 5 = 3rd place! He came after Spotted, so Spotted is ahead of him.',
+                                        'explanation_id' => 'Total ada 8 pelari. Jika ada 5 pelari di belakangnya, posisinya pasti juara ke-3 (3rd place)! Karena ia berada di belakang pelari Spotted, maka Spotted berada di posisi ke-1 atau ke-2.',
+                                    ],
+                                    [
+                                        'step' => 2,
+                                        'target' => '1st Place (Stripy) & 2nd Place (Spotted)',
+                                        'clue' => 'Stripy: "I came in front of the runner in the spotted shirt." | Spotted: "I came behind the runner in the stripy shirt."',
+                                        'explanation_en' => 'Since Lightning is 3rd, the two spots in front of him (1st and 2nd) belong to Stripy and Spotted. Stripy came in front of Spotted, so Stripy is 1st and Spotted is 2nd!',
+                                        'explanation_id' => 'Karena Lightning di posisi ke-3, dua posisi di depannya (1st & 2nd) harus diisi Stripy dan Spotted. Stripy di depan Spotted, sehingga Stripy = Juara 1 (1st) dan Spotted = Juara 2 (2nd)!',
+                                    ],
+                                    [
+                                        'step' => 3,
+                                        'target' => '4th (White) & 5th (Black)',
+                                        'clue' => 'White: "I came before the runner in the black shirt." | Black: "I came in between the runner in the white shirt and the runner in the No.5 shirt."',
+                                        'explanation_en' => 'The order must be: White -> Black -> No.5. Since 1st to 3rd are taken, White is 4th, Black is 5th, and No.5 is 6th.',
+                                        'explanation_id' => 'Urutannya harus: White -> Black -> No.5. Karena juara 1-3 sudah terisi, maka White = Juara 4 (4th), Black = Juara 5 (5th), dan No.5 di posisi ke-6.',
+                                    ],
+                                    [
+                                        'step' => 4,
+                                        'target' => '6th (No. 5) & 7th (No. 10)',
+                                        'clue' => 'No. 5: "I came in next to the runner in the No.10 shirt. Our times were exactly the same."',
+                                        'explanation_en' => 'Runner No. 5 is tied/adjacent with Runner No. 10. Since No. 5 is 6th, No. 10 is 7th!',
+                                        'explanation_id' => 'Pelari No. 5 berdampingan dengan No. 10 dengan catatan waktu persis sama (tie). Karena No. 5 di posisi ke-6, maka No. 10 berada di posisi ke-7 (7th)!',
+                                    ],
+                                    [
+                                        'step' => 5,
+                                        'target' => '8th Place / Last (Cat)',
+                                        'clue' => 'No. 10: "I came before the runner in the cat shirt." | Cat: "I came behind the runner in the No.10 shirt."',
+                                        'explanation_en' => 'Cat came behind No. 10, placing him in 8th place (last).',
+                                        'explanation_id' => 'Pelari berkaos Cat berada tepat di belakang No. 10, sehingga menempati posisi ke-8 (8th / last)!',
+                                    ],
+                                ],
+                                'runners' => [
+                                    [
+                                        'id' => 1,
+                                        'shirt_name' => 'Stripy Shirt',
+                                        'pattern' => 'Vertical Black & White Stripes',
+                                        'clue' => 'I came in front of the runner in the spotted shirt.',
+                                        'rank' => 1,
+                                        'ordinal' => '1st',
+                                        'ordinal_word' => 'First',
+                                        'image' => '/images/speaking/who_was_first/runner_01_stripy.png?v=color_20260925',
+                                        'speech_clue' => 'I came in front of the runner in the spotted shirt.',
+                                    ],
+                                    [
+                                        'id' => 2,
+                                        'shirt_name' => 'Spotted Shirt',
+                                        'pattern' => 'White with Black Polka Dots',
+                                        'clue' => 'I came behind the runner in the stripy shirt.',
+                                        'rank' => 2,
+                                        'ordinal' => '2nd',
+                                        'ordinal_word' => 'Second',
+                                        'image' => '/images/speaking/who_was_first/runner_07_spotted.png?v=color_20260925',
+                                        'speech_clue' => 'I came behind the runner in the stripy shirt.',
+                                    ],
+                                    [
+                                        'id' => 3,
+                                        'shirt_name' => 'Lightning Bolt Shirt',
+                                        'pattern' => 'Black with Yellow Lightning Bolt',
+                                        'clue' => 'I came after the runner in the spotted shirt but I came before five other runners.',
+                                        'rank' => 3,
+                                        'ordinal' => '3rd',
+                                        'ordinal_word' => 'Third',
+                                        'image' => '/images/speaking/who_was_first/runner_04_lightning.png?v=color_20260925',
+                                        'speech_clue' => 'I came after the runner in the spotted shirt but I came before five other runners.',
+                                    ],
+                                    [
+                                        'id' => 4,
+                                        'shirt_name' => 'White Shirt',
+                                        'pattern' => 'Clean Plain White',
+                                        'clue' => 'I came before the runner in the black shirt.',
+                                        'rank' => 4,
+                                        'ordinal' => '4th',
+                                        'ordinal_word' => 'Fourth',
+                                        'image' => '/images/speaking/who_was_first/runner_05_white.png?v=color_20260925',
+                                        'speech_clue' => 'I came before the runner in the black shirt.',
+                                    ],
+                                    [
+                                        'id' => 5,
+                                        'shirt_name' => 'Black Shirt',
+                                        'pattern' => 'Solid Pure Black',
+                                        'clue' => 'I came in between the runner in the white shirt and the runner in the No.5 shirt.',
+                                        'rank' => 5,
+                                        'ordinal' => '5th',
+                                        'ordinal_word' => 'Fifth',
+                                        'image' => '/images/speaking/who_was_first/runner_02_black.png?v=color_20260925',
+                                        'speech_clue' => 'I came in between the runner in the white shirt and the runner in the No.5 shirt.',
+                                    ],
+                                    [
+                                        'id' => 6,
+                                        'shirt_name' => 'Number 5 Shirt',
+                                        'pattern' => 'White with Bold Number 5',
+                                        'clue' => 'I came in next to the runner in the No.10 shirt. Our times were exactly the same.',
+                                        'rank' => 6,
+                                        'ordinal' => '6th',
+                                        'ordinal_word' => 'Sixth',
+                                        'image' => '/images/speaking/who_was_first/runner_06_num5.png?v=color_20260925',
+                                        'speech_clue' => 'I came in next to the runner in the No.10 shirt. Our times were exactly the same.',
+                                    ],
+                                    [
+                                        'id' => 7,
+                                        'shirt_name' => 'Number 10 Shirt',
+                                        'pattern' => 'White with Bold Number 10',
+                                        'clue' => 'I came before the runner in the cat shirt.',
+                                        'rank' => 7,
+                                        'ordinal' => '7th',
+                                        'ordinal_word' => 'Seventh',
+                                        'image' => '/images/speaking/who_was_first/runner_08_num10.png?v=color_20260925',
+                                        'speech_clue' => 'I came before the runner in the cat shirt.',
+                                    ],
+                                    [
+                                        'id' => 8,
+                                        'shirt_name' => 'Cat Shirt',
+                                        'pattern' => 'Black Cat Face Silhouette',
+                                        'clue' => 'I came behind the runner in the No.10 shirt.',
+                                        'rank' => 8,
+                                        'ordinal' => '8th',
+                                        'ordinal_word' => 'Eighth / Last',
+                                        'image' => '/images/speaking/who_was_first/runner_03_cat.png?v=color_20260925',
+                                        'speech_clue' => 'I came behind the runner in the No.10 shirt.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "On which floor is your bedroom or workplace located, and how do you usually get there?",
+                                'hint' => "Answer: 'My [room/office] is on the [first/second/third] floor, and I usually take the [stairs/elevator].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "Can you pronounce these ordinal numbers clearly: 1st, 2nd, 3rd, 5th, 12th, 20th, 21st, 100th?",
+                                'hint' => "Answer: 'First, second, third, fifth, twelfth, twentieth, twenty-first, one hundredth.'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "What is the greatest milestone or accomplishment you have achieved so far?",
+                                'hint' => "Answer: 'My first major accomplishment was [achievement], followed by my second milestone of [achievement].'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Ordinal Numbers Rapid-Fire Challenges',
+                        'impromptu' => [
+                            'Aktivitas 1: Sebutkan urutan lantai di sebuah gedung 10 lantai dari 1st floor sampai 10th floor secara berurutan!',
+                            'Aktivitas 2: Jelaskan 3 pencapaian terbesarmu menggunakan kata first, second, dan third!',
+                            'Aktivitas 3: Bedakan pelafalan antara 5 (five) dan 5th (fifth), 12 (twelve) dan 12th (twelfth), serta 20 (twenty) dan 20th (twentieth)!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'First', 'ipa' => '/fɜːst/', 'meaning' => 'Pertama / Kesatu (1st)', 'example' => 'She won first place in the speech championship.'],
+                            ['word' => 'Second', 'ipa' => '/ˈsek.ənd/', 'meaning' => 'Kedua (2nd)', 'example' => 'Our classroom is on the second floor.'],
+                            ['word' => 'Third', 'ipa' => '/θɜːd/', 'meaning' => 'Ketiga (3rd)', 'example' => 'This is the third time we have practiced together.'],
+                            ['word' => 'Fourth', 'ipa' => '/fɔːθ/', 'meaning' => 'Keempat (4th)', 'example' => 'The executive boardroom is on the fourth floor.'],
+                            ['word' => 'Fifth', 'ipa' => '/fɪfθ/', 'meaning' => 'Kelima (5th)', 'example' => 'May is the fifth month of the calendar year.'],
+                            ['word' => 'Sixth', 'ipa' => '/sɪksθ/', 'meaning' => 'Keenam (6th)', 'example' => 'Saturday is the sixth day of the week.'],
+                            ['word' => 'Seventh', 'ipa' => '/ˈsev.ənθ/', 'meaning' => 'Ketujuh (7th)', 'example' => 'He lives in apartment building number seven on the seventh floor.'],
+                            ['word' => 'Eighth', 'ipa' => '/eɪtθ/', 'meaning' => 'Kedelapan (8th)', 'example' => 'She finished in eighth position in the marathon.'],
+                            ['word' => 'Ninth', 'ipa' => '/naɪnθ/', 'meaning' => 'Kesembilan (9th)', 'example' => 'September is the ninth month of the year.'],
+                            ['word' => 'Tenth', 'ipa' => '/tenθ/', 'meaning' => 'Kesepuluh (10th)', 'example' => 'Module ten is our capstone presentation.'],
+                            ['word' => 'Eleventh', 'ipa' => '/ɪˈlev.ənθ/', 'meaning' => 'Kesebelas (11th)', 'example' => 'November is the eleventh month.'],
+                            ['word' => 'Twelfth', 'ipa' => '/twelfθ/', 'meaning' => 'Kedua belas (12th)', 'example' => 'The twelfth chapter concludes the training guide.'],
+                            ['word' => 'Thirteenth', 'ipa' => '/θɜːˈtiːnθ/', 'meaning' => 'Ketiga belas (13th)', 'example' => 'Friday the thirteenth is a popular folklore.'],
+                            ['word' => 'Fourteenth', 'ipa' => '/ˌfɔːˈtiːnθ/', 'meaning' => 'Keempat belas (14th)', 'example' => 'Valentine\'s Day is celebrated on February fourteenth.'],
+                            ['word' => 'Fifteenth', 'ipa' => '/ˌfɪfˈtiːnθ/', 'meaning' => 'Kelima belas (15th)', 'example' => 'The mid-term evaluation is on the fifteenth.'],
+                            ['word' => 'Twentieth', 'ipa' => '/ˈtwen.ti.əθ/', 'meaning' => 'Keduapuluh (20th)', 'example' => 'Today marks the company\'s twentieth anniversary.'],
+                            ['word' => 'Twenty-first', 'ipa' => '/ˌtwen.ti ˈfɜːst/', 'meaning' => 'Kedua puluh satu (21st)', 'example' => 'We live in the rapidly advancing twenty-first century.'],
+                            ['word' => 'Thirtieth', 'ipa' => '/ˈθɜː.ti.əθ/', 'meaning' => 'Ketiga puluh (30th)', 'example' => 'She celebrated her thirtieth birthday in Bali.'],
+                            ['word' => 'Hundredth', 'ipa' => '/ˈhʌn.drədθ/', 'meaning' => 'Keseratus (100th)', 'example' => 'The library celebrated its hundredth anniversary.'],
+                            ['word' => 'Thousandth', 'ipa' => '/ˈθaʊ.zəndθ/', 'meaning' => 'Keseribu (1,000th)', 'example' => 'The thousandth registered learner won a special prize.'],
+                            ['word' => 'Millionth', 'ipa' => '/ˈmɪl.jənθ/', 'meaning' => 'Kesatu juta (1,000,000th)', 'example' => 'He was recognized as the millionth visitor.'],
+                            ['word' => 'Ranking', 'ipa' => '/ˈræŋ.kɪŋ/', 'meaning' => 'Peringkat / Tingkatan urutan', 'example' => 'Our academy holds a top ranking in international education.'],
+                            ['word' => 'Podium', 'ipa' => '/ˈpəʊ.di.əm/', 'meaning' => 'Podium kehormatan juara', 'example' => 'All three winners stood proudly on the podium.'],
+                            ['word' => 'Floor', 'ipa' => '/flɔːr/', 'meaning' => 'Lantai tingkat gedung', 'example' => 'Take the elevator up to the fifth floor.'],
+                            ['word' => 'Century', 'ipa' => '/ˈsen.tʃər.i/', 'meaning' => 'Abad (rentang 100 tahun)', 'example' => 'The historic castle was built in the eighteenth century.'],
+                            ['word' => 'Suffix', 'ipa' => '/ˈsʌf.ɪks/', 'meaning' => 'Akhiran penanda (-st, -nd, -rd, -th)', 'example' => 'Add the suffix -th for regular ordinal numbers.'],
                         ],
                     ],
-                ],
-                'drilling1_title' => 'Drilling 1: Cardinal & Ordinal Numbers',
-                'drilling1_subtitle' => 'Latihan Pengucapan Angka Nominal Besar & Peringkat',
-                'drilling1_desc' => 'Latih pelafalan angka puluhan ribu, jutaan, dan angka urutan/ordinal:',
-                'drilling1' => [
+                    // =========================================================================
+                    // SUBTOPIK 02: CALENDAR & DATES
+                    // =========================================================================
                     [
-                        'en' => 'Over one million people attended the national festival last summer.',
-                        'id' => 'Lebih dari satu juta orang menghadiri festival nasional musim panas lalu.',
-                    ],
-                    [
-                        'en' => 'The total cost of this new project is twelve thousand two hundred dollars (,200).',
-                        'id' => 'Total biaya proyek baru ini adalah dua belas ribu dua ratus dolar (,200).',
-                    ],
-                    [
-                        'en' => 'She won first place in the international English speech competition.',
-                        'id' => 'Dia memenangkan peringkat pertama dalam kompetisi pidato bahasa Inggris internasional.',
-                    ],
-                    [
-                        'en' => 'We invited fifty-five guests to our annual family gathering.',
-                        'id' => 'Kami mengundang lima puluh lima tamu ke acara kumpul keluarga tahunan kami.',
-                    ],
-                    [
-                        'en' => 'The total population of our city is over eight hundred ninety-three thousand people.',
-                        'id' => 'Total populasi kota kami lebih dari delapan ratus sembilan puluh tiga ribu orang.',
-                    ],
-                ],
-                'drilling2_title' => 'Drilling 2: Dates, Months & Years',
-                'drilling2_subtitle' => 'Latihan Pengucapan Tanggal Lahir, Hari, & Tahun',
-                'drilling2_desc' => 'Latih pelafalan kalimat penanggalan, hari dalam seminggu, dan tahun sebelum masuk ke percakapan:',
-                'drilling2' => [
-                    [
-                        'en' => 'Her birthday is on the twenty-ninth of January.',
-                        'id' => 'Hari ulang tahunnya adalah pada tanggal dua puluh sembilan Januari.',
-                    ],
-                    [
-                        'en' => 'We were born in nineteen ninety-nine (1999).',
-                        'id' => 'Kami lahir pada tahun seribu sembilan ratus sembilan puluh sembilan (1999).',
-                    ],
-                    [
-                        'en' => 'Our international conference is scheduled for Monday, the fifteenth of October.',
-                        'id' => 'Konferensi internasional kami dijadwalkan untuk hari Senin, tanggal lima belas Oktober.',
-                    ],
-                    [
-                        'en' => 'The ancient pyramid was built in four hundred BC (Before Christ).',
-                        'id' => 'Piramida kuno tersebut dibangun pada tahun empat ratus Sebelum Masehi.',
-                    ],
-                    [
-                        'en' => 'The new university semester always begins in September.',
-                        'id' => 'Semester baru universitas selalu dimulai pada bulan September.',
-                    ],
-                ],
-                'grammar_note' => 'Prepositions of Date: IN (Month / Year / Season), ON (Specific Day / Date / Birthday)',
-                'dialogue_setting' => 'Dua siswa berlatih menanyakan dan menyebutkan tanggal lahir, hari perayaan, tahun kelahiran, dan jumlah angka/harga.',
-                'dialogue' => [
-                    // Ronde 1: Student A menanyakan, Student B menjawab
-                    [
-                        'section_badge' => 'Ronde 1: Student A Bertanya, Student B Menjawab',
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Tanggal & Hari)',
-                        'id' => 'Permisi, kapan tanggal ulang tahunmu dan pada hari apa kamu merayakannya?',
-                        'en' => 'Excuse me, when is your birthday and on what day do you usually celebrate it?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Tanggal & Hari)',
-                        'id' => 'Ulang tahun saya pada tanggal [29th of January]. Saya biasanya merayakannya pada hari [Saturday].',
-                        'en' => 'My birthday is on the [29th of January]. I usually celebrate it on [Saturday].',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Bulan & Musim)',
-                        'id' => 'Di bulan apa liburan favoritmu berlangsung setiap tahun?',
-                        'en' => 'In which month does your favorite vacation take place every year?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Bulan)',
-                        'id' => 'Liburan favorit saya di bulan [August] karena cuacanya sangat cerah dan hangat.',
-                        'en' => 'My favorite vacation is in [August] because the weather is very sunny and warm.',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Angka Tamu & Biaya)',
-                        'id' => 'Berapa banyak tamu yang kamu undang, dan berapa perkiraan biaya perayaan tersebut?',
-                        'en' => 'How many guests did you invite, and how much is the estimated cost of the celebration?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Angka / Cardinal)',
-                        'id' => 'Saya mengundang [55] teman, dan total biayanya sekitar [one million] rupiah.',
-                        'en' => 'I invited [55] friends, and the total cost is around [one million] rupiah.',
-                    ],
-                    // Ronde 2: Student B menanyakan, Student A menjawab (Tukar Peran)
-                    [
-                        'section_badge' => 'Ronde 2: Tukar Peran (Student B Bertanya, Student A Menjawab)',
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Tanggal & Tahun Lahir)',
-                        'id' => 'Sekarang giliran saya bertanya. Kapan kamu lahir dan di tahun berapa?',
-                        'en' => 'Now it is my turn to ask. When were you born and in what year?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Tanggal & Tahun)',
-                        'id' => 'Saya lahir pada tanggal [15th of October] di tahun [nineteen ninety-nine] ([1999]).',
-                        'en' => 'I was born on the [15th of October] in [nineteen ninety-nine] ([1999]).',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Tanggal Acara Konferensi)',
-                        'id' => 'Pada tanggal berapa konferensi pemuda internasional akan diselenggarakan?',
-                        'en' => 'On what date will the international youth summit be held?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Tanggal & Hari Acara)',
-                        'id' => 'Konferensi dimulai pada hari [Monday, the 3rd of October] hingga [Friday, the 7th of October, 2024].',
-                        'en' => 'The conference starts on [Monday, the 3rd of October] until [Friday, the 7th of October, 2024].',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Jumlah Peserta Terdaftar)',
-                        'id' => 'Berapa banyak total peserta yang mendaftar dari seluruh dunia?',
-                        'en' => 'How many total participants have registered from around the world?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Angka Ribuan & Puluhan)',
-                        'id' => 'Total pesertanya adalah [four thousand five hundred] ([4,500]) orang dari [sixty-five] ([65]) negara.',
-                        'en' => 'The total is [four thousand five hundred] ([4,500]) participants from [sixty-five] ([65]) countries.',
-                    ],
-                ],
-                'games' => [
-                    'type' => 'how_many_kitchen',
-                    'participation_type' => 'pair',
-                    'title' => 'How many? (Kitchen Objects & Spider Counting Challenge)',
-                    'instruction' => 'The object of the game is to find out who has the most things in the kitchen. To do this, Student A and Student B will have to ask each other how many teapots, pans, forks, knives, spoons, cups, saucers, glasses, bowls and plates there are in their kitchens and add up the total. When they have done this, they can find out who has the most spiders!',
-                    'image_a' => '/images/speaking/worksheet3/picture_a_kitchen.png',
-                    'image_b' => '/images/speaking/worksheet3/picture_b_kitchen.png',
-                    'image_full' => '/images/speaking/worksheet3/full_kitchen_worksheet.png',
-                    'exponent' => [
-                        'q' => 'How many ... are there in your kitchen?',
-                        'a_singular' => 'There is one [object]...',
-                        'a_plural' => 'There are [number] [objects]...',
-                    ],
-                    'items' => [
-                        ['key' => 'teapots', 'name' => 'Teapots (Teko Teh)', 'icon' => '🫖', 'count_a' => 1, 'count_b' => 1, 'note' => 'A: 1 on table | B: 1 on counter'],
-                        ['key' => 'pans', 'name' => 'Pans (Panci / Wajan)', 'icon' => '🍳', 'count_a' => 2, 'count_b' => 3, 'note' => 'A: 2 in cupboard | B: 3 on counter'],
-                        ['key' => 'forks', 'name' => 'Forks (Garpu)', 'icon' => '🍴', 'count_a' => 4, 'count_b' => 6, 'note' => 'A: 4 on table | B: 6 on table'],
-                        ['key' => 'knives', 'name' => 'Knives (Pisau)', 'icon' => '🔪', 'count_a' => 4, 'count_b' => 18, 'note' => 'A: 4 on table | B: 18 in drawer (marked 18)'],
-                        ['key' => 'spoons', 'name' => 'Spoons (Sendok)', 'icon' => '🥄', 'count_a' => 6, 'count_b' => 6, 'note' => 'A: 6 in drawer | B: 6 on table'],
-                        ['key' => 'cups', 'name' => 'Cups (Cangkir)', 'icon' => '☕', 'count_a' => 10, 'count_b' => 8, 'note' => 'A: 10 on upper rack (2 rows of 5) | B: 8 on table'],
-                        ['key' => 'saucers', 'name' => 'Saucers (Tatakan Cangkir)', 'icon' => '🍽️', 'count_a' => 11, 'count_b' => 6, 'note' => 'A: 11 stacked (marked 11) | B: 6 on table'],
-                        ['key' => 'glasses', 'name' => 'Glasses (Gelas)', 'icon' => '🥛', 'count_a' => 13, 'count_b' => 13, 'note' => 'A: 13 in cupboard (marked 13) | B: 13 in cupboard (4+5+4)'],
-                        ['key' => 'plates', 'name' => 'Plates (Piring)', 'icon' => '🍽️', 'count_a' => 16, 'count_b' => 34, 'note' => 'A: 16 stacked (marked 16) | B: 20 on wall racks (8+8+4) + 14 on table (marked 14) = 34'],
-                        ['key' => 'bowls', 'name' => 'Bowls (Mangkuk)', 'icon' => '🥣', 'count_a' => 4, 'count_b' => 4, 'note' => 'A: 4 on table | B: 4 on table'],
-                        ['key' => 'spiders', 'name' => 'Spiders (Laba-laba)', 'icon' => '🕷️', 'count_a' => 11, 'count_b' => 11, 'note' => 'A: 11 spiders | B: 11 spiders'],
-                    ],
-                    'questions' => [
-                        ['q' => 'How many teapots are there in your kitchen?', 'a' => 'There is one teapot on the table.', 'audio' => 'How many teapots are there in your kitchen? There is one teapot on the table.'],
-                        ['q' => 'How many cups are there in your kitchen?', 'a' => 'There are ten cups on the shelf / There are eight cups on the table.', 'audio' => 'How many cups are there in your kitchen? There are ten cups on the shelf.'],
-                        ['q' => 'How many knives are there in your kitchen?', 'a' => 'There are eighteen knives in the drawer.', 'audio' => 'How many knives are there in your kitchen? There are eighteen knives in the drawer.'],
-                        ['q' => 'Who has the most plates in their kitchen?', 'a' => 'Kitchen B has the most plates with thirty-four plates!', 'audio' => 'Who has the most plates in their kitchen? Kitchen B has the most plates!'],
-                        ['q' => 'How many spiders can you find in your kitchen?', 'a' => 'There are eleven spiders crawling around the room!', 'audio' => 'How many spiders can you find in your kitchen? There are eleven spiders crawling around the room!'],
-                    ]
-                ],
-                'ai_interview' => [
-                    [
-                        'id' => 1,
-                        'question' => "Hello! Welcome to Meeting 3. Let's start with your birthday: When were you born, and which month is your favorite?",
-                        'hint' => "Answer: 'I was born on [Date], [Year]. My favorite month is [Month] because...'",
-                    ],
-                    [
-                        'id' => 2,
-                        'question' => "Can you tell me today's full date in English, including the day, ordinal date, month, and year?",
-                        'hint' => "Answer: 'Today is [Day], the [Ordinal Date] of [Month], [Year].'",
-                    ],
-                    [
-                        'id' => 3,
-                        'question' => "Which preposition of time do we use for months and years versus specific days and dates? Give an example!",
-                        'hint' => "Answer: 'We use 'in' for months and years, like 'in January 2024', and 'on' for specific days, like 'on Monday' or 'on my birthday'.'",
-                    ],
-                    [
-                        'id' => 4,
-                        'question' => "What is the difference between cardinal numbers and ordinal numbers in English?",
-                        'hint' => "Answer: 'Cardinal numbers show quantity, like one, two, three, while ordinal numbers show order or ranking, like first, second, third.'",
-                    ],
-                    [
-                        'id' => 5,
-                        'question' => "How do you read the number 45,908,453 in English? Try saying it clearly!",
-                        'hint' => "Answer: 'Forty-five million nine hundred eight thousand four hundred fifty-three.'",
+                        'id' => 'sec-m3-sub-2',
+                        'num' => '02',
+                        'title' => 'Calendar & Dates',
+                        'subtitle' => '12 Months, 7 Days, Years (BC/AD) & Prepositions of Dates (IN & ON)',
+                        'desc' => 'Nama 12 bulan, 7 hari, cara membaca tahun (BC/AD), format tanggal British (Day-Month-Year) vs American (Month-Day-Year), serta preposisi IN dan ON.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'telling_date',
+                            'title' => 'Calendar & Dates Mastery',
+                            'telling_date' => [
+                                'months' => [
+                                    ['num' => '01', 'name' => 'January', 'ipa' => '/ˈdʒæn.ju.ə.ri/', 'id' => 'Januari'],
+                                    ['num' => '02', 'name' => 'February', 'ipa' => '/ˈfeb.ru.ə.ri/', 'id' => 'Februari'],
+                                    ['num' => '03', 'name' => 'March', 'ipa' => '/mɑːtʃ/', 'id' => 'Maret'],
+                                    ['num' => '04', 'name' => 'April', 'ipa' => '/ˈeɪ.prəl/', 'id' => 'April'],
+                                    ['num' => '05', 'name' => 'May', 'ipa' => '/meɪ/', 'id' => 'Mei'],
+                                    ['num' => '06', 'name' => 'June', 'ipa' => '/dʒuːn/', 'id' => 'Juni'],
+                                    ['num' => '07', 'name' => 'July', 'ipa' => '/dʒuˈlaɪ/', 'id' => 'Juli'],
+                                    ['num' => '08', 'name' => 'August', 'ipa' => '/ɔːˈɡʌst/', 'id' => 'Agustus'],
+                                    ['num' => '09', 'name' => 'September', 'ipa' => '/sepˈtem.bər/', 'id' => 'September'],
+                                    ['num' => '10', 'name' => 'October', 'ipa' => '/ɒkˈtəʊ.bər/', 'id' => 'Oktober'],
+                                    ['num' => '11', 'name' => 'November', 'ipa' => '/nəʊˈvem.bər/', 'id' => 'November'],
+                                    ['num' => '12', 'name' => 'December', 'ipa' => '/dɪˈsem.bər/', 'id' => 'Desember'],
+                                ],
+                                'days' => [
+                                    ['day' => 'Monday', 'ipa' => '/ˈmʌn.deɪ/', 'id' => 'Senin'],
+                                    ['day' => 'Tuesday', 'ipa' => '/ˈtʃuːz.deɪ/', 'id' => 'Selasa'],
+                                    ['day' => 'Wednesday', 'ipa' => '/ˈwenz.deɪ/', 'id' => 'Rabu'],
+                                    ['day' => 'Thursday', 'ipa' => '/ˈθɜːz.deɪ/', 'id' => 'Kamis'],
+                                    ['day' => 'Friday', 'ipa' => '/ˈfraɪ.deɪ/', 'id' => 'Jumat'],
+                                    ['day' => 'Saturday', 'ipa' => '/ˈsæt.ə.deɪ/', 'id' => 'Sabtu'],
+                                    ['day' => 'Sunday', 'ipa' => '/ˈsʌn.deɪ/', 'id' => 'Minggu'],
+                                ],
+                                'years' => [
+                                    ['year' => '1998', 'read' => 'Nineteen ninety-eight', 'note' => 'Bagi 2 angka (19 - 98)'],
+                                    ['year' => '2000', 'read' => 'Two thousand', 'note' => 'Tahun milenium tepat'],
+                                    ['year' => '2008', 'read' => 'Two thousand (and) eight / Twenty oh-eight', 'note' => 'Era 2000-an awal'],
+                                    ['year' => '2026', 'read' => 'Twenty twenty-six', 'note' => 'Era modern (20 - 26)'],
+                                ],
+                                'eras' => [
+                                    ['term' => 'BC (Before Christ)', 'meaning' => 'Sebelum Masehi (SM)', 'example' => '500 BC (Five hundred BC)'],
+                                    ['term' => 'AD (Anno Domini)', 'meaning' => 'Setelah Masehi (Masehi)', 'example' => 'AD 2026 / 2026 AD'],
+                                ],
+                                'date_formats' => [
+                                    ['style' => 'British English', 'format' => 'Day - Month - Year', 'written' => '15 August 2026 / 15th August 2026', 'spoken' => 'The fifteenth of August, twenty twenty-six'],
+                                    ['style' => 'American English', 'format' => 'Month - Day - Year', 'written' => 'August 15, 2026', 'spoken' => 'August fifteenth, twenty twenty-six'],
+                                ],
+                                'prepositions' => [
+                                    ['prep' => 'IN', 'use_for' => 'Bulan, Tahun, Abad, Musim (General / Panjang)', 'example' => 'in August, in 2026, in the 21st century, in summer'],
+                                    ['prep' => 'ON', 'use_for' => 'Hari & Tanggal Spesifik (Specific Days & Dates)', 'example' => 'on Monday, on the 15th of August, on August 15th, on my birthday'],
+                                ],
+                                'qna' => [
+                                    ['q' => 'When is your birthday?', 'a' => "My birthday is on the 17th of August / on August 17th."],
+                                    ['q' => 'What day is it today?', 'a' => "Today is Friday."],
+                                    ['q' => 'What is today\'s date?', 'a' => "Today is the 12th of September, 2026."],
+                                ]
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Scheduling the International Arts Festival & Exhibition',
+                            'audio_script' => "David: Hello Dewi! Are you finalizing the official dates for the ASEAN Art & Music Festival in Bali?
+Dewi: Yes, David! We have just confirmed the complete calendar. The festival begins on August 15th and concludes on August 20th.
+David: Wonderful! And which day is the opening gala ceremony?
+Dewi: The grand opening ceremony takes place on Saturday, August 17th, which is also Indonesian Independence Day!
+David: Oh, that is a marvelous date for a celebration! When do international artists need to submit their artwork?
+Dewi: All entries must arrive by Friday, July 25th.
+David: Excellent. My team will send our shipment before July 20th. Thank you, Dewi!
+Dewi: You are welcome, David! See you in August!",
+                            'key_phrases' => [
+                                'The festival begins on August 15th and concludes on August 20th.',
+                                'The grand opening ceremony takes place on Saturday, August 17th.',
+                                'Which is also Indonesian Independence Day!',
+                                'All entries must arrive by Friday, July 25th.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'When does the ASEAN Art & Music Festival start and finish?',
+                                    'options' => [
+                                        'August 15th to August 20th',
+                                        'July 20th to July 25th',
+                                        'August 17th to August 25th',
+                                        'September 1st to September 5th',
+                                    ],
+                                    'answer' => 'August 15th to August 20th',
+                                ],
+                                [
+                                    'q' => 'On what historic date is the grand opening ceremony held?',
+                                    'options' => [
+                                        'August 17th (Indonesian Independence Day)',
+                                        'August 15th',
+                                        'July 25th',
+                                        'August 20th',
+                                    ],
+                                    'answer' => 'August 17th (Indonesian Independence Day)',
+                                ],
+                                [
+                                    'q' => 'What is the final deadline for artists to submit their artwork?',
+                                    'options' => [
+                                        'July 25th',
+                                        'July 20th',
+                                        'August 15th',
+                                        'August 17th',
+                                    ],
+                                    'answer' => 'July 25th',
+                                ],
+                            ],
+                        ],
+'drilling1' => [
+                            ['en' => 'January, February, March, April, May, June, July, August, September, October, November, December.', 'id' => 'Januari, Februari, Maret, April, Mei, Juni, Juli, Agustus, September, Oktober, November, Desember.'],
+                            ['en' => 'Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.', 'id' => 'Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu.'],
+                            ['en' => 'The national holiday is celebrated on the seventeenth of August.', 'id' => 'Hari libur nasional dirayakan pada tanggal tujuh belas Agustus.'],
+                            ['en' => 'Indonesia declared its independence in nineteen forty-five (1945).', 'id' => 'Indonesia memproklamasikan kemerdekaannya pada tahun 1945.'],
+                            ['en' => 'Our class meets every Monday, Wednesday, and Friday.', 'id' => 'Kelas kita bertemu setiap hari Senin, Rabu, dan Jumat.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'My birthday is on the twelfth of September, two thousand and four (12 September 2004).', 'id' => 'Ulang tahun saya adalah tanggal 12 September 2004.'],
+                            ['en' => 'The conference takes place in October, from Monday to Thursday.', 'id' => 'Konferensi berlangsung pada bulan Oktober, dari hari Senin hingga Kamis.'],
+                            ['en' => 'Today is Friday, September twelfth, twenty twenty-six (September 12, 2026).', 'id' => 'Hari ini adalah hari Jumat, 12 September 2026.'],
+                            ['en' => 'We will finish our course in December this year.', 'id' => 'Kami akan menyelesaikan kursus kami pada bulan Desember tahun ini.'],
+                            ['en' => 'Julius Caesar invaded Britain in fifty-five BC (55 BC).', 'id' => 'Julius Caesar menginvasi Britania pada tahun 55 Sebelum Masehi.'],
+                        ],
+                        'grammar_note' => "Prepositions of Dates: Use 'IN' for Months & Years (in August, in 2026). Use 'ON' for Specific Days & Dates (on Monday, on August 15th, on the 15th of August).",
+                        'dialogue_setting' => 'Dua siswa menanyakan tanggal ulang tahun masing-masing, hari penting, dan tanggal liburan.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'When is your birthday, and which day of the week is it this year?',
+                                'id' => 'Kapan ulang tahunmu, dan jatuh pada hari apa tahun ini?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'My birthday is on the twenty-fourth of November (November 24th). This year it falls on a Tuesday.',
+                                'id' => 'Ulang tahun saya adalah tanggal dua puluh empat November (24 November). Tahun ini jatuh pada hari Selasa.',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'In which year were you born?',
+                                'id' => 'Pada tahun berapa kamu lahir?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'I was born in nineteen ninety-nine (1999). What about you?',
+                                'id' => 'Saya lahir pada tahun 1999 (sembilan belas sembilan puluh sembilan). Bagaimana denganmu?',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'I was born on the fifth of May, two thousand and one (May 5, 2001).',
+                                'id' => 'Saya lahir pada tanggal 5 Mei 2001 (dua ribu satu).',
+                            ],
+                        ],
+                        'games' => [
+                            'type' => 'happy_birthday',
+                            'title' => 'Activity 13: Happy Birthday (The Present Hunt & Search Game)',
+                            'participation_type' => 'individual',
+                            'activity' => 'Whole class search game: asking birthdays, mystery gift matching & parcel exchange',
+                            'aim' => 'To practice asking and saying when birthdays are fluently using "When is your birthday?", "It\'s in (Month)", and "It\'s on (Date)".',
+                            'time' => '15 to 20 minutes',
+                            'function_practised' => 'Asking and saying when birthdays are',
+                            'structures' => [
+                                'question' => 'When is your birthday?',
+                                'month_answer' => "It's in (February).",
+                                'date_answer_uk' => "It's on (the 28th of February).",
+                                'date_answer_us' => "It's on (February the 28th).",
+                            ],
+                            'preposition_rules' => [
+                                'in' => 'Gunakan preposisi "IN" untuk menyebutkan bulan saja tanpa tanggal spesifik (contoh: "It\'s in February.", "It\'s in August.").',
+                                'on' => 'Gunakan preposisi "ON" untuk menyebutkan tanggal spesifik dengan angka ordinal (contoh: "It\'s on February the 28th.", "It\'s on the 17th of August.").',
+                            ],
+                            'classroom_language' => [
+                                ['en' => 'This is a present. (hold one up and show them) It\'s for you.', 'note' => 'Pegang kartu kado dan tunjukkan kepada siswa.', 'id' => 'Ini kado. Ini untuk kamu.'],
+                                ['en' => 'Write your birthday on the label, like this. (show them with a sketch on the board)', 'note' => 'Peragakan cara menulis tanggal lahir pada label di papan tulis.', 'id' => 'Tuliskan tanggal lahirmu di label kado, seperti ini.'],
+                                ['en' => 'Now give them all to me. Sorry! (collect all the cards)', 'note' => 'Kumpulkan semua kartu kado dari seluruh siswa.', 'id' => 'Sekarang berikan semuanya kepada saya. Maaf ya!'],
+                                ['en' => 'Here you are. Now you\'ve got a new present. (give out the cards)', 'note' => 'Bagikan kartu kado secara acak sehingga setiap siswa memegang kado orang lain.', 'id' => 'Ini dia. Sekarang kamu memegang kado baru milik orang lain.'],
+                                ['en' => 'What is it? A book? Chocolates? Flowers? A cat? What do you think?', 'note' => 'Ajak siswa berimajinasi membayangkan apa isi barang di dalam kado tersebut.', 'id' => 'Apa isinya? Buku? Cokelat? Bunga? Kucing? Menurutmu apa?'],
+                                ['en' => 'Write on the back, like this. (demonstrate and then go round to help them)', 'note' => 'Minta siswa menuliskan tebakan isi kado di belakang kartu.', 'id' => 'Tuliskan tebakan barangnya di bagian belakang, seperti ini.'],
+                                ['en' => 'Look at the birthday on the label. Who is the present for?', 'note' => 'Minta siswa memperhatikan tanggal di label dan mencari siapa pemiliknya.', 'id' => 'Perhatikan tanggal lahir di label. Untuk siapa kado ini?'],
+                                ['en' => 'Find the student. Ask, "When is your birthday?" like this.', 'note' => 'Peragakan cara berkeliling kelas menanyakan "When is your birthday?".', 'id' => 'Cari temannya! Tanyakan, "When is your birthday?" seperti ini.'],
+                                ['en' => 'When you find the student, give them the present. Say "Happy Birthday!" (mime giving the present)', 'note' => 'Serahkan kado saat tanggalnya cocok sambil mengucapkan selamat ulang tahun.', 'id' => 'Saat menemukan pemiliknya, serahkan kadonya dan ucapkan "Happy Birthday!"'],
+                            ],
+                            'original_assets' => [
+                                'cards_sheet' => '/images/speaking/happy_birthday/presents_cards_sheet_color.png?v=color_v2',
+                                'cards_sheet_bw' => '/images/speaking/happy_birthday/presents_cards_sheet.png',
+                                'activity_guide' => '/images/speaking/happy_birthday/activity_guide.png',
+                                'classroom_language' => '/images/speaking/happy_birthday/classroom_language.png',
+                            ],
+                            'cards' => [
+                                [
+                                    'id' => 1,
+                                    'image' => '/images/speaking/happy_birthday/card_01.png?v=color_v2',
+                                    'date' => '28 February',
+                                    'month' => 'February',
+                                    'day_num' => '28th',
+                                    'date_uk' => 'the twenty-eighth of February',
+                                    'date_us' => 'February twenty-eighth',
+                                    'gift' => 'a box of chocolates',
+                                    'gift_id' => 'sekotak cokelat manis',
+                                    'gift_icon' => '🍫',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in February.",
+                                    'answer_on_uk' => "It's on the twenty-eighth of February.",
+                                    'answer_on_us' => "It's on February twenty-eighth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a box of chocolates!",
+                                ],
+                                [
+                                    'id' => 2,
+                                    'image' => '/images/speaking/happy_birthday/card_02.png?v=color_v2',
+                                    'date' => '15 July',
+                                    'month' => 'July',
+                                    'day_num' => '15th',
+                                    'date_uk' => 'the fifteenth of July',
+                                    'date_us' => 'July fifteenth',
+                                    'gift' => 'an exciting adventure book',
+                                    'gift_id' => 'buku cerita petualangan seru',
+                                    'gift_icon' => '📚',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in July.",
+                                    'answer_on_uk' => "It's on the fifteenth of July.",
+                                    'answer_on_us' => "It's on July fifteenth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's an exciting adventure book!",
+                                ],
+                                [
+                                    'id' => 3,
+                                    'image' => '/images/speaking/happy_birthday/card_03.png?v=color_v2',
+                                    'date' => '3 October',
+                                    'month' => 'October',
+                                    'day_num' => '3rd',
+                                    'date_uk' => 'the third of October',
+                                    'date_us' => 'October third',
+                                    'gift' => 'a beautiful bouquet of flowers',
+                                    'gift_id' => 'seikat bunga mawar indah',
+                                    'gift_icon' => '💐',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in October.",
+                                    'answer_on_uk' => "It's on the third of October.",
+                                    'answer_on_us' => "It's on October third.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a beautiful bouquet of flowers!",
+                                ],
+                                [
+                                    'id' => 4,
+                                    'image' => '/images/speaking/happy_birthday/card_04.png?v=color_v2',
+                                    'date' => '21 April',
+                                    'month' => 'April',
+                                    'day_num' => '21st',
+                                    'date_uk' => 'the twenty-first of April',
+                                    'date_us' => 'April twenty-first',
+                                    'gift' => 'a cute little playful cat',
+                                    'gift_id' => 'anak kucing lucu dan menggemaskan',
+                                    'gift_icon' => '🐱',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in April.",
+                                    'answer_on_uk' => "It's on the twenty-first of April.",
+                                    'answer_on_us' => "It's on April twenty-first.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a cute little playful cat!",
+                                ],
+                                [
+                                    'id' => 5,
+                                    'image' => '/images/speaking/happy_birthday/card_05.png?v=color_v2',
+                                    'date' => '9 November',
+                                    'month' => 'November',
+                                    'day_num' => '9th',
+                                    'date_uk' => 'the ninth of November',
+                                    'date_us' => 'November ninth',
+                                    'gift' => 'a stylish classic wristwatch',
+                                    'gift_id' => 'jam tangan klasik yang elegan',
+                                    'gift_icon' => '⌚',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in November.",
+                                    'answer_on_uk' => "It's on the ninth of November.",
+                                    'answer_on_us' => "It's on November ninth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a stylish classic wristwatch!",
+                                ],
+                                [
+                                    'id' => 6,
+                                    'image' => '/images/speaking/happy_birthday/card_06.png?v=color_v2',
+                                    'date' => '12 January',
+                                    'month' => 'January',
+                                    'day_num' => '12th',
+                                    'date_uk' => 'the twelfth of January',
+                                    'date_us' => 'January twelfth',
+                                    'gift' => 'a colourful parrot in a cage',
+                                    'gift_id' => 'burung nuri warna-warni di dalam sangkar',
+                                    'gift_icon' => '🦜',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in January.",
+                                    'answer_on_uk' => "It's on the twelfth of January.",
+                                    'answer_on_us' => "It's on January twelfth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a colourful parrot in a cage!",
+                                ],
+                                [
+                                    'id' => 7,
+                                    'image' => '/images/speaking/happy_birthday/card_07.png?v=color_v2',
+                                    'date' => '30 May',
+                                    'month' => 'May',
+                                    'day_num' => '30th',
+                                    'date_uk' => 'the thirtieth of May',
+                                    'date_us' => 'May thirtieth',
+                                    'gift' => 'a luxury French perfume',
+                                    'gift_id' => 'parfum mewah aroma harum',
+                                    'gift_icon' => '🌸',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in May.",
+                                    'answer_on_uk' => "It's on the thirtieth of May.",
+                                    'answer_on_us' => "It's on May thirtieth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a luxury French perfume!",
+                                ],
+                                [
+                                    'id' => 8,
+                                    'image' => '/images/speaking/happy_birthday/card_08.png?v=color_v2',
+                                    'date' => '17 August',
+                                    'month' => 'August',
+                                    'day_num' => '17th',
+                                    'date_uk' => 'the seventeenth of August',
+                                    'date_us' => 'August seventeenth',
+                                    'gift' => 'a wooden acoustic guitar',
+                                    'gift_id' => 'gitar akustik kayu merdu',
+                                    'gift_icon' => '🎸',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in August.",
+                                    'answer_on_uk' => "It's on the seventeenth of August.",
+                                    'answer_on_us' => "It's on August seventeenth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a wooden acoustic guitar!",
+                                ],
+                                [
+                                    'id' => 9,
+                                    'image' => '/images/speaking/happy_birthday/card_09.png?v=color_v2',
+                                    'date' => '5 September',
+                                    'month' => 'September',
+                                    'day_num' => '5th',
+                                    'date_uk' => 'the fifth of September',
+                                    'date_us' => 'September fifth',
+                                    'gift' => 'a giant fluffy teddy bear',
+                                    'gift_id' => 'boneka beruang raksasa yang lembut',
+                                    'gift_icon' => '🧸',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in September.",
+                                    'answer_on_uk' => "It's on the fifth of September.",
+                                    'answer_on_us' => "It's on September fifth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a giant fluffy teddy bear!",
+                                ],
+                                [
+                                    'id' => 10,
+                                    'image' => '/images/speaking/happy_birthday/card_10.png?v=color_v2',
+                                    'date' => '25 December',
+                                    'month' => 'December',
+                                    'day_num' => '25th',
+                                    'date_uk' => 'the twenty-fifth of December',
+                                    'date_us' => 'December twenty-fifth',
+                                    'gift' => 'premium wireless headphones',
+                                    'gift_id' => 'headphone nirkabel suara jernih',
+                                    'gift_icon' => '🎧',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in December.",
+                                    'answer_on_uk' => "It's on the twenty-fifth of December.",
+                                    'answer_on_us' => "It's on December twenty-fifth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's premium wireless headphones!",
+                                ],
+                                [
+                                    'id' => 11,
+                                    'image' => '/images/speaking/happy_birthday/card_11.png?v=color_v2',
+                                    'date' => '14 June',
+                                    'month' => 'June',
+                                    'day_num' => '14th',
+                                    'date_uk' => 'the fourteenth of June',
+                                    'date_us' => 'June fourteenth',
+                                    'gift' => 'a pair of brand new sneakers',
+                                    'gift_id' => 'sepasang sepatu kets baru yang keren',
+                                    'gift_icon' => '👟',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in June.",
+                                    'answer_on_uk' => "It's on the fourteenth of June.",
+                                    'answer_on_us' => "It's on June fourteenth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a pair of brand new sneakers!",
+                                ],
+                                [
+                                    'id' => 12,
+                                    'image' => '/images/speaking/happy_birthday/card_12.png?v=color_v2',
+                                    'date' => '8 March',
+                                    'month' => 'March',
+                                    'day_num' => '8th',
+                                    'date_uk' => 'the eighth of March',
+                                    'date_us' => 'March eighth',
+                                    'gift' => 'a shiny silver skateboard',
+                                    'gift_id' => 'papan luncur skateboard keren',
+                                    'gift_icon' => '🛹',
+                                    'question' => 'When is your birthday?',
+                                    'answer_in' => "It's in March.",
+                                    'answer_on_uk' => "It's on the eighth of March.",
+                                    'answer_on_us' => "It's on March eighth.",
+                                    'handover' => "Happy Birthday! This present is for you. It's a shiny silver skateboard!",
+                                ],
+                            ],
+                            'report_examples' => [
+                                'In our class, five students celebrate their birthdays in August.',
+                                'Rina was holding a present for February 28th, and she successfully found Budi!',
+                                'Most students in our group have birthdays in the second half of the year.',
+                                'Everyone practiced the prepositions IN and ON accurately during the present exchange.'
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "When is your birthday (day, date, month, and year), and how do you usually celebrate it?",
+                                'hint' => "Answer: 'My birthday is on [e.g. the 15th of August, 2000]. I usually celebrate it with [family/friends].'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "What is your favourite month of the year, and why do you like it the most?",
+                                'hint' => "Answer: 'My favourite month is [Month] because [the weather / holidays / special events].'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "What is today\'s complete date, and what are your main plans for this week?",
+                                'hint' => "Answer: 'Today is [Day, Date, Month, Year]. My main plans for this week are [activities].'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Calendar & Dates Showcase',
+                        'impromptu' => [
+                            'Aktivitas 1: Sebutkan tanggal lahir lengkapmu (hari, tanggal ordinal, bulan, dan tahun) dengan pelafalan presisi!',
+                            'Aktivitas 2: Sebutkan 12 bulan dalam setahun dalam bahasa Inggris dari Januari hingga Desember tanpa melihat teks.',
+                            'Aktivitas 3: Bacakan 3 tanggal bersejarah menggunakan format British dan American secara bergantian!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'January', 'ipa' => '/ˈdʒæn.ju.ə.ri/', 'meaning' => 'Januari (Bulan ke-1)', 'example' => 'The speaking course begins in January.'],
+                            ['word' => 'February', 'ipa' => '/ˈfeb.ru.ər.i/', 'meaning' => 'Februari (Bulan ke-2)', 'example' => 'February has twenty-eight days in a regular year.'],
+                            ['word' => 'March', 'ipa' => '/mɑːtʃ/', 'meaning' => 'Maret (Bulan ke-3)', 'example' => 'Spring season commences in March.'],
+                            ['word' => 'April', 'ipa' => '/ˈeɪ.prəl/', 'meaning' => 'April (Bulan ke-4)', 'example' => 'April is the fourth month of the calendar year.'],
+                            ['word' => 'May', 'ipa' => '/meɪ/', 'meaning' => 'Mei (Bulan ke-5)', 'example' => 'International Labour Day is celebrated in May.'],
+                            ['word' => 'June', 'ipa' => '/dʒuːn/', 'meaning' => 'Juni (Bulan ke-6)', 'example' => 'Summer holidays usually begin in June.'],
+                            ['word' => 'July', 'ipa' => '/dʒuˈlaɪ/', 'meaning' => 'Juli (Bulan ke-7)', 'example' => 'July is traditionally a warm summer month.'],
+                            ['word' => 'August', 'ipa' => '/ˈɔː.ɡəst/', 'meaning' => 'Agustus (Bulan ke-8)', 'example' => 'Indonesia Independence Day is in August.'],
+                            ['word' => 'September', 'ipa' => '/sepˈtem.bər/', 'meaning' => 'September (Bulan ke-9)', 'example' => 'Autumn term starts in September.'],
+                            ['word' => 'October', 'ipa' => '/ɒkˈtəʊ.bər/', 'meaning' => 'Oktober (Bulan ke-10)', 'example' => 'The international conference takes place in October.'],
+                            ['word' => 'November', 'ipa' => '/nəʊˈvem.bər/', 'meaning' => 'November (Bulan ke-11)', 'example' => 'Thanksgiving holiday is observed in November.'],
+                            ['word' => 'December', 'ipa' => '/dɪˈsem.bər/', 'meaning' => 'Desember (Bulan ke-12)', 'example' => 'December is the twelfth and final month.'],
+                            ['word' => 'Monday', 'ipa' => '/ˈmʌn.deɪ/', 'meaning' => 'Hari Senin', 'example' => 'Our first meeting takes place on Monday.'],
+                            ['word' => 'Tuesday', 'ipa' => '/ˈtʃuːz.deɪ/', 'meaning' => 'Hari Selasa', 'example' => 'We have small group discussion on Tuesday.'],
+                            ['word' => 'Wednesday', 'ipa' => '/ˈwenz.deɪ/', 'meaning' => 'Hari Rabu', 'example' => 'Wednesday represents the middle of the work week.'],
+                            ['word' => 'Thursday', 'ipa' => '/ˈθɜːz.deɪ/', 'meaning' => 'Hari Kamis', 'example' => 'The vocabulary quiz is scheduled for Thursday.'],
+                            ['word' => 'Friday', 'ipa' => '/ˈfraɪ.deɪ/', 'meaning' => 'Hari Jumat', 'example' => 'We review our progress every Friday afternoon.'],
+                            ['word' => 'Saturday', 'ipa' => '/ˈsæt.ə.deɪ/', 'meaning' => 'Hari Sabtu', 'example' => 'Saturday is ideal for conversation club meetups.'],
+                            ['word' => 'Sunday', 'ipa' => '/ˈsʌn.deɪ/', 'meaning' => 'Hari Minggu', 'example' => 'Sunday is a day for rest and family time.'],
+                            ['word' => 'Calendar', 'ipa' => '/ˈkæl.ɪn.dər/', 'meaning' => 'Kalender / Penanggalan', 'example' => 'Please check the academic calendar for class dates.'],
+                            ['word' => 'Decade', 'ipa' => '/ˈdek.eɪd/', 'meaning' => 'Dekade / Dasawarsa (10 tahun)', 'example' => 'A decade spans ten consecutive years.'],
+                            ['word' => 'Leap year', 'ipa' => '/liːp jɪər/', 'meaning' => 'Tahun kabisat (366 hari)', 'example' => 'A leap year occurs once every four years.'],
+                            ['word' => 'Date of birth', 'ipa' => '/deɪt əv bɜːθ/', 'meaning' => 'Tanggal lahir', 'example' => 'Please write your complete date of birth on the form.'],
+                            ['word' => 'Preposition IN', 'ipa' => '/ɪn/', 'meaning' => 'Preposisi untuk Bulan dan Tahun', 'example' => 'I was born in August / in nineteen ninety-eight.'],
+                            ['word' => 'Preposition ON', 'ipa' => '/ɒn/', 'meaning' => 'Preposisi untuk Hari dan Tanggal Spesifik', 'example' => 'The class meets on Monday / on the 17th of August.'],
+                        ],
                     ],
                 ],
             ],
+
+            
+            // =========================================================================
+            // MEETING 4: PREPOSITION OF PLACE, THERE IS / THERE ARE & IMPERATIVES
+            // =========================================================================
             4 => [
-                'topic' => 'Telling Time & Daily Schedules',
-                'focus' => 'Telling Time Masterclass (British vs American vs 24-Hour International), Clock Formulas (A quarter past/to, Half past, O\'clock, AM/PM, Sharp, Hundred), Prepositions of Time (At, From...to, Until), Daily Routines & Schedule Conversations',
-                'materi' => [
-                    'telling_time' => [
-                        'british_rules' => [
-                            ['pattern' => 'A quarter past [Hour]', 'meaning' => 'Jam [Hour] lebih 15 menit (seperempat)', 'example' => '04:15 -> A quarter past four'],
-                            ['pattern' => 'A quarter to [Next Hour]', 'meaning' => 'Jam [Next Hour] kurang 15 menit (seperempat)', 'example' => '04:45 -> A quarter to five'],
-                            ['pattern' => 'Half past [Hour]', 'meaning' => 'Jam setengah [Hour] (lebih 30 menit)', 'example' => '06:30 -> Half past six'],
-                            ['pattern' => "[Hour] O'clock", 'meaning' => 'Jam [Hour] tepat (tanpa lebih menit)', 'example' => "07:00 -> Seven o'clock"],
-                        ],
-                        'american_rules' => [
-                            ['term' => 'AM (Ante Meridiem)', 'meaning' => 'Pagi (12:00 tengah malam s.d. 11:59 siang)', 'example' => '07:30 AM -> Seven thirty in the morning'],
-                            ['term' => 'PM (Post Meridiem)', 'meaning' => 'Siang / Malam (12:00 siang s.d. 11:59 malam)', 'example' => '07:30 PM -> Seven thirty in the evening'],
-                            ['term' => 'Digital Direct Form', 'meaning' => 'Membaca jam lalu menit secara langsung', 'example' => '04:15 -> Four fifteen | 06:30 -> Six thirty'],
-                        ],
-                        'other_formats' => [
-                            ['term' => 'Sharp (Tepat)', 'meaning' => 'Menyatakan waktu yang sangat presisi / tanpa toleransi', 'example' => 'The meeting starts at 4 sharp (Tepat jam 4).'],
-                            ['term' => 'Hundred (24-Hour International)', 'meaning' => 'Format 24 jam militer / internasional', 'example' => '14:00 -> Fourteen hundred | 13:00 -> Thirteen hundred'],
-                        ],
-                        'prepositions' => [
-                            ['prep' => 'AT', 'use_for' => 'Jam Spesifik & Waktu Tepat (Exact Clock Time & Moments)', 'example' => "at 4 o'clock, at 7:30 PM, at noon, at midnight"],
-                            ['prep' => 'FROM ... TO', 'use_for' => 'Rentang Waktu Mulai s.d. Selesai', 'example' => 'from 08:00 AM to 05:00 PM'],
-                            ['prep' => 'UNTIL', 'use_for' => 'Batas Waktu Berakhir', 'example' => 'until 10:00 PM'],
-                            ['prep' => 'AROUND / ABOUT', 'use_for' => 'Perkiraan Jam (Sekitar / Kurang Lebih)', 'example' => 'around half past six (sekitar jam 06:30)'],
-                        ],
-                        'qna' => [
-                            ['q' => 'What time is it now?', 'a' => "It is a quarter past four in the afternoon (04:15 PM)."],
-                            ['q' => 'What time does our class start?', 'a' => "Our class starts at a quarter past eight in the morning (08:15 AM)."],
-                            ['q' => 'What time do you usually wake up?', 'a' => "I usually wake up at half past six in the morning (06:30 AM)."],
-                        ]
-                    ],
-                ],
-                'listening' => [
-                    'title' => 'Short Listening: Flight Reservation & Schedule Confirmation',
-                    'audio_script' => "Travel Agent: Good afternoon! Global Travel Services, how can I help you today?
-
-Customer: Hi! I would like to book a flight from Jakarta to London for tomorrow.
-
-Travel Agent: Certainly! We have a flight departing at a quarter past eight in the morning (08:15 AM). The arrival time in London is at half past six in the evening (06:30 PM) on the same day.
-
-Customer: That sounds perfect! What time does boarding start?
-
-Travel Agent: Boarding starts at a quarter to eight in the morning (07:45 AM) sharp at Gate 24.
-
-Customer: Excellent! And what time does the airport train depart?
-
-Travel Agent: The airport train departs every thirty minutes, starting at five o'clock in the morning.
-
-Customer: Wonderful! Please book that flight for me. Thank you!",
-                    'key_phrases' => [
-                        'The flight departs at a quarter past eight in the morning (08:15 AM).',
-                        'The arrival time is at half past six in the evening (06:30 PM).',
-                        'Boarding starts at a quarter to eight in the morning (07:45 AM) sharp.',
-                        'The airport train departs every thirty minutes starting at five o\'clock.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What time does the flight depart from Jakarta?',
-                            'options' => [
-                                'At a quarter past eight in the morning (08:15 AM)',
-                                'At half past eight in the morning (08:30 AM)',
-                                'At a quarter to eight in the morning (07:45 AM)',
-                                'At eight o\'clock sharp (08:00 AM)',
-                            ],
-                            'answer' => 'At a quarter past eight in the morning (08:15 AM)',
-                        ],
-                        [
-                            'q' => 'What time does the flight arrive in London?',
-                            'options' => [
-                                'At half past six in the evening (06:30 PM)',
-                                'At a quarter past six in the evening (06:15 PM)',
-                                'At half past seven in the evening (07:30 PM)',
-                                'At six o\'clock sharp (06:00 PM)',
-                            ],
-                            'answer' => 'At half past six in the evening (06:30 PM)',
-                        ],
-                        [
-                            'q' => 'What time does boarding start at Gate 24?',
-                            'options' => [
-                                'At a quarter to eight in the morning (07:45 AM)',
-                                'At a quarter past eight in the morning (08:15 AM)',
-                                'At half past seven in the morning (07:30 AM)',
-                                'At eight o\'clock sharp (08:00 AM)',
-                            ],
-                            'answer' => 'At a quarter to eight in the morning (07:45 AM)',
-                        ],
-                        [
-                            'q' => 'What time does the airport train service start in the morning?',
-                            'options' => [
-                                'At five o\'clock in the morning (05:00 AM)',
-                                'At six o\'clock in the morning (06:00 AM)',
-                                'At half past five in the morning (05:30 AM)',
-                                'At a quarter past five in the morning (05:15 AM)',
-                            ],
-                            'answer' => 'At five o\'clock in the morning (05:00 AM)',
-                        ],
-                    ],
-                ],
-                'drilling1_title' => 'Drilling 1: Telling Time Masterclass (British Style)',
-                'drilling1_subtitle' => 'Latihan Pengucapan Jam British (Past, To, Half, Quarter)',
-                'drilling1_desc' => 'Latih pelafalan kalimat penyebutan jam dengan rumus British sebelum masuk ke percakapan:',
-                'drilling1' => [
+                'topic' => 'Preposition of Place, There is / There are & Imperatives',
+                'focus' => 'Prepositions of place (in, on, under, behind, next to), spatial descriptions using there is / there are, and classroom & daily imperatives.',
+                'subtopics' => [
+                    // SUBTOPIC 01
                     [
-                        'en' => 'My English speaking class starts at a quarter past four in the afternoon (04:15 PM).',
-                        'id' => 'Kelas speaking bahasa Inggris saya mulai jam empat lebih seperempat sore (04:15 PM).',
-                    ],
-                    [
-                        'en' => 'The express train will arrive at half past six sharp (06:30 sharp).',
-                        'id' => 'Kereta api ekspres akan tiba jam setengah tujuh tepat (06:30 sharp).',
-                    ],
-                    [
-                        'en' => 'Did you say a quarter to five or a quarter past five?',
-                        'id' => 'Apakah Anda mengatakan jam lima kurang seperempat atau jam lima lebih seperempat?',
-                    ],
-                    [
-                        'en' => 'Our morning briefing starts at nine o\'clock sharp.',
-                        'id' => 'Briefing pagi kita dimulai tepat jam sembilan.',
-                    ],
-                    [
-                        'en' => 'It is twenty-five past ten; we must start our session right away.',
-                        'id' => 'Sekarang jam sepuluh lebih dua puluh lima menit; kita harus segera memulai sesi kita.',
-                    ],
-                ],
-                'drilling2_title' => 'Drilling 2: Schedules & 24-Hour International Time',
-                'drilling2_subtitle' => 'Latihan Pengucapan Jadwal Harian, AM/PM, & Format 24 Jam',
-                'drilling2_desc' => 'Latih pelafalan kalimat jadwal penerbangan, jam kerja, dan waktu presisi:',
-                'drilling2' => [
-                    [
-                        'en' => 'I usually wake up at seven o\'clock in the morning on weekdays.',
-                        'id' => 'Saya biasanya bangun jam tujuh tepat di pagi hari pada hari kerja.',
-                    ],
-                    [
-                        'en' => 'Our flight departs at zero eight fifteen (08:15 AM) and lands at eighteen thirty (06:30 PM).',
-                        'id' => 'Penerbangan kami berangkat jam 08:15 dan mendarat jam 18:30.',
-                    ],
-                    [
-                        'en' => 'The library is open from eight thirty AM to nine o\'clock PM every day.',
-                        'id' => 'Perpustakaan buka dari jam 8.30 pagi sampai jam 9 malam setiap hari.',
-                    ],
-                    [
-                        'en' => 'Flight departure is scheduled for fourteen hundred hours (14:00).',
-                        'id' => 'Keberangkatan penerbangan dijadwalkan pada jam empat belas tepat (14:00).',
-                    ],
-                    [
-                        'en' => 'I usually go to bed around half past ten at night.',
-                        'id' => 'Saya biasanya tidur sekitar jam setengah sebelas malam.',
-                    ],
-                ],
-                'grammar_note' => 'Prepositions of Clock Time: AT (Specific Time/Hour, e.g. at 7:00 AM, at half past six, at noon, at midnight)',
-                'dialogue_setting' => 'Dua siswa berlatih menanyakan jam saat ini, jadwal kegiatan harian, waktu penerbangan, dan jam mulai/selesai kelas.',
-                'dialogue' => [
-                    // Ronde 1: Student A menanyakan, Student B menjawab
-                    [
-                        'section_badge' => 'Ronde 1: Student A Bertanya, Student B Menjawab',
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Jam Saat Ini)',
-                        'id' => 'Permisi, jam berapa sekarang? Jam tangan saya mati.',
-                        'en' => 'Excuse me, what time is it right now? My watch has stopped.',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Jam British)',
-                        'id' => 'Sekarang jam [a quarter past four] sore ([04:15 PM]). Kita masih punya banyak waktu.',
-                        'en' => 'It is [a quarter past four] in the afternoon ([04:15 PM]). We still have plenty of time.',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Jam Mulai Acara)',
-                        'id' => 'Jam berapa pesta dan pertemuan kita akan dimulai malam ini?',
-                        'en' => 'What time will our party and gathering start tonight?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Jam Tepat / Sharp)',
-                        'id' => 'Acara dimulai jam [half past six] malam ([06:30 PM] sharp). Jangan sampai terlambat ya!',
-                        'en' => 'The event starts at [half past six] in the evening ([06:30 PM] sharp). Please do not be late!',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menanyakan Jam Bangun Tidur)',
-                        'id' => 'Jam berapa kamu biasanya bangun tidur di pagi hari pada hari kerja?',
-                        'en' => 'What time do you usually wake up in the morning on weekdays?',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menjawab Jam Pagi AM)',
-                        'id' => 'Saya biasanya bangun jam [half past five in the morning] ([05:30 AM]) untuk berolahraga.',
-                        'en' => 'I usually wake up at [half past five in the morning] ([05:30 AM]) to exercise.',
-                    ],
-                    // Ronde 2: Student B menanyakan, Student A menjawab (Tukar Peran)
-                    [
-                        'section_badge' => 'Ronde 2: Tukar Peran (Student B Bertanya, Student A Menjawab)',
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Jam Tidur Malam)',
-                        'id' => 'Sekarang giliran saya bertanya. Jam berapa kamu biasanya pergi tidur di malam hari?',
-                        'en' => 'Now it is my turn to ask. What time do you usually go to bed at night?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Jam Malam PM)',
-                        'id' => 'Saya biasanya tidur sekitar jam [eleven o\'clock at night] ([11:00 PM]).',
-                        'en' => 'I usually go to bed around [eleven o\'clock at night] ([11:00 PM]).',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Jadwal Penerbangan)',
-                        'id' => 'Jam berapa penerbangan kita berangkat besok pagi, dan jam berapa tiba di London?',
-                        'en' => 'What time does our flight depart tomorrow morning, and what time does it arrive in London?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Jam Keberangkatan & Kedatangan)',
-                        'id' => 'Penerbangan berangkat jam [a quarter past eight] pagi ([08:15 AM]) dan tiba jam [half past six] sore ([06:30 PM]).',
-                        'en' => 'The flight departs at [a quarter past eight] in the morning ([08:15 AM]) and arrives at [half past six] in the evening ([06:30 PM]).',
-                    ],
-                    [
-                        'speaker' => 'Student B',
-                        'role_label' => 'Siswa B (Menanyakan Jam Boarding Pesawat)',
-                        'id' => 'Jam berapa proses boarding penumpang akan dimulai di Gate 24?',
-                        'en' => 'What time will passenger boarding start at Gate 24?',
-                    ],
-                    [
-                        'speaker' => 'Student A',
-                        'role_label' => 'Siswa A (Menjawab Jam Kurang Seperempat)',
-                        'id' => 'Boarding dimulai jam [a quarter to eight in the morning] ([07:45 AM] sharp).',
-                        'en' => 'Boarding starts at [a quarter to eight in the morning] ([07:45 AM] sharp).',
-                    ],
-                ],
-                'games' => [
-                    'type' => 'tourist_in_town',
-                    'participation_type' => 'group',
-                    'title' => 'Worksheet 4 Game • Wandering Tourists (Asking for Tourist Information)',
-                    'activity' => 'Whole class simulation',
-                    'aim' => 'To practice asking for and giving directions, opening times, hotel room rates, currency exchange, and train times/fares in English.',
-                    'function_practised' => 'Asking for tourist information',
-                    'lexical_areas' => 'Directions, public buildings, transport, banks (currency), hotels',
-                    'essential_vocabulary' => 'bank, station, tourist office, museum, hotel, art gallery, shopping centre, zoo, abbey, castle, aquarium, single, return, single/double room, shower, bath, times, prices, directions',
-                    'exponents' => [
-                        'How do I get to ...? / Excuse me, where is the ...?',
-                        'Turn left / right. Go straight along ...',
-                        'When / What time does the ... open / close / arrive / leave?',
-                        'It opens / closes / arrives / leaves at ....',
-                        'How much is a single / return ticket to ...?',
-                        'Can I change ... into ... please? (e.g. francs / marks / lire / yen into pounds)',
-                        'Can I have / Have you got a single / double room for ... nights, please?',
-                    ],
-                    'teacher_guide' => [
-                        'how_to_use' => 'This is an elementary simulation, designed to provide further practice in language already practised in Visiting friends (directions), Planning a day out (asking when places open and close), Getting there on time (asking for travel information), Shopping around (asking about prices) and Finding a hotel (reserving a hotel room).',
-                        'student_numbers' => 'The simulation may be done with a minimum of 8 students. Four students will act as Tourist Information Officer, Railway Booking Clerk, Hotel Receptionist and Bank Clerk. If there are more than 15 or 16 students in your class, assign 2 students per desk to deal with the queues.',
-                        'room_setup' => 'Clear the room of desks and chairs and set up four desks in different corners of the room to represent the Bank, Tourist Office, Railway Station and Seaview Hotel. Put students at these desks with their respective master information cards.',
-                        'game_rules' => [
-                            '1. Give each wandering tourist a task sheet (Sheets A through G) with their town map.',
-                            '2. The object of the game is for students to carry out the instructions in the EXACT ORDER in which they appear on the sheet.',
-                            '3. Students should find out from someone in the street where the hotel, bank, tourist office, and station are ON THE MAP and mark them in on the map, BEFORE going to these places.',
-                            '4. At each desk, tourists practice authentic communicative exponents, record their answers, and calculate currency exchange or accommodation costs accurately.',
-                        ],
-                    ],
-                    'time' => '20-25 Menit',
-                    'map_image' => '/images/speaking/worksheet4/map_overview.png',
-                    'map_landmarks' => [
-                        1 => ['id' => 1, 'name' => 'Museum', 'street' => 'Museum Street / Queen Street', 'icon' => '🏛️', 'open' => '9am–5pm', 'closed' => 'Closed on Tuesdays', 'audio' => 'The Museum is building number 1 on Museum Street. It is open from 9am to 5pm, and closed on Tuesdays.'],
-                        2 => ['id' => 2, 'name' => 'Shopping centre', 'street' => 'Station Road / Market Street / High Street', 'icon' => '🛍️', 'open' => '9am–5.30pm', 'closed' => 'Closed Wednesday afternoon', 'audio' => 'The Shopping centre is building number 2. Shops are open 9am to 5.30pm, closed Wednesday afternoon.'],
-                        3 => ['id' => 3, 'name' => 'Art gallery', 'street' => 'London Road / West Street / Museum Street', 'icon' => '🎨', 'open' => '10am–6pm', 'closed' => 'Closed on Mondays', 'audio' => 'The Art gallery is building number 3 on London Road. It is open from 10am to 6pm, and closed on Mondays.'],
-                        4 => ['id' => 4, 'name' => 'Cathedral', 'street' => 'London Road / Church Street / Queen Street', 'icon' => '⛪', 'open' => '8am–6pm', 'closed' => 'Open every day', 'audio' => 'The Cathedral is building number 4 on Church Street. It is open daily from 8am to 6pm.'],
-                        5 => ['id' => 5, 'name' => 'Aquarium', 'street' => 'High Street / East Street / Marine Drive', 'icon' => '🐠', 'open' => '9am–5pm', 'closed' => 'Open every day', 'audio' => 'The Aquarium is building number 5 on High Street near Marine Drive. It is open daily from 9am to 5pm.'],
-                        6 => ['id' => 6, 'name' => 'Castle', 'street' => 'Park Road / Queen Street', 'icon' => '🏰', 'open' => '10am–5pm', 'closed' => 'Open every day', 'audio' => 'The Castle is building number 6 on Park Road. It is open daily from 10am to 5pm.'],
-                        7 => ['id' => 7, 'name' => 'Abbey', 'street' => 'Park Road / Abbey Road / Queen Street', 'icon' => '🕍', 'open' => '9am–6pm', 'closed' => 'Closed on Thursdays', 'audio' => 'The Abbey is building number 7 on Abbey Road. It is open from 9am to 6pm, and closed on Thursdays.'],
-                        8 => ['id' => 8, 'name' => 'Zoo', 'street' => 'King Street', 'icon' => '🦁', 'open' => '10am–5.30pm', 'closed' => 'Open every day', 'audio' => 'The Zoo is building number 8 near King Street. It is open every day from 10am to 5.30pm.'],
-                    ],
-                    'main_buildings' => [
-                        'station' => ['name' => 'Railway Station', 'street' => 'North Street / Station Road', 'icon' => '🚆', 'desc' => 'Train ticket office and departures to London, Liverpool, York, Manchester, and Bristol.', 'audio' => 'The Railway Station is located on North Street at the top of Station Road.'],
-                        'tourist_office' => ['name' => 'Tourist Office', 'street' => 'High Street / East Street / King Street', 'icon' => 'ℹ️', 'desc' => 'Information desk for city sights opening times and map locations.', 'audio' => 'The Tourist Office is located on High Street at the corner of East Street.'],
-                        'bank' => ['name' => 'Bank (Currency Exchange)', 'street' => 'West Street / Marine Drive', 'icon' => '🏦', 'desc' => 'Foreign exchange service into English pounds (£ sterling).', 'audio' => 'The Bank is located on West Street, opposite Marine Drive.'],
-                        'hotel' => ['name' => 'Seaview Hotel', 'street' => 'Marine Drive / East Street (Waterfront)', 'icon' => '🏨', 'desc' => 'Hotel accommodation with single/double rooms, shower and bath options.', 'audio' => 'The Seaview Hotel is located on Marine Drive by the seaside at the bottom right of town.'],
-                    ],
-                    'desks' => [
-                        'tourist_office' => [
-                            'title' => 'Tourist Office',
-                            'subtitle' => 'Opening Times & City Attractions',
-                            'icon' => 'ℹ️',
-                            'places' => [
-                                ['num' => 1, 'name' => 'Museum', 'open' => '9am–5pm', 'note' => 'closed on Tuesdays', 'audio' => 'The museum is open from 9am to 5pm, closed on Tuesdays.'],
-                                ['num' => 2, 'name' => 'Shopping centre', 'open' => '9am–5.30pm', 'note' => 'closed Wednesday afternoon', 'audio' => 'The shopping centre shops are open 9am to 5.30pm, closed Wednesday afternoon.'],
-                                ['num' => 3, 'name' => 'Art gallery', 'open' => '10am–6pm', 'note' => 'closed on Mondays', 'audio' => 'The art gallery is open 10am to 6pm, closed on Mondays.'],
-                                ['num' => 4, 'name' => 'Cathedral', 'open' => '8am–6pm', 'note' => 'open every day', 'audio' => 'The cathedral is open daily from 8am to 6pm.'],
-                                ['num' => 5, 'name' => 'Aquarium', 'open' => '9am–5pm', 'note' => 'open every day', 'audio' => 'The aquarium is open daily from 9am to 5pm.'],
-                                ['num' => 6, 'name' => 'Castle', 'open' => '10am–5pm', 'note' => 'open every day', 'audio' => 'The castle is open daily from 10am to 5pm.'],
-                                ['num' => 7, 'name' => 'Abbey', 'open' => '9am–6pm', 'note' => 'closed on Thursdays', 'audio' => 'The abbey is open 9am to 6pm, closed on Thursdays.'],
-                                ['num' => 8, 'name' => 'Zoo', 'open' => '10am–5.30pm', 'note' => 'open every day', 'audio' => 'The zoo is open every day from 10am to 5.30pm.'],
+                        'id' => 'sec-m4-sub-1',
+                        'num' => '01',
+                        'title' => 'Preposition of Place & Spatial Descriptions',
+                        'subtitle' => 'Prepositions of Place (In, On, Under, Behind, Next to, Opposite, Between) & Room Layouts',
+                        'desc' => 'Preposisi tempat, posisi benda dalam ruangan, arah letak bangunan, dan denah spasial.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'preposition_place',
+                            'title' => 'Prepositions of Place Matrix',
+                            'rules' => [
+                                ['prep' => 'IN', 'meaning' => 'Di dalam (ruang tertutup / wadah)', 'example' => 'The passport is in my leather backpack.'],
+                                ['prep' => 'ON', 'meaning' => 'Di atas permukaan (menempel / menyentuh)', 'example' => 'The laptop is on the study desk.'],
+                                ['prep' => 'UNDER', 'meaning' => 'Di bawah (tertutupi benda lain)', 'example' => 'The shoes are under the wooden chair.'],
+                                ['prep' => 'BEHIND', 'meaning' => 'Di belakang (posisi punggung)', 'example' => 'The whiteboard is behind the podium.'],
+                                ['prep' => 'IN FRONT OF', 'meaning' => 'Di depan (berada di hadapan)', 'example' => 'The screen is in front of the students.'],
+                                ['prep' => 'NEXT TO / BESIDE', 'meaning' => 'Di sebelah / Di samping', 'example' => 'The printer is next to the monitor.'],
+                                ['prep' => 'BETWEEN', 'meaning' => 'Di antara dua benda/orang', 'example' => 'The table is between the sofa and the bookcase.'],
+                                ['prep' => 'OPPOSITE / ACROSS FROM', 'meaning' => 'Berseberangan langsung', 'example' => 'The library is opposite the science lab.'],
+                                ['prep' => 'ABOVE / OVER', 'meaning' => 'Di atas (melayang / tanpa kontak langsung)', 'example' => 'The wall clock is above the main door.'],
                             ],
                         ],
-                        'bank' => [
-                            'title' => 'Bank (Foreign Exchange Desk)',
-                            'subtitle' => 'Rates of Exchange for Pounds (£ sterling)',
-                            'icon' => '🏦',
-                            'currencies' => [
-                                ['currency' => 'French francs', 'rate' => '10.00', 'rate_desc' => '10.00 francs = £1.00', 'example' => '250 francs = £25.00', 'audio' => 'The exchange rate for French francs is 10.00 francs per pound sterling.'],
-                                ['currency' => 'German marks', 'rate' => '4.50', 'rate_desc' => '4.50 marks = £1.00', 'example' => '45 marks = £10.00', 'audio' => 'The exchange rate for German marks is 4.50 marks per pound sterling.'],
-                                ['currency' => 'Italian lire', 'rate' => '2,300', 'rate_desc' => '2,300 lire = £1.00', 'example' => '23,000 lire = £10.00', 'audio' => 'The exchange rate for Italian lire is 2,300 lire per pound sterling.'],
-                                ['currency' => 'Spanish pesetas', 'rate' => '200', 'rate_desc' => '200 pesetas = £1.00', 'example' => '2,000 pesetas = £10.00', 'audio' => 'The exchange rate for Spanish pesetas is 200 pesetas per pound sterling.'],
-                                ['currency' => 'US dollars', 'rate' => '1.50', 'rate_desc' => '$1.50 = £1.00', 'example' => '$15.00 = £10.00', 'audio' => 'The exchange rate for US dollars is 1.50 dollars per pound sterling.'],
-                                ['currency' => 'Japanese yen', 'rate' => '400', 'rate_desc' => '400 yen = £1.00', 'example' => '4,000 yen = £10.00', 'audio' => 'The exchange rate for Japanese yen is 400 yen per pound sterling.'],
+                                                'listening' => [
+                            'title' => 'Short Listening: Navigating the Modern Multinational Office in Jakarta',
+                            'audio_script' => "Jessica: Good morning, Bagus! Could you please help me locate the materials for our presentation?
+Bagus: Good morning, Jessica! Of course. Which materials are you looking for?
+Jessica: First, where is the main digital projector?
+Bagus: The projector is on the top shelf, inside the media cabinet next to the whiteboard.
+Jessica: Great! And where are the printed handouts for the participants?
+Bagus: They are on the long wooden table, right between the laptop chargers and the guest register.
+Jessica: Perfect! And which room is our meeting in?
+Bagus: The meeting is in the Merdeka Boardroom, directly across from the coffee lounge on the 3rd floor.
+Jessica: Thank you so much, Bagus! That is very clear.",
+                            'key_phrases' => [
+                                'The projector is on the top shelf, inside the media cabinet next to the whiteboard.',
+                                'They are on the long wooden table, right between the laptop chargers and the guest register.',
+                                'Directly across from the coffee lounge on the 3rd floor.',
+                                'Could you please help me locate the materials for our presentation?',
                             ],
-                        ],
-                        'hotel' => [
-                            'title' => 'Seaview Hotel',
-                            'subtitle' => 'Room Price List & Booking',
-                            'icon' => '🏨',
-                            'rooms' => [
-                                ['type' => 'Single room', 'feature' => 'Standard', 'price' => '£12', 'price_num' => 12, 'audio' => 'A single room is £12 per night.'],
-                                ['type' => 'Single room', 'feature' => 'With shower', 'price' => '£14', 'price_num' => 14, 'audio' => 'A single room with shower is £14 per night.'],
-                                ['type' => 'Single room', 'feature' => 'With bath', 'price' => '£15', 'price_num' => 15, 'audio' => 'A single room with bath is £15 per night.'],
-                                ['type' => 'Double room', 'feature' => 'Standard', 'price' => '£20', 'price_num' => 20, 'audio' => 'A double room is £20 per night.'],
-                                ['type' => 'Double room', 'feature' => 'With shower', 'price' => '£22', 'price_num' => 22, 'audio' => 'A double room with shower is £22 per night.'],
-                                ['type' => 'Double room', 'feature' => 'With bath', 'price' => '£25', 'price_num' => 25, 'audio' => 'A double room with bath is £25 per night.'],
-                            ],
-                        ],
-                        'station' => [
-                            'title' => 'Railway Station',
-                            'subtitle' => 'Train Timetable & Fares',
-                            'icon' => '🚆',
-                            'trains' => [
+                            'questions' => [
                                 [
-                                    'dest' => 'London',
-                                    'dep' => ['9.00', '14.30', '17.15', '18.40'],
-                                    'single' => '£12',
-                                    'return' => '£20',
-                                    'audio' => 'Trains to London depart at 9.00, 14.30, 17.15, and 18.40. A single ticket is £12 and a return is £20.',
+                                    'q' => 'Where is the digital projector located?',
+                                    'options' => [
+                                        'Inside the media cabinet next to the whiteboard',
+                                        'On the long wooden table',
+                                        'Across from the coffee lounge',
+                                        'Under the receptionist desk',
+                                    ],
+                                    'answer' => 'Inside the media cabinet next to the whiteboard',
                                 ],
                                 [
-                                    'dest' => 'Liverpool',
-                                    'dep' => ['6.00', '15.35', '19.50', '21.17'],
-                                    'single' => '£20',
-                                    'return' => '£35',
-                                    'audio' => 'Trains to Liverpool depart at 6.00, 15.35, 19.50, and 21.17. A single ticket is £20 and a return is £35.',
+                                    'q' => 'Where are the printed handouts placed?',
+                                    'options' => [
+                                        'Between the laptop chargers and the guest register',
+                                        'Inside the media cabinet',
+                                        'On the top shelf',
+                                        'Next to the elevator',
+                                    ],
+                                    'answer' => 'Between the laptop chargers and the guest register',
                                 ],
                                 [
-                                    'dest' => 'York',
-                                    'dep' => ['10.00', '13.25', '15.30', '20.45'],
-                                    'single' => '£17',
-                                    'return' => '£30',
-                                    'audio' => 'Trains to York depart at 10.00, 13.25, 15.30, and 20.45. A single ticket is £17 and a return is £30.',
-                                ],
-                                [
-                                    'dest' => 'Manchester',
-                                    'dep' => ['10.05', '12.45', '15.27', '18.55'],
-                                    'single' => '£15',
-                                    'return' => '£25',
-                                    'audio' => 'Trains to Manchester depart at 10.05, 12.45, 15.27, and 18.55. A single ticket is £15 and a return is £25.',
-                                ],
-                                [
-                                    'dest' => 'Bristol',
-                                    'dep' => ['11.00', '16.40', '22.10', '23.57'],
-                                    'single' => '£7',
-                                    'return' => '£12',
-                                    'audio' => 'Trains to Bristol depart at 11.00, 16.40, 22.10, and 23.57. A single ticket is £7 and a return is £12.',
+                                    'q' => 'Where is the Merdeka Boardroom situated?',
+                                    'options' => [
+                                        'Across from the coffee lounge on the 3rd floor',
+                                        'Next to the main entrance',
+                                        'On the ground floor',
+                                        'Beside the parking lot',
+                                    ],
+                                    'answer' => 'Across from the coffee lounge on the 3rd floor',
                                 ],
                             ],
                         ],
-                    ],
-                    'student_sheets' => [
-                        'sheet_a' => [
-                            'id' => 'sheet_a',
-                            'title' => 'Tourist Sheet A (Route 1)',
-                            'badge' => 'Tourist A',
-                            'image' => '/images/speaking/worksheet4/student_sheet_a.png',
-                            'start' => 'Museum Street / Marine Drive (YOU ARE HERE)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Go to the Seaview Hotel. Book a single room with a shower for two nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Good day. I\'d like to book a single room with a shower for two nights, please. How much does it cost?',
-                                    'desk_reply' => 'A single room with a shower is £14 per night, so for two nights it costs £28.',
-                                    'answer' => '£28 (£14 x 2 nights)',
-                                    'calc' => 'Single room with shower = £14/night. 2 nights x £14 = £28.',
+'drilling' => [
+                            'The financial report is on the conference table.',
+                            'My office laptop is inside the leather briefcase.',
+                            'The emergency flashlight is under the driver seat.',
+                            'The whiteboard is positioned right behind the teacher desk.',
+                            'The visitor reception desk is directly in front of the entrance.',
+                            'The modern coffee machine is next to the water dispenser.',
+                            'Our training center is located between the bank and the bookstore.',
+                            'The city museum is located opposite the central train station.',
+                            'A classic analog clock hangs quietly above the wooden door.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Finding Items in the Modern Workspace',
+                                'turns' => [
+                                    ['speaker' => 'David', 'text' => 'Excuse me, Sarah. Have you seen my blue notebook anywhere in the room?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Sarah', 'text' => 'I think you left it on the round coffee table, next to the magazines.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'David', 'text' => 'I already checked there. Oh, wait! It is under these printed project folders.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Sarah', 'text' => 'Glad you found it. By the way, your car keys are behind the computer screen.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'David', 'text' => 'Thank you so much! My memory is not working well this morning.', 'avatar' => 'male_1'],
                                 ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Ask someone where the bank is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Excuse me, could you tell me where the bank is?',
-                                    'desk_reply' => 'The bank is on West Street, just opposite Marine Drive near London Road.',
-                                    'answer' => 'Mark Bank on West Street / Marine Drive',
-                                    'calc' => 'Location is on West Street / Marine Drive.',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Go to the bank. Change 250 French francs into English pounds.',
-                                    'question' => 'Write down how much you get.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Hello. Could I change 250 French francs into English pounds, please?',
-                                    'desk_reply' => 'Certainly. The rate is 10.00 francs per pound, so you get £25.',
-                                    'answer' => '£25 (250 / 10)',
-                                    'calc' => '250 francs ÷ 10.00 = £25.00.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, where is the railway station?',
-                                    'desk_reply' => 'Go straight up Station Road to North Street. The station is right at the top of Station Road.',
-                                    'answer' => 'Mark Station at top of Station Road / North Street',
-                                    'calc' => 'Station is located on North Street / Station Road.',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Go to the station. Find the time of the first train to Liverpool in the morning.',
-                                    'question' => 'Write the time down here & How much is a return ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What time is the first train to Liverpool in the morning, and how much is a return ticket?',
-                                    'desk_reply' => 'The first train to Liverpool departs at 6.00 in the morning. A return ticket is £35.',
-                                    'answer' => 'Time: 6.00 | Return ticket: £35',
-                                    'calc' => 'First morning departure: 6.00. Return fare: £35 (Single is £20).',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Ask where the tourist office is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Tourist Office',
-                                    'inquiry' => 'Excuse me, where can I find the tourist office?',
-                                    'desk_reply' => 'The tourist office is on High Street, on the corner of East Street.',
-                                    'answer' => 'Mark Tourist Office on High Street / East Street',
-                                    'calc' => 'Tourist Office is on High Street and East Street.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the tourist office. Ask where the aquarium is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Aquarium',
-                                    'inquiry' => 'Excuse me, where is the aquarium and what are its opening times?',
-                                    'desk_reply' => 'The aquarium is building number 5 on High Street / Marine Drive. It is open daily from 9am to 5pm.',
-                                    'answer' => 'Location: 5 | Times: 9am–5pm (open every day)',
-                                    'calc' => 'Aquarium is building 5. Open 9am–5pm.',
+                            ],
+                            [
+                                'title' => 'Dialogue B: Asking Directions Inside Campus',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Pardon me, could you tell me where Room 304 is located?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Emma', 'text' => 'Sure! Go down this hallway. Room 304 is between the language lab and the staff room.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Dimas', 'text' => 'Is it opposite the student cafeteria?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Emma', 'text' => 'Yes, exactly! It is directly opposite the cafeteria entrance.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Dimas', 'text' => 'Thank you very much for your kind help!', 'avatar' => 'male_2'],
                                 ],
                             ],
                         ],
-                        'sheet_b' => [
-                            'id' => 'sheet_b',
-                            'title' => 'Tourist Sheet B (Route 2)',
-                            'badge' => 'Tourist B',
-                            'image' => '/images/speaking/worksheet4/student_sheet_b.png',
-                            'start' => 'Museum Street / Marine Drive (YOU ARE HERE)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Ask someone where the bank is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Excuse me, where is the bank please?',
-                                    'desk_reply' => 'It is on West Street, just off Marine Drive.',
-                                    'answer' => 'Mark Bank on West Street / Marine Drive',
-                                    'calc' => 'Bank is located on West Street / Marine Drive.',
+                        'game' => [
+                            'type' => 'where_are_my_glasses',
+                            'title' => 'Activity: Where Are My Glasses? (The Untidy House)',
+                            'aim' => 'To ask and answer where household objects and personal possessions are using prepositions of place in an untidy family living room.',
+                            'activity_type' => 'Information Gap • Small Groups of 3 or 4 Students',
+                            'function_practised' => 'Asking and replying where things are',
+                            'exponents' => [
+                                'questions' => [
+                                    ['pattern' => "Where's my ...?", 'usage' => 'Singular objects (e.g., Where\'s my radio? Where\'s my book?)'],
+                                    ['pattern' => "Where are my ...?", 'usage' => 'Plural objects (e.g., Where are my glasses? Where are my slippers?)'],
                                 ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Go to the bank. Change 23,000 lire into English pounds.',
-                                    'question' => 'Write down how much you get.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Good morning. Could I please exchange 23,000 Italian lire into pounds?',
-                                    'desk_reply' => 'Sure! The exchange rate is 2,300 lire per pound, so 23,000 lire is exactly £10.',
-                                    'answer' => '£10 (23,000 / 2,300)',
-                                    'calc' => '23,000 lire ÷ 2,300 = £10.00.',
+                                'answers' => [
+                                    ['pattern' => "It's in / on / under / behind / next to / in front of the ...", 'usage' => 'Singular response'],
+                                    ['pattern' => "They're in / on / under / behind / next to / in front of the ...", 'usage' => 'Plural response'],
                                 ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, which way is the railway station?',
-                                    'desk_reply' => 'Head up Station Road towards North Street. You will see the station at the end of the road.',
-                                    'answer' => 'Mark Station on North Street / Station Road',
-                                    'calc' => 'Station is on North Street.',
+                                'prepositions' => [
+                                    ['prep' => 'in', 'meaning' => 'di dalam', 'example' => "in the fireplace / in the waste-paper basket"],
+                                    ['prep' => 'on', 'meaning' => 'di atas permukaan', 'example' => "on the sofa / on the table / on the floor"],
+                                    ['prep' => 'under', 'meaning' => 'di bawah', 'example' => "under the table / under the sofa"],
+                                    ['prep' => 'on top of', 'meaning' => 'di atas puncak benda', 'example' => "on top of the television"],
+                                    ['prep' => 'near', 'meaning' => 'di dekat', 'example' => "near the sofa / near the door"],
+                                    ['prep' => 'next to / beside', 'meaning' => 'di sebelah / di samping', 'example' => "next to the lamp / beside the sofa"],
+                                    ['prep' => 'in front of', 'meaning' => 'di depan', 'example' => "in front of the armchair / in front of the bookcase"],
+                                    ['prep' => 'behind', 'meaning' => 'di belakang', 'example' => "behind the chair / behind the sofa"],
+                                    ['prep' => 'between', 'meaning' => 'di antara dua benda', 'example' => "between the sofa and the armchair"],
+                                    ['prep' => 'to the right / left of', 'meaning' => 'di sebelah kanan / kiri', 'example' => "to the right of the table"],
                                 ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Go to the station. Ask when the first train to Bristol is.',
-                                    'question' => 'Write the time here & How much is a single ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What time does the first train to Bristol depart, and how much is a single ticket?',
-                                    'desk_reply' => 'The first train to Bristol is at 11.00. A single ticket costs £7.',
-                                    'answer' => 'Time: 11.00 | Single ticket: £7',
-                                    'calc' => 'First departure: 11.00. Single ticket: £7 (Return is £12).',
+                            ],
+                            'original_assets' => [
+                                'activity_guide' => '/images/speaking/where_are_my_glasses/activity_guide.png?v=color_20260925',
+                                'card_dad_jenny' => '/images/speaking/where_are_my_glasses/card_dad_jenny.png?v=color_20260925',
+                                'card_mum_tom' => '/images/speaking/where_are_my_glasses/card_mum_tom.png?v=color_20260925',
+                                'room_color' => '/images/speaking/where_are_my_glasses/untidy_living_room_color.png?v=color_20260925',
+                            ],
+                            'roles' => [
+                                'dad' => [
+                                    'id' => 'dad',
+                                    'name' => 'Dad',
+                                    'label' => 'Dad (Ayah)',
+                                    'icon' => '👨',
+                                    'badge' => 'Family Member #1',
+                                    'color' => 'amber',
+                                    'card_image' => '/images/speaking/where_are_my_glasses/card_dad.png?v=color_20260925',
+                                    'scan_image' => '/images/speaking/where_are_my_glasses/card_dad_bw.png?v=color_20260925',
+                                    'desc' => 'You live in a very untidy house with your family. This is your living room, and you have lost 6 of your favorite things!',
+                                    'lost_items' => [
+                                        [
+                                            'id' => 'dad_glasses',
+                                            'name' => 'glasses',
+                                            'name_id' => 'kacamata baca',
+                                            'icon' => '👓',
+                                            'is_plural' => true,
+                                            'question' => 'Where are my glasses?',
+                                            'answer' => "They're on the small table next to the lamp.",
+                                            'preposition' => 'on / next to',
+                                            'place' => 'the small table next to the lamp',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'dad_pipe',
+                                            'name' => 'pipe',
+                                            'name_id' => 'pipa tembakau',
+                                            'icon' => '🚬',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my pipe?',
+                                            'answer' => "It's on the small table, in front of the lamp.",
+                                            'preposition' => 'on / in front of',
+                                            'place' => 'the small table in front of the lamp',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'dad_radio',
+                                            'name' => 'radio',
+                                            'name_id' => 'radio antik',
+                                            'icon' => '📻',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my radio?',
+                                            'answer' => "It's on the small table beside the sofa.",
+                                            'preposition' => 'on / beside',
+                                            'place' => 'the small table beside the sofa',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'dad_cushion',
+                                            'name' => 'cushion',
+                                            'name_id' => 'bantal sofa empuk',
+                                            'icon' => '🛋️',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my cushion?',
+                                            'answer' => "It's on the right corner of the sofa.",
+                                            'preposition' => 'on',
+                                            'place' => 'the right corner of the sofa',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'dad_newspaper',
+                                            'name' => 'newspaper (paper)',
+                                            'name_id' => 'koran berita harian',
+                                            'icon' => '📰',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my newspaper?',
+                                            'answer' => "It's on the floor in front of the armchair.",
+                                            'preposition' => 'on / in front of',
+                                            'place' => 'the floor in front of the armchair',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'dad_umbrella',
+                                            'name' => 'umbrella',
+                                            'name_id' => 'payung lipat hitam',
+                                            'icon' => '☂️',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my umbrella?',
+                                            'answer' => "It's behind the sofa in the corner, next to the bookcase.",
+                                            'preposition' => 'behind / next to',
+                                            'place' => 'the corner behind the sofa, next to the bookcase',
+                                            'found_on' => "Jenny, Mum, and Tom's cards",
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Ask someone where the Seaview Hotel is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Excuse me, could you tell me where the Seaview Hotel is?',
-                                    'desk_reply' => 'The Seaview Hotel is at the far right end of Marine Drive, facing the sea.',
-                                    'answer' => 'Mark Seaview Hotel on Marine Drive / East Street (bottom right)',
-                                    'calc' => 'Seaview Hotel is located on Marine Drive near East Street.',
+                                'jenny' => [
+                                    'id' => 'jenny',
+                                    'name' => 'Jenny',
+                                    'label' => 'Jenny (Anak Perempuan)',
+                                    'icon' => '👧',
+                                    'badge' => 'Family Member #2',
+                                    'color' => 'pink',
+                                    'card_image' => '/images/speaking/where_are_my_glasses/card_jenny.png?v=color_20260925',
+                                    'scan_image' => '/images/speaking/where_are_my_glasses/card_jenny_bw.png?v=color_20260925',
+                                    'desc' => 'You live in a very untidy house with your family. This is your living room, and you have lost 6 of your favorite accessories!',
+                                    'lost_items' => [
+                                        [
+                                            'id' => 'jenny_hairbrush',
+                                            'name' => 'hairbrush',
+                                            'name_id' => 'sikat rambut',
+                                            'icon' => '🪮',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my hairbrush?',
+                                            'answer' => "It's on the floor between the wooden chair and the TV.",
+                                            'preposition' => 'on / between',
+                                            'place' => 'the floor between the wooden chair and the TV',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'jenny_pen',
+                                            'name' => 'pen',
+                                            'name_id' => 'pulpen tulis',
+                                            'icon' => '✒️',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my pen?',
+                                            'answer' => "It's on top of the television set.",
+                                            'preposition' => 'on top of',
+                                            'place' => 'top of the television',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'jenny_cigarettes',
+                                            'name' => 'cigarettes',
+                                            'name_id' => 'bungkus rokok & korek',
+                                            'icon' => '🚬',
+                                            'is_plural' => true,
+                                            'question' => 'Where are my cigarettes?',
+                                            'answer' => "They're on the mantlepiece, above the fireplace.",
+                                            'preposition' => 'on / above',
+                                            'place' => 'the mantlepiece above the fireplace',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'jenny_gloves',
+                                            'name' => 'gloves',
+                                            'name_id' => 'sepasang sarung tangan',
+                                            'icon' => '🧤',
+                                            'is_plural' => true,
+                                            'question' => 'Where are my gloves?',
+                                            'answer' => "They're on the cushion of the armchair.",
+                                            'preposition' => 'on',
+                                            'place' => 'the armchair',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'jenny_handbag',
+                                            'name' => 'handbag',
+                                            'name_id' => 'tas jinjing wanita',
+                                            'icon' => '👜',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my handbag?',
+                                            'answer' => "It's on the backrest of the sofa.",
+                                            'preposition' => 'on / on top of',
+                                            'place' => 'the back of the sofa',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'jenny_hat',
+                                            'name' => 'hat',
+                                            'name_id' => 'topi bundar',
+                                            'icon' => '👒',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my hat?',
+                                            'answer' => "It's hanging on the back of the wooden chair.",
+                                            'preposition' => 'on / hanging on',
+                                            'place' => 'the back of the wooden chair',
+                                            'found_on' => "Dad, Mum, and Tom's cards",
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Go to the Seaview Hotel. Book a double room for one night.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Hello. I would like to book a standard double room for one night, please. How much is that?',
-                                    'desk_reply' => 'A double room for one night costs £20.',
-                                    'answer' => '£20 (1 night)',
-                                    'calc' => 'Double room standard = £20/night.',
+                                'mum' => [
+                                    'id' => 'mum',
+                                    'name' => 'Mum',
+                                    'label' => 'Mum (Ibu)',
+                                    'icon' => '👩',
+                                    'badge' => 'Family Member #3',
+                                    'color' => 'purple',
+                                    'card_image' => '/images/speaking/where_are_my_glasses/card_mum.png?v=color_20260925',
+                                    'scan_image' => '/images/speaking/where_are_my_glasses/card_mum_bw.png?v=color_20260925',
+                                    'desc' => 'You live in a very untidy house with your family. This is your living room, and you have lost 6 of your domestic necessities!',
+                                    'lost_items' => [
+                                        [
+                                            'id' => 'mum_cup',
+                                            'name' => 'cup',
+                                            'name_id' => 'cangkir teh',
+                                            'icon' => '☕',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my cup?',
+                                            'answer' => "It's on top of the TV, right next to the antenna.",
+                                            'preposition' => 'on top of / next to',
+                                            'place' => 'top of the TV, next to the antenna',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'mum_purse',
+                                            'name' => 'purse',
+                                            'name_id' => 'dompet koin',
+                                            'icon' => '👛',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my purse?',
+                                            'answer' => "It's on the arm of the armchair.",
+                                            'preposition' => 'on',
+                                            'place' => 'the arm of the armchair',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'mum_knitting',
+                                            'name' => 'knitting',
+                                            'name_id' => 'jarum & benang rajutan',
+                                            'icon' => '🧶',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my knitting?',
+                                            'answer' => "It's on the sofa, right in the middle.",
+                                            'preposition' => 'on / in the middle of',
+                                            'place' => 'the middle of the sofa',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'mum_basket',
+                                            'name' => 'shopping basket',
+                                            'name_id' => 'keranjang anyaman belanja',
+                                            'icon' => '🧺',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my shopping basket?',
+                                            'answer' => "It's on the floor in front of the sofa.",
+                                            'preposition' => 'on / in front of',
+                                            'place' => 'the floor in front of the sofa',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'mum_slippers',
+                                            'name' => 'slippers',
+                                            'name_id' => 'sepasang sandal rumah',
+                                            'icon' => '🩴',
+                                            'is_plural' => true,
+                                            'question' => 'Where are my slippers?',
+                                            'answer' => "They're on the floor near the sofa and open book.",
+                                            'preposition' => 'on / near',
+                                            'place' => 'the floor near the sofa',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                        [
+                                            'id' => 'mum_teapot',
+                                            'name' => 'teapot',
+                                            'name_id' => 'teko porselen pembuat teh',
+                                            'icon' => '🫖',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my teapot?',
+                                            'answer' => "It's in the fireplace on the floor hearth.",
+                                            'preposition' => 'in',
+                                            'place' => 'the fireplace on the left',
+                                            'found_on' => "Dad, Jenny, and Tom's cards",
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the tourist office. Ask where the castle is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Castle',
-                                    'inquiry' => 'Excuse me, where is the castle located, and what time does it open and close?',
-                                    'desk_reply' => 'The castle is building number 6 on Park Road. It is open every day from 10am to 5pm.',
-                                    'answer' => 'Location: 6 | Times: 10am–5pm (open every day)',
-                                    'calc' => 'Castle is building 6. Open 10am–5pm.',
+                                'tom' => [
+                                    'id' => 'tom',
+                                    'name' => 'Tom',
+                                    'label' => 'Tom (Anak Laki-laki)',
+                                    'icon' => '👦',
+                                    'badge' => 'Family Member #4',
+                                    'color' => 'blue',
+                                    'card_image' => '/images/speaking/where_are_my_glasses/card_tom.png?v=color_20260925',
+                                    'scan_image' => '/images/speaking/where_are_my_glasses/card_tom_bw.png?v=color_20260925',
+                                    'desc' => 'You live in a very untidy house with your family. This is your living room, and you have lost 6 of your favorite personal belongings!',
+                                    'lost_items' => [
+                                        [
+                                            'id' => 'tom_comb',
+                                            'name' => 'comb',
+                                            'name_id' => 'sisir rambut',
+                                            'icon' => '🪮',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my comb?',
+                                            'answer' => "It's on the armchair next to the gloves.",
+                                            'preposition' => 'on / next to',
+                                            'place' => 'the armchair next to the gloves',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                        [
+                                            'id' => 'tom_book',
+                                            'name' => 'book',
+                                            'name_id' => 'buku bacaan tebal',
+                                            'icon' => '📖',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my book?',
+                                            'answer' => "It's open on the floor in front of the sofa.",
+                                            'preposition' => 'on / in front of',
+                                            'place' => 'the floor in front of the sofa',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                        [
+                                            'id' => 'tom_glass',
+                                            'name' => 'glass',
+                                            'name_id' => 'gelas air minum',
+                                            'icon' => '🥛',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my glass?',
+                                            'answer' => "It's on the floor in front of the small table.",
+                                            'preposition' => 'on / in front of',
+                                            'place' => 'the floor in front of the small table',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                        [
+                                            'id' => 'tom_socks',
+                                            'name' => 'socks',
+                                            'name_id' => 'sepasang kaus kaki',
+                                            'icon' => '🧦',
+                                            'is_plural' => true,
+                                            'question' => 'Where are my socks?',
+                                            'answer' => "They're draped on the seat of the wooden chair.",
+                                            'preposition' => 'on',
+                                            'place' => 'the seat of the wooden chair',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                        [
+                                            'id' => 'tom_football',
+                                            'name' => 'football',
+                                            'name_id' => 'bola sepak polkadot',
+                                            'icon' => '⚽',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my football?',
+                                            'answer' => "It's on the floor between the sofa and armchair, in front of the bookcase.",
+                                            'preposition' => 'on / between / in front of',
+                                            'place' => 'the floor in front of the bookcase',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                        [
+                                            'id' => 'tom_record',
+                                            'name' => 'record',
+                                            'name_id' => 'piringan hitam vinil',
+                                            'icon' => '🎵',
+                                            'is_plural' => false,
+                                            'question' => 'Where is my record?',
+                                            'answer' => "It's on the floor leaning against the armchair.",
+                                            'preposition' => 'on / against / next to',
+                                            'place' => 'the floor leaning against the armchair',
+                                            'found_on' => "Dad, Jenny, and Mum's cards",
+                                        ],
+                                    ],
                                 ],
+                            ],
+                            'teacher_guide' => [
+                                ['step' => 1, 'title' => 'Bentuk Kelompok 3 atau 4 Siswa', 'desc' => 'Bagi siswa menjadi kelompok beranggotakan 3 atau 4 orang. Jika kelompok berisi 3 orang, tinggalkan karakter Jenny.'],
+                                ['step' => 2, 'title' => 'Bagikan Karakter & Kartu Gambar', 'desc' => 'Berikan masing-masing 1 kartu karakter (Dad, Jenny, Mum, atau Tom). Beri tahu siswa bahwa mereka adalah keluarga yang sangat tidak rapi dan selalu kehilangan barang!'],
+                                ['step' => 3, 'title' => 'Pahami Posisi Gambar di Ruangan', 'desc' => 'Gambar besar menunjukkan ruang tamu keluarga saat ini. Gambar kecil di bagian bawah adalah 6 barang pribadi yang hilang dan harus mereka temukan letaknya.'],
+                                ['step' => 4, 'title' => 'Tanya Jawab Berkeliling Menggunakan Preposisi', 'desc' => 'Siswa bergiliran bertanya: "Where is/are my ...?". Siswa lain yang melihat barang tersebut di kartunya wajib menjawab dengan preposisi yang tepat (misal: "It\'s on the table next to the lamp").'],
+                                ['step' => 5, 'title' => 'Tandai Barang yang Ditemukan', 'desc' => 'Ketika posisi barang diketahui, siswa mencatat lokasinya dan menandai barang tersebut sebagai Ditemukan (Found). Siswa pertama yang menjawab mendapat giliran bertanya berikutnya.'],
+                            ],
+                            'essential_vocabulary' => [
+                                'furniture' => ['TV', 'carpet', 'fireplace', 'mantlepiece', 'sofa', 'armchair', 'table', 'chair', 'waste-paper basket', 'wall', 'bookcase', 'lamp'],
+                                'household_objects' => ['radio', 'pipe', 'glasses', 'cushion', 'paper (newspaper)', 'umbrella', 'record', 'book', 'glass', 'socks', 'football', 'comb', 'handbag', 'pen', 'cigarettes', 'gloves', 'hairbrush', 'hat', 'teapot', 'knitting', 'cup', 'shopping basket', 'slippers', 'purse'],
+                                'prepositions' => ['in', 'on', 'under', 'on top of', 'near', 'next to', 'in front of', 'behind', 'between', 'to the right/left of'],
                             ],
                         ],
-                        'sheet_c' => [
-                            'id' => 'sheet_c',
-                            'title' => 'Tourist Sheet C (Route 3)',
-                            'badge' => 'Tourist C',
-                            'image' => '/images/speaking/worksheet4/student_sheet_c.png',
-                            'start' => 'Museum Street / Marine Drive (YOU ARE HERE)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, could you direct me to the railway station?',
-                                    'desk_reply' => 'Walk along West Street, turn left up Station Road. The station is on North Street.',
-                                    'answer' => 'Mark Station on North Street / Station Road',
-                                    'calc' => 'Station is on North Street.',
-                                ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Go to the station. Ask the times of trains to York.',
-                                    'question' => 'Write the times here & How much is a return ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What are the times of trains to York, and how much is a return ticket?',
-                                    'desk_reply' => 'Trains to York depart at 10.00, 13.25, 15.30, and 20.45. A return ticket is £30.',
-                                    'answer' => 'Times: 10.00, 13.25, 15.30, 20.45 | Return ticket: £30',
-                                    'calc' => 'Departures: 10.00, 13.25, 15.30, 20.45. Return fare: £30 (Single is £17).',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Ask someone where the Seaview Hotel is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Excuse me, where is the Seaview Hotel located?',
-                                    'desk_reply' => 'It is on Marine Drive, right by the beach at the bottom right corner of town.',
-                                    'answer' => 'Mark Seaview Hotel on Marine Drive (bottom right)',
-                                    'calc' => 'Seaview Hotel is on Marine Drive.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Go to the Seaview Hotel. Book a single room with shower for four nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'I\'d like to book a single room with a shower for four nights. How much will that be?',
-                                    'desk_reply' => 'A single room with shower is £14 per night, so for four nights it will cost £56.',
-                                    'answer' => '£56 (£14 x 4 nights)',
-                                    'calc' => 'Single room with shower = £14/night. 4 nights x £14 = £56.',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Ask where the tourist office is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Tourist Office',
-                                    'inquiry' => 'Excuse me, where is the tourist office?',
-                                    'desk_reply' => 'The tourist office is on High Street near East Street.',
-                                    'answer' => 'Mark Tourist Office on High Street / East Street',
-                                    'calc' => 'Tourist Office is on High Street.',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Go to the tourist office. Ask where the abbey is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Abbey',
-                                    'inquiry' => 'Could you tell me where the abbey is, and when it opens and closes?',
-                                    'desk_reply' => 'The abbey is building number 7 on Abbey Road. It is open from 9am to 6pm, and closed on Thursdays.',
-                                    'answer' => 'Location: 7 | Times: 9am–6pm, closed on Thursdays',
-                                    'calc' => 'Abbey is building 7. Open 9am–6pm, closed Thursdays.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the bank. Change 4,000 yen into English pounds.',
-                                    'question' => 'How much do you get?',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Good day, I would like to exchange 4,000 Japanese yen into English pounds, please.',
-                                    'desk_reply' => 'Certainly! The exchange rate is 400 yen per pound, so you get £10.',
-                                    'answer' => '£10 (4,000 / 400)',
-                                    'calc' => '4,000 yen ÷ 400 = £10.00.',
-                                ],
+                        'ai_interview' => [
+                            'title' => 'AI Spatial Speaking: Describe Your Study Room / Office',
+                            'intro' => 'Practice speaking English with your AI Tutor by describing where objects and furniture are placed in your current room.',
+                            'questions' => [
+                                'Where is your laptop or phone right now? Describe its position using "on", "in", or "next to".',
+                                'Look around your room. What object is located behind or under your desk?',
+                                'If a visitor enters your room, what is directly in front of them?',
+                            ],
+                            'prompts' => [
+                                'Right now, my laptop is on the desk, right next to a cup of warm tea...',
+                                'Behind my chair, there is a large bookshelf filled with English novels...',
+                                'Under my study table, there is a soft gray rug and my backpack...',
                             ],
                         ],
-                        'sheet_d' => [
-                            'id' => 'sheet_d',
-                            'title' => 'Tourist Sheet D (Route 4)',
-                            'badge' => 'Tourist D',
-                            'image' => '/images/speaking/worksheet4/student_sheet_d.png',
-                            'start' => 'Museum Street / Marine Drive (Tourist Office already marked on High St)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Ask someone where the bank is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Excuse me, where is the bank please?',
-                                    'desk_reply' => 'The bank is on West Street, just opposite Marine Drive.',
-                                    'answer' => 'Mark Bank on West Street / Marine Drive',
-                                    'calc' => 'Bank is on West Street.',
-                                ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Go to the bank. Change 5,000 pesetas into English pounds.',
-                                    'question' => 'How much do you get?',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Hello, could I change 5,000 Spanish pesetas into English pounds, please?',
-                                    'desk_reply' => 'Certainly. The exchange rate is 200 pesetas per pound, so you receive £25.',
-                                    'answer' => '£25 (5,000 / 200)',
-                                    'calc' => '5,000 pesetas ÷ 200 = £25.00.',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, could you tell me where the railway station is?',
-                                    'desk_reply' => 'Go up Station Road all the way to North Street. The station is on North Street.',
-                                    'answer' => 'Mark Station on North Street / Station Road',
-                                    'calc' => 'Station is located on North Street.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Go to the station. Find the time of the first train to London in the morning.',
-                                    'question' => 'Write the time here & How much is a return ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What time is the first train to London in the morning, and how much is a return ticket?',
-                                    'desk_reply' => 'The first morning train to London departs at 9.00. A return ticket is £20.',
-                                    'answer' => 'Time: 9.00 | Return ticket: £20',
-                                    'calc' => 'First departure: 9.00. Return fare: £20 (Single is £12).',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Go to the tourist office. Ask where the museum is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Museum',
-                                    'inquiry' => 'Could you tell me where the museum is and when it opens and closes?',
-                                    'desk_reply' => 'The museum is building number 1 on Museum Street. It is open from 9am to 5pm, and closed on Tuesdays.',
-                                    'answer' => 'Location: 1 | Times: 9am–5pm, closed on Tuesdays',
-                                    'calc' => 'Museum is building 1 on Museum Street. Open 9am–5pm, closed Tuesdays.',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Ask someone where the Seaview Hotel is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Excuse me, where is the Seaview Hotel?',
-                                    'desk_reply' => 'The Seaview Hotel is on Marine Drive near East Street by the seaside.',
-                                    'answer' => 'Mark Seaview Hotel on Marine Drive (bottom right)',
-                                    'calc' => 'Seaview Hotel is on Marine Drive.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the Seaview Hotel. Book a double room with a shower for three nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'I would like to book a double room with a shower for three nights. How much does it cost?',
-                                    'desk_reply' => 'A double room with shower is £22 per night, so for three nights it costs £66.',
-                                    'answer' => '£66 (£22 x 3 nights)',
-                                    'calc' => 'Double room with shower = £22/night. 3 nights x £22 = £66.',
-                                ],
-                            ],
-                        ],
-                        'sheet_e' => [
-                            'id' => 'sheet_e',
-                            'title' => 'Tourist Sheet E (Route 5)',
-                            'badge' => 'Tourist E',
-                            'image' => '/images/speaking/worksheet4/student_sheet_e.png',
-                            'start' => 'Museum Street / Marine Drive (Bank already marked on West St)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, which way is the railway station?',
-                                    'desk_reply' => 'Go straight up Station Road to North Street. The station is at the end of the road.',
-                                    'answer' => 'Mark Station on North Street / Station Road',
-                                    'calc' => 'Station is on North Street.',
-                                ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Go to the station. Find the time of the first train to York in the morning.',
-                                    'question' => 'Write the time here & How much is a single ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What time is the first train to York in the morning, and how much is a single ticket?',
-                                    'desk_reply' => 'The first morning train to York is at 10.00. A single ticket costs £17.',
-                                    'answer' => 'Time: 10.00 | Single ticket: £17',
-                                    'calc' => 'First departure: 10.00. Single fare: £17 (Return is £30).',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Ask someone where the tourist office is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Tourist Office',
-                                    'inquiry' => 'Excuse me, where can I find the tourist office?',
-                                    'desk_reply' => 'The tourist office is on High Street at the corner of East Street.',
-                                    'answer' => 'Mark Tourist Office on High Street / East Street',
-                                    'calc' => 'Tourist Office is on High Street.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Go to the tourist office. Ask where the shopping centre is (mark on map) and when the shops open and close.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Shopping Centre',
-                                    'inquiry' => 'Could you tell me where the shopping centre is, and what time the shops open and close?',
-                                    'desk_reply' => 'The shopping centre is building number 2 on Station Road. Shops open 9am to 5.30pm, closed Wednesday afternoon.',
-                                    'answer' => 'Location: 2 | Times: 9am–5.30pm, closed Wednesday afternoon',
-                                    'calc' => 'Shopping centre is building 2. Open 9am–5.30pm, closed Wednesday afternoon.',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Ask someone where the Seaview Hotel is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Excuse me, where is the Seaview Hotel located?',
-                                    'desk_reply' => 'It is located at the far right of Marine Drive overlooking the sea.',
-                                    'answer' => 'Mark Seaview Hotel on Marine Drive (bottom right)',
-                                    'calc' => 'Seaview Hotel is on Marine Drive.',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Go to the Seaview Hotel. Book a single room with a bath for two nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Hello, I\'d like to book a single room with a bath for two nights, please. How much is that?',
-                                    'desk_reply' => 'A single room with a bath is £15 per night, so for two nights it is £30.',
-                                    'answer' => '£30 (£15 x 2 nights)',
-                                    'calc' => 'Single room with bath = £15/night. 2 nights x £15 = £30.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the bank. Change £50 into German marks.',
-                                    'question' => 'How much do you get?',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Good day. I would like to exchange 50 English pounds into German marks, please.',
-                                    'desk_reply' => 'The exchange rate is 4.50 marks per pound, so you receive 225 German marks.',
-                                    'answer' => '225 German marks (£50 x 4.50)',
-                                    'calc' => '£50 x 4.50 marks = 225.00 German marks.',
-                                ],
-                            ],
-                        ],
-                        'sheet_f' => [
-                            'id' => 'sheet_f',
-                            'title' => 'Tourist Sheet F (Route 6)',
-                            'badge' => 'Tourist F',
-                            'image' => '/images/speaking/worksheet4/student_sheet_f.png',
-                            'start' => 'Museum Street / Marine Drive (Seaview Hotel already marked on Marine Dr)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Go to the Seaview Hotel. Book a single room for three nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Hello, I would like to book a standard single room for three nights. How much does it cost?',
-                                    'desk_reply' => 'A standard single room is £12 per night, so for three nights it costs £36.',
-                                    'answer' => '£36 (£12 x 3 nights)',
-                                    'calc' => 'Standard single room = £12/night. 3 nights x £12 = £36.',
-                                ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Ask someone where the bank is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Excuse me, could you tell me where the bank is?',
-                                    'desk_reply' => 'The bank is on West Street, just opposite Marine Drive.',
-                                    'answer' => 'Mark Bank on West Street / Marine Drive',
-                                    'calc' => 'Bank is on West Street.',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Go to the bank. Change 10,000 pesetas into English pounds.',
-                                    'question' => 'How much do you get?',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Good morning. Could I exchange 10,000 Spanish pesetas into English pounds?',
-                                    'desk_reply' => 'Sure! The exchange rate is 200 pesetas per pound, so you get £50.',
-                                    'answer' => '£50 (10,000 / 200)',
-                                    'calc' => '10,000 pesetas ÷ 200 = £50.00.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Ask someone where the station is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'Excuse me, where is the railway station?',
-                                    'desk_reply' => 'Walk straight up Station Road to North Street. The station is right at the top.',
-                                    'answer' => 'Mark Station on North Street / Station Road',
-                                    'calc' => 'Station is on North Street.',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Go to the station. Ask the times of trains to Bristol.',
-                                    'question' => 'Write the times here & How much is a return ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What are the departure times of trains to Bristol, and how much is a return ticket?',
-                                    'desk_reply' => 'Trains to Bristol leave at 11.00, 16.40, 22.10, and 23.57. A return ticket is £12.',
-                                    'answer' => 'Times: 11.00, 16.40, 22.10, 23.57 | Return ticket: £12',
-                                    'calc' => 'Departures: 11.00, 16.40, 22.10, 23.57. Return fare: £12 (Single is £7).',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Ask someone where the tourist office is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Tourist Office',
-                                    'inquiry' => 'Excuse me, where is the tourist office?',
-                                    'desk_reply' => 'The tourist office is on High Street near East Street.',
-                                    'answer' => 'Mark Tourist Office on High Street / East Street',
-                                    'calc' => 'Tourist Office is on High Street.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the tourist office. Ask where the art gallery is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Art Gallery',
-                                    'inquiry' => 'Could you tell me where the art gallery is located, and when it opens and closes?',
-                                    'desk_reply' => 'The art gallery is building number 3 on London Road / West Street. It is open from 10am to 6pm, and closed on Mondays.',
-                                    'answer' => 'Location: 3 | Times: 10am–6pm, closed on Mondays',
-                                    'calc' => 'Art gallery is building 3. Open 10am–6pm, closed Mondays.',
-                                ],
-                            ],
-                        ],
-                        'sheet_g' => [
-                            'id' => 'sheet_g',
-                            'title' => 'Tourist Sheet G (Route 7)',
-                            'badge' => 'Tourist G',
-                            'image' => '/images/speaking/worksheet4/student_sheet_g.png',
-                            'start' => 'Museum Street / Marine Drive (Station already marked on North St)',
-                            'tasks' => [
-                                [
-                                    'step' => 1,
-                                    'action' => 'Ask someone where the tourist office is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Tourist Office',
-                                    'inquiry' => 'Excuse me, where is the tourist office?',
-                                    'desk_reply' => 'The tourist office is on High Street at the corner of East Street.',
-                                    'answer' => 'Mark Tourist Office on High Street / East Street',
-                                    'calc' => 'Tourist Office is on High Street.',
-                                ],
-                                [
-                                    'step' => 2,
-                                    'action' => 'Go to the tourist office. Ask where the zoo is (mark on map) and when it opens and closes.',
-                                    'question' => 'Write the times here:',
-                                    'target_place' => 'Tourist Office & Zoo',
-                                    'inquiry' => 'Could you please tell me where the zoo is and what time it opens and closes?',
-                                    'desk_reply' => 'The zoo is building number 8 on King Street. It is open every day from 10am to 5.30pm.',
-                                    'answer' => 'Location: 8 | Times: 10am–5.30pm (open every day)',
-                                    'calc' => 'Zoo is building 8. Open daily 10am–5.30pm.',
-                                ],
-                                [
-                                    'step' => 3,
-                                    'action' => 'Ask someone where the Seaview Hotel is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Excuse me, which way is the Seaview Hotel?',
-                                    'desk_reply' => 'The Seaview Hotel is on Marine Drive at the bottom right corner of town.',
-                                    'answer' => 'Mark Seaview Hotel on Marine Drive (bottom right)',
-                                    'calc' => 'Seaview Hotel is on Marine Drive.',
-                                ],
-                                [
-                                    'step' => 4,
-                                    'action' => 'Go to the Seaview Hotel. Book a double room with a bath for two nights.',
-                                    'question' => 'How much does it cost?',
-                                    'target_place' => 'Seaview Hotel',
-                                    'inquiry' => 'Hello, I would like to book a double room with a bath for two nights. How much does it cost?',
-                                    'desk_reply' => 'A double room with a bath is £25 per night, so for two nights it will cost £50.',
-                                    'answer' => '£50 (£25 x 2 nights)',
-                                    'calc' => 'Double room with bath = £25/night. 2 nights x £25 = £50.',
-                                ],
-                                [
-                                    'step' => 5,
-                                    'action' => 'Ask someone where the bank is.',
-                                    'question' => 'Mark it on your map.',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Excuse me, where is the bank located?',
-                                    'desk_reply' => 'The bank is on West Street, opposite Marine Drive.',
-                                    'answer' => 'Mark Bank on West Street / Marine Drive',
-                                    'calc' => 'Bank is on West Street.',
-                                ],
-                                [
-                                    'step' => 6,
-                                    'action' => 'Go to the bank. Change 50 dollars into pounds.',
-                                    'question' => 'How much do you get?',
-                                    'target_place' => 'Bank',
-                                    'inquiry' => 'Good day, I\'d like to change 50 US dollars into English pounds, please.',
-                                    'desk_reply' => 'The exchange rate is $1.50 per pound, so 50 dollars is £33.33.',
-                                    'answer' => '£33.33 ($50 / 1.50)',
-                                    'calc' => '50 dollars ÷ 1.50 = £33.33.',
-                                ],
-                                [
-                                    'step' => 7,
-                                    'action' => 'Go to the station. Ask the times of trains to Manchester.',
-                                    'question' => 'Write the times here & How much is a return ticket?',
-                                    'target_place' => 'Station',
-                                    'inquiry' => 'What are the departure times of trains to Manchester, and how much is a return ticket?',
-                                    'desk_reply' => 'Trains to Manchester leave at 10.05, 12.45, 15.27, and 18.55. A return ticket is £25.',
-                                    'answer' => 'Times: 10.05, 12.45, 15.27, 18.55 | Return ticket: £25',
-                                    'calc' => 'Departures: 10.05, 12.45, 15.27, 18.55. Return fare: £25 (Single is £15).',
-                                ],
-                            ],
+                        'vocabulary' => [
+                            ['word' => 'Beside', 'ipa' => '/bɪˈsaɪd/', 'meaning' => 'Di samping / Di sebelah', 'example' => 'Sit beside me during the lecture.'],
+                            ['word' => 'Opposite', 'ipa' => '/ˈɒp.ə.zɪt/', 'meaning' => 'Berseberangan / Di depan berhadapan', 'example' => 'The cafe is opposite the station.'],
+                            ['word' => 'Drawer', 'ipa' => '/drɔː.ər/', 'meaning' => 'Laci meja / Lemari', 'example' => 'Store the documents in the top drawer.'],
+                            ['word' => 'Podium', 'ipa' => '/ˈpəʊ.di.əm/', 'meaning' => 'Podium / Mimbar pembicara', 'example' => 'The speaker stepped up to the podium.'],
+                            ['word' => 'Shelves', 'ipa' => '/ʃelvz/', 'meaning' => 'Rak-rak buku atau barang', 'example' => 'The books are organized neatly on the shelves.'],
+                            ['word' => 'Corner', 'ipa' => '/ˈkɔː.nər/', 'meaning' => 'Pojok / Sudut ruangan', 'example' => 'There is a tall plant in the corner.'],
+                            ['word' => 'Hallway', 'ipa' => '/ˈhɔːl.weɪ/', 'meaning' => 'Lorong koridor', 'example' => 'Walk down the hallway to find Room 201.'],
+                            ['word' => 'Surface', 'ipa' => '/ˈsɜː.fɪs/', 'meaning' => 'Permukaan bidang datar', 'example' => 'Do not scratch the glossy surface of the table.'],
                         ],
                     ],
-                ],
-                'ai_interview' => [
+                    // SUBTOPIC 02
                     [
-                        'id' => 1,
-                        'question' => "Hello! Welcome to Meeting 4 on Telling Time. Let's start with your daily routine: What time do you usually wake up in the morning?",
-                        'hint' => "Answer: 'I usually wake up at [Time, e.g. half past six in the morning / 06:30 AM].'",
-                    ],
-                    [
-                        'id' => 2,
-                        'question' => "What time do you usually go to bed at night, and how many hours of sleep do you get?",
-                        'hint' => "Answer: 'I usually go to bed at [Time, e.g. eleven o'clock PM], so I get around [7/8] hours of sleep.'",
-                    ],
-                    [
-                        'id' => 3,
-                        'question' => "How do you say 04:15 and 04:45 in British English using 'past' and 'to'?",
-                        'hint' => "Answer: '04:15 is 'a quarter past four', and 04:45 is 'a quarter to five'.'",
-                    ],
-                    [
-                        'id' => 4,
-                        'question' => "What does the word 'sharp' mean when someone says 'The meeting starts at 9 o'clock sharp'?",
-                        'hint' => "Answer: ''Sharp' means exactly on time without any delay or tardiness.'",
-                    ],
-                    [
-                        'id' => 5,
-                        'question' => "Which preposition do we use for exact clock times, like hours and minutes? Can you make a short sentence?",
-                        'hint' => "Answer: 'We use 'at' for clock time, for example: 'Our English speaking class starts at eight o'clock in the morning.''",
+                        'id' => 'sec-m4-sub-2',
+                        'num' => '02',
+                        'title' => 'There is / There are & Imperatives',
+                        'subtitle' => 'Existential Statements (There is / There are) & Classroom / Workplace Commands',
+                        'desc' => 'Menyatakan keberadaan benda tunggal/jamak dengan there is/there are, serta memberikan instruksi dan perintah (Imperatives).',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'there_is_are_imperatives',
+                            'title' => 'There is / There are & Imperative Matrix',
+                            'rules' => [
+                                ['pattern' => 'There is + Singular Noun', 'usage' => 'Keberadaan 1 benda / uncountable', 'example' => 'There is a whiteboard on the wall.'],
+                                ['pattern' => 'There is + Uncountable Noun', 'usage' => 'Keberadaan benda tak terhitung (air, teh, gula)', 'example' => 'There is some fresh water in the bottle.'],
+                                ['pattern' => 'There are + Plural Noun', 'usage' => 'Keberadaan 2 benda atau lebih (jamak)', 'example' => 'There are twenty students in the lecture hall.'],
+                                ['pattern' => 'Positive Imperative (V1 base)', 'usage' => 'Memberikan instruksi langsung secara jelas', 'example' => 'Open your course book to page 45.'],
+                                ['pattern' => 'Polite Imperative (Please + V1)', 'usage' => 'Instruksi sopan dan santun', 'example' => 'Please take a seat and sign your name.'],
+                                ['pattern' => 'Negative Imperative (Don\'t + V1)', 'usage' => 'Larangan melakukan sesuatu tindakan', 'example' => 'Don\'t touch the wet paint on the door.'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Studio Facilities & Workspace Guidelines',
+                            'audio_script' => "Rian: Welcome to our innovation coworking hub in Bandung, Alex! Let me show you around our space.
+Alex: Thank you, Rian! It looks very modern and spacious.
+Rian: On this floor, there is a high-speed fiber internet station, and there are six private audio recording pods.
+Alex: Impressive! Are there any quiet zones for deep work?
+Rian: Yes, there is a dedicated silent study library on the second floor, and there are two rooftop discussion terraces.
+Alex: That sounds ideal. Are there any house rules we should follow?
+Rian: Please tap your access card at the door, and do not leave personal belongings unattended on the desks.
+Alex: Understood! Thank you for the helpful orientation, Rian.",
+                            'key_phrases' => [
+                                'There is a high-speed fiber internet station.',
+                                'There are six private audio recording pods.',
+                                'There is a dedicated silent study library on the second floor.',
+                                'Please tap your access card at the door, and do not leave personal belongings unattended.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'How many private audio recording pods are on this floor?',
+                                    'options' => [
+                                        'Six pods',
+                                        'Two pods',
+                                        'Ten pods',
+                                        'Four pods',
+                                    ],
+                                    'answer' => 'Six pods',
+                                ],
+                                [
+                                    'q' => 'Where is the dedicated silent study library located?',
+                                    'options' => [
+                                        'On the second floor',
+                                        'On the rooftop terrace',
+                                        'In the basement',
+                                        'Next to the cafeteria',
+                                    ],
+                                    'answer' => 'On the second floor',
+                                ],
+                                [
+                                    'q' => 'What rule does Rian mention about personal belongings?',
+                                    'options' => [
+                                        'Do not leave belongings unattended on desks',
+                                        'Lock them in the car',
+                                        'Give them to the receptionist',
+                                        'Do not bring laptops',
+                                    ],
+                                    'answer' => 'Do not leave belongings unattended on desks',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'There is an apple on the kitchen counter.',
+                            'There is a new message in your inbox.',
+                            'There is some coffee in the pot.',
+                            'There are twelve participants in the seminar.',
+                            'There are several questions in the survey form.',
+                            'Please submit your speaking assignment before midnight.',
+                            'Listen attentively to the native speaker recording.',
+                            'Open your workbook and complete exercise three.',
+                            'Don\'t speak loudly while others are recording their voice.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Checking Available Hotel Amenities',
+                                'turns' => [
+                                    ['speaker' => 'Guest', 'text' => 'Hello! Is there a swimming pool on the rooftop of this hotel?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Receptionist', 'text' => 'Yes, there is a rooftop pool on the 15th floor, and there are two fitness centers.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Guest', 'text' => 'Great! Are there any restaurants open late tonight?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Receptionist', 'text' => 'There is a 24-hour bistro in the main lobby. Please take this hotel directory map.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Guest', 'text' => 'Thank you very much for the helpful information!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Classroom Instructions by the Teacher',
+                                'turns' => [
+                                    ['speaker' => 'Teacher', 'text' => 'Good morning class! Please take your seats and open your laptops.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Student', 'text' => 'Teacher, is there an assignment due today?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Teacher', 'text' => 'Yes, there are two speaking tasks due on the learning portal.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Teacher', 'text' => 'Click on Module 4 and start recording your answers clearly.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Student', 'text' => 'Understood! I will begin right away.', 'avatar' => 'male_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'there_is_are_chooser',
+                            'title' => 'There is vs There are Fast Classifier',
+                            'desc' => 'Tentukan apakah kalimat berikut harus menggunakan "There is" (tunggal/uncountable) atau "There are" (jamak)!',
+                            'cards' => [
+                                ['sentence' => '___ a whiteboard in Room 101.', 'answer' => 'There is'],
+                                ['sentence' => '___ three new emails in your inbox.', 'answer' => 'There are'],
+                                ['sentence' => '___ some hot tea in the thermos.', 'answer' => 'There is'],
+                                ['sentence' => '___ twenty students attending the online webinar.', 'answer' => 'There are'],
+                                ['sentence' => '___ an urgent memo on the director\'s desk.', 'answer' => 'There is'],
+                                ['sentence' => '___ four cars parked outside the training center.', 'answer' => 'There are'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Giving Office & Classroom Instructions',
+                            'intro' => 'Practice speaking English by giving clear instructions and stating what is present in your workplace.',
+                            'questions' => [
+                                'Tell me three things that exist in your workplace or classroom using "There is" and "There are".',
+                                'Give me two polite instructions you often say or hear at work or school (e.g. "Please submit...").',
+                                'Give me one negative instruction/warning using "Don\'t..." for visitors entering your office.',
+                            ],
+                            'prompts' => [
+                                'In my workplace, there is a large central printer, and there are fifteen modern workstations...',
+                                'A polite instruction I often say is: "Please sign in at the front desk and wear your badge"...',
+                                'A warning for visitors is: "Don\'t enter the server room without an authorized security pass"...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Extinguisher', 'ipa' => '/ɪkˈstɪŋ.ɡwɪ.ʃər/', 'meaning' => 'Alat pemadam api ringan (APAR)', 'example' => 'The fire extinguisher is near the red sign.'],
+                            ['word' => 'First-aid', 'ipa' => '/ˌfɜːstˈeɪd/', 'meaning' => 'Pertolongan pertama (P3K)', 'example' => 'Grab the first-aid kit from the wall.'],
+                            ['word' => 'Directory', 'ipa' => '/dɪˈrek.tər.i/', 'meaning' => 'Buku panduan / Denah petunjuk gedung', 'example' => 'Check the directory board in the lobby.'],
+                            ['word' => 'Submit', 'ipa' => '/səbˈmɪt/', 'meaning' => 'Mengumpulkan / Menyerahkan tugas', 'example' => 'Submit your project files before 5 PM.'],
+                            ['word' => 'Unauthorized', 'ipa' => '/ʌnˈɔː.θər.aɪzd/', 'meaning' => 'Tidak berizin / Tanpa wewenang', 'example' => 'Unauthorized personnel cannot enter here.'],
+                            ['word' => 'Attentively', 'ipa' => '/əˈten.tɪv.li/', 'meaning' => 'Dengan penuh perhatian / Saksama', 'example' => 'Listen attentively to the instructions.'],
+                            ['word' => 'Amenity', 'ipa' => '/əˈmiː.nə.ti/', 'meaning' => 'Fasilitas penunjang (hotel/gedung)', 'example' => 'Free Wi-Fi is an essential hotel amenity.'],
+                            ['word' => 'Lobby', 'ipa' => '/ˈlɒb.i/', 'meaning' => 'Ruang tunggu utama / Lobi', 'example' => 'Meet our representative in the hotel lobby.'],
+                        ],
                     ],
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 5: PROHIBITION, PRONOUNS & POSSESSIVE NOUNS
+            // =========================================================================
             5 => [
-                'topic' => 'Pronouns (Personal, Possessive & Reflexive)',
-                'focus' => 'Subject & Object Pronouns, Possessive Adjectives vs Possessive Pronouns, Reflexive Pronouns, Demonstratives, Spoken Fluency Drills',
-                'materi' => [
-                    'pronouns_mastery' => true,
-                    'overview' => 'Pronoun (Kata Ganti) adalah pilar utama kelancaran berbicara bahasa Inggris. Dengan menguasai 5 bentuk kata ganti (Subject, Object, Possessive Adjective, Possessive Pronoun, dan Reflexive), Anda dapat menyusun kalimat yang ringkas, alami, dan bebas dari pengulangan kata benda yang kaku.',
-                    'matrix' => [
-                        [
-                            'person' => '1st Person Singular (Saya)',
-                            'subject' => ['word' => 'I', 'ipa' => '/aɪ/', 'example' => 'I learn English every morning.'],
-                            'object' => ['word' => 'me', 'ipa' => '/miː/', 'example' => 'Could you please call me later?'],
-                            'possessive_adj' => ['word' => 'my', 'ipa' => '/maɪ/', 'example' => 'This is my favorite podcast.'],
-                            'possessive_pro' => ['word' => 'mine', 'ipa' => '/maɪn/', 'example' => 'This podcast recommendation is mine.'],
-                            'reflexive' => ['word' => 'myself', 'ipa' => '/maɪˈsɛlf/', 'example' => 'I introduced myself to the mentor.'],
-                        ],
-                        [
-                            'person' => '2nd Person Singular (Kamu / Anda)',
-                            'subject' => ['word' => 'You', 'ipa' => '/juː/', 'example' => 'You speak English with great confidence.'],
-                            'object' => ['word' => 'you', 'ipa' => '/juː/', 'example' => 'I will gladly help you with the project.'],
-                            'possessive_adj' => ['word' => 'your', 'ipa' => '/jɔːr/', 'example' => 'Is this your new passport?'],
-                            'possessive_pro' => ['word' => 'yours', 'ipa' => '/jɔːrz/', 'example' => 'Is this red passport yours?'],
-                            'reflexive' => ['word' => 'yourself', 'ipa' => '/jɔːrˈsɛlf/', 'example' => 'Please believe in yourself!'],
-                        ],
-                        [
-                            'person' => '3rd Person Singular Male (Dia - Laki-laki)',
-                            'subject' => ['word' => 'He', 'ipa' => '/hiː/', 'example' => 'He works as a software engineer.'],
-                            'object' => ['word' => 'him', 'ipa' => '/hɪm/', 'example' => 'We saw him at the conference yesterday.'],
-                            'possessive_adj' => ['word' => 'his', 'ipa' => '/hɪz/', 'example' => 'His presentation was exceptionally clear.'],
-                            'possessive_pro' => ['word' => 'his', 'ipa' => '/hɪz/', 'example' => 'That outstanding idea was his.'],
-                            'reflexive' => ['word' => 'himself', 'ipa' => '/hɪmˈsɛlf/', 'example' => 'He prepared the whole report himself.'],
-                        ],
-                        [
-                            'person' => '3rd Person Singular Female (Dia - Perempuan)',
-                            'subject' => ['word' => 'She', 'ipa' => '/ʃiː/', 'example' => 'She manages international partnerships.'],
-                            'object' => ['word' => 'her', 'ipa' => '/hɜːr/', 'example' => 'The director gave her a special promotion.'],
-                            'possessive_adj' => ['word' => 'her', 'ipa' => '/hɜːr/', 'example' => 'Her team won the speaking competition.'],
-                            'possessive_pro' => ['word' => 'hers', 'ipa' => '/hɜːrz/', 'example' => 'The trophy on the stage is hers.'],
-                            'reflexive' => ['word' => 'herself', 'ipa' => '/hɜːrˈsɛlf/', 'example' => 'She taught herself graphic design.'],
-                        ],
-                        [
-                            'person' => '3rd Person Singular Neutral (Benda / Hewan / Hal)',
-                            'subject' => ['word' => 'It', 'ipa' => '/ɪt/', 'example' => 'It starts at eight o\'clock sharp.'],
-                            'object' => ['word' => 'it', 'ipa' => '/ɪt/', 'example' => 'I received it in the mail this morning.'],
-                            'possessive_adj' => ['word' => 'its', 'ipa' => '/ɪts/', 'example' => 'The puppy wagged its fluffy tail.'],
-                            'possessive_pro' => ['word' => 'its (rare)', 'ipa' => '/ɪts/', 'example' => 'Its usage is very rare as a standalone pronoun.'],
-                            'reflexive' => ['word' => 'itself', 'ipa' => '/ɪtˈsɛlf/', 'example' => 'The smart application updates itself.'],
-                        ],
-                        [
-                            'person' => '1st Person Plural (Kita / Kami)',
-                            'subject' => ['word' => 'We', 'ipa' => '/wiː/', 'example' => 'We practice speaking English every day.'],
-                            'object' => ['word' => 'us', 'ipa' => '/ʌs/', 'example' => 'The teacher invited us to join the webinar.'],
-                            'possessive_adj' => ['word' => 'our', 'ipa' => '/ˈaʊ.ər/', 'example' => 'Our study group meets every Tuesday.'],
-                            'possessive_pro' => ['word' => 'ours', 'ipa' => '/ˈaʊ.ərz/', 'example' => 'The highest test score is ours.'],
-                            'reflexive' => ['word' => 'ourselves', 'ipa' => '/aʊərˈsɛlvz/', 'example' => 'We really enjoyed ourselves at the gala.'],
-                        ],
-                        [
-                            'person' => '2nd Person Plural (Kalian semua)',
-                            'subject' => ['word' => 'You (all)', 'ipa' => '/juː/', 'example' => 'You all did a wonderful job today!'],
-                            'object' => ['word' => 'you', 'ipa' => '/juː/', 'example' => 'I am very proud of all of you.'],
-                            'possessive_adj' => ['word' => 'your', 'ipa' => '/jɔːr/', 'example' => 'Where are your group presentation slides?'],
-                            'possessive_pro' => ['word' => 'yours', 'ipa' => '/jɔːrz/', 'example' => 'The decision to proceed is yours.'],
-                            'reflexive' => ['word' => 'yourselves', 'ipa' => '/jɔːrˈsɛlvz/', 'example' => 'Please make yourselves comfortable!'],
-                        ],
-                        [
-                            'person' => '3rd Person Plural (Mereka)',
-                            'subject' => ['word' => 'They', 'ipa' => '/ðeɪ/', 'example' => 'They arrived at the airport on time.'],
-                            'object' => ['word' => 'them', 'ipa' => '/ðɛm/', 'example' => 'We welcomed them with traditional flowers.'],
-                            'possessive_adj' => ['word' => 'their', 'ipa' => '/ðɛər/', 'example' => 'Their flight was smooth and pleasant.'],
-                            'possessive_pro' => ['word' => 'theirs', 'ipa' => '/ðɛərz/', 'example' => 'Our car is blue, but theirs is silver.'],
-                            'reflexive' => ['word' => 'themselves', 'ipa' => '/ðəmˈsɛlvz/', 'example' => 'They organized the whole charity themselves.'],
-                        ],
-                    ],
-                    'categories' => [
-                        [
-                            'id' => 'subject',
-                            'badge' => 'Category 1',
-                            'color' => 'indigo',
-                            'title' => 'Subject Pronouns (Pelaku Tindakan)',
-                            'tagline' => 'Berada di awal klausa / sebelum Kata Kerja (Verb)',
-                            'formula' => '[ Subject Pronoun + Verb + Object / Complement ]',
-                            'explanation' => 'Subject Pronouns bertindak sebagai PELAKU yang melakukan aksi dalam kalimat. Selalu ditempatkan sebelum kata kerja utama.',
-                            'items' => ['I', 'You', 'He', 'She', 'It', 'We', 'They'],
-                            'examples' => [
-                                ['en' => 'She loves practicing conversational English.', 'id' => 'Dia suka berlatih percakapan bahasa Inggris.'],
-                                ['en' => 'They always arrive before the lecture starts.', 'id' => 'Mereka selalu datang sebelum kuliah dimulai.'],
-                                ['en' => 'He works at an international technology firm.', 'id' => 'Dia bekerja di perusahaan teknologi internasional.'],
+                'topic' => 'Prohibition, Pronouns & Possessive Nouns',
+                'focus' => 'Prohibitions (Don\\\'t / Must not), possessive nouns (\\\'s), subject pronouns, noun phrases, possessive adjectives, and family wedding photo pairwork.',
+                'subtopics' => [
+                    [
+                        'id' => 'sec-m5-sub-1',
+                        'num' => '01',
+                        'title' => 'Prohibitions & Public Rules',
+                        'subtitle' => 'Expressing Prohibitions (Don\\\'t / Do not / Must not / No + V-ing) & Safety Directives',
+                        'desc' => 'Larangan formal dan informal, aturan di tempat umum, rambu peringatan, serta instruksi keselamatan.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'prohibitions_rules',
+                            'title' => 'Prohibitions & Public Safety Rules Matrix',
+                            'rules' => [
+                                ['type' => 'Don\\\'t / Do not + Verb 1', 'use_for' => 'Larangan langsung (Classroom, Home, Daily conversation)', 'example' => 'Don\\\'t open the window while the air conditioner is on.'],
+                                ['type' => 'Must not / Mustn\\\'t + Verb 1', 'use_for' => 'Larangan hukum / aturan ketat resmi (Law, Flight, Safety)', 'example' => 'Passengers must not smoke inside the aircraft cabin.'],
+                                ['type' => 'No + V-ing', 'use_for' => 'Rambu larangan publik & plang pemberitahuan', 'example' => 'No parking / No smoking / No littering.'],
+                                ['type' => 'You are not allowed / permitted to', 'use_for' => 'Pernyataan formal larangan akses / hak', 'example' => 'Visitors are not allowed to take flash photography inside.'],
                             ],
-                            'rule' => 'Gunakan Subject Pronoun saat Anda yang memulai atau melakukan aksi utama dalam kalimat.',
                         ],
-                        [
-                            'id' => 'object',
-                            'badge' => 'Category 2',
-                            'color' => 'emerald',
-                            'title' => 'Object Pronouns (Penerima Tindakan)',
-                            'tagline' => 'Berada setelah Kata Kerja (Verb) atau Preposisi (to, for, with, between)',
-                            'formula' => '[ Verb + Object Pronoun ] atau [ Preposition + Object Pronoun ]',
-                            'explanation' => 'Object Pronouns menerima aksi dari subjek, atau diletakkan langsung setelah kata depan (preposisi) seperti to, for, with, about, between.',
-                            'items' => ['me', 'you', 'him', 'her', 'it', 'us', 'them'],
-                            'examples' => [
-                                ['en' => 'Could you please send me the updated timetable?', 'id' => 'Bisakah kamu mengirimkan jadwal terbaru kepada saya?'],
-                                ['en' => 'The manager gave him a round of applause.', 'id' => 'Manajer memberikan tepuk tangan meriah kepadanya.'],
-                                ['en' => 'This matter must stay between you and me.', 'id' => 'Urusan ini harus tetap rahasia antara kamu dan saya (Bukan: between you and I).'],
+                                                'listening' => [
+                            'title' => 'Short Listening: Airport Security Rules & Prohibited Items Briefing',
+                            'audio_script' => "Hendra: Good morning, ma'am! Welcome to the international departure security checkpoint.
+Sophie: Good morning, officer! Could you remind me what items I must remove from my carry-on bag?
+Hendra: Certainly! You must take out your laptop and place it in a separate tray. Also, remember that liquids over 100 milliliters are strictly prohibited.
+Sophie: Understood. What about water bottles?
+Hendra: You must not bring opened drink bottles through security; please finish or dispose of them before the gate.
+Sophie: Okay, I have an empty metal thermos. Is that allowed?
+Hendra: Yes, empty bottles are completely fine. And please, do not take photos or videos inside the security control area.
+Sophie: Thank you for the clear instructions, officer!
+Hendra: You are welcome, ma'am. Have a safe flight!",
+                            'key_phrases' => [
+                                'You must take out your laptop and place it in a separate tray.',
+                                'Liquids over 100 milliliters are strictly prohibited.',
+                                'You must not bring opened drink bottles through security.',
+                                'Do not take photos or videos inside the security control area.',
                             ],
-                            'rule' => 'Waspada: Setelah preposisi (between, for, with, to), selalu gunakan Object Pronoun (me, him, her, us, them), bukan Subject Pronoun.',
-                        ],
-                        [
-                            'id' => 'possessive_adj',
-                            'badge' => 'Category 3',
-                            'color' => 'amber',
-                            'title' => 'Possessive Adjectives (Kata Sifat Kepemilikan)',
-                            'tagline' => 'WAJIB diikuti oleh Kata Benda (Noun) -> [Possessive Adj + NOUN]',
-                            'formula' => '[ My / Your / His / Her / Its / Our / Their + NOUN ]',
-                            'explanation' => 'Possessive Adjectives menerangkan kepemilikan atas suatu benda. Ciri mutlaknya adalah HARUS selalu menempel di depan kata benda.',
-                            'items' => ['my', 'your', 'his', 'her', 'its', 'our', 'their'],
-                            'examples' => [
-                                ['en' => 'Is this your new smartphone on the table?', 'id' => 'Apakah ini smartphone barumu di atas meja?'],
-                                ['en' => 'Our English teacher is very patient and friendly.', 'id' => 'Guru bahasa Inggris kami sangat sabar dan ramah.'],
-                                ['en' => 'The cat is cleaning its paws.', 'id' => 'Kucing itu sedang membersihkan cakar-cakarnya (its tanpa tanda kutip!).'],
+                            'questions' => [
+                                [
+                                    'q' => 'What must Sophie do with her laptop at security?',
+                                    'options' => [
+                                        'Take it out and place it in a separate tray',
+                                        'Keep it inside her backpack',
+                                        'Turn it on and play audio',
+                                        'Leave it with the airline desk',
+                                    ],
+                                    'answer' => 'Take it out and place it in a separate tray',
+                                ],
+                                [
+                                    'q' => 'What size of liquid is strictly prohibited in carry-on luggage?',
+                                    'options' => [
+                                        'Liquids over 100 milliliters',
+                                        'Liquids under 50 milliliters',
+                                        'All sealed medicine',
+                                        'Empty metal bottles',
+                                    ],
+                                    'answer' => 'Liquids over 100 milliliters',
+                                ],
+                                [
+                                    'q' => 'What activity is prohibited inside the security checkpoint area?',
+                                    'options' => [
+                                        'Taking photos or videos',
+                                        'Wearing sneakers',
+                                        'Holding a passport',
+                                        'Speaking in English',
+                                    ],
+                                    'answer' => 'Taking photos or videos',
+                                ],
                             ],
-                            'rule' => 'Possessive Adjectives tidak bisa berdiri sendiri tanpa benda di belakangnya (Salah: "This is my." -> Benar: "This is my book.").',
                         ],
-                        [
-                            'id' => 'possessive_pro',
-                            'badge' => 'Category 4',
-                            'color' => 'purple',
-                            'title' => 'Possessive Pronouns (Kata Ganti Kepemilikan Mandiri)',
-                            'tagline' => 'Berdiri SENDIRI dan TIDAK PERNAH diikuti Kata Benda',
-                            'formula' => '[ NOUN + to be + Mine / Yours / His / Hers / Ours / Theirs ]',
-                            'explanation' => 'Possessive Pronouns menggantikan kata sifat kepemilikan sekaligus bendanya agar tidak terjadi pengulangan kata yang membosankan.',
-                            'items' => ['mine', 'yours', 'his', 'hers', 'ours', 'theirs'],
-                            'examples' => [
-                                ['en' => 'This jacket is mine, and that coat is yours.', 'id' => 'Jaket ini milik saya, dan mantel itu milik kamu.'],
-                                ['en' => 'Her presentation was great, but ours was more engaging.', 'id' => 'Presentasinya bagus, tetapi presentasi milik kita lebih menarik.'],
-                                ['en' => 'My luggage is black, while theirs is bright red.', 'id' => 'Koper saya hitam, sedangkan koper milik mereka berwarna merah terang.'],
+'drilling1' => [
+                            ['en' => 'You must not use your mobile phone while driving on the highway.', 'id' => 'Anda dilarang menggunakan ponsel saat mengemudi di jalan raya.'],
+                            ['en' => 'Don\\\'t enter the laboratory without protective goggles and gloves.', 'id' => 'Jangan masuk ke laboratorium tanpa kacamata dan sarung tangan pelindung.'],
+                            ['en' => 'Smoking is strictly prohibited in all indoor public spaces.', 'id' => 'Merokok dilarang keras di semua ruang publik dalam ruangan.'],
+                            ['en' => 'Please do not lean against the glass railing on the balcony.', 'id' => 'Harap jangan bersandar pada pagar kaca di balkon.'],
+                            ['en' => 'Visitors are not allowed to feed the animals at the zoo.', 'id' => 'Pengunjung tidak diizinkan memberi makan hewan di kebun binatang.'],
+                        ],
+                        'drilling2' => [
+                            ['en' => 'Don\\\'t hesitate to ask if you have any questions about the rules.', 'id' => 'Jangan ragu untuk bertanya jika Anda memiliki pertanyaan tentang aturan tersebut.'],
+                            ['en' => 'Passengers must not cross the yellow safety line on the train platform.', 'id' => 'Penumpang dilarang melewati garis batas keselamatan kuning di peron kereta.'],
+                            ['en' => 'No parking is allowed in front of the emergency hospital gates.', 'id' => 'Dilarang parkir di depan gerbang darurat rumah sakit.'],
+                            ['en' => 'Do not share your online banking passwords with anyone.', 'id' => 'Jangan membagikan kata sandi perbankan online Anda kepada siapa pun.'],
+                            ['en' => 'You cannot enter the exam room after the test has started.', 'id' => 'Anda tidak dapat memasuki ruang ujian setelah tes dimulai.'],
+                        ],
+                        'grammar_note' => "Use 'Don\\\'t' for everyday verbal prohibitions. Use 'Must not' for formal legal bans and severe safety rules. Always follow with base Verb 1.",
+                        'dialogue_setting' => 'Seorang petugas museum menjelaskan aturan pameran kepada pengunjung galeri seni.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Excuse me, Officer! Can I bring this iced coffee into the painting gallery?',
+                                'id' => 'Permisi, Petugas! Bolehkah saya membawa es kopi ini ke dalam galeri lukisan?',
                             ],
-                            'rule' => 'Jangan pernah menambahkan kata benda setelah Possessive Pronoun (Salah: "This is mine car." -> Benar: "This car is mine.").',
-                        ],
-                        [
-                            'id' => 'reflexive',
-                            'badge' => 'Category 5',
-                            'color' => 'rose',
-                            'title' => 'Reflexive Pronouns (Kata Ganti Refleksif / Penekanan Diri)',
-                            'tagline' => 'Aksi mengenai diri sendiri ATAU Penekanan (Melakukan sendiri tanpa bantuan)',
-                            'formula' => '[ Subject + Verb + Reflexive Pronoun (Objek = Subjek) ] / [ Subject + ... + by himself/myself ]',
-                            'explanation' => 'Reflexive Pronouns dipakai ketika subjek dan objek adalah orang yang sama, atau untuk memberi penekanan bahwa subjek melakukan tindakan itu sendiri tanpa bantuan orang lain.',
-                            'items' => ['myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'yourselves', 'themselves'],
-                            'examples' => [
-                                ['en' => 'I accidentally cut myself while chopping carrots.', 'id' => 'Saya tidak sengaja melukai diri saya sendiri saat memotong wortel.'],
-                                ['en' => 'He built this mobile application all by himself.', 'id' => 'Dia membangun aplikasi seluler ini sepenuhnya sendirian tanpa bantuan.'],
-                                ['en' => 'We must take good care of ourselves during the flu season.', 'id' => 'Kita harus menjaga diri kita baik-baik selama musim flu.'],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'I am sorry, but food and drinks are not allowed inside the exhibition rooms. Please finish it outside.',
+                                'id' => 'Maaf, makanan dan minuman tidak diizinkan di dalam ruang pameran. Harap habiskan di luar.',
                             ],
-                            'rule' => 'Reflexive tunggal berakhiran "-self" (myself, yourself, himself, herself, itself). Bentuk jamak berakhiran "-selves" (ourselves, yourselves, themselves).',
-                        ],
-                    ],
-                    'pitfalls' => [
-                        [
-                            'id' => 'its_vs_its',
-                            'badge' => 'Crucial Spoken Distinction',
-                            'title' => "Its vs It's (Suara Sama, Makna Sangat Berbeda)",
-                            'desc' => "<b>It's</b> adalah singkatan dari <i>It is</i> atau <i>It has</i> (memiliki tanda petik apostrof). Sedangkan <b>Its</b> adalah kata ganti kepemilikan (tanpa apostrof sama sekali).",
-                            'wrong' => "The company changed it's marketing strategy.",
-                            'correct' => "The company changed its marketing strategy. (It's a great strategy!)",
-                        ],
-                        [
-                            'id' => 'your_vs_youre',
-                            'badge' => 'Common Pronunciation & Text Error',
-                            'title' => "Your vs You're",
-                            'desc' => "<b>Your</b> adalah possessive adjective (milikmu). Sedangkan <b>You're</b> adalah singkatan dari <i>You are</i>.",
-                            'wrong' => "Your the best English student in our batch.",
-                            'correct' => "You're the best English student in our batch! (I love your enthusiasm.)",
-                        ],
-                        [
-                            'id' => 'their_there_theyre',
-                            'badge' => 'The Triple Homophone',
-                            'title' => "Their vs There vs They're",
-                            'desc' => "<b>Their</b> = kepemilikan mereka (their car), <b>There</b> = di sana / penunjuk tempat (over there), <b>They're</b> = singkatan dari <i>They are</i>.",
-                            'wrong' => "There going to visit they're grandparents over their.",
-                            'correct' => "They're going to visit their grandparents over there.",
-                        ],
-                        [
-                            'id' => 'between_you_and_me',
-                            'badge' => 'Preposition + Object Rule',
-                            'title' => "Between you and me (Bukan 'Between you and I')",
-                            'desc' => "Kata <i>between</i> adalah preposisi. Semua kata ganti setelah preposisi WAJIB menggunakan Object Pronoun (me, him, her, us, them).",
-                            'wrong' => "Between you and I, I think the exam was quite tricky.",
-                            'correct' => "Between you and me, I think the exam was quite tricky.",
-                        ],
-                        [
-                            'id' => 'myself_as_subject',
-                            'badge' => 'Over-politeness Error',
-                            'title' => "Jangan gunakan 'Myself' sebagai Subjek atau Objek Biasa",
-                            'desc' => "Reflexive pronoun <i>myself</i> hanya dipakai jika Anda adalah subjek sekaligus objek kalimat, atau untuk penekanan. Jangan gunakan untuk menggantikan <i>I</i> atau <i>me</i>.",
-                            'wrong' => "John and myself will lead the speaking workshop.",
-                            'correct' => "John and I will lead the speaking workshop. (Feel free to contact John or me.)",
-                        ],
-                    ],
-                    'demonstratives' => [
-                        'title' => 'Demonstrative Pronouns & Adjectives (Penunjuk Jarak & Jumlah)',
-                        'items' => [
-                            ['word' => 'This', 'type' => 'Singular (Dekat)', 'ipa' => '/ðɪs/', 'meaning' => 'Ini (satu benda dekat)', 'example' => 'This is my personal laptop on my desk.'],
-                            ['word' => 'These', 'type' => 'Plural (Dekat)', 'ipa' => '/ðiːz/', 'meaning' => 'Ini semua (banyak benda dekat)', 'example' => 'These are our newly printed presentation handouts.'],
-                            ['word' => 'That', 'type' => 'Singular (Jauh)', 'ipa' => '/ðæt/', 'meaning' => 'Itu (satu benda jauh)', 'example' => 'That is their private conference room across the hall.'],
-                            ['word' => 'Those', 'type' => 'Plural (Jauh)', 'ipa' => '/ðoʊz/', 'meaning' => 'Itu semua (banyak benda jauh)', 'example' => 'Those are the award certificates we won last year.'],
-                        ]
-                    ]
-                ],
-                'listening' => [
-                    'title' => 'Short Listening Practice: The Lost Backpack & Mystery Owner',
-                    'audio_script' => "David: Excuse me, Sarah! Is this navy blue backpack yours?\nSarah: No, David, that backpack isn't mine. My backpack is bright red, and I left it in my locker. I think this bag belongs to Jessica. Look at that handcrafted wooden keychain on the zipper—she made it herself during our art workshop last Friday!\nDavid: You are right! I saw her carrying it this morning. Let's return it to her before our lecture starts. We can also ask their study group if anyone left their notebook behind.\nSarah: Great idea! Between you and me, Jessica would be very relieved to have her bag back. Let's go find her right now!",
-                    'key_phrases' => [
-                        'Is this navy blue backpack yours? No, it isn\'t mine.',
-                        'She made it herself during our art workshop last Friday.',
-                        'Between you and me, Jessica would be very relieved to have her bag back.',
-                        'We can also ask their study group if anyone left their notebook behind.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'Whose backpack was actually found in the classroom?',
-                            'options' => [
-                                'Jessica\'s backpack',
-                                'Sarah\'s backpack',
-                                'David\'s backpack',
-                                'The professor\'s backpack',
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'I understand. And can we take photos of the historical artifacts?',
+                                'id' => 'Saya mengerti. Dan bisakah kami mengambil foto artefak bersejarah?',
                             ],
-                            'answer' => 'Jessica\'s backpack',
-                        ],
-                        [
-                            'q' => 'How did Sarah know the backpack belonged to Jessica?',
-                            'options' => [
-                                'Because of a handcrafted keychain that Jessica made herself',
-                                'Because Sarah\'s name was written on the front tag',
-                                'Because David opened it and read Jessica\'s diary',
-                                'Because the backpack was bright red',
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'You can take photos, but you must not use flash. Flash light can damage the delicate pigments.',
+                                'id' => 'Anda boleh mengambil foto, tetapi dilarang menggunakan lampu kilat (flash). Cahaya flash dapat merusak pigmen yang sensitif.',
                             ],
-                            'answer' => 'Because of a handcrafted keychain that Jessica made herself',
-                        ],
-                        [
-                            'q' => 'Which sentence contains the grammatically correct preposition and pronoun pair?',
-                            'options' => [
-                                'Between you and me, Jessica will be very relieved.',
-                                'Between you and I, Jessica will be very relieved.',
-                                'Between yourself and I, Jessica will be very relieved.',
-                                'Between you and myself, Jessica will be very relieved.',
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Thank you for the clear reminder. We will turn off our camera flash right now.',
+                                'id' => 'Terima kasih atas pengingat yang jelas. Kami akan mematikan lampu kilat kamera kami sekarang.',
                             ],
-                            'answer' => 'Between you and me, Jessica will be very relieved.',
+                        ],
+                        'drilling' => [
+                            'Don\'t touch the electrical switches with wet hands.',
+                            'You must not exceed the highway speed limit of 100 km/h.',
+                            'Visitors are not allowed to touch the museum artifacts.',
+                            'No smoking is permitted anywhere inside the hospital premises.',
+                            'Please do not disturb the audio recording in progress.',
+                            'Passengers must not cross the yellow safety line on the platform.',
+                            'Do not share your secret bank password with anyone.',
+                            'It is forbidden to park unauthorized vehicles in front of the ambulance bay.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Visiting a National Art Gallery',
+                                'turns' => [
+                                    ['speaker' => 'Tourist', 'text' => 'Excuse me, guard! May I use flash photography for this antique painting?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Security Guard', 'text' => 'I am sorry, sir. Flash photography is strictly forbidden here because light harms the paint.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Tourist', 'text' => 'Oh, I see! Am I allowed to take regular photos without flash?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Security Guard', 'text' => 'Yes, non-flash photos are fine. But please do not cross the velvet rope.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Tourist', 'text' => 'Understood. Thank you for informing me!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Safety Briefing at the Science Laboratory',
+                                'turns' => [
+                                    ['speaker' => 'Lab Instructor', 'text' => 'Welcome students. Before we begin the chemical experiment, remember the golden rules.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Student', 'text' => 'What are the main prohibitions in this lab, professor?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Lab Instructor', 'text' => 'You must not eat or drink inside the laboratory, and don\'t touch chemicals without safety gloves.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Student', 'text' => 'Got it! We will wear our goggles and gloves right now.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Lab Instructor', 'text' => 'Excellent. Safety always comes first.', 'avatar' => 'female_2'],
+                                ],
+                            ],
+                        ],
+                        'games' => [
+                            'title' => 'Speaking Activity: Public Safety & Prohibitions Mystery Signs',
+                            'participation_type' => 'individual',
+                            'activity' => 'Whole class & pairwork: rule interrogation, sign guessing, public safety roleplay',
+                            'aim' => 'To master the fluent articulation of prohibitions (Don\\\'t / Must not / No + V-ing).',
+                            'time' => '15 to 20 minutes',
+                            'cards' => [
+                                ['id' => 1, 'title' => 'Library Quiet Zone', 'badge' => 'No Noise', 'category' => 'Rules', 'question' => 'What must visitors NOT do in a public library study room?', 'sample_answer' => 'Visitors must not speak loudly or make phone calls in the study room.'],
+                                ['id' => 2, 'title' => 'Airplane Cabin Rule', 'badge' => 'Flight Safety', 'category' => 'Rules', 'question' => 'What is one strict rule during airplane takeoff and landing?', 'sample_answer' => 'Passengers must not unbuckle their seatbelts or stand up during takeoff.'],
+                                ['id' => 3, 'title' => 'Swimming Pool Safety', 'badge' => 'No Diving', 'category' => 'Rules', 'question' => 'What is a vital safety rule at the shallow end of a swimming pool?', 'sample_answer' => 'Do not dive into the shallow water and do not run around the pool edge.'],
+                                ['id' => 4, 'title' => 'Exam Room Security', 'badge' => 'No Cheating', 'category' => 'Rules', 'question' => 'What must students never do during an official international test?', 'sample_answer' => 'Students must not look at other papers or use unauthorized electronic devices.'],
+                                ['id' => 5, 'title' => 'Hospital ICU Ward', 'badge' => 'Quiet Zone', 'category' => 'Rules', 'question' => 'What are visitors prohibited from doing inside an intensive care ward?', 'sample_answer' => 'Visitors are not allowed to make loud noises or visit outside official hours.'],
+                                ['id' => 6, 'title' => 'Laboratory Protocol', 'badge' => 'No Eating', 'category' => 'Rules', 'question' => 'What must you never do inside a chemical or biology laboratory?', 'sample_answer' => 'Never eat or drink inside the lab and do not touch chemicals with bare hands.'],
+                                ['id' => 7, 'title' => 'Gas Station Safety', 'badge' => 'No Smoking', 'category' => 'Rules', 'question' => 'What warning sign is prominently displayed at every fuel station?', 'sample_answer' => 'No smoking and turn off your car engine while refueling.'],
+                                ['id' => 8, 'title' => 'National Park Wilderness', 'badge' => 'No Littering', 'category' => 'Rules', 'question' => 'What rule protects wildlife in a protected national park?', 'sample_answer' => 'Do not leave trash behind and you must not feed or touch wild animals.'],
+                                ['id' => 9, 'title' => 'Highway Driving Law', 'badge' => 'No Phone', 'category' => 'Rules', 'question' => 'What traffic law prevents road accidents on busy highways?', 'sample_answer' => 'Drivers must not text or hold a mobile phone while operating a vehicle.'],
+                                ['id' => 10, 'title' => 'Historic Castle Tour', 'badge' => 'Do Not Touch', 'category' => 'Rules', 'question' => 'What rule is given to tourists visiting antique royal chambers?', 'sample_answer' => 'Please do not touch the antique tapestries and do not sit on historic chairs.'],
+                            ],
+                            'report_examples' => [
+                                'In our class survey, all students agreed that "No smoking" and "No texting while driving" save lives.',
+                                'Most classmates highlighted library and exam room etiquette as the most common rules.',
+                                'David explained that flash photography is prohibited in museums to protect historic artwork.',
+                                'The class practiced using "Must not" for strict laws and "Don\\\'t" for daily friendly advice.'
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "What are three important rules or prohibitions you have in your own home or workplace?",
+                                'hint' => "Answer: 'In my home, we don\\\'t wear outdoor shoes inside, we must not waste food, and we don\\\'t make noise late at night.'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "Explain why people must not use smartphones while driving on the road.",
+                                'hint' => "Answer: 'Drivers must not use phones because it causes serious distraction and leads to fatal traffic accidents.'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "What is the difference in tone between saying 'Don\\\'t shout' and 'You must not shout'?",
+                                'hint' => "Answer: ''Don\\\'t shout' is a direct spoken instruction, while 'You must not shout' is a formal, strict rule.'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Prohibitions & Public Rules Spoken Fluency Drills',
+                        'impromptu' => [
+                            'Aktivitas 1: Bertindaklah sebagai kepala keamanan bandara internasional dan umumkan 5 aturan keselamatan kepada penumpang!',
+                            'Aktivitas 2: Jelaskan kepada turis asing tentang 3 larangan adat atau aturan kesopanan lokal di daerahmu!',
+                            'Aktivitas 3: Debat singkat 1 menit tentang mengapa penggunaan helm dan larangan merokok di tempat umum wajib ditegakkan!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Prohibit', 'ipa' => '/prəˈhɪb.ɪt/', 'meaning' => 'Melarang secara resmi', 'example' => 'The law prohibits illegal parking.'],
+                            ['word' => 'Forbidden', 'ipa' => '/fəˈbɪd.ən/', 'meaning' => 'Terlarang / Diharamkan', 'example' => 'Entry into the restricted zone is forbidden.'],
+                            ['word' => 'Regulation', 'ipa' => '/ˌreɡ.jəˈleɪ.ʃən/', 'meaning' => 'Peraturan resmi', 'example' => 'Follow all safety regulations.'],
+                            ['word' => 'Penalty', 'ipa' => '/ˈpen.əl.ti/', 'meaning' => 'Denda / Hukuman pelanggaran', 'example' => 'There is a heavy penalty for littering.'],
+                            ['word' => 'Warning', 'ipa' => '/ˈwɔː.nɪŋ/', 'meaning' => 'Peringatan waspada', 'example' => 'Pay attention to the warning sign.'],
+                            ['word' => 'Strict', 'ipa' => '/strɪkt/', 'meaning' => 'Ketat / Tegas', 'example' => 'Our academy has strict attendance rules.'],
+                            ['word' => 'Permission', 'ipa' => '/pəˈmɪʃ.ən/', 'meaning' => 'Izin tertulis/lisan', 'example' => 'Ask for permission before entering.'],
+                            ['word' => 'Authorized', 'ipa' => '/ˈɔː.θər.aɪzd/', 'meaning' => 'Berwenang / Memiliki izin', 'example' => 'Only authorized staff may enter.'],
+                            ['word' => 'Checkpoint', 'ipa' => '/ˈtʃek.pɔɪnt/', 'meaning' => 'Pos pemeriksaan keamanan', 'example' => 'Show your passport at the checkpoint.'],
+                            ['word' => 'Platform', 'ipa' => '/ˈplæt.fɔːm/', 'meaning' => 'Peron stasiun kereta', 'example' => 'Stand behind the line on the platform.'],
+                            ['word' => 'Littering', 'ipa' => '/ˈlɪt.ər.ɪŋ/', 'meaning' => 'Membuang sampah sembarangan', 'example' => 'No littering in the city square.'],
+                            ['word' => 'Unbuckle', 'ipa' => '/ʌnˈbʌk.əl/', 'meaning' => 'Membuka sabuk pengaman', 'example' => 'Do not unbuckle your seatbelt yet.'],
+                            ['word' => 'Refuel', 'ipa' => '/ˌriːˈfjuː.əl/', 'meaning' => 'Mengisi bahan bakar', 'example' => 'Turn off the engine while refueling.'],
+                            ['word' => 'Artifact', 'ipa' => '/ˈɑː.tə.fækt/', 'meaning' => 'Benda purbakala bersejarah', 'example' => 'Do not touch the museum artifacts.'],
+                            ['word' => 'Tapestry', 'ipa' => '/ˈtæp.ə.stri/', 'meaning' => 'Kain tenun pajangan dinding', 'example' => 'The antique tapestry is fragile.'],
+                            ['word' => 'Goggles', 'ipa' => '/ˈɡɒɡ.əlz/', 'meaning' => 'Kacamata pelindung lab/renang', 'example' => 'Wear protective goggles during the experiment.'],
+                            ['word' => 'Cabin', 'ipa' => '/ˈkæb.ɪn/', 'meaning' => 'Kabin pesawat/kapal', 'example' => 'Stow luggage in the overhead cabin.'],
+                            ['word' => 'Distraction', 'ipa' => '/dɪˈstræk.ʃən/', 'meaning' => 'Gangguan konsentrasi', 'example' => 'Mobile phones cause dangerous distraction.'],
+                            ['word' => 'Hazard', 'ipa' => '/ˈhæz.əd/', 'meaning' => 'Bahaya / Risiko bahaya', 'example' => 'Spilled oil is a serious slip hazard.'],
+                            ['word' => 'Mandatory', 'ipa' => '/ˈmæn.də.tər.i/', 'meaning' => 'Wajib / Keharusan', 'example' => 'Wearing a helmet is mandatory.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
                     [
-                        'en' => 'I have a new laptop. This new laptop is mine.',
-                        'id' => 'Saya punya laptop baru. Laptop baru ini milik saya.',
-                    ],
-                    [
-                        'en' => 'She loves her job, and she always does her assignments herself.',
-                        'id' => 'Dia mencintai pekerjaannya, dan dia selalu menyelesaikan tugas-tugasnya sendiri.',
-                    ],
-                    [
-                        'en' => 'They invited us to their party, and we really enjoyed ourselves.',
-                        'id' => 'Mereka mengundang kami ke pesta mereka, dan kami sangat menikmati waktu kami.',
-                    ],
-                    [
-                        'en' => 'He bought himself a coffee and offered one to me.',
-                        'id' => 'Dia membelikan dirinya sendiri segelas kopi dan menawarkan satu kepada saya.',
-                    ],
-                    [
-                        'en' => 'Between you and me, their presentation is much more convincing than ours.',
-                        'id' => 'Antara kamu dan saya, presentasi mereka jauh lebih meyakinkan daripada milik kita.',
-                    ],
-                    [
-                        'en' => 'The company updated its mobile app, and it works seamlessly by itself.',
-                        'id' => 'Perusahaan memperbarui aplikasi selulernya, dan aplikasi itu berjalan lancar dengan sendirinya.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'Please introduce yourself to the rest of the speaking class.',
-                        'id' => 'Silakan perkenalkan dirimu kepada seluruh anggota kelas speaking.',
-                    ],
-                    [
-                        'en' => 'We built this entire web application ourselves from scratch without external help.',
-                        'id' => 'Kami membangun seluruh aplikasi web ini sendiri dari awal tanpa bantuan pihak luar.',
-                    ],
-                    [
-                        'en' => 'Is that umbrella on the rack hers, or did someone leave theirs behind?',
-                        'id' => 'Apakah payung di rak itu miliknya, atau ada yang meninggalkan payung milik mereka?',
-                    ],
-                    [
-                        'en' => 'Can you please lend him your notes? He forgot his at home this morning.',
-                        'id' => 'Bisakah kamu meminjamkan catatanmu kepadanya? Dia kelupaan membawa miliknya di rumah pagi ini.',
-                    ],
-                    [
-                        'en' => 'They promised to look after themselves during their adventurous mountain hike.',
-                        'id' => 'Mereka berjanji untuk menjaga diri mereka baik-baik selama pendakian gunung yang menantang.',
-                    ],
-                    [
-                        'en' => 'These books belong to our mentor, so please handle them with great care.',
-                        'id' => 'Buku-buku ini milik mentor kita, jadi tolong rawat buku-buku tersebut dengan hati-hati.',
-                    ],
-                ],
-                'grammar_note' => 'Golden Rule: Possessive Adjectives ALWAYS need a noun (my car, her bag, their house). Possessive Pronouns NEVER take a noun (the car is mine, the bag is hers, the house is theirs). Use Reflexive when Subject = Object (I taught myself) or for emphasis (We did it ourselves).',
-                'dialogue_setting' => 'Dua percakapan autentik melatih penggunaan Subjek, Objek, Possessive Adjective, Possessive Pronoun, dan Reflexive Pronoun dalam situasi sosial nyata.',
-                'dialogue' => [
-                    // Ronde 1: Whose Backpack Is This? (Investigating Lost Items)
-                    [
-                        'section_badge' => 'Ronde 1: Investigating Lost Belongings (Whose Backpack Is This?)',
-                        'speaker' => 'Alex',
-                        'role_label' => 'Siswa A (Menemukan Barang Tertinggal)',
-                        'id' => 'Permisi Bella! Apakah payung ungu di samping kursimu ini milikmu?',
-                        'en' => 'Excuse me Bella! Is this purple umbrella next to your chair yours?',
-                    ],
-                    [
-                        'speaker' => 'Bella',
-                        'role_label' => 'Siswa B (Memeriksa Kepemilikan & Memberi Informasi)',
-                        'id' => 'Tidak, payung itu bukan milik saya. Milik saya berwarna biru tua di dalam tas saya. Saya rasa payung itu milik Sarah.',
-                        'en' => 'No, that umbrella isn\'t mine. Mine is navy blue inside my bag. I think that umbrella belongs to Sarah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'role_label' => 'Siswa A (Menanyakan Ciri-ciri Khusus)',
-                        'id' => 'Bagaimana kamu bisa yakin payung itu miliknya?',
-                        'en' => 'How can you be so certain that it is hers?',
-                    ],
-                    [
-                        'speaker' => 'Bella',
-                        'role_label' => 'Siswa B (Menjelaskan Bukti Reflexive)',
-                        'id' => 'Lihat gantungan kuncinya! Dia menghiasnya sendiri dengan pita kain sutra kemarin.',
-                        'en' => 'Look at the keychain! She decorated it herself with silk ribbon yesterday.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'role_label' => 'Siswa A (Mengajak Mengembalikan Barang)',
-                        'id' => 'Kamu benar sekali! Mari kita antarkan payung ini kepadanya sebelum hujan mulai turun deras.',
-                        'en' => 'You are completely right! Let\'s return it to her before the heavy rain starts.',
-                    ],
-                    [
-                        'speaker' => 'Bella',
-                        'role_label' => 'Siswa B (Menyetujui dengan Preposisi + Object)',
-                        'id' => 'Ide bagus. Antara kamu dan saya, dia pasti sangat cemas mencari payung kesayangannya.',
-                        'en' => 'Great idea. Between you and me, she must be very anxious looking for her favorite umbrella.',
-                    ],
-                    // Ronde 2: Dividing Responsibilities for Group Presentation
-                    [
-                        'section_badge' => 'Ronde 2: Tukar Peran (Membagi Tugas Presentasi Kelompok)',
-                        'speaker' => 'David',
-                        'role_label' => 'Siswa A (Membahas Pembagian Proyek)',
-                        'id' => 'Maya, bagaimana kita akan membagi bagian presentasi kita untuk ujian speaking besok?',
-                        'en' => 'Maya, how shall we divide our presentation parts for tomorrow\'s speaking test?',
-                    ],
-                    [
-                        'speaker' => 'Maya',
-                        'role_label' => 'Siswa B (Mengusulkan Pembagian Mandiri)',
-                        'id' => 'Saya bisa menyiapkan slide pembuka sendiri, dan kamu bisa merancang studi kasusnya sendiri.',
-                        'en' => 'I can prepare the opening slides myself, and you can design the case study yourself.',
-                    ],
-                    [
-                        'speaker' => 'David',
-                        'role_label' => 'Siswa A (Menanyakan Data Kelompok Lain)',
-                        'id' => 'Terdengar adil! Bagaimana dengan kelompok Kevin dan Lisa? Apakah topik mereka mirip dengan topik kita?',
-                        'en' => 'Sounds fair! What about Kevin and Lisa\'s group? Is their topic similar to ours?',
-                    ],
-                    [
-                        'speaker' => 'Maya',
-                        'role_label' => 'Siswa B (Membandingkan dengan Possessive Pronouns)',
-                        'id' => 'Topik kita berfokus pada teknologi pendidikan, sedangkan topik mereka membahas pariwisata berkelanjutan.',
-                        'en' => 'Our topic focuses on educational technology, while theirs discusses sustainable tourism.',
-                    ],
-                    [
-                        'speaker' => 'David',
-                        'role_label' => 'Siswa A (Menegaskan Kerja Sama)',
-                        'id' => 'Bagus sekali. Mari kita beri diri kita waktu dua jam untuk gladi bersih sore ini.',
-                        'en' => 'Excellent. Let\'s give ourselves two hours for a full dress rehearsal this afternoon.',
-                    ],
-                    [
-                        'speaker' => 'Maya',
-                        'role_label' => 'Siswa B (Menutup dengan Percaya Diri)',
-                        'id' => 'Sepakat! Jika kita percaya pada diri kita sendiri, hasil terbaik pasti menjadi milik kita.',
-                        'en' => 'Agreed! If we believe in ourselves, the highest score will certainly be ours.',
-                    ],
-                ],
-                'vocabulary' => [
-                    ['word' => 'I', 'type' => 'Subject Pronoun', 'ipa' => '/aɪ/', 'meaning' => 'Saya (subjek pelaku)', 'example' => 'I learn English every day.'],
-                    ['word' => 'Me', 'type' => 'Object Pronoun', 'ipa' => '/miː/', 'meaning' => 'Saya (objek penerima / setelah preposisi)', 'example' => 'Please give the document to me.'],
-                    ['word' => 'My', 'type' => 'Possessive Adjective', 'ipa' => '/maɪ/', 'meaning' => '... saya (wajib diikuti kata benda)', 'example' => 'This is my personal computer.'],
-                    ['word' => 'Mine', 'type' => 'Possessive Pronoun', 'ipa' => '/maɪn/', 'meaning' => 'Milik saya (tanpa kata benda)', 'example' => 'This computer is mine.'],
-                    ['word' => 'Myself', 'type' => 'Reflexive Pronoun', 'ipa' => '/maɪˈsɛlf/', 'meaning' => 'Diri saya sendiri / Saya sendiri', 'example' => 'I solved the problem myself.'],
-                    ['word' => 'You', 'type' => 'Subject / Object', 'ipa' => '/juː/', 'meaning' => 'Kamu / Anda (tunggal atau jamak)', 'example' => 'You are doing an excellent job.'],
-                    ['word' => 'Your', 'type' => 'Possessive Adjective', 'ipa' => '/jɔːr/', 'meaning' => '... kamu / anda (wajib ada benda)', 'example' => 'Is this your new car?'],
-                    ['word' => 'Yours', 'type' => 'Possessive Pronoun', 'ipa' => '/jɔːrz/', 'meaning' => 'Milik kamu / milik anda', 'example' => 'Is this blue backpack yours?'],
-                    ['word' => 'Yourself', 'type' => 'Reflexive Pronoun', 'ipa' => '/jɔːrˈsɛlf/', 'meaning' => 'Dirimu sendiri (tunggal)', 'example' => 'Take good care of yourself.'],
-                    ['word' => 'Yourselves', 'type' => 'Reflexive Pronoun', 'ipa' => '/jɔːrˈsɛlvz/', 'meaning' => 'Diri kalian semua (jamak)', 'example' => 'Please enjoy yourselves at the party.'],
-                    ['word' => 'He', 'type' => 'Subject Pronoun', 'ipa' => '/hiː/', 'meaning' => 'Dia (laki-laki, subjek)', 'example' => 'He lives in Melbourne, Australia.'],
-                    ['word' => 'Him', 'type' => 'Object Pronoun', 'ipa' => '/hɪm/', 'meaning' => 'Dia (laki-laki, objek)', 'example' => 'We congratulated him on his success.'],
-                    ['word' => 'His', 'type' => 'Possessive Adj / Pronoun', 'ipa' => '/hɪz/', 'meaning' => 'Miliknya (laki-laki)', 'example' => 'His speech was inspiring and the idea was his.'],
-                    ['word' => 'Himself', 'type' => 'Reflexive Pronoun', 'ipa' => '/hɪmˈsɛlf/', 'meaning' => 'Dirinya sendiri (laki-laki)', 'example' => 'He repaired the vintage bicycle himself.'],
-                    ['word' => 'She', 'type' => 'Subject Pronoun', 'ipa' => '/ʃiː/', 'meaning' => 'Dia (perempuan, subjek)', 'example' => 'She leads the regional research team.'],
-                    ['word' => 'Her', 'type' => 'Object / Possessive Adj', 'ipa' => '/hɜːr/', 'meaning' => 'Dia (objek) / ... miliknya (perempuan)', 'example' => 'I called her yesterday to discuss her project.'],
-                    ['word' => 'Hers', 'type' => 'Possessive Pronoun', 'ipa' => '/hɜːrz/', 'meaning' => 'Miliknya (perempuan, mandiri)', 'example' => 'That golden trophy is hers.'],
-                    ['word' => 'Herself', 'type' => 'Reflexive Pronoun', 'ipa' => '/hɜːrˈsɛlf/', 'meaning' => 'Dirinya sendiri (perempuan)', 'example' => 'She prepared the entire gourmet dinner herself.'],
-                    ['word' => 'It', 'type' => 'Subject / Object', 'ipa' => '/ɪt/', 'meaning' => 'Benda / hewan / hal ini', 'example' => 'It operates smoothly on all devices.'],
-                    ['word' => 'Its', 'type' => 'Possessive Adjective', 'ipa' => '/ɪts/', 'meaning' => 'Miliknya (hewan/benda, tanpa petik)', 'example' => 'The cat washed its paws thoroughly.'],
-                    ['word' => 'Itself', 'type' => 'Reflexive Pronoun', 'ipa' => '/ɪtˈsɛlf/', 'meaning' => 'Dirinya sendiri (benda/hewan)', 'example' => 'The software updates itself automatically.'],
-                    ['word' => 'We', 'type' => 'Subject Pronoun', 'ipa' => '/wiː/', 'meaning' => 'Kami / kita (subjek)', 'example' => 'We speak fluent English with confidence.'],
-                    ['word' => 'Us', 'type' => 'Object Pronoun', 'ipa' => '/ʌs/', 'meaning' => 'Kami / kita (objek)', 'example' => 'The instructor gave us insightful feedback.'],
-                    ['word' => 'Our', 'type' => 'Possessive Adjective', 'ipa' => '/ˈaʊ.ər/', 'meaning' => '... kami / kita (wajib ada benda)', 'example' => 'Our team achieved all quarterly goals.'],
-                    ['word' => 'Ours', 'type' => 'Possessive Pronoun', 'ipa' => '/ˈaʊ.ərz/', 'meaning' => 'Milik kami / milik kita', 'example' => 'The championship victory is ours.'],
-                    ['word' => 'Ourselves', 'type' => 'Reflexive Pronoun', 'ipa' => '/aʊərˈsɛlvz/', 'meaning' => 'Diri kami / kita sendiri', 'example' => 'We treated ourselves to a delicious dinner.'],
-                    ['word' => 'They', 'type' => 'Subject Pronoun', 'ipa' => '/ðeɪ/', 'meaning' => 'Mereka (subjek)', 'example' => 'They arrived at the venue on schedule.'],
-                    ['word' => 'Them', 'type' => 'Object Pronoun', 'ipa' => '/ðɛm/', 'meaning' => 'Mereka (objek)', 'example' => 'We invited them to join our study group.'],
-                    ['word' => 'Their', 'type' => 'Possessive Adjective', 'ipa' => '/ðɛər/', 'meaning' => '... mereka (wajib ada benda)', 'example' => 'Their collaborative effort was phenomenal.'],
-                    ['word' => 'Theirs', 'type' => 'Possessive Pronoun', 'ipa' => '/ðɛərz/', 'meaning' => 'Milik mereka', 'example' => 'Our car is red, but theirs is metallic grey.'],
-                    ['word' => 'Themselves', 'type' => 'Reflexive Pronoun', 'ipa' => '/ðəmˈsɛlvz/', 'meaning' => 'Diri mereka sendiri', 'example' => 'They built their startup company themselves.'],
-                ],
-                'games' => [
-                    'type' => 'wedding_photos',
-                    'participation_type' => 'pair',
-                    'title' => 'Worksheet 6 Game • Wedding Photos (Asking & Saying Who Someone Is)',
-                    'activity' => 'Pairwork; Information Gap',
-                    'aim' => 'To find out who all the people in the photo are and write their names in on the photo by asking "Who\'s that?" and answering "That\'s [Name]. She\'s/He\'s my [Relationship]."',
-                    'function_practised' => 'Asking and saying who someone is',
-                    'structures' => [
-                        "Who's this / that?",
-                        "This is / That's [Name]. She's / He's my [Relationship].",
-                        "Who's the man with the glasses / moustache?",
-                        "Who's the woman wearing the hat / holding flowers?",
-                    ],
-                    'topic_area' => 'Family members & Pronouns (He, She, This, That, My, His, Her)',
-                    'essential_vocabulary' => 'mother, father, sister, brother, aunt, uncle, cousin, grandmother, grandfather, bride, groom, husband, wife',
-                    'images' => [
-                        'wedding_photo_color' => '/images/speaking/wedding_photos/wedding_photo_color.jpg',
-                        'wedding_photo' => '/images/speaking/wedding_photos/wedding_photo_upright.png',
-                        'family_trees' => '/images/speaking/wedding_photos/family_trees.png',
-                        'family_tree_a' => '/images/speaking/wedding_photos/family_tree_a.png',
-                        'family_tree_b' => '/images/speaking/wedding_photos/family_tree_b.png',
-                        'teacher_guide_1' => '/images/speaking/wedding_photos/teacher_guide_1.png',
-                        'teacher_guide_2' => '/images/speaking/wedding_photos/teacher_guide_2.png',
-                    ],
-                    'story' => [
-                        'en' => "This is a wedding picture: Student A's sister (Ann) is marrying Student B's brother (Tim). A's family is on the bride's side and B's family is on the groom's side.",
-                        'id' => "Ini adalah foto pernikahan keluarga besar: Saudara perempuan Siswa A (Ann) menikah dengan saudara laki-laki Siswa B (Tim). Keluarga Siswa A berada di sisi pengantin wanita (Bride), dan keluarga Siswa B berada di sisi pengantin pria (Groom)."
-                    ],
-                    'family_a' => [
-                        'title' => "Family Tree A (Bride's Family)",
-                        'badge' => "Bride's Family (Ann's Side)",
-                        'self_name' => "Student A (Ann's Sibling)",
-                        'bride' => "Ann (The Bride - Sister of Student A)",
-                        'groom' => "Tim (The Groom - New Brother-in-law)",
-                        'members' => [
-                            ['name' => 'Joe', 'relation_en' => 'Grandfather', 'relation_id' => 'Kakek', 'pronoun' => 'He', 'clue' => 'Old man with glasses and spiky hair at the top back', 'spoken_answer' => "That's Joe. He's my grandfather."],
-                            ['name' => 'Elsie', 'relation_en' => 'Grandmother', 'relation_id' => 'Nenek', 'pronoun' => 'She', 'clue' => 'Elderly lady with curly hair and round glasses next to Joe', 'spoken_answer' => "That's Elsie. She's my grandmother."],
-                            ['name' => 'Tom', 'relation_en' => 'Father', 'relation_id' => 'Ayah', 'pronoun' => 'He', 'clue' => 'Bald man with moustache smiling in suit', 'spoken_answer' => "That's Tom. He's my father."],
-                            ['name' => 'Jess', 'relation_en' => 'Mother', 'relation_id' => 'Ibu', 'pronoun' => 'She', 'clue' => 'Woman wearing a wide-brimmed hat next to Tom', 'spoken_answer' => "That's Jess. She's my mother."],
-                            ['name' => 'Pete', 'relation_en' => 'Uncle', 'relation_id' => 'Paman', 'pronoun' => 'He', 'clue' => 'Man with curly hair and glasses wearing a bowtie', 'spoken_answer' => "That's Pete. He's my uncle."],
-                            ['name' => 'Sue', 'relation_en' => 'Aunt', 'relation_id' => 'Bibi', 'pronoun' => 'She', 'clue' => 'Woman with dark headband and stylish coat', 'spoken_answer' => "That's Sue. She's my aunt."],
-                            ['name' => 'Sam', 'relation_en' => 'Brother', 'relation_id' => 'Saudara Laki-laki', 'pronoun' => 'He', 'clue' => 'Young boy in neat suit with bow tie near Ann', 'spoken_answer' => "That's Sam. He's my brother."],
-                            ['name' => 'Ann', 'relation_en' => 'Sister (The Bride)', 'relation_id' => 'Pengantin Wanita (Kakak/Adik)', 'pronoun' => 'She', 'clue' => 'The bride in white veil and holding flowers', 'spoken_answer' => "That's Ann. She's my sister (the bride)."],
-                            ['name' => 'Mike', 'relation_en' => 'Cousin', 'relation_id' => 'Sepupu', 'pronoun' => 'He', 'clue' => 'Young man with glasses and smile (son of Pete & Sue)', 'spoken_answer' => "That's Mike. He's my cousin."],
-                        ]
-                    ],
-                    'family_b' => [
-                        'title' => "Family Tree B (Groom's Family)",
-                        'badge' => "Groom's Family (Tim's Side)",
-                        'self_name' => "Student B (Tim's Sibling)",
-                        'groom' => "Tim (The Groom - Brother of Student B)",
-                        'bride' => "Ann (The Bride - New Sister-in-law)",
-                        'members' => [
-                            ['name' => 'Jim', 'relation_en' => 'Grandfather', 'relation_id' => 'Kakek', 'pronoun' => 'He', 'clue' => 'Old man with thick bushy moustache and suit at the back', 'spoken_answer' => "That's Jim. He's my grandfather."],
-                            ['name' => 'Betty', 'relation_en' => 'Grandmother', 'relation_id' => 'Nenek', 'pronoun' => 'She', 'clue' => 'Elderly lady with hair tied in a bun smiling next to Jim', 'spoken_answer' => "That's Betty. She's my grandmother."],
-                            ['name' => 'Al', 'relation_en' => 'Father', 'relation_id' => 'Ayah', 'pronoun' => 'He', 'clue' => 'Man with neat moustache and suit standing near Tim', 'spoken_answer' => "That's Al. He's my father."],
-                            ['name' => 'Jane', 'relation_en' => 'Mother', 'relation_id' => 'Ibu', 'pronoun' => 'She', 'clue' => 'Woman wearing a hat with flower corsage on jacket', 'spoken_answer' => "That's Jane. She's my mother."],
-                            ['name' => 'Ben', 'relation_en' => 'Uncle', 'relation_id' => 'Paman', 'pronoun' => 'He', 'clue' => 'Man with dark combed hair smiling next to Liz', 'spoken_answer' => "That's Ben. He's my uncle."],
-                            ['name' => 'Liz', 'relation_en' => 'Aunt', 'relation_id' => 'Bibi', 'pronoun' => 'She', 'clue' => 'Woman wearing a stylish beret hat and scarf', 'spoken_answer' => "That's Liz. She's my aunt."],
-                            ['name' => 'Tim', 'relation_en' => 'Brother (The Groom)', 'relation_id' => 'Pengantin Pria (Kakak/Adik)', 'pronoun' => 'He', 'clue' => 'The groom in suit with flower on lapel', 'spoken_answer' => "That's Tim. He's my brother (the groom)."],
-                            ['name' => 'Beth', 'relation_en' => 'Sister', 'relation_id' => 'Saudara Perempuan', 'pronoun' => 'She', 'clue' => 'Young girl with bow ribbons in hair holding bouquet', 'spoken_answer' => "That's Beth. She's my sister."],
-                            ['name' => 'John', 'relation_en' => 'Cousin', 'relation_id' => 'Sepupu', 'pronoun' => 'He', 'clue' => 'Young man with wavy hair and tie (son of Ben & Liz)', 'spoken_answer' => "That's John. He's my cousin."],
-                        ]
-                    ],
-                    'sample_dialogues' => [
-                        [
-                            'step' => 1,
-                            'asker' => 'Student A (Menunjuk sisi Groom)',
-                            'target' => 'Al (Ayah Tim)',
-                            'question_en' => "Who's that man with the moustache next to Tim?",
-                            'question_id' => "Siapa pria berkumis di samping Tim itu?",
-                            'answerer' => 'Student B (Melihat Family Tree B)',
-                            'answer_en' => "That's Al. He's my father.",
-                            'answer_id' => "Itu Al. Dia adalah ayah saya."
+                        'id' => 'sec-m5-sub-2',
+                        'num' => '02',
+                        'title' => "Pronouns, Possessive Nouns ('s) & Family Photo",
+                        'subtitle' => "Subject/Object Pronouns, Possessive Adjectives, Possessive Nouns ('s) & Wedding Photo Pairwork",
+                        'desc' => "Kata ganti subjek, objek, kata sifat kepemilikan, kepemilikan nama orang ('s vs s'), serta permainan foto pernikahan keluarga (Wedding Photos Pairwork).",
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'pronouns_mastery',
+                            'title' => "Tabel Referensi: Pronouns & Possessive Nouns ('s)",
+                            'matrix' => [
+                                [
+                                    'person' => '1st Person (Singular)',
+                                    'meaning' => 'Saya / Aku',
+                                    'subject' => 'I',
+                                    'object' => 'Me',
+                                    'poss_adj' => 'My (car)',
+                                    'poss_pron' => 'Mine',
+                                    'reflexive' => 'Myself',
+                                    'example' => "I love my car; it is mine, and I bought it myself.",
+                                ],
+                                [
+                                    'person' => '2nd Person (Sing./Plural)',
+                                    'meaning' => 'Kamu / Anda / Kalian',
+                                    'subject' => 'You',
+                                    'object' => 'You',
+                                    'poss_adj' => 'Your (car)',
+                                    'poss_pron' => 'Yours',
+                                    'reflexive' => 'Yourself / Yourselves',
+                                    'example' => "You forgot your jacket, but this blue jacket is yours; wear it yourself.",
+                                ],
+                                [
+                                    'person' => '3rd Person (Male)',
+                                    'meaning' => 'Dia (Laki-laki)',
+                                    'subject' => 'He',
+                                    'object' => 'Him',
+                                    'poss_adj' => 'His (car)',
+                                    'poss_pron' => 'His',
+                                    'reflexive' => 'Himself',
+                                    'example' => "He repaired his laptop; that silver computer is his, he fixed it himself.",
+                                ],
+                                [
+                                    'person' => '3rd Person (Female)',
+                                    'meaning' => 'Dia (Perempuan)',
+                                    'subject' => 'She',
+                                    'object' => 'Her',
+                                    'poss_adj' => 'Her (car)',
+                                    'poss_pron' => 'Hers',
+                                    'reflexive' => 'Herself',
+                                    'example' => "She designed her own dress; that stylish gown is hers, she made it herself.",
+                                ],
+                                [
+                                    'person' => '3rd Person (Neutral)',
+                                    'meaning' => 'Benda / Hewan / Hal',
+                                    'subject' => 'It',
+                                    'object' => 'It',
+                                    'poss_adj' => 'Its (tail)',
+                                    'poss_pron' => 'Its (rare)',
+                                    'reflexive' => 'Itself',
+                                    'example' => "The kitten drank its warm milk and cleaned its fur itself.",
+                                ],
+                                [
+                                    'person' => '1st Person (Plural)',
+                                    'meaning' => 'Kami / Kita',
+                                    'subject' => 'We',
+                                    'object' => 'Us',
+                                    'poss_adj' => 'Our (car)',
+                                    'poss_pron' => 'Ours',
+                                    'reflexive' => 'Ourselves',
+                                    'example' => "We prepared our presentation; the victory is ours, we won it ourselves.",
+                                ],
+                                [
+                                    'person' => '3rd Person (Plural)',
+                                    'meaning' => 'Mereka',
+                                    'subject' => 'They',
+                                    'object' => 'Them',
+                                    'poss_adj' => 'Their (car)',
+                                    'poss_pron' => 'Theirs',
+                                    'reflexive' => 'Themselves',
+                                    'example' => "They parked their new bicycles; those bikes are theirs, they bought them themselves.",
+                                ],
+                            ],
+                            'possessive_noun_rules' => [
+                                [
+                                    'category' => "Singular Nouns (Nama / Benda Tunggal)",
+                                    'rule' => "Singular Nouns + 's",
+                                    'formula' => "Noun + 's",
+                                    'explanation' => "Tambahkan 's untuk menyatakan kepemilikan oleh satu orang atau satu benda tunggal.",
+                                    'example' => "Ann's sister, John's laptop, the teacher's desk.",
+                                ],
+                                [
+                                    'category' => "Plural Nouns ending in -s (Jamak Berakhiran -s)",
+                                    'rule' => "Plural Nouns ending in -s + '",
+                                    'formula' => "Plural Noun (-s) + '",
+                                    'explanation' => "Hanya tambahkan tanda petik tunggal (') di ujung kata jika kata benda jamak sudah berakhiran huruf 's' (tidak perlu menambah s lagi).",
+                                    'example' => "The students' classroom, the parents' house, the teachers' room.",
+                                ],
+                                [
+                                    'category' => "Irregular Plural Nouns (Jamak Tak Beraturan)",
+                                    'rule' => "Irregular Plural Nouns + 's",
+                                    'formula' => "Irregular Plural + 's",
+                                    'explanation' => "Kata benda jamak yang bentuknya berubah dan tidak berakhiran 's' (children, women, people) tetap ditambahkan 's.",
+                                    'example' => "The children's toys, the women's team, people's choice.",
+                                ],
+                                [
+                                    'category' => "Photo Identification Phrases (Identifikasi Foto)",
+                                    'rule' => "Noun Phrases for Identification",
+                                    'formula' => "Noun + with / wearing + [ciri/pakaian]",
+                                    'explanation' => "Digunakan dalam percakapan untuk mengenali dan menunjuk seseorang pada foto keluarga besar saat namanya belum diketahui.",
+                                    'example' => "The man with the glasses, the woman wearing the wide hat, the boy in the blue suit.",
+                                ],
+                            ],
                         ],
-                        [
-                            'step' => 2,
-                            'asker' => 'Student B (Menunjuk sisi Bride)',
-                            'target' => 'Jess (Ibu Ann)',
-                            'question_en' => "Who's that woman wearing the wide hat next to Ann?",
-                            'question_id' => "Siapa wanita bertopi lebar di sebelah Ann itu?",
-                            'answerer' => 'Student A (Melihat Family Tree A)',
-                            'answer_en' => "That's Jess. She's my mother.",
-                            'answer_id' => "Itu Jess. Dia adalah ibu saya."
+                                                'listening' => [
+                            'title' => 'Short Listening: Organizing Creative Portfolios & Equipment at the Studio',
+                            'audio_script' => "Mark: Good afternoon, Sari! Is this sleek professional camera on the counter yours?
+Sari: Hi Mark! No, that camera is not mine; it is John's camera. Mine is inside my black leather backpack.
+Mark: Oh, I see! And whose laptop is this silver one on the wooden desk?
+Sari: That is our lead designer's laptop. She left her charger here because she forgot it herself this morning.
+Mark: Ah, understood. By the way, your recent photo exhibition received wonderful reviews; the credit is truly yours!
+Sari: Thank you so much, Mark! Our team worked very hard, and we really enjoyed ourselves during the gallery opening.
+Mark: Well, their feedback was outstanding. Let us grab our coffee cups and review today's schedule!",
+                            'key_phrases' => [
+                                'Is this sleek professional camera on the counter yours?',
+                                'That camera is not mine; it is John\'s camera.',
+                                'She left her charger here because she forgot it herself this morning.',
+                                'Our team worked very hard, and we really enjoyed ourselves.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'Whose camera is on the studio counter?',
+                                    'options' => [
+                                        'John\'s camera',
+                                        'Sari\'s camera',
+                                        'Mark\'s camera',
+                                        'The client\'s camera',
+                                    ],
+                                    'answer' => 'John\'s camera',
+                                ],
+                                [
+                                    'q' => 'Where is Sari\'s own camera located?',
+                                    'options' => [
+                                        'Inside her black leather backpack',
+                                        'On the wooden desk',
+                                        'In the car trunk',
+                                        'On the studio shelf',
+                                    ],
+                                    'answer' => 'Inside her black leather backpack',
+                                ],
+                                [
+                                    'q' => 'Why was the charger left on the wooden desk?',
+                                    'options' => [
+                                        'The designer forgot it herself this morning',
+                                        'It was broken',
+                                        'Mark asked for it',
+                                        'It belongs to John',
+                                    ],
+                                    'answer' => 'The designer forgot it herself this morning',
+                                ],
+                            ],
                         ],
-                        [
-                            'step' => 3,
-                            'asker' => 'Student A (Menunjuk sisi Groom)',
-                            'target' => 'Beth (Adik Tim)',
-                            'question_en' => "Who's that little girl in the front holding flowers?",
-                            'question_id' => "Siapa anak perempuan kecil di depan yang memegang bunga itu?",
-                            'answerer' => 'Student B (Melihat Family Tree B)',
-                            'answer_en' => "That's Beth. She's my sister.",
-                            'answer_id' => "Itu Beth. Dia adalah saudara perempuan saya."
+'drilling1' => [
+                            ['en' => 'This leather briefcase is mine, and that blue backpack is hers.', 'id' => 'Tas kerja kulit ini milik saya, dan ransel biru itu miliknya (perempuan).'],
+                            ['en' => 'We designed this entire interactive presentation ourselves.', 'id' => 'Kami merancang seluruh presentasi interaktif ini sendiri.'],
+                            ['en' => 'David forgot his notebook at home, so please lend him yours.', 'id' => 'David lupa membawa buku catatannya di rumah, jadi tolong pinjamkan milikmu kepadanya.'],
+                            ['en' => 'Sarah decorated her room herself with colorful fairy lights.', 'id' => 'Sarah menghias kamarnya sendiri dengan lampu hias warna-warni.'],
+                            ['en' => 'Their collaborative project won first place, and the victory is theirs.', 'id' => 'Proyek kolaboratif mereka meraih juara pertama, dan kemenangan itu milik mereka.'],
                         ],
-                        [
-                            'step' => 4,
-                            'asker' => 'Student B (Menunjuk sisi Bride)',
-                            'target' => 'Joe (Kakek Ann)',
-                            'question_en' => "Who's that elderly man with glasses standing at the back?",
-                            'question_id' => "Siapa pria tua berkacamata yang berdiri di baris belakang itu?",
-                            'answerer' => 'Student A (Melihat Family Tree A)',
-                            'answer_en' => "That's Joe. He's my grandfather.",
-                            'answer_id' => "Itu Joe. Dia adalah kakek saya."
-                        ]
-                    ]
-                ],
-                'ai_interview' => [
-                    [
-                        'id' => 1,
-                        'question' => "Hello! Welcome to Meeting 5 on English Pronouns. Let's start with your self-introduction: Can you introduce yourself, and mention one skill you taught yourself?",
-                        'hint' => "Answer: 'Hello! My name is [Name]. In my spare time, I taught myself [e.g. how to play the acoustic guitar / how to edit video / English speaking] all by myself.'",
-                    ],
-                    [
-                        'id' => 2,
-                        'question' => "What is the key grammatical difference between 'This is my car' and 'This car is mine'?",
-                        'hint' => "Answer: ''My' is a possessive adjective that must be followed by a noun (my car), whereas 'mine' is a possessive pronoun that stands alone without a noun.'",
-                    ],
-                    [
-                        'id' => 3,
-                        'question' => "Why is it grammatically incorrect to say 'This secret is between you and I'? What is the correct phrase and why?",
-                        'hint' => "Answer: 'The correct phrase is 'Between you and me' because 'between' is a preposition, and pronouns following a preposition must be object pronouns (me, not I).'",
-                    ],
-                    [
-                        'id' => 4,
-                        'question' => "Can you explain the difference between 'it's' and 'its' with a clear example for each?",
-                        'hint' => "Answer: ''It's' with an apostrophe means 'it is' (e.g. 'It's raining outside'), while 'its' without an apostrophe shows possession (e.g. 'The cat licked its paw').'",
-                    ],
-                    [
-                        'id' => 5,
-                        'question' => "Describe a challenging project, presentation, or task that you and your team completed yourselves. Who was involved and how did you feel?",
-                        'hint' => "Answer: 'My classmates and I organized a speaking competition ourselves. We divided the tasks between them and me, and we really enjoyed ourselves.'",
+                        'drilling2' => [
+                            ['en' => 'Whose jacket is this? It is Ann\\\'s brother\\\'s jacket.', 'id' => 'Jaket siapakah ini? Ini jaket milik saudara laki-laki Ann.'],
+                            ['en' => 'The woman holding the flower bouquet is the bride\\\'s grandmother.', 'id' => 'Wanita yang memegang buket bunga itu adalah nenek pengantin wanita.'],
+                            ['en' => 'The children\\\'s play area is next to the parents\\\' lounge.', 'id' => 'Area bermain anak-anak berada di sebelah ruang tunggu orang tua.'],
+                            ['en' => 'Who is the man with the dark moustache standing near the groom?', 'id' => 'Siapakah pria berkumis gelap yang berdiri dekat pengantin pria?'],
+                            ['en' => 'Between you and me, their family looks very warm and united.', 'id' => 'Antara kamu dan saya, keluarga mereka terlihat sangat hangat dan rukun.'],
+                        ],
+                        'grammar_note' => "Possessive Adjectives (my, your, his, her, their, our) ALWAYS need a noun. Possessive Pronouns (mine, yours, his, hers, theirs, ours) STAND ALONE without a noun.",
+                        'dialogue_setting' => 'Dua siswa mengidentifikasi anggota keluarga besar dan barang-barang kepemilikan pada foto pernikahan.',
+                        'dialogue' => [
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'Excuse me! Is this stylish blue umbrella next to your chair yours?',
+                                'id' => 'Permisi! Apakah payung biru modis di samping kursimu ini milikmu?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'No, that umbrella isn\\\'t mine. Mine is in my bag. I think it is Sarah\\\'s umbrella.',
+                                'id' => 'Tidak, payung itu bukan milik saya. Milik saya ada di dalam tas. Saya rasa itu payung Sarah.',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'How do you know it is hers?',
+                                'id' => 'Bagaimana kamu tahu payung itu miliknya?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'Look at the custom keychain! She made it herself yesterday.',
+                                'id' => 'Lihat gantungan kuncinya! Dia membuatnya sendiri kemarin.',
+                            ],
+                            [
+                                'speaker' => 'Student A',
+                                'en' => 'You are totally right! And who is that man with the glasses in Ann\\\'s wedding photo?',
+                                'id' => 'Kamu benar sekali! Dan siapakah pria berkacamata di foto pernikahan Ann itu?',
+                            ],
+                            [
+                                'speaker' => 'Student B',
+                                'en' => 'That\\\'s Joe! He is Ann\\\'s grandfather.',
+                                'id' => 'Itu Joe! Dia adalah kakeknya Ann.',
+                            ],
+                        ],
+                        'drilling' => [
+                            'This elegant watch belongs to my father; it is his.',
+                            'Amanda introduced her husband to all of our relatives.',
+                            'My parents\' wedding anniversary takes place in November.',
+                            'David gave me his business card and I gave him mine.',
+                            'The children\'s playground is located behind the community center.',
+                            'Is this stylish leather jacket yours or your brother\'s?',
+                            'Sarah loves her job because her colleagues always support her.',
+                            'Their house is beautiful, but our garden is much larger than theirs.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Exploring the Family Wedding Photo Album',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'This wedding album is stunning, Jessica! Who is the bride next to you?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'That is my elder sister, Rachel. And the tall handsome groom is her husband, Daniel.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'What a lovely couple! And who are those energetic boys in front of them?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'Those are Daniel\'s nephews. Their names are Ethan and Oliver.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'They look so joyful in their matching bow ties!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Claiming Lost Belongings in the Hall',
+                                'turns' => [
+                                    ['speaker' => 'Kevin', 'text' => 'Excuse me, Maria. Is this silver ballpoint pen yours?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Maria', 'text' => 'No, mine is black. I think that pen belongs to Michael. It is his.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Kevin', 'text' => 'Let me ask him. Michael, is this pen your father\'s gift to you?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Michael', 'text' => 'Yes! That is my favorite pen. Thank you so much for returning it to me.', 'avatar' => 'male_3'],
+                                ],
+                            ],
+                        ],
+                        'games' => [
+                            'type' => 'wedding_photos',
+                            'participation_type' => 'pair',
+                            'title' => 'Worksheet 6 Game • Wedding Photos (Asking & Saying Who Someone Is)',
+                            'activity' => 'Pairwork; Information Gap',
+                            'aim' => 'To find out who all the people in the photo are and write their names in on the photo by asking "Who\\\'s that?" and answering "That\\\'s [Name]. She\\\'s/He\\\'s my [Relationship]."',
+                            'topic_area' => 'Family members & Pronouns (He, She, This, That, My, His, Her)',
+                            'essential_vocabulary' => 'mother, father, sister, brother, aunt, uncle, cousin, grandmother, grandfather, bride, groom, husband, wife',
+                            'images' => [
+                                'wedding_photo_color' => '/images/speaking/wedding_photos/wedding_photo_color.jpg',
+                                'wedding_photo' => '/images/speaking/wedding_photos/wedding_photo_upright.png',
+                                'family_trees' => '/images/speaking/wedding_photos/family_trees.png',
+                                'family_tree_a' => '/images/speaking/wedding_photos/family_tree_a.png',
+                                'family_tree_b' => '/images/speaking/wedding_photos/family_tree_b.png',
+                                'teacher_guide_1' => '/images/speaking/wedding_photos/teacher_guide_1.png',
+                                'teacher_guide_2' => '/images/speaking/wedding_photos/teacher_guide_2.png',
+                            ],
+                            'story' => [
+                                'en' => "This is a wedding picture: Student A\\\'s sister (Ann) is marrying Student B\\\'s brother (Tim). A\\\'s family is on the bride\\\'s side and B\\\'s family is on the groom\\\'s side.",
+                                'id' => "Ini adalah foto pernikahan keluarga besar: Saudara perempuan Siswa A (Ann) menikah dengan saudara laki-laki Siswa B (Tim). Keluarga Siswa A berada di sisi pengantin wanita (Bride), dan keluarga Siswa B berada di sisi pengantin pria (Groom)."
+                            ],
+                            'family_a' => [
+                                'title' => "Family Tree A (Bride\\\'s Family)",
+                                'badge' => "Bride\\\'s Family (Ann\\\'s Side)",
+                                'self_name' => "Student A (Ann\\\'s Sibling)",
+                                'bride' => "Ann (The Bride - Sister of Student A)",
+                                'groom' => "Tim (The Groom - New Brother-in-law)",
+                                'members' => [
+                                    ['name' => 'Joe', 'relation_en' => 'Grandfather', 'relation_id' => 'Kakek', 'pronoun' => 'He', 'clue' => 'Old man with glasses and spiky hair at the top back', 'spoken_answer' => "That\\\'s Joe. He\\\'s my grandfather."],
+                                    ['name' => 'Elsie', 'relation_en' => 'Grandmother', 'relation_id' => 'Nenek', 'pronoun' => 'She', 'clue' => 'Elderly lady with curly hair and round glasses next to Joe', 'spoken_answer' => "That\\\'s Elsie. She\\\'s my grandmother."],
+                                    ['name' => 'Tom', 'relation_en' => 'Father', 'relation_id' => 'Ayah', 'pronoun' => 'He', 'clue' => 'Bald man with moustache smiling in suit', 'spoken_answer' => "That\\\'s Tom. He\\\'s my father."],
+                                    ['name' => 'Jess', 'relation_en' => 'Mother', 'relation_id' => 'Ibu', 'pronoun' => 'She', 'clue' => 'Woman wearing a wide-brimmed hat next to Tom', 'spoken_answer' => "That\\\'s Jess. She\\\'s my mother."],
+                                    ['name' => 'Pete', 'relation_en' => 'Uncle', 'relation_id' => 'Paman', 'pronoun' => 'He', 'clue' => 'Man with curly hair and glasses wearing a bowtie', 'spoken_answer' => "That\\\'s Pete. He\\\'s my uncle."],
+                                    ['name' => 'Sue', 'relation_en' => 'Aunt', 'relation_id' => 'Bibi', 'pronoun' => 'She', 'clue' => 'Woman with dark headband and stylish coat', 'spoken_answer' => "That\\\'s Sue. She\\\'s my aunt."],
+                                    ['name' => 'Sam', 'relation_en' => 'Brother', 'relation_id' => 'Saudara Laki-laki', 'pronoun' => 'He', 'clue' => 'Young boy in neat suit with bow tie near Ann', 'spoken_answer' => "That\\\'s Sam. He\\\'s my brother."],
+                                    ['name' => 'Ann', 'relation_en' => 'Sister (The Bride)', 'relation_id' => 'Pengantin Wanita', 'pronoun' => 'She', 'clue' => 'The bride in white veil and holding flowers', 'spoken_answer' => "That\\\'s Ann. She\\\'s my sister (the bride)."],
+                                    ['name' => 'Mike', 'relation_en' => 'Cousin', 'relation_id' => 'Sepupu', 'pronoun' => 'He', 'clue' => 'Young man with glasses and smile (son of Pete & Sue)', 'spoken_answer' => "That\\\'s Mike. He\\\'s my cousin."],
+                                ]
+                            ],
+                            'family_b' => [
+                                'title' => "Family Tree B (Groom\\\'s Family)",
+                                'badge' => "Groom\\\'s Family (Tim\\\'s Side)",
+                                'self_name' => "Student B (Tim\\\'s Sibling)",
+                                'bride' => "Ann (The Bride - New Sister-in-law)",
+                                'groom' => "Tim (The Groom - Brother of Student B)",
+                                'members' => [
+                                    ['name' => 'Harry', 'relation_en' => 'Grandfather', 'relation_id' => 'Kakek', 'pronoun' => 'He', 'clue' => 'Elderly man in dark suit standing on groom\\\'s side', 'spoken_answer' => "That\\\'s Harry. He\\\'s my grandfather."],
+                                    ['name' => 'May', 'relation_en' => 'Grandmother', 'relation_id' => 'Nenek', 'pronoun' => 'She', 'clue' => 'Elderly lady smiling warmly next to Harry', 'spoken_answer' => "That\\\'s May. She\\\'s my grandmother."],
+                                    ['name' => 'Frank', 'relation_en' => 'Father', 'relation_id' => 'Ayah', 'pronoun' => 'He', 'clue' => 'Tall gentleman with dark hair in three-piece suit', 'spoken_answer' => "That\\\'s Frank. He\\\'s my father."],
+                                    ['name' => 'Jane', 'relation_en' => 'Mother', 'relation_id' => 'Ibu', 'pronoun' => 'She', 'clue' => 'Lady with stylish earrings next to Frank', 'spoken_answer' => "That\\\'s Jane. She\\\'s my mother."],
+                                    ['name' => 'Arthur', 'relation_en' => 'Uncle', 'relation_id' => 'Paman', 'pronoun' => 'He', 'clue' => 'Friendly man with moustache on groom\\\'s side', 'spoken_answer' => "That\\\'s Arthur. He\\\'s my uncle."],
+                                    ['name' => 'Rita', 'relation_en' => 'Aunt', 'relation_id' => 'Bibi', 'pronoun' => 'She', 'clue' => 'Cheerful lady in elegant outfit beside Arthur', 'spoken_answer' => "That\\\'s Rita. She\\\'s my aunt."],
+                                    ['name' => 'Beth', 'relation_en' => 'Sister', 'relation_id' => 'Saudara Perempuan', 'pronoun' => 'She', 'clue' => 'Young woman in floral dress smiling near Tim', 'spoken_answer' => "That\\\'s Beth. She\\\'s my sister."],
+                                    ['name' => 'Tim', 'relation_en' => 'Brother (The Groom)', 'relation_id' => 'Pengantin Pria', 'pronoun' => 'He', 'clue' => 'The groom in black tuxedo standing beside Ann', 'spoken_answer' => "That\\\'s Tim. He\\\'s my brother (the groom)."],
+                                    ['name' => 'Paul', 'relation_en' => 'Cousin', 'relation_id' => 'Sepupu', 'pronoun' => 'He', 'clue' => 'Young boy smiling on right side (son of Arthur & Rita)', 'spoken_answer' => "That\\\'s Paul. He\\\'s my cousin."],
+                                ]
+                            ],
+                            'cards' => [
+                                ['id' => 1, 'title' => 'The Bride\\\'s Sister', 'badge' => 'Ann\\\'s Sibling', 'question' => 'Who is the bride, and who is standing next to her?', 'sample_answer' => 'The bride is Ann, and her brother Sam is standing next to her.'],
+                                ['id' => 2, 'title' => 'The Groom\\\'s Brother', 'badge' => 'Tim\\\'s Sibling', 'question' => 'Who is the groom, and what is he wearing?', 'sample_answer' => 'The groom is Tim, and he is wearing an elegant black tuxedo.'],
+                                ['id' => 3, 'title' => 'Grandfather with Glasses', 'badge' => 'Joe', 'question' => 'Who is the grandfather with round glasses at the back?', 'sample_answer' => 'That is Joe. He is Ann\\\'s grandfather.'],
+                                ['id' => 4, 'title' => 'Mother with Wide Hat', 'badge' => 'Jess', 'question' => 'Who is the woman wearing the wide-brimmed hat?', 'sample_answer' => 'That is Jess. She is Ann\\\'s mother.'],
+                                ['id' => 5, 'title' => 'Uncle with Bowtie', 'badge' => 'Pete', 'question' => 'Who is the man with curly hair and a bowtie?', 'sample_answer' => 'That is Pete. He is Ann\\\'s uncle.'],
+                            ],
+                            'report_examples' => [
+                                'In our pairwork, Student A discovered all nine relatives on the bride\\\'s family tree.',
+                                'Student B successfully identified Tim\\\'s grandfather Harry and sister Beth.',
+                                'All students practiced asking "Who\\\'s the man with the glasses?" and using possessive pronouns.',
+                                'The wedding photo pairwork helped everyone master "mine, yours, his, hers, and theirs".'
+                            ],
+                        ],
+                        'ai_interview' => [
+                            [
+                                'id' => 1,
+                                'question' => "Tell me about your family members using subject pronouns, possessive adjectives, and possessive pronouns.",
+                                'hint' => "Answer: 'In my family, my father is an engineer, my mother runs her own business, and their house has a beautiful garden.'",
+                            ],
+                            [
+                                'id' => 2,
+                                'question' => "What is one project or accomplishment that you completed all by yourself?",
+                                'hint' => "Answer: 'I built my portfolio website completely by myself without any help.'",
+                            ],
+                            [
+                                'id' => 3,
+                                'question' => "Explain the difference in meaning between 'its' (without apostrophe) and 'it\\\'s' (with apostrophe).",
+                                'hint' => "Answer: ''Its' is a possessive adjective (e.g. The cat washed its paws), while 'it\\\'s' is a contraction of 'it is' or 'it has'.'",
+                            ],
+                        ],
+                        'impromptu_title' => 'Pronouns & Possessive Nouns Spoken Fluency Drills',
+                        'impromptu' => [
+                            'Aktivitas 1: Tunjukkan 5 benda milikmu dan teman sekelasmu lalu jelaskan kepemilikannya menggunakan mine, yours, his, hers, dan theirs!',
+                            'Aktivitas 2: Deskripsikan pohon silsilah keluargamu (kakek, nenek, orang tua, paman, bibi, sepupu) dalam bahasa Inggris selama 2 menit!',
+                            'Aktivitas 3: Jelaskan 3 hal yang biasanya kamu lakukan sendiri (myself) dan 2 hal yang kamu kerjakan bersama teman (ourselves)!',
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Bride', 'ipa' => '/braɪd/', 'meaning' => 'Pengantin wanita', 'example' => 'The bride looked radiant in white.'],
+                            ['word' => 'Groom', 'ipa' => '/ɡruːm/', 'meaning' => 'Pengantin pria', 'example' => 'The groom waited at the altar.'],
+                            ['word' => 'Relative', 'ipa' => '/ˈrel.ə.tɪv/', 'meaning' => 'Kerabat / Sanak keluarga', 'example' => 'All our relatives attended the reunion.'],
+                            ['word' => 'Grandfather', 'ipa' => '/ˈɡræn.fɑː.ðər/', 'meaning' => 'Kakek', 'example' => 'My grandfather tells fascinating stories.'],
+                            ['word' => 'Grandmother', 'ipa' => '/ˈɡræn.mʌð.ər/', 'meaning' => 'Nenek', 'example' => 'Her grandmother bakes delicious pies.'],
+                            ['word' => 'Uncle', 'ipa' => '/ˈʌŋ.kəl/', 'meaning' => 'Paman', 'example' => 'My uncle lives in Manchester.'],
+                            ['word' => 'Aunt', 'ipa' => '/ɑːnt/', 'meaning' => 'Bibi', 'example' => 'Aunt Sue bought us a gift.'],
+                            ['word' => 'Cousin', 'ipa' => '/ˈkʌz.ən/', 'meaning' => 'Sepupu', 'example' => 'Mike is my favorite cousin.'],
+                            ['word' => 'Sibling', 'ipa' => '/ˈsɪb.lɪŋ/', 'meaning' => 'Saudara kandung', 'example' => 'Do you have any brothers or sisters?'],
+                            ['word' => 'Brother-in-law', 'ipa' => '/ˈbrʌð.ə.rɪn.lɔː/', 'meaning' => 'Ipar laki-laki', 'example' => 'Tim is my new brother-in-law.'],
+                            ['word' => 'Sister-in-law', 'ipa' => '/ˈsɪs.tə.rɪn.lɔː/', 'meaning' => 'Ipar perempuan', 'example' => 'Ann is my sister-in-law.'],
+                            ['word' => 'Belongings', 'ipa' => '/bɪˈlɒŋ.ɪŋz/', 'meaning' => 'Barang-barang milik pribadi', 'example' => 'Please take all your belongings.'],
+                            ['word' => 'Possession', 'ipa' => '/pəˈzeʃ.ən/', 'meaning' => 'Kepemilikan / Harta milik', 'example' => 'The book is in his possession.'],
+                            ['word' => 'Tuxedo', 'ipa' => '/tʌkˈsiː.dəʊ/', 'meaning' => 'Setelan tuksedo pesta', 'example' => 'The groom wore a classic black tuxedo.'],
+                            ['word' => 'Bouquet', 'ipa' => '/buˈkeɪ/', 'meaning' => 'Buket rangkaian bunga', 'example' => 'The bride held a rose bouquet.'],
+                            ['word' => 'Bowtie', 'ipa' => '/ˈbəʊ.taɪ/', 'meaning' => 'Dasi kupu-kupu', 'example' => 'Uncle Pete wore a velvet bowtie.'],
+                            ['word' => 'Moustache', 'ipa' => '/məˈstɑːʃ/', 'meaning' => 'Kumis', 'example' => 'The man with the moustache is smiling.'],
+                            ['word' => 'Elderly', 'ipa' => '/ˈel.dəl.i/', 'meaning' => 'Lanjut usia / Kakek-nenek', 'example' => 'Respect the elderly in the community.'],
+                            ['word' => 'Keychain', 'ipa' => '/ˈkiː.tʃeɪn/', 'meaning' => 'Gantungan kunci', 'example' => 'She decorated her keychain herself.'],
+                            ['word' => 'United', 'ipa' => '/juːˈnaɪ.tɪd/', 'meaning' => 'Rukun / Bersatu padu', 'example' => 'They are a happy and united family.'],
+                        ],
                     ],
                 ],
             ],
+
             6 => [
-                'topic' => 'Hobbies and Leisure Activities',
-                'focus' => 'Expressing likes, dislikes, and frequencies with gerunds',
-                'listening' => [
-                    'title' => 'Listening Practice: Hobbies and Leisure Activities',
-                    'audio_script' => 'In my spare time, I love landscape photography and outdoor cycling. Whenever I have a free Saturday, I take my digital camera to the botanical gardens to capture close-up shots of exotic flowers and birds. Engaging in creative hobbies helps me relieve mental fatigue.',
-                    'key_phrases' => [
-                        'I enjoy playing badminton with my colleagues twice a week.',
-                        'She loves reading mystery novels before going to sleep.',
-                        'We often go hiking in the hills on Sunday mornings.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Hobbies and Leisure Activities',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'To Be (Statements, Contractions & Questions)',
+                'focus' => 'Mastery of To Be (am, is, are) in positive/negative statements, spoken contractions (I\'m, you\'re, he\'s, she\'s, it\'s, we\'re, they\'re), Yes/No questions with short answers, and WH-Questions with To Be.',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m6-sub-1',
+                        'num' => '01',
+                        'title' => 'To Be Affirmative, Negative & Contractions',
+                        'subtitle' => 'Affirmative Statements, Negative Forms (is not / are not) & Spoken Contractions',
+                        'desc' => 'Pola kalimat nominal To Be (Am, Is, Are) bentuk positif dan negatif, serta pelafalan singkatan (contractions) dalam percakapan sehari-hari.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'to_be_statements',
+                            'title' => 'To Be Statements & Spoken Contractions Matrix',
+                            'rules' => [
+                                ['subject' => 'I', 'to_be' => 'am', 'contraction' => 'I\'m / I\'m not', 'complement_type' => 'Noun / Adj / Prep', 'example' => 'I\'m a software developer. I\'m not nervous.'],
+                                ['subject' => 'He / She / It', 'to_be' => 'is', 'contraction' => 'He\'s / She\'s / It\'s (isn\'t)', 'complement_type' => 'Singular Noun / Adj', 'example' => 'She\'s very enthusiastic. He isn\'t at home.'],
+                                ['subject' => 'You / We / They', 'to_be' => 'are', 'contraction' => 'You\'re / We\'re / They\'re (aren\'t)', 'complement_type' => 'Plural Noun / Adj', 'example' => 'We\'re ready for the presentation. They aren\'t tired.'],
                             ],
-                            'answer' => 'Hobbies and Leisure Activities',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I enjoy playing badminton with my colleagues twice a week.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                            'complement_rules' => [
+                                ['type' => 'Adjective (Sifat)', 'example' => 'The project is innovative and highly productive.'],
+                                ['type' => 'Noun / Profession (Pekerjaan/Benda)', 'example' => 'Maya is an architect and Dimas is an engineer.'],
+                                ['type' => 'Preposition / Location (Tempat)', 'example' => 'The team is in the main seminar hall.'],
                             ],
-                            'answer' => 'I enjoy playing badminton with my colleagues twice a week.',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering hobbies and leisure activities?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                                                'listening' => [
+                            'title' => 'Short Listening: Welcome & Team Orientation at a Tech Company',
+                            'audio_script' => "Lisa: Good morning, Arif! Welcome to our international engineering team in Jakarta. I'm Lisa, the engineering lead.
+Arif: Good morning, Lisa! It's a pleasure to meet you. I'm really excited to join the team.
+Lisa: We're thrilled to have you! First, let me introduce our setup. This is your workstation, and that is our team lounge.
+Arif: Thank you! Are our frontend specialists in the office today?
+Lisa: Kevin isn't here today; he's working remotely from Bali. But Maya and David are in the conference room.
+Arif: Understood. And is the main production server online right now?
+Lisa: Yes, it's completely stable. It isn't under maintenance today, so you're ready to start your code review!
+Arif: Fantastic! I'm ready to get started.",
+                            'key_phrases' => [
+                                'I\'m Lisa, the engineering lead.',
+                                'It\'s a pleasure to meet you.',
+                                'Kevin isn\'t here today; he\'s working remotely from Bali.',
+                                'It isn\'t under maintenance today, so you\'re ready to start.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'questions' => [
+                                [
+                                    'q' => 'What role does Lisa hold in the company?',
+                                    'options' => [
+                                        'Engineering lead',
+                                        'Marketing manager',
+                                        'HR director',
+                                        'Client coordinator',
+                                    ],
+                                    'answer' => 'Engineering lead',
+                                ],
+                                [
+                                    'q' => 'Where is Kevin working from today?',
+                                    'options' => [
+                                        'Remotely from Bali',
+                                        'In the conference room',
+                                        'In Sydney',
+                                        'In the main office',
+                                    ],
+                                    'answer' => 'Remotely from Bali',
+                                ],
+                                [
+                                    'q' => 'Is the production server under maintenance today?',
+                                    'options' => [
+                                        'No, it is not under maintenance and is stable',
+                                        'Yes, it is offline',
+                                        'It will shut down at noon',
+                                        'It is currently broken',
+                                    ],
+                                    'answer' => 'No, it is not under maintenance and is stable',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'I\'m really delighted to meet you today.',
+                            'She\'s an outstanding English teacher in our academy.',
+                            'He isn\'t available at the moment because he\'s in a meeting.',
+                            'We\'re completely prepared for the client demonstration.',
+                            'They aren\'t late; in fact, they\'re early for the workshop.',
+                            'It\'s a bright, sunny morning in Surabaya.',
+                            'The conference room is spacious, modern, and air-conditioned.',
+                            'I\'m not afraid of public speaking anymore.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Meeting a New Colleague at Coffee Break',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Hi there! I\'m Dimas, the new content writer here.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'Nice to meet you, Dimas! I\'m Clara. I\'m in the marketing team.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'It\'s great to meet you! Is our marketing director in today?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'No, she isn\'t in the office today. She\'s at a client workshop in Bali.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'I see. Well, we\'re both fortunate to have such a supportive team!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Checking Room Status Before a Seminar',
+                                'turns' => [
+                                    ['speaker' => 'Alex', 'text' => 'Is the presentation room ready for the 10 AM seminar?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Jessica', 'text' => 'Yes, it\'s all set! The projector is on, and the microphones are tested.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Alex', 'text' => 'Great! Are the guest speakers here yet?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Jessica', 'text' => 'They aren\'t here yet, but they\'re on their way from the airport.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Alex', 'text' => 'Awesome, everything\'s under control then.', 'avatar' => 'male_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'to_be_contraction_race',
+                            'title' => 'To Be & Contractions Quick Master',
+                            'desc' => 'Ubah bentuk kalimat panjang To Be menjadi bentuk singkatan lisan (Contractions) yang alami!',
+                            'cards' => [
+                                ['full' => 'I am not ready', 'contracted' => 'I\'m not ready'],
+                                ['full' => 'She is an architect', 'contracted' => 'She\'s an architect'],
+                                ['full' => 'They are not busy', 'contracted' => 'They aren\'t busy'],
+                                ['full' => 'He is in the meeting', 'contracted' => 'He\'s in the meeting'],
+                                ['full' => 'We are very proud of you', 'contracted' => 'We\'re very proud of you'],
+                                ['full' => 'It is a wonderful opportunity', 'contracted' => 'It\'s a wonderful opportunity'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Professional & Personal Profile with To Be',
+                            'intro' => 'Practice speaking English by describing yourself, your qualities, and your colleagues using To Be and contractions naturally.',
+                            'questions' => [
+                                'Introduce yourself in three sentences using contractions (e.g. "I\'m...", "I\'m not...").',
+                                'Describe your best friend or colleague using "He\'s / She\'s" and two adjectives.',
+                                'Where are you right now and how is the atmosphere in your room or city?',
+                            ],
+                            'prompts' => [
+                                'I\'m a dedicated web developer from Jakarta, and I\'m passionate about technology...',
+                                'My colleague Sarah is incredibly hardworking. She\'s always punctual and cheerful...',
+                                'Right now, I\'m in my study room. It\'s peaceful, comfortable, and well-lit...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Enthusiastic', 'ipa' => '/ɪnˌθjuː.ziˈæs.tɪk/', 'meaning' => 'Antusias / Penuh semangat', 'example' => 'She is very enthusiastic about learning English.'],
+                            ['word' => 'Dedicated', 'ipa' => '/ˈded.ɪ.keɪ.tɪd/', 'meaning' => 'Berdedikasi tinggi / Tulus', 'example' => 'He is a dedicated teacher.'],
+                            ['word' => 'Punctual', 'ipa' => '/ˈpʌŋk.tʃu.əl/', 'meaning' => 'Tepat waktu', 'example' => 'Please be punctual for the morning briefing.'],
+                            ['word' => 'Fortunate', 'ipa' => '/ˈfɔː.tʃən.ət/', 'meaning' => 'Beruntung / Mujur', 'example' => 'We are fortunate to have such great mentors.'],
+                            ['word' => 'Spacious', 'ipa' => '/ˈspeɪ.ʃəs/', 'meaning' => 'Luas dan lapang', 'example' => 'The new seminar room is very spacious.'],
+                            ['word' => 'Competent', 'ipa' => '/ˈkɒm.pɪ.tənt/', 'meaning' => 'Kompeten / Cakap / Mumpuni', 'example' => 'They are competent software engineers.'],
+                            ['word' => 'Atmosphere', 'ipa' => '/ˈæt.məs.fɪər/', 'meaning' => 'Suasana ruangan / Atmosfer', 'example' => 'The atmosphere in the class is friendly.'],
+                            ['word' => 'Colleague', 'ipa' => '/ˈkɒl.iːɡ/', 'meaning' => 'Rekan kerja satu profesi/kantor', 'example' => 'Maya is my trusted colleague.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'I enjoy playing badminton with my colleagues twice a week.',
-                        'id' => 'Saya menikmati bermain bulu tangkis dengan rekan kerja dua kali seminggu.',
+                        'id' => 'sec-m6-sub-2',
+                        'num' => '02',
+                        'title' => 'To Be Yes/No & WH-Questions',
+                        'subtitle' => 'To Be Inversion for Questions, Short Answers & WH-Information Questions',
+                        'desc' => 'Menyusun pertanyaan Yes/No dengan To Be beserta jawaban pendek (Short Answers), serta pertanyaan informasi (Who, What, Where, When, Why, How).',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'to_be_questions',
+                            'title' => 'To Be Question Forms & Inversion Rules',
+                            'rules' => [
+                                ['question_type' => 'Yes/No Questions', 'pattern' => 'To Be (Am/Is/Are) + Subject + Complement?', 'example' => 'Are you ready? / Is he your supervisor?'],
+                                ['question_type' => 'Short Answers (Positive)', 'pattern' => 'Yes, + Subject Pronoun + To Be.', 'example' => 'Yes, I am. / Yes, he is. / Yes, they are.'],
+                                ['question_type' => 'Short Answers (Negative)', 'pattern' => 'No, + Subject Pronoun + To Be + not.', 'example' => 'No, I\'m not. / No, he isn\'t. / No, they aren\'t.'],
+                                ['question_type' => 'WH-Questions (Who)', 'pattern' => 'Who + is/are + Subject?', 'example' => 'Who is the keynote speaker today?'],
+                                ['question_type' => 'WH-Questions (Where)', 'pattern' => 'Where + is/are + Subject?', 'example' => 'Where is the main registration desk?'],
+                                ['question_type' => 'WH-Questions (Why)', 'pattern' => 'Why + is/are + Subject + Complement?', 'example' => 'Why are the flights delayed?'],
+                                ['question_type' => 'WH-Questions (How)', 'pattern' => 'How + is/are + Subject?', 'example' => 'How is your new project going?'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Inquiries at the International Tech Summit Info Desk',
+                            'audio_script' => "Thomas: Excuse me! Good morning. Is this the information and registration desk for overseas delegates?
+Gita: Good morning, sir! Yes, it is. Welcome to the Global Innovation Summit in Surabaya. How can I help you?
+Thomas: Are the keynote presentations in the grand auditorium on the first floor?
+Gita: Yes, they are! The opening address is in Auditorium A at nine o'clock.
+Thomas: Excellent! And who is the main keynote speaker for today's plenary session?
+Gita: She is Dr. Linda Watson, a renowned pioneer in artificial intelligence ethics from Cambridge.
+Thomas: Wonderful! And where are the exhibition booths located?
+Gita: They are in Hall B, right behind the main cafeteria.
+Thomas: Thank you very much for your kind help, Gita!
+Gita: You are very welcome, Thomas! Enjoy the summit.",
+                            'key_phrases' => [
+                                'Is this the information and registration desk for overseas delegates?',
+                                'Are the keynote presentations in the grand auditorium?',
+                                'Who is the main keynote speaker for today\'s plenary session?',
+                                'Where are the exhibition booths located?',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'Where is the opening keynote address being held?',
+                                    'options' => [
+                                        'In Auditorium A on the first floor',
+                                        'In Hall B',
+                                        'In the cafeteria',
+                                        'At the registration booth',
+                                    ],
+                                    'answer' => 'In Auditorium A on the first floor',
+                                ],
+                                [
+                                    'q' => 'Who is the keynote speaker for the plenary session?',
+                                    'options' => [
+                                        'Dr. Linda Watson from Cambridge',
+                                        'Thomas from Germany',
+                                        'Gita from Surabaya',
+                                        'The summit director',
+                                    ],
+                                    'answer' => 'Dr. Linda Watson from Cambridge',
+                                ],
+                                [
+                                    'q' => 'Where are the exhibition booths situated?',
+                                    'options' => [
+                                        'In Hall B behind the cafeteria',
+                                        'In Auditorium A',
+                                        'Outside on the lawn',
+                                        'On the third floor',
+                                    ],
+                                    'answer' => 'In Hall B behind the cafeteria',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'Are you interested in digital marketing? - Yes, I am.',
+                            'Is Mr. Robert available for a short discussion? - No, he isn\'t.',
+                            'Are these documents confidential? - Yes, they are.',
+                            'Where is the nearest automated teller machine (ATM)?',
+                            'Who is in charge of customer support this evening?',
+                            'Why is the network connection slow today?',
+                            'How is the weather in Melbourne right now?',
+                            'What is your primary goal in taking this speaking course?',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Inquiring About Event Details',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Excuse me, are you one of the seminar organizers?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Amanda', 'text' => 'Yes, I am! How can I assist you today?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'What time is the workshop on English Pronunciation?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Amanda', 'text' => 'It\'s at two o\'clock this afternoon in Room 105.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Is admission free for course students?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Amanda', 'text' => 'Yes, it is completely free of charge. Enjoy the session!', 'avatar' => 'female_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: First Meeting at an International Airport',
+                                'turns' => [
+                                    ['speaker' => 'Driver', 'text' => 'Pardon me, are you Mr. Nathan from Global Edu?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Nathan', 'text' => 'Yes, I am. Are you the airport transfer driver from the hotel?', 'avatar' => 'male_3'],
+                                    ['speaker' => 'Driver', 'text' => 'Yes, I am! Welcome to Jakarta. Is this your only luggage suitcase?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Nathan', 'text' => 'Yes, it is. How far is our hotel from here?', 'avatar' => 'male_3'],
+                                    ['speaker' => 'Driver', 'text' => 'It\'s about forty-five minutes depending on the highway traffic.', 'avatar' => 'male_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'to_be_question_builder',
+                            'title' => 'To Be Question & Answer Alignment',
+                            'desc' => 'Cocokkan pertanyaan To Be berikut dengan jawaban pendek dan informasi yang paling tepat!',
+                            'cards' => [
+                                ['q' => 'Are you ready for the speaking test?', 'a' => 'Yes, I am! I practiced all week.'],
+                                ['q' => 'Is your manager in the office today?', 'a' => 'No, she isn\'t. She is working remotely.'],
+                                ['q' => 'Where are the workshop certificates?', 'a' => 'They are in the red folder on the registration desk.'],
+                                ['q' => 'Who is the instructor for Meeting 6?', 'a' => 'The instructor is Mr. Dimas.'],
+                                ['q' => 'Are they from Australia or New Zealand?', 'a' => 'They are from New Zealand.'],
+                                ['q' => 'Why is this classroom so quiet?', 'a' => 'Because all students are taking an online exam.'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Question & Answer Simulation with To Be',
+                            'intro' => 'Respond to the AI interviewer\'s questions using full sentences and accurate To Be structures.',
+                            'questions' => [
+                                'Are you currently a student or an employee? Tell me your daily role.',
+                                'Where is your favorite place to relax in your hometown and why is it special?',
+                                'Ask the AI interviewer two questions using "Are you...?" or "What is...?"',
+                            ],
+                            'prompts' => [
+                                'I\'m a full-time university student majoring in Computer Science...',
+                                'My favorite place is a peaceful hillside cafe. It\'s special because the air is refreshing...',
+                                'AI Tutor, are you available 24/7 for speaking practice? What is your favorite English topic?...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Delegate', 'ipa' => '/ˈdel.ɪ.ɡət/', 'meaning' => 'Delegasi / Peserta utusan resmi', 'example' => 'Every delegate received a summit badge.'],
+                            ['word' => 'Moderator', 'ipa' => '/ˈmɒd.ər.eɪ.tər/', 'meaning' => 'Moderator pemandu diskusi', 'example' => 'The moderator opened the discussion panel.'],
+                            ['word' => 'Admission', 'ipa' => '/ədˈmɪʃ.ən/', 'meaning' => 'Biaya masuk / Izin masuk', 'example' => 'Admission is free for registered members.'],
+                            ['word' => 'Schedule', 'ipa' => '/ˈʃedʒ.uːl/', 'meaning' => 'Jadwal rangkaian kegiatan', 'example' => 'Check your workshop schedule on the app.'],
+                            ['word' => 'In charge of', 'ipa' => '/ɪn tʃɑːdʒ ɒv/', 'meaning' => 'Bertanggung jawab atas', 'example' => 'Who is in charge of event registration?'],
+                            ['word' => 'Remotely', 'ipa' => '/rɪˈməʊt.li/', 'meaning' => 'Secara jarak jauh (dari rumah)', 'example' => 'Our team works remotely on Fridays.'],
+                            ['word' => 'Inquiry', 'ipa' => '/ɪnˈkwaɪə.ri/', 'meaning' => 'Pertanyaan / Permintaan informasi', 'example' => 'Please direct your inquiry to the front desk.'],
+                            ['word' => 'Passionate', 'ipa' => '/ˈpæʃ.ən.ət/', 'meaning' => 'Sangat bersemangat dan mencintai bidangnya', 'example' => 'She is passionate about language teaching.'],
+                        ],
                     ],
-                    [
-                        'en' => 'She loves reading mystery novels before going to sleep.',
-                        'id' => 'Dia suka membaca novel misteri sebelum tidur.',
-                    ],
-                    [
-                        'en' => 'We often go hiking in the hills on Sunday mornings.',
-                        'id' => 'Kami sering mendaki bukit pada Minggu pagi.',
-                    ],
-                    [
-                        'en' => 'He practices playing the acoustic guitar every evening.',
-                        'id' => 'Dia berlatih bermain gitar akustik setiap malam.',
-                    ],
-                    [
-                        'en' => 'Having active hobbies creates a healthy work-life balance.',
-                        'id' => 'Memiliki hobi yang aktif menciptakan keseimbangan hidup dan kerja yang sehat.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about hobbies and leisure activities with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang hobbies and leisure activities dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Verb patterns: Enjoy / Love / Like / Prefer + Gerund (V-ing)',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Hobbies and Leisure Activities dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Hobbies and Leisure Activities today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Hobbies and Leisure Activities hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for hobbies and leisure activities makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk hobbies and leisure activities membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I enjoy playing badminton with my colleagues twice a week.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I enjoy playing badminton with my colleagues twice a week.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Hobbies and Leisure Activities memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Hobbies and Leisure Activities ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Hobbies and Leisure Activities?',
-                    'Seberapa sering kamu membahas tentang Hobbies and Leisure Activities dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Hobbies and Leisure Activities Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Hobbies and Leisure Activities membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 7: THE SIMPLE PRESENT (POSITIVE, SPELLING RULES & FREQUENCY WORDS)
+            // =========================================================================
             7 => [
-                'topic' => 'Travel and Transportation',
-                'focus' => 'Directions, public transport, travel itineraries, asking for help',
-                'listening' => [
-                    'title' => 'Listening Practice: Travel and Transportation',
-                    'audio_script' => 'Traveling opens up new horizons and broadens cultural understanding. Last month, I took the high-speed train to Yogyakarta. Getting around the city was very convenient thanks to the modern public transit, clear directional signboards, and helpful local commuters.',
-                    'key_phrases' => [
-                        'Excuse me, where is the nearest commuter train station?',
-                        'Go straight ahead for two blocks and turn left at the traffic light.',
-                        'We take the subway to avoid morning traffic congestion.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Travel and Transportation',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'The Simple Present (Positive, Spelling Rules & Frequency Words)',
+                'focus' => 'Simple Present positive statements (Verb 1), 3rd person singular -s/-es/-ies spelling rules, irregular verbs (have->has, go->goes, do->does), and Adverbs of Frequency (always, usually, often, sometimes, rarely, never) in daily routines.',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m7-sub-1',
+                        'num' => '01',
+                        'title' => 'Simple Present Positive & -s/-es Spelling Rules',
+                        'subtitle' => 'Habitual Actions, General Facts & Third-Person Singular (-s / -es / -ies) Rules',
+                        'desc' => 'Struktur kalimat positif Simple Present Tense untuk kebiasaan dan fakta umum, serta kaidah penambahan akhiran -s, -es, dan -ies pada subjek orang ketiga tunggal (He, She, It).',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'simple_present_positive',
+                            'title' => 'Simple Present Verb Conjugation & Spelling Rules',
+                            'subject_rules' => [
+                                ['subjects' => 'I / You / We / They / Plural Nouns', 'verb_form' => 'Verb 1 (Base Form)', 'example' => 'They work at an international bank in Jakarta.'],
+                                ['subjects' => 'He / She / It / Singular Nouns', 'verb_form' => 'Verb 1 + -s / -es / -ies', 'example' => 'She teaches English and writes educational books.'],
                             ],
-                            'answer' => 'Travel and Transportation',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'Excuse me, where is the nearest commuter train station?',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                            'spelling_rules' => [
+                                ['rule' => 'General Rule: Add -s', 'verbs' => 'read -> reads, work -> works, speak -> speaks, live -> lives', 'example' => 'David works remotely from Yogyakarta.'],
+                                ['rule' => 'Ending in -ch, -sh, -s, -x, -z, -o: Add -es', 'verbs' => 'watch -> watches, finish -> finishes, pass -> passes, fix -> fixes, go -> goes, do -> does', 'example' => 'She finishes her work at 5 PM and goes to the gym.'],
+                                ['rule' => 'Consonant + Y: Change -y to -ies', 'verbs' => 'study -> studies, fly -> flies, carry -> carries', 'example' => 'He studies software engineering every evening.'],
+                                ['rule' => 'Vowel + Y: Simply add -s', 'verbs' => 'play -> plays, stay -> stays, buy -> buys', 'example' => 'My brother plays acoustic guitar on weekends.'],
+                                ['rule' => 'Irregular: Have -> Has', 'verbs' => 'have -> has', 'example' => 'Our academy has five modern language labs.'],
                             ],
-                            'answer' => 'Excuse me, where is the nearest commuter train station?',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering travel and transportation?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                                                'listening' => [
+                            'title' => 'Short Listening: Daily Routines of a Marine Conservation Team in Papua',
+                            'audio_script' => "Daniel: Good morning, Siti! Your conservation sanctuary here in Raja Ampat operates so smoothly every single day.
+Siti: Good morning, Daniel! Thank you. Our team follows a dedicated daily routine to protect the coral reefs.
+Daniel: What does your head research diver do each morning?
+Siti: Budi wakes up at five thirty, checks the water temperature, and inspects the coastal nurseries before sunrise.
+Daniel: That is fantastic! And how often does the research boat depart for the outer islands?
+Siti: The boat leaves the harbor at seven sharp, and our marine biologist collects water samples from three different reef sites.
+Daniel: She certainly works very hard! And what do you do in the afternoons?
+Siti: In the afternoons, I teach English and environmental awareness to local school children in the village.
+Daniel: That sounds truly inspiring, Siti!",
+                            'key_phrases' => [
+                                'Our team follows a dedicated daily routine to protect the coral reefs.',
+                                'Budi wakes up at five thirty, checks the water temperature, and inspects the coastal nurseries.',
+                                'The boat leaves the harbor at seven sharp.',
+                                'In the afternoons, I teach English and environmental awareness.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'questions' => [
+                                [
+                                    'q' => 'What time does Budi wake up in the morning?',
+                                    'options' => [
+                                        'At five thirty (5:30 AM)',
+                                        'At seven o\'clock (7:00 AM)',
+                                        'At six fifteen (6:15 AM)',
+                                        'At eight o\'clock (8:00 AM)',
+                                    ],
+                                    'answer' => 'At five thirty (5:30 AM)',
+                                ],
+                                [
+                                    'q' => 'What does the research boat do at seven o\'clock sharp?',
+                                    'options' => [
+                                        'Leaves the harbor for outer island reef sites',
+                                        'Returns to the dock',
+                                        'Transports tourists to hotels',
+                                        'Anchors for repairs',
+                                    ],
+                                    'answer' => 'Leaves the harbor for outer island reef sites',
+                                ],
+                                [
+                                    'q' => 'What does Siti do in the afternoons in the village?',
+                                    'options' => [
+                                        'Teaches English and environmental awareness to local children',
+                                        'Cleans the boat',
+                                        'Dives alone in deep water',
+                                        'Writes scientific papers',
+                                    ],
+                                    'answer' => 'Teaches English and environmental awareness to local children',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'She speaks English fluently with international clients.',
+                            'My father reads the financial newspaper every morning.',
+                            'David finishes his project reports before the deadline.',
+                            'The airplane departs from Soekarno-Hatta Airport at 7 PM.',
+                            'Our teacher explains complex grammar concepts with great clarity.',
+                            'She studies Japanese and practices conversation every evening.',
+                            'He has a busy schedule during the workweek.',
+                            'The sun rises in the east and sets in the west.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Talking About a Sibling\'s Daily Routine',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'What does your sister do for a living, Jessica?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'She works as a pediatrician at Medika Hospital. She loves children!', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'That\'s an admirable profession! Does she work long hours?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'Yes, she starts her clinic at 8 AM and sees patients until 4 PM.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'In the evening, she often attends pediatric research seminars.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'She truly is a passionate and hardworking doctor!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Discussing Daily Hobbies & Fitness Habits',
+                                'turns' => [
+                                    ['speaker' => 'Ryan', 'text' => 'You look energetic today, Leo! Do you go to the gym regularly?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Leo', 'text' => 'Yes! I jog five kilometers every morning around the neighborhood park.', 'avatar' => 'male_3'],
+                                    ['speaker' => 'Ryan', 'text' => 'That\'s fantastic! My brother also jogs there, but he prefers evening runs.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Leo', 'text' => 'Morning fresh air gives me great energy for the entire working day.', 'avatar' => 'male_3'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'verb_spelling_master',
+                            'title' => 'Third-Person Singular (-s / -es / -ies) Challenge',
+                            'desc' => 'Ubah kata kerja bentuk dasar (Verb 1) ke bentuk subjek orang ketiga tunggal (He/She/It) dengan benar!',
+                            'cards' => [
+                                ['base' => 'watch', 'third_person' => 'watches', 'rule' => 'Add -es for -ch ending'],
+                                ['base' => 'study', 'third_person' => 'studies', 'rule' => 'Change -y to -ies after consonant'],
+                                ['base' => 'play', 'third_person' => 'plays', 'rule' => 'Add -s after vowel + y'],
+                                ['base' => 'fix', 'third_person' => 'fixes', 'rule' => 'Add -es for -x ending'],
+                                ['base' => 'go', 'third_person' => 'goes', 'rule' => 'Add -es for -o ending'],
+                                ['base' => 'have', 'third_person' => 'has', 'rule' => 'Irregular 3rd person singular'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Describing Daily Routines & Habits',
+                            'intro' => 'Practice speaking English by describing your daily schedule and the routines of someone close to you using Simple Present positive verbs.',
+                            'questions' => [
+                                'What time do you usually wake up, and what is the first thing you do in the morning?',
+                                'Describe the daily routine of a family member or coworker (use he/she with -s/-es verbs).',
+                                'What is a general fact or universal truth that you find fascinating?',
+                            ],
+                            'prompts' => [
+                                'I wake up at 6:00 AM every morning. First, I drink a large glass of water and stretch...',
+                                'My father works as an architect. He creates building blueprints and visits construction sites...',
+                                'Water boils at 100 degrees Celsius, and the Earth revolves around the sun once a year...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Admirable', 'ipa' => '/ˈæd.mɪ.rə.bəl/', 'meaning' => 'Patut dikagumi / Hebat', 'example' => 'Her dedication to teaching is admirable.'],
+                            ['word' => 'Pediatrician', 'ipa' => '/ˌpiː.di.əˈtrɪʃ.ən/', 'meaning' => 'Dokter spesialis anak', 'example' => 'She works as a pediatrician at the hospital.'],
+                            ['word' => 'Blueprint', 'ipa' => '/ˈbluː.prɪnt/', 'meaning' => 'Cetak biru rancangan teknis/arsitektur', 'example' => 'The architect reviews the building blueprint.'],
+                            ['word' => 'Conduct', 'ipa' => '/kənˈdʌkt/', 'meaning' => 'Mengadakan / Memimpin pelaksanaan', 'example' => 'He conducts research in the laboratory.'],
+                            ['word' => 'Depart', 'ipa' => '/dɪˈpɑːt/', 'meaning' => 'Berangkat (pesawat/kereta)', 'example' => 'The commuter train departs at 07:15 AM.'],
+                            ['word' => 'Revolve', 'ipa' => '/rɪˈvɒlv/', 'meaning' => 'Berputar mengelilingi orbit', 'example' => 'The Earth revolves around the sun.'],
+                            ['word' => 'Routines', 'ipa' => '/ruːˈtiːnz/', 'meaning' => 'Aktivitas rutin sehari-hari', 'example' => 'Healthy morning routines boost productivity.'],
+                            ['word' => 'Fluently', 'ipa' => '/ˈfluː.ənt.li/', 'meaning' => 'Secara fasih dan lancar', 'example' => 'Dimas speaks English fluently.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'Excuse me, where is the nearest commuter train station?',
-                        'id' => 'Permisi, di mana stasiun kereta komuter terdekat?',
+                        'id' => 'sec-m7-sub-2',
+                        'num' => '02',
+                        'title' => 'Adverbs of Frequency & Habitual Routines',
+                        'subtitle' => 'Frequency Scale (100% to 0%), Word Placement Rules & Daily Habit Descriptions',
+                        'desc' => 'Tingkat frekuensi kegiatan (Always, Usually, Often, Sometimes, Rarely/Seldom, Never), aturan posisi kata dalam kalimat, serta mendeskripsikan gaya hidup dan rutinitas.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'adverbs_frequency',
+                            'title' => 'Adverbs of Frequency Spectrum & Placement Rules',
+                            'frequency_scale' => [
+                                ['percentage' => '100%', 'adverb' => 'Always', 'meaning' => 'Selalu (tanpa absen)', 'example' => 'I always start my day with a glass of water.'],
+                                ['percentage' => '85%', 'adverb' => 'Usually / Normally', 'meaning' => 'Biasanya / Umumnya', 'example' => 'She usually takes the commuter train to work.'],
+                                ['percentage' => '70%', 'adverb' => 'Often / Frequently', 'meaning' => 'Sering kali', 'example' => 'We often practice English conversation after class.'],
+                                ['percentage' => '50%', 'adverb' => 'Sometimes', 'meaning' => 'Kadang-kadang', 'example' => 'He sometimes cooks traditional pasta on Sundays.'],
+                                ['percentage' => '20%', 'adverb' => 'Rarely / Seldom', 'meaning' => 'Jarang sekali', 'example' => 'They rarely eat fast food during weekdays.'],
+                                ['percentage' => '0%', 'adverb' => 'Never', 'meaning' => 'Tidak pernah sama sekali', 'example' => 'I never skip breakfast before a morning exam.'],
+                            ],
+                            'placement_rules' => [
+                                ['position' => 'Before Main Verbs (Sebelum kata kerja utama)', 'formula' => 'Subject + Frequency Adverb + Verb 1', 'example' => 'David always arrives early.'],
+                                ['position' => 'After To Be (Setelah to be am/is/are)', 'formula' => 'Subject + To Be + Frequency Adverb', 'example' => 'Sarah is always cheerful and punctual.'],
+                                ['position' => 'Between Auxiliary and Main Verb', 'formula' => 'Subject + Aux + Frequency Adverb + Verb', 'example' => 'You should always double-check your grammar.'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Healthy Daily Habits & Remote Work Routines',
+                            'audio_script' => "Rachel: Hi Dimas! How do you maintain high productivity while working remotely across different time zones?
+Dimas: Hi Rachel! Well, I always start my workday at seven in the morning with a cup of black coffee.
+Rachel: Do you usually exercise before beginning your programming tasks?
+Dimas: Yes, I usually jog for thirty minutes around my neighborhood. I rarely skip my morning workout.
+Rachel: That is great discipline! How often do you check your work emails during the day?
+Dimas: I often check emails in the morning and afternoon, but I never open work notifications after eight in the evening.
+Rachel: That is a wonderful boundary! I sometimes answer emails too late at night, which disrupts my sleep.
+Dimas: Setting clear boundaries always helps you stay energized and productive, Rachel!",
+                            'key_phrases' => [
+                                'I always start my workday at seven in the morning.',
+                                'I usually jog for thirty minutes around my neighborhood.',
+                                'I rarely skip my morning workout.',
+                                'I never open work notifications after eight in the evening.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'What does Dimas always do at seven in the morning?',
+                                    'options' => [
+                                        'Starts his workday with black coffee',
+                                        'Attends client meetings',
+                                        'Checks social media',
+                                        'Goes to sleep',
+                                    ],
+                                    'answer' => 'Starts his workday with black coffee',
+                                ],
+                                [
+                                    'q' => 'How often does Dimas jog in the morning?',
+                                    'options' => [
+                                        'He usually jogs for 30 minutes and rarely skips',
+                                        'He never exercises',
+                                        'He only exercises on weekends',
+                                        'He jogs once a month',
+                                    ],
+                                    'answer' => 'He usually jogs for 30 minutes and rarely skips',
+                                ],
+                                [
+                                    'q' => 'When does Dimas never open work notifications?',
+                                    'options' => [
+                                        'After eight in the evening (8:00 PM)',
+                                        'Before noon',
+                                        'During lunch time',
+                                        'On Tuesday mornings',
+                                    ],
+                                    'answer' => 'After eight in the evening (8:00 PM)',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'I always double-check my speaking assignments before submission.',
+                            'She is usually in the office before 8:30 AM.',
+                            'Our team often collaborates on creative multimedia projects.',
+                            'We sometimes have lunch together at the Italian bistro.',
+                            'David rarely watches television because he prefers reading.',
+                            'I never compromise on safety and product quality.',
+                            'My teacher is always patient with beginner learners.',
+                            'He frequently travels to overseas conferences for medical research.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Comparing Weekend Habits and Free Time',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'How do you usually spend your weekends, Emma?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Emma', 'text' => 'I usually visit local art galleries or read books at a quiet cafe. What about you?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'I often play badminton with friends on Saturday, and I sometimes go cycling.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Emma', 'text' => 'Do you ever cook your own meals on weekends?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Yes, I usually cook traditional Indonesian rendang with my family on Sundays!', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Emma', 'text' => 'That sounds delicious! I rarely cook because I am not very good at it.', 'avatar' => 'female_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Discussing Punctuality in the Workplace',
+                                'turns' => [
+                                    ['speaker' => 'Manager', 'text' => 'Kevin, I noticed you are always on time for the morning standup meetings.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Kevin', 'text' => 'Thank you, ma\'am! I always leave home thirty minutes early to avoid traffic.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Manager', 'text' => 'That\'s wonderful. Punctuality is a habit we truly appreciate here.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Kevin', 'text' => 'I rarely get stuck in traffic if I take the MRT commuter train.', 'avatar' => 'male_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'adverb_frequency_order',
+                            'title' => 'Adverb of Frequency Word Order Puzzle',
+                            'desc' => 'Susun kata-kata acak berikut menjadi kalimat yang benar sesuai aturan posisi Adverb of Frequency!',
+                            'cards' => [
+                                ['scrambled' => 'late / is / never / for / she / meetings', 'correct' => 'She is never late for meetings.'],
+                                ['scrambled' => 'coffee / morning / in / drinks / always / he / the', 'correct' => 'He always drinks coffee in the morning.'],
+                                ['scrambled' => 'travel / we / overseas / rarely / winter / in', 'correct' => 'We rarely travel overseas in winter.'],
+                                ['scrambled' => 'friendly / teachers / our / always / are', 'correct' => 'Our teachers are always friendly.'],
+                                ['scrambled' => 'studies / sometimes / library / at / she / the', 'correct' => 'She sometimes studies at the library.'],
+                                ['scrambled' => 'speaks / he / with / English / often / clients', 'correct' => 'He often speaks English with clients.'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Lifestyle & Frequency Survey',
+                            'intro' => 'Practice speaking English by answering lifestyle frequency questions with full sentences and clear adverbs of frequency.',
+                            'questions' => [
+                                'How often do you practice speaking English, and what methods do you usually use?',
+                                'What is something you always do before starting work or study in the morning?',
+                                'Is there a habit you rarely or never do because you consider it unhealthy or unproductive?',
+                            ],
+                            'prompts' => [
+                                'I always practice English for at least twenty minutes every day by listening to podcasts...',
+                                'Before starting work, I always prepare a fresh cup of tea and write down my top three priorities...',
+                                'I rarely drink sugary sodas, and I never stay awake past midnight on workdays...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Frequently', 'ipa' => '/ˈfriː.kwənt.li/', 'meaning' => 'Sering kali / Kerap', 'example' => 'He frequently travels for business.'],
+                            ['word' => 'Seldom', 'ipa' => '/ˈsel.dəm/', 'meaning' => 'Jarang (formal)', 'example' => 'She seldom complains about hard work.'],
+                            ['word' => 'Consistency', 'ipa' => '/kənˈsɪs.tən.si/', 'meaning' => 'Konsistensi / Keajegan', 'example' => 'Consistency is essential for language mastery.'],
+                            ['word' => 'Punctuality', 'ipa' => '/ˌpʌŋk.tʃuˈæl.ə.ti/', 'meaning' => 'Ketepatan waktu', 'example' => 'Punctuality creates a professional impression.'],
+                            ['word' => 'Compromise', 'ipa' => '/ˈkɒm.prə.maɪz/', 'meaning' => 'Berkompromi / Mengorbankan standar', 'example' => 'We never compromise on product quality.'],
+                            ['word' => 'Standup', 'ipa' => '/ˈstænd.ʌp/', 'meaning' => 'Rapat singkat harian tim (berdiri)', 'example' => 'We have a ten-minute standup meeting every morning.'],
+                            ['word' => 'Productive', 'ipa' => '/prəˈdʌk.tɪv/', 'meaning' => 'Produktif / Menghasilkan banyak karya', 'example' => 'Morning study sessions are very productive.'],
+                            ['word' => 'Priorities', 'ipa' => '/praɪˈɒr.ə.tiz/', 'meaning' => 'Hal-hal yang menjadi prioritas utama', 'example' => 'List your top three daily priorities.'],
+                        ],
                     ],
-                    [
-                        'en' => 'Go straight ahead for two blocks and turn left at the traffic light.',
-                        'id' => 'Lurus terus sejauh dua blok dan belok kiri di lampu lalu lintas.',
-                    ],
-                    [
-                        'en' => 'We take the subway to avoid morning traffic congestion.',
-                        'id' => 'Kami naik kereta bawah tanah untuk menghindari kemacetan pagi.',
-                    ],
-                    [
-                        'en' => 'I always book my flight tickets and hotel rooms online in advance.',
-                        'id' => 'Saya selalu memesan tiket pesawat dan kamar hotel secara online sebelumnya.',
-                    ],
-                    [
-                        'en' => 'Exploring unfamiliar places teaches us adaptability and confidence.',
-                        'id' => 'Menjelajahi tempat baru mengajarkan kita kemampuan adaptasi dan rasa percaya diri.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about travel and transportation with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang travel and transportation dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Prepositions of Movement: into, out of, across, through, towards, along',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Travel and Transportation dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Travel and Transportation today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Travel and Transportation hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for travel and transportation makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk travel and transportation membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "Excuse me, where is the nearest commuter train station?". It sounds very natural and professional.',
-                        'id' => 'Frasa: "Excuse me, where is the nearest commuter train station?". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Travel and Transportation memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Travel and Transportation ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Travel and Transportation?',
-                    'Seberapa sering kamu membahas tentang Travel and Transportation dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Travel and Transportation Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Travel and Transportation membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 8: THE SIMPLE PRESENT (NEGATIVE STATEMENTS & EXPRESSIONS)
+            // =========================================================================
             8 => [
-                'topic' => 'Shopping and Money',
-                'focus' => 'Bargaining, prices, payment methods, personal budgeting',
-                'listening' => [
-                    'title' => 'Listening Practice: Shopping and Money',
-                    'audio_script' => 'Smart shopping requires careful budgeting and smart decision making. I usually compare prices on e-commerce platforms before making any electronics purchase. It helps me find the best promotional discounts while keeping my monthly expenses within budget.',
-                    'key_phrases' => [
-                        'How much does this pair of running shoes cost?',
-                        'Can you give me a ten percent discount on this purchase?',
-                        'Do you accept contactless digital wallet payments here?',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Shopping and Money',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'The Simple Present (Negative Statements & Expressions)',
+                'focus' => 'Simple Present negative statements using auxiliary verbs (do not / don\'t vs does not / doesn\'t + Base Verb), common negative error traps, and essential everyday spoken expressions using simple present patterns.',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m8-sub-1',
+                        'num' => '01',
+                        'title' => 'Simple Present Negative Statements',
+                        'subtitle' => 'Auxiliary Verbs (Don\'t vs Doesn\'t), Base Verb Rules & Common Error Traps',
+                        'desc' => 'Pola kalimat negatif Simple Present menggunakan don\'t dan doesn\'t diikuti kata kerja bentuk dasar (Verb 1), serta pencegahan kesalahan umum seperti *doesn\'t likes*.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'simple_present_negative',
+                            'title' => 'Negative Sentence Structure & Auxiliary Rules',
+                            'rules' => [
+                                ['subjects' => 'I / You / We / They / Plural Nouns', 'auxiliary' => 'do not / don\'t', 'main_verb' => 'Verb 1 (Base Form)', 'example' => 'They don\'t live in London. We don\'t work on Sundays.'],
+                                ['subjects' => 'He / She / It / Singular Nouns', 'auxiliary' => 'does not / doesn\'t', 'main_verb' => 'Verb 1 (Base Form - NO -s/-es)', 'example' => 'She doesn\'t drink coffee. The train doesn\'t stop here.'],
                             ],
-                            'answer' => 'Shopping and Money',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'How much does this pair of running shoes cost?',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                            'error_traps' => [
+                                ['incorrect' => 'She doesn\'t speaks English.', 'correct' => 'She doesn\'t speak English.', 'note' => 'Setelah doesn\'t, kata kerja selalu kembali ke bentuk dasar murni (tanpa -s).'],
+                                ['incorrect' => 'He don\'t know the answer.', 'correct' => 'He doesn\'t know the answer.', 'note' => 'Subjek orang ketiga tunggal wajib menggunakan doesn\'t.'],
+                                ['incorrect' => 'I doesn\'t have a car.', 'correct' => 'I don\'t have a car.', 'note' => 'Subjek I selalu menggunakan don\'t.'],
                             ],
-                            'answer' => 'How much does this pair of running shoes cost?',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering shopping and money?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                                                'listening' => [
+                            'title' => 'Short Listening: Clarifying Organic Ingredients & Cooking Philosophies',
+                            'audio_script' => "Michael: Good morning, Dewi! Your new healthy dining cafe in Ubud has such a unique concept.
+Dewi: Good morning, Michael! Thank you. We take great pride in our culinary philosophy.
+Michael: Do you use processed sugar or artificial flavorings in your traditional herbal drinks?
+Dewi: No, we do not use any artificial preservatives or processed sugar in our kitchen.
+Michael: That is excellent! And what about your chefs? Do they deep-fry the tempeh and tofu?
+Dewi: Our head chef does not fry our ingredients in palm oil; he bakes them with cold-pressed coconut oil.
+Michael: Impressive! Many tourists don't eat dairy or gluten. Does your menu cater to them?
+Dewi: Absolutely! Our signature noodles do not contain wheat gluten, and our desserts do not have dairy milk.
+Michael: That is why so many international guests love your restaurant!",
+                            'key_phrases' => [
+                                'We do not use any artificial preservatives or processed sugar.',
+                                'Our head chef does not fry our ingredients in palm oil.',
+                                'Many tourists don\'t eat dairy or gluten.',
+                                'Our signature noodles do not contain wheat gluten.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'questions' => [
+                                [
+                                    'q' => 'What does Dewi\'s kitchen NOT use in their food and drinks?',
+                                    'options' => [
+                                        'Artificial preservatives or processed sugar',
+                                        'Fresh organic vegetables',
+                                        'Coconut oil',
+                                        'Traditional herbs',
+                                    ],
+                                    'answer' => 'Artificial preservatives or processed sugar',
+                                ],
+                                [
+                                    'q' => 'How does the head chef prepare the tempeh and tofu instead of frying?',
+                                    'options' => [
+                                        'Bakes them with cold-pressed coconut oil',
+                                        'Boils them in salt water',
+                                        'Microwaves them',
+                                        'Serves them completely raw',
+                                    ],
+                                    'answer' => 'Bakes them with cold-pressed coconut oil',
+                                ],
+                                [
+                                    'q' => 'What ingredient is excluded from the signature noodles?',
+                                    'options' => [
+                                        'Wheat gluten',
+                                        'Vegetables',
+                                        'Natural spices',
+                                        'Water',
+                                    ],
+                                    'answer' => 'Wheat gluten',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'I don\'t understand this complicated technical term.',
+                            'She doesn\'t consume dairy products because of allergies.',
+                            'David doesn\'t drive to the office; he takes the train.',
+                            'We don\'t share confidential client passwords via email.',
+                            'They don\'t live near the campus anymore.',
+                            'The new software update doesn\'t cause any lag.',
+                            'He doesn\'t speak Spanish, but he speaks Portuguese.',
+                            'Our company doesn\'t charge extra fees for weekend support.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Clarifying Food Preferences & Allergies',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Would you like to order some spicy seafood noodle soup, Clara?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'Thank you, Dimas, but I don\'t eat spicy food at all. My stomach is sensitive.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Oh, I see! Does your brother eat seafood?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'No, he doesn\'t eat seafood either. He has a shrimp allergy.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Let us order vegetarian pasta then. It doesn\'t contain any allergens.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'That\'s thoughtful of you! Thank you so much.', 'avatar' => 'female_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Office Scheduling and Working Hours',
+                                'turns' => [
+                                    ['speaker' => 'Alex', 'text' => 'Does Mr. Hendra attend our afternoon progress review?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Jessica', 'text' => 'No, he doesn\'t attend meetings on Thursday afternoons because he teaches a class.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Alex', 'text' => 'I understand. We don\'t need to wait for him then; we can send the meeting notes.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Jessica', 'text' => 'Good idea! I will compile the summary right after we finish.', 'avatar' => 'female_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'negative_grammar_fixer',
+                            'title' => 'Don\'t vs Doesn\'t Error Hunter',
+                            'desc' => 'Temukan kalimat yang salah dan perbaiki dengan bentuk don\'t / doesn\'t yang benar!',
+                            'cards' => [
+                                ['wrong' => 'He don\'t work on Saturdays.', 'fixed' => 'He doesn\'t work on Saturdays.'],
+                                ['wrong' => 'She doesn\'t likes spicy food.', 'fixed' => 'She doesn\'t like spicy food.'],
+                                ['wrong' => 'They doesn\'t live in Yogyakarta.', 'fixed' => 'They don\'t live in Yogyakarta.'],
+                                ['wrong' => 'My sister don\'t watch horror movies.', 'fixed' => 'My sister doesn\'t watch horror movies.'],
+                                ['wrong' => 'The software doesn\'t supports old versions.', 'fixed' => 'The software doesn\'t support old versions.'],
+                                ['wrong' => 'We doesn\'t have enough storage.', 'fixed' => 'We don\'t have enough storage.'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Describing Dislikes & Personal Boundaries',
+                            'intro' => 'Practice speaking English by expressing things you do not do, foods you don\'t like, and routines you don\'t follow.',
+                            'questions' => [
+                                'What is a type of food or drink you don\'t like, and why?',
+                                'Tell me two things a professional person doesn\'t do in a formal workplace.',
+                                'What is an activity or habit that doesn\'t interest you at all?',
+                            ],
+                            'prompts' => [
+                                'I don\'t drink sweet sodas because I try to avoid high sugar...',
+                                'A professional person doesn\'t arrive late for meetings, and doesn\'t interrupt colleagues rudely...',
+                                'Playing video games doesn\'t interest me because I prefer outdoor sports and reading...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Sensitive', 'ipa' => '/ˈsen.sɪ.tɪv/', 'meaning' => 'Sensitif / Peka terhadap sesuatu', 'example' => 'Her skin is sensitive to direct sunlight.'],
+                            ['word' => 'Allergen', 'ipa' => '/ˈæl.ə.dʒən/', 'meaning' => 'Zat pemicu alergi', 'example' => 'This bakery label lists all potential allergens.'],
+                            ['word' => 'Compile', 'ipa' => '/kəmˈpaɪl/', 'meaning' => 'Mengumpulkan dan menyusun data', 'example' => 'I will compile the monthly financial report.'],
+                            ['word' => 'Interrupt', 'ipa' => '/ˌɪn.təˈrʌpt/', 'meaning' => 'Memotong pembicaraan / Menginterupsi', 'example' => 'Please do not interrupt when someone is speaking.'],
+                            ['word' => 'Thoughtful', 'ipa' => '/ˈθɔːt.fəl/', 'meaning' => 'Penuh perhatian / Bijaksana', 'example' => 'That was a thoughtful gift from the team.'],
+                            ['word' => 'Require', 'ipa' => '/rɪˈkwaɪər/', 'meaning' => 'Membutuhkan / Mensyaratkan', 'example' => 'This course doesn\'t require prior experience.'],
+                            ['word' => 'Lag', 'ipa' => '/læɡ/', 'meaning' => 'Kelambatan sistem / Jeda respon', 'example' => 'The system doesn\'t experience any lag.'],
+                            ['word' => 'Clarify', 'ipa' => '/ˈklær.ɪ.faɪ/', 'meaning' => 'Mengklarifikasi / Memperjelas', 'example' => 'Let me clarify the instructions for this task.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'How much does this pair of running shoes cost?',
-                        'id' => 'Berapa harga sepasang sepatu lari ini?',
+                        'id' => 'sec-m8-sub-2',
+                        'num' => '02',
+                        'title' => 'Everyday Spoken Expressions with Simple Present',
+                        'subtitle' => 'Conversational Idiomatic Phrases, Fixed Verbal Collocations & Reaction Expressions',
+                        'desc' => 'Ungkapan lisan sehari-hari (idiomatic collocations) berbasis Simple Present: It doesn\'t matter, I don\'t think so, That makes sense, It takes time, That sounds great.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'spoken_expressions',
+                            'title' => 'Everyday Spoken Phrases Matrix',
+                            'expressions' => [
+                                ['phrase' => 'It doesn\'t matter.', 'meaning' => 'Tidak apa-apa / Tidak masalah sama sekali.', 'usage' => 'Menghibur orang yang minta maaf atas hal sepele.', 'example' => 'You forgot the pen? It doesn\'t matter; I have a spare one.'],
+                                ['phrase' => 'I don\'t think so.', 'meaning' => 'Saya rasa tidak demikian / Saya kurang sependapat.', 'usage' => 'Menyatakan ketidaksetujuan secara sopan.', 'example' => 'Is the museum open on Mondays? I don\'t think so.'],
+                                ['phrase' => 'That makes sense.', 'meaning' => 'Itu masuk akal / Sangat logis.', 'usage' => 'Menyatakan pemahaman setelah mendengar penjelasan.', 'example' => 'We take the subway to beat the traffic. - That makes sense!'],
+                                ['phrase' => 'That sounds great / fantastic!', 'meaning' => 'Kedengarannya luar biasa!', 'usage' => 'Merespons ajakan atau ide bagus secara antusias.', 'example' => 'Let\'s practice speaking together tonight. - That sounds great!'],
+                                ['phrase' => 'It takes time.', 'meaning' => 'Butuh waktu dan proses.', 'usage' => 'Memberi motivasi saat belajar atau membangun kebiasaan.', 'example' => 'Mastering English pronunciation takes time and patience.'],
+                                ['phrase' => 'I don\'t mind.', 'meaning' => 'Saya tidak keberatan sama sekali.', 'usage' => 'Memberikan izin atau menyatakan fleksibilitas.', 'example' => 'Can I sit beside you? - Of course, I don\'t mind.'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Brainstorming Creative Campaign Concepts',
+                            'audio_script' => "Emma: Hi Rian! Do you have a few minutes to review our concept for the international eco-tourism campaign?
+Rian: Hi Emma! Yes, of course. I totally agree that we need a fresh visual style this season.
+Emma: Exactly! What do you think about using vibrant tropical photography combined with clean modern typography?
+Rian: That makes complete sense to me! It captures Indonesia's natural beauty without feeling cluttered.
+Emma: Wonderful! Do you mind preparing three mockup layouts before our client meeting on Thursday?
+Rian: I don't mind at all; I can easily deliver them by Wednesday afternoon.
+Emma: That sounds like a fantastic plan, Rian! I really appreciate your swift turnaround.
+Rian: My pleasure, Emma! Let us make this campaign a huge success.",
+                            'key_phrases' => [
+                                'I totally agree that we need a fresh visual style.',
+                                'That makes complete sense to me!',
+                                'Do you mind preparing three mockup layouts before our meeting?',
+                                'I don\'t mind at all; that sounds like a fantastic plan!',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'What visual style do Emma and Rian agree to use for the campaign?',
+                                    'options' => [
+                                        'Vibrant tropical photography with clean modern typography',
+                                        'Dark retro illustrations',
+                                        'Black and white line art only',
+                                        'Generic 3D cartoons',
+                                    ],
+                                    'answer' => 'Vibrant tropical photography with clean modern typography',
+                                ],
+                                [
+                                    'q' => 'When does Rian promise to deliver the three mockup layouts?',
+                                    'options' => [
+                                        'By Wednesday afternoon',
+                                        'On Thursday morning',
+                                        'Next month',
+                                        'On Friday evening',
+                                    ],
+                                    'answer' => 'By Wednesday afternoon',
+                                ],
+                                [
+                                    'q' => 'What spoken expression does Rian use to show he is happy to help?',
+                                    'options' => [
+                                        '"I don\'t mind at all"',
+                                        '"I strongly disagree"',
+                                        '"That is impossible"',
+                                        '"I have no time"',
+                                    ],
+                                    'answer' => '"I don\'t mind at all"',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'Don\'t worry about the small typo; it doesn\'t matter at all.',
+                            'I don\'t think so, because the latest data shows different results.',
+                            'Your reasoning is very sound; that makes total sense.',
+                            'A weekend trip to Mount Bromo? That sounds fantastic!',
+                            'Becoming confident in public speaking takes time and deliberate practice.',
+                            'Would you mind if I open the window? - Not at all, I don\'t mind.',
+                            'It doesn\'t make any difference to me which cafe we choose.',
+                            'That looks amazing on you! It really suits your style.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Choosing Between Two Project Proposals',
+                                'turns' => [
+                                    ['speaker' => 'David', 'text' => 'Should we launch the new mobile feature this Friday or next Monday?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Sarah', 'text' => 'I don\'t think so about Friday. Launching before the weekend is risky.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'David', 'text' => 'That makes sense! If bugs occur, the team won\'t be available over the weekend.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Sarah', 'text' => 'Exactly. Let\'s schedule it for Monday morning instead.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'David', 'text' => 'That sounds like a solid plan. I will inform the stakeholders.', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Encouraging a Friend Learning English',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'I feel frustrated because I still make small grammar mistakes when speaking.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Emma', 'text' => 'Dimas, it doesn\'t matter if you make mistakes! Language fluency takes time.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Dimas', 'text' => 'Do you really think my pronunciation is improving?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Emma', 'text' => 'Absolutely! You speak much more clearly now than two weeks ago.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Dimas', 'text' => 'Thank you, Emma! Your encouragement means a lot to me.', 'avatar' => 'male_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'conversational_response_matcher',
+                            'title' => 'Everyday English Spoken Expression Matcher',
+                            'desc' => 'Pilih ungkapan percakapan sehari-hari yang paling alami untuk merespons situasi berikut!',
+                            'cards' => [
+                                ['situation' => 'Someone accidentally spilled two drops of water on your desk.', 'best_response' => 'It doesn\'t matter.'],
+                                ['situation' => 'A friend suggests an exciting culinary tour this Saturday evening.', 'best_response' => 'That sounds fantastic!'],
+                                ['situation' => 'A colleague explains a logical way to organize messy folders.', 'best_response' => 'That makes total sense.'],
+                                ['situation' => 'Someone asks if the bank is open on Sunday afternoon.', 'best_response' => 'I don\'t think so.'],
+                                ['situation' => 'A learner feels down because mastering accent takes long.', 'best_response' => 'It takes time, keep going!'],
+                                ['situation' => 'A classmate asks to borrow your dictionary for 10 minutes.', 'best_response' => 'Sure, I don\'t mind!'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Reacting with Natural Spoken Expressions',
+                            'intro' => 'Practice speaking English by reacting naturally to hypothetical situations using idiomatic phrases from Meeting 8.',
+                            'questions' => [
+                                'How do you respond when a friend apologizes for being 5 minutes late to a casual lunch?',
+                                'A coworker proposes an ambitious but logical strategy. How do you express your agreement?',
+                                'What encouraging words do you say to someone struggling to learn a new skill?',
+                            ],
+                            'prompts' => [
+                                'I would smile and say: "No worries at all, it doesn\'t matter! I just arrived myself"...',
+                                'I would tell them: "That makes complete sense to me, and it sounds like a brilliant strategy"...',
+                                'I would encourage them by saying: "Don\'t give up! Building mastery takes time and patience"...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Idiomatic', 'ipa' => '/ˌɪd.i.əˈmæt.ɪk/', 'meaning' => 'Bersifat ungkapan lisan alami (idiom)', 'example' => 'Use idiomatic phrases to sound natural.'],
+                            ['word' => 'Spill', 'ipa' => '/spɪl/', 'meaning' => 'Menumpahkan cairan tanpa sengaja', 'example' => 'Be careful not to spill the tea.'],
+                            ['word' => 'Stakeholder', 'ipa' => '/ˈsteɪkˌhəʊl.dər/', 'meaning' => 'Pemangku kepentingan / Pihak terkait', 'example' => 'Present the updates to the stakeholders.'],
+                            ['word' => 'Deliberate', 'ipa' => '/dɪˈlɪb.ər.ət/', 'meaning' => 'Terencana / Dilakukan dengan sengaja dan fokus', 'example' => 'Deliberate practice is the key to mastery.'],
+                            ['word' => 'Intimate', 'ipa' => '/ˈɪn.tɪ.mət/', 'meaning' => 'Akrab / Jumlah peserta sedikit dan fokus', 'example' => 'Small groups create an intimate learning environment.'],
+                            ['word' => 'Encouragement', 'ipa' => '/ɪnˈkʌr.ɪdʒ.mənt/', 'meaning' => 'Dorongan semangat / Motivasi', 'example' => 'Her encouragement gave me confidence.'],
+                            ['word' => 'Fluency', 'ipa' => '/ˈfluː.ən.si/', 'meaning' => 'Kelancaran berbicara', 'example' => 'Speaking daily develops fluency.'],
+                            ['word' => 'Reasoning', 'ipa' => '/ˈriː.zən.ɪŋ/', 'meaning' => 'Alur penalaran logis', 'example' => 'Your reasoning makes complete sense.'],
+                        ],
                     ],
-                    [
-                        'en' => 'Can you give me a ten percent discount on this purchase?',
-                        'id' => 'Bisakah Anda memberi saya diskon sepuluh persen untuk pembelian ini?',
-                    ],
-                    [
-                        'en' => 'Do you accept contactless digital wallet payments here?',
-                        'id' => 'Apakah Anda menerima pembayaran dompet digital non-kontak di sini?',
-                    ],
-                    [
-                        'en' => 'I always track my daily expenditures using a financial app.',
-                        'id' => 'Saya selalu mencatat pengeluaran harian saya menggunakan aplikasi keuangan.',
-                    ],
-                    [
-                        'en' => 'It is better to invest in high quality items that last longer.',
-                        'id' => 'Lebih baik berinvestasi pada barang berkualitas tinggi yang tahan lama.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about shopping and money with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang shopping and money dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Quantifiers: some, any, a few, a little, a lot of, much, many',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Shopping and Money dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Shopping and Money today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Shopping and Money hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for shopping and money makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk shopping and money membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "How much does this pair of running shoes cost?". It sounds very natural and professional.',
-                        'id' => 'Frasa: "How much does this pair of running shoes cost?". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Shopping and Money memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Shopping and Money ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Shopping and Money?',
-                    'Seberapa sering kamu membahas tentang Shopping and Money dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Shopping and Money Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Shopping and Money membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 9: TO-INFINITIVE, YES/NO, WH & SUBJECT QUESTIONS IN SIMPLE PRESENT
+            // =========================================================================
             9 => [
-                'topic' => 'Health and Body',
-                'focus' => 'Symptoms, wellness advice, doctor consultations, healthy lifestyle',
-                'listening' => [
-                    'title' => 'Listening Practice: Health and Body',
-                    'audio_script' => 'Maintaining good physical and mental health requires daily dedication. I make sure to drink eight glasses of water every day, sleep at least seven hours, and eat nutritious meals rich in fresh vegetables and lean protein. Regular exercise also keeps my energy levels high.',
-                    'key_phrases' => [
-                        'I have a mild headache and a sore throat since yesterday.',
-                        'You should drink plenty of warm water and get adequate rest.',
-                        'She takes essential vitamins every morning to boost her immunity.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Health and Body',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'To-Infinitive, Yes/No, WH & Subject Questions in Simple Present',
+                'focus' => 'To-Infinitive with verbal predicates (want to, need to, plan to, hope to, like to + V1), Do/Does Yes/No questions with short answers, WH-Information questions, and Subject Questions without auxiliary do/does.',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m9-sub-1',
+                        'num' => '01',
+                        'title' => 'To-Infinitive & Verbal Complements',
+                        'subtitle' => 'Verb + To-Infinitive Patterns (Want to, Need to, Plan to, Hope to, Decide to)',
+                        'desc' => 'Pola penggabungan dua kata kerja menggunakan To-Infinitive (Verb + to + Verb 1) untuk menyatakan keinginan, rencana, kebutuhan, harapan, dan keputusan.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'to_infinitive_verbs',
+                            'title' => 'Common Verbs Followed by To-Infinitive',
+                            'verbs' => [
+                                ['verb' => 'WANT TO + V1', 'meaning' => 'Ingin / Mau melakukan', 'example' => 'I want to improve my spoken English fluency.'],
+                                ['verb' => 'NEED TO + V1', 'meaning' => 'Perlu / Harus melakukan', 'example' => 'She needs to submit the research paper by 5 PM.'],
+                                ['verb' => 'PLAN TO + V1', 'meaning' => 'Berencana untuk', 'example' => 'We plan to launch the new mobile application in June.'],
+                                ['verb' => 'HOPE TO + V1', 'meaning' => 'Berharap untuk', 'example' => 'He hopes to study master degree abroad next year.'],
+                                ['verb' => 'DECIDE TO + V1', 'meaning' => 'Memutuskan untuk', 'example' => 'They decided to open a branch office in Surabaya.'],
+                                ['verb' => 'TRY TO + V1', 'meaning' => 'Mencoba / Berusaha untuk', 'example' => 'I try to read thirty pages of English every night.'],
+                                ['verb' => 'LIKE / LOVE TO + V1', 'meaning' => 'Suka / Gemar melakukan', 'example' => 'David loves to travel and photograph cultural heritage.'],
                             ],
-                            'answer' => 'Health and Body',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I have a mild headache and a sore throat since yesterday.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                            'key_rules' => [
+                                ['rule' => 'Subject 3rd Person Singular', 'note' => 'Hanya kata kerja pertama yang ditambahkan -s/-es, kata kerja setelah "to" selalu Verb 1 murni.', 'example' => 'She wants to learn Japanese (BUKAN: She wants to learns).'],
+                                ['rule' => 'Negative Infinitive', 'note' => 'Gunakan don\'t / doesn\'t want to + V1, atau decide NOT to + V1.', 'example' => 'I don\'t want to miss the live webinar.'],
                             ],
-                            'answer' => 'I have a mild headache and a sore throat since yesterday.',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering health and body?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                                                'listening' => [
+                            'title' => 'Short Listening: University Application & Scholarship Advising Session',
+                            'audio_script' => "Mr. Collins: Good afternoon, Anita! Welcome to our academic counseling session. Let us discuss your postgraduate study plans.
+Anita: Good afternoon, Mr. Collins! Thank you. I really hope to study renewable energy policy in the UK next autumn.
+Mr. Collins: That is an admirable ambition! Why did you decide to choose this specific field of research?
+Anita: I want to help Indonesia transition to clean solar and geothermal energy, and I plan to work with international organizations.
+Mr. Collins: Excellent! Do you intend to apply for the prestigious Chevening scholarship this year?
+Anita: Yes, I promise to submit all my recommendation letters and essay drafts before the October deadline.
+Mr. Collins: Wonderful! Remember to practice your interview presentation thoroughly; I expect to review your first draft on Monday.
+Anita: Thank you so much, Mr. Collins! I will work hard to achieve my dream.",
+                            'key_phrases' => [
+                                'I really hope to study renewable energy policy in the UK.',
+                                'I want to help Indonesia transition to clean energy.',
+                                'I plan to work with international organizations.',
+                                'I promise to submit all my recommendation letters before the deadline.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'questions' => [
+                                [
+                                    'q' => 'What subject does Anita hope to study in the UK?',
+                                    'options' => [
+                                        'Renewable energy policy',
+                                        'Ancient history',
+                                        'Hotel hospitality',
+                                        'Fashion design',
+                                    ],
+                                    'answer' => 'Renewable energy policy',
+                                ],
+                                [
+                                    'q' => 'What scholarship does Anita intend to apply for?',
+                                    'options' => [
+                                        'Chevening scholarship',
+                                        'Fulbright scholarship',
+                                        'Erasmus program',
+                                        'Local city grant',
+                                    ],
+                                    'answer' => 'Chevening scholarship',
+                                ],
+                                [
+                                    'q' => 'When does Mr. Collins expect to review Anita\'s first essay draft?',
+                                    'options' => [
+                                        'On Monday',
+                                        'In October',
+                                        'Next year',
+                                        'On Friday night',
+                                    ],
+                                    'answer' => 'On Monday',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'I want to speak English confidently in global meetings.',
+                            'She needs to renew her international passport next Monday.',
+                            'Our company plans to expand operations into Southeast Asia.',
+                            'He hopes to graduate with honors from his university.',
+                            'We decided to adopt modern agile practices in our software team.',
+                            'I try to practice shadowing audio recordings for twenty minutes daily.',
+                            'David wants to buy a comfortable family house in Yogyakarta.',
+                            'She doesn\'t want to make hasty decisions without full data.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Sharing Educational Ambitions',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'What do you plan to do after graduating, Jessica?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'I plan to apply for a scholarship in the UK. I want to study Data Science.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'That\'s an incredible field! Do you need to take any language exams?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'Yes, I need to take the IELTS test next month, so I try to study every evening.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'I hope you achieve your dream score with flying colors!', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'Thank you, Dimas! I truly appreciate your support.', 'avatar' => 'female_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Planning a Team Outing and Workshop',
+                                'turns' => [
+                                    ['speaker' => 'Robert', 'text' => 'Where do we want to organize our annual team building retreat?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Clara', 'text' => 'Most members want to go to Batu, Malang. They love the cool mountain air.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Robert', 'text' => 'Sounds great. We need to book the villa and transport before next Friday.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Clara', 'text' => 'I will call the reservation desk today to confirm the dates.', 'avatar' => 'female_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'to_infinitive_matcher',
+                            'title' => 'Verb + To-Infinitive Goal Matcher',
+                            'desc' => 'Lengkapi kalimat rumpang berikut dengan kombinasi Verb + To-Infinitive yang paling tepat!',
+                            'cards' => [
+                                ['prompt' => 'Dimas ___ (want / study) Data Science in London.', 'correct' => 'wants to study'],
+                                ['prompt' => 'We ___ (need / finish) this presentation before 4 PM.', 'correct' => 'need to finish'],
+                                ['prompt' => 'They ___ (plan / visit) their grandparents in Solo this weekend.', 'correct' => 'plan to visit'],
+                                ['prompt' => 'She ___ (hope / win) the national speech competition.', 'correct' => 'hopes to win'],
+                                ['prompt' => 'I ___ (try / exercise) at least three times a week.', 'correct' => 'try to exercise'],
+                                ['prompt' => 'The management ___ (decide / open) a new branch.', 'correct' => 'decides to open'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Personal Goals & Future Ambitions',
+                            'intro' => 'Practice speaking English by discussing your dreams, goals, and intentions using "want to", "need to", "plan to", and "hope to".',
+                            'questions' => [
+                                'What is a major goal you want to achieve by the end of this year?',
+                                'What specific skill do you need to improve to advance your career or studies?',
+                                'Where do you plan or hope to travel for your next memorable holiday, and why?',
+                            ],
+                            'prompts' => [
+                                'By the end of this year, I want to become a fluent and confident English speaker...',
+                                'To advance my career, I need to improve my public speaking and leadership presentation skills...',
+                                'I hope to visit Japan next spring because I want to experience Kyoto\'s historic architecture...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Aspiration', 'ipa' => '/ˌæs.pɪˈreɪ.ʃən/', 'meaning' => 'Aspirasi / Cita-cita masa depan', 'example' => 'Her career aspiration is to lead an AI research lab.'],
+                            ['word' => 'Scholarship', 'ipa' => '/ˈskɒl.ə.ʃɪp/', 'meaning' => 'Beasiswa pendidikan', 'example' => 'She received a full academic scholarship.'],
+                            ['word' => 'Flying colors', 'ipa' => '/ˌflaɪ.ɪŋ ˈkʌl.əz/', 'meaning' => 'Hasil gemilang / Prestasi sangat memuaskan', 'example' => 'He passed the speaking exam with flying colors.'],
+                            ['word' => 'Hasty', 'ipa' => '/ˈheɪ.sti/', 'meaning' => 'Terburu-buru / Gegabah tanpa analisis', 'example' => 'Do not make hasty financial decisions.'],
+                            ['word' => 'Retreat', 'ipa' => '/rɪˈtriːt/', 'meaning' => 'Kegiatan rehat bersama / Outing kantor', 'example' => 'Our annual team retreat takes place in Bali.'],
+                            ['word' => 'Advance', 'ipa' => '/ədˈvɑːns/', 'meaning' => 'Memajukan / Mengembangkan karir', 'example' => 'English skills help you advance in your company.'],
+                            ['word' => 'Dedication', 'ipa' => '/ˌded.ɪˈkeɪ.ʃən/', 'meaning' => 'Dedikasi dan kerja keras', 'example' => 'Success requires dedication and patience.'],
+                            ['word' => 'Memorable', 'ipa' => '/ˈmem.ər.ə.bəl/', 'meaning' => 'Sangat berkesan / Tak terlupakan', 'example' => 'We had a memorable trip to Mount Bromo.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'I have a mild headache and a sore throat since yesterday.',
-                        'id' => 'Saya mengalami sakit kepala ringan dan sakit tenggorokan sejak kemarin.',
+                        'id' => 'sec-m9-sub-2',
+                        'num' => '02',
+                        'title' => 'Questions Masterclass (Yes/No, WH & Subject Questions)',
+                        'subtitle' => 'Auxiliary Do/Does in Questions, WH-Information Structures & Subject Questions Without Auxiliary',
+                        'desc' => 'Kuasai seluruh jenis pertanyaan Simple Present: Yes/No Questions (Do/Does), WH-Questions (What, Where, When, Why, How), serta Subject Questions (Who / What) yang tidak memakai do/does.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'question_masterclass',
+                            'title' => 'Simple Present Question Archetypes & Formulas',
+                            'types' => [
+                                ['type' => 'Yes/No Questions', 'formula' => 'Do / Does + Subject + Verb 1 (Base Form)?', 'example' => 'Do you speak English? / Does he work in banking?'],
+                                ['type' => 'Short Answers', 'formula' => 'Yes, Subject + do/does. / No, Subject + don\'t/doesn\'t.', 'example' => 'Yes, I do. / No, she doesn\'t.'],
+                                ['type' => 'WH-Object Questions', 'formula' => 'WH-Word + do / does + Subject + Verb 1?', 'example' => 'Where do you live? / What does she teach?'],
+                                ['type' => 'WH-Subject Questions (CRITICAL)', 'formula' => 'Who / What + Verb 1 (+ -s/-es) + Object? (NO DO/DOES)', 'example' => 'Who lives in this house? / What causes this error?'],
+                            ],
+                            'subject_question_guide' => [
+                                ['note' => 'Ketika kata tanya (Who / What) menanyakan SUBJEK (pelaku aksi), JANGAN gunakan do/does. Kata kerja langsung diberi akhiran -s/-es seperti kalimat positif orang ketiga.'],
+                                ['contrast_1' => 'Object Question: Who do you see? (Siapa yang KAMU lihat? - Kamu = Subjek)'],
+                                ['contrast_2' => 'Subject Question: Who sees you? (Siapa yang MELIHAT kamu? - Who = Subjek)'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Pitch Screening & Q&A at a Global Startup Accelerator',
+                            'audio_script' => "Professor Davis: Welcome to our global accelerator interview, Kevin! Let us dive straight into a few questions about your venture.
+Kevin: Thank you, Professor Davis! I am thrilled to present our digital education platform.
+Professor Davis: First, do you currently have active users across Southeast Asia?
+Kevin: Yes, we do! We currently serve over fifty thousand active learners across Indonesia and Malaysia.
+Professor Davis: Impressive! And who founded the original technology behind your platform?
+Kevin: My university partner and I built the core algorithm during our final year in Bandung.
+Professor Davis: Fascinating. What motivated you to focus specifically on spoken language fluency?
+Kevin: We realized that millions of talented students understand English grammar, but lack the conversational confidence to speak freely.
+Professor Davis: That is an insightful observation, Kevin. Your vision addresses a crucial global need!",
+                            'key_phrases' => [
+                                'Do you currently have active users across Southeast Asia?',
+                                'Who founded the original technology behind your platform?',
+                                'What motivated you to focus specifically on spoken language fluency?',
+                                'We realized that students understand grammar, but lack conversational confidence.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'How many active learners currently use Kevin\'s education platform?',
+                                    'options' => [
+                                        'Over fifty thousand (50,000) active learners',
+                                        'Five hundred learners',
+                                        'Ten thousand learners',
+                                        'One million learners',
+                                    ],
+                                    'answer' => 'Over fifty thousand (50,000) active learners',
+                                ],
+                                [
+                                    'q' => 'Who built the original technology behind the platform?',
+                                    'options' => [
+                                        'Kevin and his university partner in Bandung',
+                                        'An overseas software agency',
+                                        'Professor Davis',
+                                        'A large tech conglomerate',
+                                    ],
+                                    'answer' => 'Kevin and his university partner in Bandung',
+                                ],
+                                [
+                                    'q' => 'What core problem does Kevin\'s platform solve for students?',
+                                    'options' => [
+                                        'Students understand grammar but lack confidence to speak freely',
+                                        'Students cannot read English',
+                                        'Schools have no textbooks',
+                                        'Students want to avoid homework',
+                                    ],
+                                    'answer' => 'Students understand grammar but lack confidence to speak freely',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'Do you practice speaking English every day? - Yes, I do.',
+                            'Does your supervisor review your reports promptly? - Yes, she does.',
+                            'Where do you usually purchase fresh groceries in this neighborhood?',
+                            'What time does the morning express train arrive at Gambir Station?',
+                            'Why do they prefer online learning over conventional classrooms?',
+                            'Who teaches the advanced conversation module on Thursdays?',
+                            'What causes unexpected power outages during heavy thunderstorms?',
+                            'Who knows the Wi-Fi password for the main auditorium?',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Interviewing a New Language Club Member',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Hello! Do you want to join our English Speaking Circle?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Fiona', 'text' => 'Yes, I do! How often does the club meet?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'We meet twice a week on Tuesdays and Thursdays at 4 PM.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Fiona', 'text' => 'What topics do you usually discuss during the sessions?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'We discuss current events, technology, travel, and personal storytelling.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Fiona', 'text' => 'Who facilitates the conversation tables?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Senior members and guest native speakers facilitate each table.', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Inquiring About an IT Support Ticket',
+                                'turns' => [
+                                    ['speaker' => 'Brian', 'text' => 'Does this software license cover five desktop computers?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Support', 'text' => 'Yes, it does. It supports up to ten simultaneous devices.', 'avatar' => 'male_3'],
+                                    ['speaker' => 'Brian', 'text' => 'Who handles technical troubleshooting if a bug occurs?', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Support', 'text' => 'Our 24/7 technical team responds to support tickets within 15 minutes.', 'avatar' => 'male_3'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'question_form_classifier',
+                            'title' => 'Yes/No vs WH vs Subject Question Master',
+                            'desc' => 'Identifikasi jenis pertanyaan berikut: Yes/No, WH-Object, atau Subject Question!',
+                            'cards' => [
+                                ['question' => 'Do you live in Bandung?', 'type' => 'Yes/No Question'],
+                                ['question' => 'Where do you work?', 'type' => 'WH-Object Question'],
+                                ['question' => 'Who teaches this class?', 'type' => 'Subject Question (No do/does)'],
+                                ['question' => 'Does she play tennis?', 'type' => 'Yes/No Question'],
+                                ['question' => 'What makes you happy?', 'type' => 'Subject Question (No do/does)'],
+                                ['question' => 'Why do they arrive late?', 'type' => 'WH-Object Question'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: The Comprehensive Interviewer Challenge',
+                            'intro' => 'Take turns answering and asking questions with the AI tutor across all question formats.',
+                            'questions' => [
+                                'Answer in detail: What do you do when you face a challenging problem at work or study?',
+                                'Answer clearly: Who inspires you the most in your life and what makes them extraordinary?',
+                                'Ask the AI tutor two questions: one Yes/No question and one Subject Question.',
+                            ],
+                            'prompts' => [
+                                'When I face a difficult challenge, I analyze the core root causes and consult experienced mentors...',
+                                'My mother inspires me most because she demonstrates incredible resilience and selfless generosity...',
+                                'Do you enjoy interacting with students? Who creates your conversational speaking topics?...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Welfare', 'ipa' => '/ˈwel.feər/', 'meaning' => 'Kesejahteraan / Bantuan sosial', 'example' => 'The student welfare office provides counseling.'],
+                            ['word' => 'Facilitate', 'ipa' => '/fəˈsɪl.ɪ.teɪt/', 'meaning' => 'Memfasilitasi / Mempermudah proses', 'example' => 'The instructor facilitates group discussions.'],
+                            ['word' => 'Simultaneous', 'ipa' => '/ˌsɪm.əlˈteɪ.ni.əs/', 'meaning' => 'Simultan / Berlangsung serentak', 'example' => 'The license allows ten simultaneous users.'],
+                            ['word' => 'Troubleshooting', 'ipa' => '/ˈtrʌb.əlˌʃuː.tɪŋ/', 'meaning' => 'Penelusuran dan pemecahan masalah teknis', 'example' => 'Follow our quick troubleshooting guide.'],
+                            ['word' => 'Resilience', 'ipa' => '/rɪˈzɪl.jəns/', 'meaning' => 'Ketangguhan / Daya bangkit menghadapi kesulitan', 'example' => 'Her resilience in tough times is inspiring.'],
+                            ['word' => 'Generosity', 'ipa' => '/ˌdʒen.əˈrɒs.ə.ti/', 'meaning' => 'Kedermawanan / Kebaikan hati', 'example' => 'We appreciate your exceptional generosity.'],
+                            ['word' => 'Outage', 'ipa' => '/ˈaʊ.tɪdʒ/', 'meaning' => 'Pemadaman listrik / Terputusnya layanan', 'example' => 'The storm caused a two-hour power outage.'],
+                            ['word' => 'Conventional', 'ipa' => '/kənˈven.ʃən.əl/', 'meaning' => 'Konvensional / Cara tradisional biasa', 'example' => 'Online classes differ from conventional lectures.'],
+                        ],
                     ],
-                    [
-                        'en' => 'You should drink plenty of warm water and get adequate rest.',
-                        'id' => 'Kamu sebaiknya minum banyak air hangat dan istirahat yang cukup.',
-                    ],
-                    [
-                        'en' => 'She takes essential vitamins every morning to boost her immunity.',
-                        'id' => 'Dia meminum vitamin penting setiap pagi untuk meningkatkan kekebalan tubuhnya.',
-                    ],
-                    [
-                        'en' => 'It is advisable to schedule a medical checkup once a year.',
-                        'id' => 'Disarankan untuk menjadwalkan pemeriksaan kesehatan sekali setahun.',
-                    ],
-                    [
-                        'en' => 'Taking deep breaths and walking outdoors helps reduce mental stress.',
-                        'id' => 'Mengambil napas dalam-dalam dan berjalan di luar ruangan membantu mengurangi stres.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about health and body with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang health and body dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Modals for giving advice: Should, Ought to, Had better + V1',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Health and Body dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Health and Body today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Health and Body hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for health and body makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk health and body membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I have a mild headache and a sore throat since yesterday.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I have a mild headache and a sore throat since yesterday.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Health and Body memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Health and Body ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Health and Body?',
-                    'Seberapa sering kamu membahas tentang Health and Body dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Health and Body Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Health and Body membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 10: COMPLEX TRANSITIVE VERBS (VTC) & LINKING VERBS
+            // =========================================================================
             10 => [
-                'topic' => 'Work and Professions',
-                'focus' => 'Job roles, workplace responsibilities, professional communication',
-                'listening' => [
-                    'title' => 'Listening Practice: Work and Professions',
-                    'audio_script' => 'I work as a digital marketing specialist for an innovative technology company. My daily responsibilities include formulating social media campaigns, analyzing web analytics, and coordinating cross-functional projects with our creative and software engineering teams.',
-                    'key_phrases' => [
-                        'I work as a software engineer at a financial technology company.',
-                        'I am responsible for managing client relationships and project deadlines.',
-                        'We collaborate effectively through daily morning standup meetings.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Work and Professions',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'Complex Transitive Verbs (VTC) & Linking Verbs',
+                'focus' => 'Linking verbs & sensory descriptors (look, sound, feel, taste, smell, seem, become + Adjective), and Complex Transitive Verbs / VTC (make, call, name, consider, find, keep, elect + Object + Object Complement).',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m10-sub-1',
+                        'num' => '01',
+                        'title' => 'Linking Verbs & Sensory Descriptors',
+                        'subtitle' => 'Sensory Perception Verbs (Look, Sound, Feel, Taste, Smell) & State Verbs (Seem, Become, Appear)',
+                        'desc' => 'Kata kerja penghubung (Linking Verbs) yang diikuti kata sifat (Adjective) tanpa adverb, untuk mendeskripsikan kesan panca indra dan keadaan subjek.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'linking_verbs',
+                            'title' => 'Linking Verbs & Sensory Descriptors Matrix',
+                            'verbs' => [
+                                ['verb' => 'LOOK + Adj', 'sense' => 'Visual / Penglihatan', 'meaning' => 'Kelihatan / Tampak', 'example' => 'You look energetic and confident today.'],
+                                ['verb' => 'SOUND + Adj', 'sense' => 'Auditory / Pendengaran', 'meaning' => 'Kedengarannya', 'example' => 'That project proposal sounds feasible and exciting.'],
+                                ['verb' => 'TASTE + Adj', 'sense' => 'Gustatory / Pengecapan', 'meaning' => 'Rasanya (makanan/minuman)', 'example' => 'This traditional herbal tea tastes refreshing.'],
+                                ['verb' => 'SMELL + Adj', 'sense' => 'Olfactory / Penciuman', 'meaning' => 'Baunya / Aromanya', 'example' => 'The freshly baked pastries smell delicious.'],
+                                ['verb' => 'FEEL + Adj', 'sense' => 'Tactile / Emosional', 'meaning' => 'Terasa / Merasa', 'example' => 'The fabric feels soft; I feel optimistic about the future.'],
+                                ['verb' => 'SEEM / APPEAR + Adj', 'sense' => 'Perception / Keadaan', 'meaning' => 'Tampaknya / Terlihat seolah', 'example' => 'The exam questions seem straightforward.'],
+                                ['verb' => 'BECOME / GROW + Adj', 'sense' => 'Transformation / Perubahan', 'meaning' => 'Menjadi / Berubah menjadi', 'example' => 'The weather becomes cooler in the evening.'],
                             ],
-                            'answer' => 'Work and Professions',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I work as a software engineer at a financial technology company.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                            'golden_rule' => [
+                                ['rule' => 'Linking Verb + ADJECTIVE (NOT Adverb)', 'note' => 'Linking verbs mendeskripsikan Subjek (kata benda), sehingga membutuhkan ADJECTIVE, BUKAN Adverb (-ly).'],
+                                ['incorrect' => 'The soup smells deliciously.', 'correct' => 'The soup smells delicious.'],
+                                ['incorrect' => 'You look beautifully tonight.', 'correct' => 'You look beautiful tonight.'],
                             ],
-                            'answer' => 'I work as a software engineer at a financial technology company.',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering work and professions?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                                                'listening' => [
+                            'title' => 'Short Listening: Tasting Artisan Indonesian Cuisine & Specialty Coffee',
+                            'audio_script' => "Anthony: Good evening, Chef Bagus! The atmosphere in your hillside bistro feels incredibly serene and welcoming tonight.
+Chef Bagus: Good evening, Anthony! Welcome. It feels wonderful to host you in Bandung.
+Anthony: The aroma from your kitchen smells absolutely divine! What specialty dish are you preparing?
+Chef Bagus: Tonight, I am preparing slow-braised beef with local mountain herbs. It tastes rich, savory, and slightly caramelized.
+Anthony: Mmm! The tender beef looks mouth-watering, and the texture feels remarkably silky.
+Chef Bagus: Thank you! And for dessert, this artisanal passionfruit sorbet tastes refreshingly tart and crisp.
+Anthony: Every flavor combination seems exceptionally balanced, Chef Bagus. You are a true culinary artist!
+Chef Bagus: I am honored by your kind words, Anthony. Please enjoy your meal!",
+                            'key_phrases' => [
+                                'The atmosphere in your hillside bistro feels incredibly serene and welcoming.',
+                                'The aroma from your kitchen smells absolutely divine!',
+                                'It tastes rich, savory, and slightly caramelized.',
+                                'Every flavor combination seems exceptionally balanced.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'questions' => [
+                                [
+                                    'q' => 'How does the bistro atmosphere feel to Anthony?',
+                                    'options' => [
+                                        'Incredibly serene and welcoming',
+                                        'Noisy and crowded',
+                                        'Cold and uncomfortable',
+                                        'Boring and dull',
+                                    ],
+                                    'answer' => 'Incredibly serene and welcoming',
+                                ],
+                                [
+                                    'q' => 'How does Chef Bagus describe the flavor of the slow-braised beef?',
+                                    'options' => [
+                                        'Rich, savory, and slightly caramelized',
+                                        'Extremely spicy and bitter',
+                                        'Very bland and dry',
+                                        'Too sour and salty',
+                                    ],
+                                    'answer' => 'Rich, savory, and slightly caramelized',
+                                ],
+                                [
+                                    'q' => 'How does the artisanal passionfruit sorbet taste?',
+                                    'options' => [
+                                        'Refreshingly tart and crisp',
+                                        'Excessively sweet',
+                                        'Bitter like medicine',
+                                        'Heavy and greasy',
+                                    ],
+                                    'answer' => 'Refreshingly tart and crisp',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'Your new presentation slides look professional and modern.',
+                            'The proposal for the overseas partnership sounds promising.',
+                            'This hot ginger drink tastes soothing for a sore throat.',
+                            'The morning mountain breeze feels cool and refreshing.',
+                            'Freshly ground coffee beans smell wonderfully aromatic.',
+                            'The new software interface seems very intuitive for beginners.',
+                            'Students become more confident after continuous speaking drills.',
+                            'She appears calm even during intense high-pressure negotiations.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Evaluating a New Product Sample',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'What do you think of this organic cotton t-shirt sample, Clara?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'The fabric feels exceptionally smooth and breathable!', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'How does the minimalist collar look to you?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'It looks sleek and elegant. The muted colors also look premium.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Our suppliers will be thrilled to hear this feedback!', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Ordering Special Dishes at a Cafe',
+                                'turns' => [
+                                    ['speaker' => 'Waiter', 'text' => 'Good evening! Our chef recommendation tonight is truffle mushroom soup.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Customer', 'text' => 'That sounds delicious! Is it rich and creamy?', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Waiter', 'text' => 'Yes, it tastes rich, and the roasted herbs smell amazing.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Customer', 'text' => 'Perfect, I will have one bowl along with garlic bread.', 'avatar' => 'female_2'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'sensory_verb_classifier',
+                            'title' => 'Linking Verb & Sense Descriptor Matcher',
+                            'desc' => 'Cocokkan rangsangan panca indra berikut dengan Linking Verb yang paling tepat (Look, Sound, Smell, Taste, Feel)!',
+                            'cards' => [
+                                ['stimulus' => 'Acoustic symphony playing softly in the hall', 'verb' => 'Sounds soothing'],
+                                ['stimulus' => 'Warm bakery croissants right out of the oven', 'verb' => 'Smell heavenly'],
+                                ['stimulus' => 'Dark hot cocoa with cinnamon and milk', 'verb' => 'Tastes delicious'],
+                                ['stimulus' => 'Silk formal necktie against your skin', 'verb' => 'Feels smooth'],
+                                ['stimulus' => 'New modern corporate logo and sleek website', 'verb' => 'Looks professional'],
+                                ['stimulus' => 'Complex theoretical physics formula on board', 'verb' => 'Seems difficult'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Sensory Description Showcase',
+                            'intro' => 'Practice speaking English by describing your favorite foods, music, or scenic spots using sensory linking verbs.',
+                            'questions' => [
+                                'Describe your favorite Indonesian food using "tastes", "smells", and "looks".',
+                                'What kind of music or environment sounds calming and relaxing to your mind?',
+                                'Think of a challenging task you overcame. How did it seem at first, and how did you feel after finishing it?',
+                            ],
+                            'prompts' => [
+                                'My favorite dish is Indonesian Sate Ayam. It smells smoky, looks mouthwatering, and tastes savory and sweet...',
+                                'Acoustic instrumental guitar sounds peaceful, and nature rain sounds feel soothing when studying...',
+                                'At first, public speaking seemed intimidating, but after regular practice, I feel empowered and confident...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Appetizing', 'ipa' => '/ˈæp.ə.taɪ.zɪŋ/', 'meaning' => 'Menggugah selera makan', 'example' => 'The colorful salad looks appetizing.'],
+                            ['word' => 'Savory', 'ipa' => '/ˈseɪ.vər.i/', 'meaning' => 'Gurih dan lezat', 'example' => 'The broth tastes rich and savory.'],
+                            ['word' => 'Aromatic', 'ipa' => '/ˌær.əˈmæt.ɪk/', 'meaning' => 'Wangi semerbak / Beraroma sedap', 'example' => 'Fresh mint leaves smell aromatic.'],
+                            ['word' => 'Breathable', 'ipa' => '/ˈbriː.ðə.bəl/', 'meaning' => 'Bahan pakaian yang sejuk dan menyerap udara', 'example' => 'Cotton fabric is soft and breathable.'],
+                            ['word' => 'Soothing', 'ipa' => '/ˈsuː.ðɪŋ/', 'meaning' => 'Menenangkan pikiran / Menyejukkan', 'example' => 'Warm chamomile tea feels soothing.'],
+                            ['word' => 'Intuitive', 'ipa' => '/ɪnˈtʃuː.ɪ.tɪv/', 'meaning' => 'Mudah dipahami secara alami (intuitif)', 'example' => 'The app design feels very intuitive.'],
+                            ['word' => 'Feasible', 'ipa' => '/ˈfiː.zə.bəl/', 'meaning' => 'Layak dan memungkinkan untuk dijalankan', 'example' => 'This business plan sounds feasible.'],
+                            ['word' => 'Straightforward', 'ipa' => '/ˌstreɪtˈfɔː.wəd/', 'meaning' => 'Jelas, lugas, dan tidak berbelit-belit', 'example' => 'The user guide seems straightforward.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'I work as a software engineer at a financial technology company.',
-                        'id' => 'Saya bekerja sebagai insinyur perangkat lunak di perusahaan teknologi finansial.',
+                        'id' => 'sec-m10-sub-2',
+                        'num' => '02',
+                        'title' => 'Complex Transitive Verbs (VTC) & Object Complements',
+                        'subtitle' => 'Subject + Verb + Object + Complement (SVOC) Patterns (Make, Call, Name, Consider, Keep, Find)',
+                        'desc' => 'Pola kalimat Complex Transitive Verbs (VTC): Subjek + Kata Kerja + Objek + Pelengkap Objek (Adjective atau Noun) untuk menyatakan dampak, penamaan, anggapan, dan pemeliharaan kondisi.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'complex_transitive_vtc',
+                            'title' => 'Complex Transitive Verbs (SVOC) Matrix',
+                            'patterns' => [
+                                ['verb' => 'MAKE + Object + Adjective', 'usage' => 'Menyebabkan objek berada dalam kondisi tertentu', 'example' => 'Daily English practice makes speaking effortless.'],
+                                ['verb' => 'KEEP + Object + Adjective', 'usage' => 'Menjaga kondisi objek tetap bertahan', 'example' => 'Regular exercise keeps your body healthy and energetic.'],
+                                ['verb' => 'FIND + Object + Adjective', 'usage' => 'Menilai / Merasakan suatu objek setelah dialami', 'example' => 'I find online language simulations very engaging.'],
+                                ['verb' => 'CONSIDER + Object + Noun/Adj', 'usage' => 'Menganggap atau memperhitungkan objek sebagai', 'example' => 'We consider Dimas an indispensable team member.'],
+                                ['verb' => 'CALL / NAME + Object + Noun', 'usage' => 'Memberi nama atau sebutan pada objek', 'example' => 'They named their firstborn daughter Sophia.'],
+                                ['verb' => 'ELECT / APPOINT + Object + Title', 'usage' => 'Memilih atau mengangkat objek menduduki jabatan', 'example' => 'The committee appointed Marcus Chief Technology Officer.'],
+                            ],
+                            'structure_comparison' => [
+                                ['svo' => 'Simple Transitive (SVO): She made a cake. (Cake = Benda yang dibuat)'],
+                                ['svoc' => 'Complex Transitive (SVOC): She made me happy. (Me = Objek, Happy = Sifat yang dialami Objek)'],
+                            ],
+                        ],
+                                                'listening' => [
+                            'title' => 'Short Listening: Regional Leadership Appointment & Strategic Evaluation',
+                            'audio_script' => "Marcus: Good afternoon, Maya! The regional executive committee held our annual strategy review this morning.
+Maya: Good afternoon, Marcus! I hope the board found our annual performance report satisfactory.
+Marcus: More than satisfactory, Maya! The executive board considered your market expansion proposal exceptionally innovative.
+Maya: That is wonderful news! Our team worked tirelessly to ensure every projection was realistic and thorough.
+Marcus: Because of your stellar results, the board unanimously appointed you Regional Operations Director for Southeast Asia!
+Maya: Wow, thank you so much, Marcus! I consider this appointment an incredible honor and a major responsibility.
+Marcus: We know you will make our regional operations even more successful, Maya. Congratulations!
+Maya: Thank you, Marcus! I will prove our collective strategy successful in every market.",
+                            'key_phrases' => [
+                                'The executive board considered your market expansion proposal exceptionally innovative.',
+                                'The board unanimously appointed you Regional Operations Director.',
+                                'I consider this appointment an incredible honor.',
+                                'We know you will make our regional operations even more successful.',
+                            ],
+                            'questions' => [
+                                [
+                                    'q' => 'How did the executive board consider Maya\'s market expansion proposal?',
+                                    'options' => [
+                                        'Exceptionally innovative',
+                                        'Too expensive and risky',
+                                        'Average and uninspiring',
+                                        'Unclear and confusing',
+                                    ],
+                                    'answer' => 'Exceptionally innovative',
+                                ],
+                                [
+                                    'q' => 'What new role did the board appoint Maya to lead?',
+                                    'options' => [
+                                        'Regional Operations Director for Southeast Asia',
+                                        'Junior marketing assistant',
+                                        'Branch accountant',
+                                        'Independent legal auditor',
+                                    ],
+                                    'answer' => 'Regional Operations Director for Southeast Asia',
+                                ],
+                                [
+                                    'q' => 'How does Maya describe her new leadership appointment?',
+                                    'options' => [
+                                        'An incredible honor and a major responsibility',
+                                        'A routine task',
+                                        'A temporary assignment',
+                                        'An unwelcome burden',
+                                    ],
+                                    'answer' => 'An incredible honor and a major responsibility',
+                                ],
+                            ],
+                        ],
+'drilling' => [
+                            'Daily speaking practice makes my English pronunciation crystal clear.',
+                            'Healthy eating habits keep your immune system strong.',
+                            'I find this interactive grammar platform extremely beneficial.',
+                            'The board of executives consider this project a top strategic priority.',
+                            'The parents named their newborn baby boy Alexander.',
+                            'The faculty appointed Dr. Edward dean of the medical school.',
+                            'Please keep the conference hall clean and organized after use.',
+                            'Unexpected acts of kindness make everyone in the office cheerful.',
+                        ],
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Evaluating Learning Experience & Apps',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'How do you like the new conversational speaking simulator, Jessica?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'I find it exceptionally helpful! The real-time feedback makes speaking less stressful.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'I agree. Interactive roleplays keep students motivated and focused.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Jessica', 'text' => 'Our instructors consider this technology a breakthrough in language pedagogy.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'It truly makes continuous practice an enjoyable habit.', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                            [
+                                'title' => 'Dialogue B: Selecting a Team Captain for Competition',
+                                'turns' => [
+                                    ['speaker' => 'Coach', 'text' => 'Team, we need to choose our captain for the upcoming national debates.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Members', 'text' => 'We consider Dimas the ideal leader because of his eloquence and calm mindset.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Coach', 'text' => 'Excellent unanimous choice! We officially appoint Dimas team captain.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Dimas', 'text' => 'Thank you all! I will do my best to keep our teamwork sharp and victorious.', 'avatar' => 'male_1'],
+                                ],
+                            ],
+                        ],
+                        'game' => [
+                            'type' => 'svoc_structure_builder',
+                            'title' => 'Complex Transitive (SVOC) Sentence Architect',
+                            'desc' => 'Susun potongan klausa berikut menjadi pola Subject + Verb + Object + Complement yang utuh!',
+                            'cards' => [
+                                ['chunks' => 'Daily drills / make / my speaking / fluent', 'complete' => 'Daily drills make my speaking fluent.'],
+                                ['chunks' => 'Fresh fruit / keeps / your skin / radiant', 'complete' => 'Fresh fruit keeps your skin radiant.'],
+                                ['chunks' => 'We / consider / her / an outstanding mentor', 'complete' => 'We consider her an outstanding mentor.'],
+                                ['chunks' => 'The committee / appointed / Marcus / team captain', 'complete' => 'The committee appointed Marcus team captain.'],
+                                ['chunks' => 'I / find / audio shadowing / very effective', 'complete' => 'I find audio shadowing very effective.'],
+                                ['chunks' => 'Please / keep / the workspace / tidy', 'complete' => 'Please keep the workspace tidy.'],
+                            ],
+                        ],
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Expressing Impact, Judgment & Choices',
+                            'intro' => 'Practice speaking English by expressing what influences your emotions and habits using Complex Transitive Verbs (make, find, keep, consider).',
+                            'questions' => [
+                                'What habit or routine makes you feel productive and energized throughout the day?',
+                                'What do you consider the most important quality of a great leader or teacher?',
+                                'What study technique do you find most effective for expanding your English vocabulary?',
+                            ],
+                            'prompts' => [
+                                'A morning run and a healthy breakfast make me feel energized and fully focused...',
+                                'I consider empathy and clear communication the most vital qualities of an exceptional leader...',
+                                'I find creating contextual example sentences much more effective than memorizing raw word lists...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Indispensable', 'ipa' => '/ˌɪn.dɪˈspen.sə.bəl/', 'meaning' => 'Sangat penting dan tidak tergantikan', 'example' => 'Her expertise is indispensable to our team.'],
+                            ['word' => 'Breakthrough', 'ipa' => '/ˈbreɪk.θruː/', 'meaning' => 'Terobosan besar / Penemuan penting', 'example' => 'This AI tool is a major breakthrough.'],
+                            ['word' => 'Pedagogy', 'ipa' => '/ˈped.ə.ɡɒdʒ.i/', 'meaning' => 'Ilmu pengajaran dan pendidikan', 'example' => 'Modern pedagogy emphasizes interactive dialogue.'],
+                            ['word' => 'Eloquence', 'ipa' => '/ˈel.ə.kwəns/', 'meaning' => 'Kepandaian merangkai kata secara fasih dan anggun', 'example' => 'His eloquence captivated the whole auditorium.'],
+                            ['word' => 'Unanimous', 'ipa' => '/juːˈnæn.ɪ.məs/', 'meaning' => 'Bulat suara / Sepakat tanpa bantahan', 'example' => 'The committee made a unanimous decision.'],
+                            ['word' => 'Effortless', 'ipa' => '/ˈef.ət.ləs/', 'meaning' => 'Tampak mudah dan lancar tanpa beban', 'example' => 'Regular drills make speaking feel effortless.'],
+                            ['word' => 'Radiant', 'ipa' => '/ˈreɪ.di.ənt/', 'meaning' => 'Bercahaya / Tampak berseri-seri sehat', 'example' => 'Good rest keeps your face looking radiant.'],
+                            ['word' => 'Victorious', 'ipa' => '/vɪkˈtɔː.ri.əs/', 'meaning' => 'Menang / Meraih kemenangan', 'example' => 'Our debating team emerged victorious.'],
+                        ],
                     ],
-                    [
-                        'en' => 'I am responsible for managing client relationships and project deadlines.',
-                        'id' => 'Saya bertanggung jawab mengelola hubungan klien dan tenggat waktu proyek.',
-                    ],
-                    [
-                        'en' => 'We collaborate effectively through daily morning standup meetings.',
-                        'id' => 'Kami berkolaborasi secara efektif melalui rapat koordinasi pagi setiap hari.',
-                    ],
-                    [
-                        'en' => 'Continuous professional development is essential in a dynamic career.',
-                        'id' => 'Pengembangan profesional berkelanjutan sangat penting dalam karier yang dinamis.',
-                    ],
-                    [
-                        'en' => 'Setting clear working boundaries ensures long-term career satisfaction.',
-                        'id' => 'Menetapkan batasan kerja yang jelas memastikan kepuasan karier jangka panjang.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about work and professions with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang work and professions dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Action verbs in professional context: Coordinate, analyze, manage, lead, optimize, execute',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Work and Professions dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Work and Professions today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Work and Professions hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for work and professions makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk work and professions membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I work as a software engineer at a financial technology company.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I work as a software engineer at a financial technology company.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Work and Professions memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Work and Professions ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Work and Professions?',
-                    'Seberapa sering kamu membahas tentang Work and Professions dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Work and Professions Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Work and Professions membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
+
+            // =========================================================================
+            // MEETING 11: REVIEW AND FINAL ASSESSMENT (EXAM)
+            // =========================================================================
             11 => [
-                'topic' => 'Education and Learning',
-                'focus' => 'School subjects, past learning experiences, self-improvement',
-                'listening' => [
-                    'title' => 'Listening Practice: Education and Learning',
-                    'audio_script' => 'Education is a lifelong journey of curiosity and growth. When I was in university, I participated actively in international student exchange programs and English debate competitions. Those enriching experiences helped me cultivate strong critical thinking and articulate public speaking skills.',
-                    'key_phrases' => [
-                        'I graduated with a bachelor degree in English literature and education.',
-                        'She studied foreign languages diligently during her school years.',
-                        'A dedicated mentor can inspire students to achieve their greatest potential.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Education and Learning',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                'topic' => 'Review and Final Assessment (Exam)',
+                'focus' => 'Comprehensive synthesis of Meetings 1 to 10: Greetings, Alphabets, Cardinal & Ordinal Numbers, Time, Dates, Prepositions, Existential statements, Prohibitions, Pronouns & Possessives, To Be Mastery, Simple Present (Positive/Negative/Questions), Linking Verbs, and Complex Transitive Verbs (VTC), culminating in the Official Oral Final Speaking Assessment.',
+                'subtopics' => [
+                    // SUBTOPIC 01
+                    [
+                        'id' => 'sec-m11-sub-1',
+                        'num' => '01',
+                        'title' => 'Comprehensive Review of Meetings 1-10',
+                        'subtitle' => 'Integrated Grammar & Conversational Core Synthesis Across 10 Foundational Modules',
+                        'desc' => 'Rangkuman terpadu 10 topik dasar Bahasa Inggris: Identitas, Angka, Waktu, Tanggal, Spasial, Larangan, Posesif, To Be, Simple Present, Pertanyaan, Linking Verbs, dan VTC.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'comprehensive_review',
+                            'title' => 'First Point Curriculum Complete Mastery Blueprint',
+                            'pillars' => [
+                                ['meeting' => 'M1 & M2', 'core' => 'Self-Introduction, Greetings, Alphabet (IPA), Cardinal Numbers (0 to Millions) & Telling Time (British vs American).'],
+                                ['meeting' => 'M3 & M4', 'core' => 'Ordinal Numbers & Dates, Prepositions of Place, Existential (There is / There are) & Clear Imperatives.'],
+                                ['meeting' => 'M5 & M6', 'core' => 'Prohibitions & Public Rules, Pronouns Matrix, Possessive Nouns (\'s), and To Be Affirmative, Negative & Questions.'],
+                                ['meeting' => 'M7 & M8', 'core' => 'Simple Present Positive (-s/-es), Adverbs of Frequency (100%-0%), Negative Statements (Don\'t/Doesn\'t), and Everyday Spoken Expressions.'],
+                                ['meeting' => 'M9 & M10', 'core' => 'To-Infinitive Complements, Yes/No, WH & Subject Questions, Linking Verbs (Look/Sound/Taste), and Complex Transitive Verbs (SVOC).'],
                             ],
-                            'answer' => 'Education and Learning',
+                            'speaking_exam_tips' => [
+                                ['tip' => 'Speak in Full Paragraphs', 'explanation' => 'Hindari jawaban satu kata. Kembangkan jawaban dengan rumus: Statement + Reason + Example + Conclusion.'],
+                                ['tip' => 'Pronunciation & Intonation', 'explanation' => 'Lafalkan akhiran -s, -ed, dan kata tanya dengan intonasi naik/turun yang tepat.'],
+                                ['tip' => 'Natural Flow & Confidence', 'explanation' => 'Gunakan filler alami seperti "Well...", "Actually...", "To be honest..." saat memikirkan ide.'],
+                            ],
                         ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I graduated with a bachelor degree in English literature and education.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                                                'listening' => [
+                            'title' => 'Short Listening: Comprehensive Speaking Review & Exam Readiness Coaching',
+                            'audio_script' => "Mr. Harrison: Good morning, Putri! Are you feeling confident and prepared for your First Point Speaking review today?
+Putri: Good morning, Mr. Harrison! Yes, I am excited! I have reviewed all ten modules from greetings to complex verbs.
+Mr. Harrison: Excellent! When students look back at their learning journey, which conversational topic often feels most useful?
+Putri: Mastering pronouns and the simple present tense helped me speak smoothly without pausing to translate in my head.
+Mr. Harrison: That is precisely the secret to fluency! How about expressing time, numbers, and giving clear directions?
+Putri: The cardinal and ordinal numbers gave me precision, while spatial prepositions made my descriptions vivid and clear.
+Mr. Harrison: Brilliant progress, Putri. Remember to speak with natural pacing, warm eye contact, and steady voice projection!
+Putri: Thank you for your inspiring guidance, Mr. Harrison. I am ready to demonstrate my speaking skills!",
+                            'key_phrases' => [
+                                'Are you feeling confident and prepared for your speaking review?',
+                                'Mastering pronouns and the simple present tense helped me speak smoothly.',
+                                'That is precisely the secret to fluency!',
+                                'Remember to speak with natural pacing and steady voice projection.',
                             ],
-                            'answer' => 'I graduated with a bachelor degree in English literature and education.',
+                            'questions' => [
+                                [
+                                    'q' => 'What grammar modules helped Putri speak without translating in her head?',
+                                    'options' => [
+                                        'Pronouns and the simple present tense',
+                                        'Passive voice exceptions',
+                                        'Old English poetry',
+                                        'Silent letters',
+                                    ],
+                                    'answer' => 'Pronouns and the simple present tense',
+                                ],
+                                [
+                                    'q' => 'What value did cardinal/ordinal numbers and prepositions add to Putri\'s speech?',
+                                    'options' => [
+                                        'Precision and vivid, clear descriptions',
+                                        'Long pauses',
+                                        'Complex jargon',
+                                        'Formal academic tone',
+                                    ],
+                                    'answer' => 'Precision and vivid, clear descriptions',
+                                ],
+                                [
+                                    'q' => 'What delivery advice does Mr. Harrison emphasize for the speaking exam?',
+                                    'options' => [
+                                        'Natural pacing, warm eye contact, and steady voice projection',
+                                        'Speaking as fast as possible',
+                                        'Memorizing full paragraphs',
+                                        'Whispering softly',
+                                    ],
+                                    'answer' => 'Natural pacing, warm eye contact, and steady voice projection',
+                                ],
+                            ],
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering education and learning?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
-                            ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+'drilling' => [
+                            'Hello! My name is Dimas, and I work as a creative web designer in Jakarta.',
+                            'My office is located on the fourth floor, opposite the central park.',
+                            'There are fifteen talented specialists in our international engineering team.',
+                            'I always wake up early at 6:00 AM and I rarely skip my morning workout.',
+                            'David doesn\'t drink coffee, but he loves to brew organic green tea.',
+                            'This project sounds ambitious, but our dedicated team makes it completely feasible.',
+                            'Who is responsible for coordinating the international guest speakers?',
+                            'I want to master English to expand my global networking opportunities.',
                         ],
-                    ],
-                ],
-                'drilling1' => [
-                    [
-                        'en' => 'I graduated with a bachelor degree in English literature and education.',
-                        'id' => 'Saya lulus dengan gelar sarjana sastra Inggris dan pendidikan.',
-                    ],
-                    [
-                        'en' => 'She studied foreign languages diligently during her school years.',
-                        'id' => 'Dia belajar bahasa asing dengan tekun selama masa sekolahnya.',
-                    ],
-                    [
-                        'en' => 'A dedicated mentor can inspire students to achieve their greatest potential.',
-                        'id' => 'Seorang mentor yang berdedikasi dapat menginspirasi siswa untuk mencapai potensi terbesar mereka.',
-                    ],
-                    [
-                        'en' => 'Active listening and speaking practice are the keys to language mastery.',
-                        'id' => 'Latihan menyimak dan berbicara aktif adalah kunci penguasaan bahasa.',
-                    ],
-                    [
-                        'en' => 'Cultivating a curious mindset empowers lifelong personal achievement.',
-                        'id' => 'Menumbuhkan pola pikir penuh rasa ingin tahu mendorong pencapaian pribadi seumur hidup.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about education and learning with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang education and learning dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Past Simple Tense: Regular (-ed) and Irregular verbs for finished events',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Education and Learning dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Education and Learning today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Education and Learning hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for education and learning makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk education and learning membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I graduated with a bachelor degree in English literature and education.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I graduated with a bachelor degree in English literature and education.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Education and Learning memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Education and Learning ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Education and Learning?',
-                    'Seberapa sering kamu membahas tentang Education and Learning dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Education and Learning Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Education and Learning membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
-                ],
-            ],
-            12 => [
-                'topic' => 'Technology and Communication',
-                'focus' => 'Gadgets, internet vocabulary, AI and future trends',
-                'listening' => [
-                    'title' => 'Listening Practice: Technology and Communication',
-                    'audio_script' => 'Technological innovation plays an indispensable role in shaping modern civilization. From artificial intelligence tools that automate routine workflows to cloud collaboration platforms that connect global teams, digital technology enables us to accomplish complex tasks faster and more efficiently.',
-                    'key_phrases' => [
-                        'I rely on my smartphone and laptop for daily remote communication.',
-                        'Artificial intelligence will revolutionize personalized online education.',
-                        'We must safeguard our digital accounts with strong authentication.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Technology and Communication',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Quick-Fire Synthesis Practice Between Study Partners',
+                                'turns' => [
+                                    ['speaker' => 'Dimas', 'text' => 'Let us test each other before the oral exam! Clara, what time does your morning flight depart tomorrow?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'It departs at quarter to seven in the morning on October 24th.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'Where are you staying, and what makes that place special?', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'I am staying at Grand Lotus Hotel. There is an infinity pool, and the room feels exceptionally peaceful.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Dimas', 'text' => 'That sounds amazing! You answered using time, dates, existentials, and linking verbs perfectly.', 'avatar' => 'male_1'],
+                                    ['speaker' => 'Clara', 'text' => 'Thanks, Dimas! All 10 meetings are starting to connect together naturally!', 'avatar' => 'female_1'],
+                                ],
                             ],
-                            'answer' => 'Technology and Communication',
+                            [
+                                'title' => 'Dialogue B: Pre-Exam Encouragement with Senior Instructor',
+                                'turns' => [
+                                    ['speaker' => 'Instructor', 'text' => 'How are you feeling about the final speaking test today, Alex?', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Alex', 'text' => 'I was nervous yesterday, but after reviewing the 10 topic summaries, I feel ready!', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Instructor', 'text' => 'Remember to speak at a steady pace and explain the "why" behind your answers.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Alex', 'text' => 'Thank you for your guidance, coach! I will give it my absolute best.', 'avatar' => 'male_2'],
+                                ],
+                            ],
                         ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I rely on my smartphone and laptop for daily remote communication.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                        'game' => [
+                            'type' => 'grand_curriculum_crossword',
+                            'title' => '10-Meeting Grand Mastery Trivia Challenge',
+                            'desc' => 'Uji pemahaman lintas materi dari Meeting 1 hingga 10 dalam tantangan kilat berikut!',
+                            'cards' => [
+                                ['clue' => 'Expressing 07:45 in British style', 'answer' => 'Quarter to eight'],
+                                ['clue' => 'Ordinal form of number 22', 'answer' => 'Twenty-second (22nd)'],
+                                ['clue' => 'Preposition used for exact calendar dates (October 25th)', 'answer' => 'ON (on October 25th)'],
+                                ['clue' => 'Negative auxiliary for he/she in simple present', 'answer' => 'Doesn\'t + V1'],
+                                ['clue' => 'Verb pattern: Subject + Verb + Object + Complement', 'answer' => 'Complex Transitive / SVOC'],
+                                ['clue' => 'Linking verb meaning "tampaknya / terlihat seolah"', 'answer' => 'Seem / Appear'],
                             ],
-                            'answer' => 'I rely on my smartphone and laptop for daily remote communication.',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering technology and communication?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: Pre-Exam Warm-Up Simulation',
+                            'intro' => 'A comprehensive warm-up session with your AI Examiner covering multiple curriculum topics before your final oral test.',
+                            'questions' => [
+                                'Introduce yourself comprehensively: name, spelling, hometown, job, and one unique personal passion.',
+                                'Describe your current room using at least two prepositions of place and one "there is / there are" statement.',
+                                'Explain your weekly schedule using at least two adverbs of frequency and one negative statement.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'prompts' => [
+                                'Hello Examiner! My name is Dimas, spelled D-I-M-A-S. I am an enthusiastic web developer from Bandung...',
+                                'In my room, there is a large wooden study desk next to the window, and my laptop sits on a sleek stand...',
+                                'I always practice English in the morning, and I usually run on weekends. I don\'t watch late-night television...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Competence', 'ipa' => '/ˈkɒm.pɪ.təns/', 'meaning' => 'Kompetensi / Kemampuan keahlian mumpuni', 'example' => 'She demonstrated exceptional speaking competence.'],
+                            ['word' => 'Synthesis', 'ipa' => '/ˈsɪn.θə.sɪs/', 'meaning' => 'Sintesis / Penggabungan terpadu berbagai konsep', 'example' => 'This module provides a synthesis of all 10 topics.'],
+                            ['word' => 'Assessor', 'ipa' => '/əˈses.ər/', 'meaning' => 'Penilai ujian / Penguji lisan', 'example' => 'Listen carefully to the instructions of the assessor.'],
+                            ['word' => 'Steady', 'ipa' => '/ˈsted.i/', 'meaning' => 'Stabil / Tenang dan teratur', 'example' => 'Speak at a steady, understandable pace.'],
+                            ['word' => 'Comprehensive', 'ipa' => '/ˌkɒm.prɪˈhen.sɪv/', 'meaning' => 'Menyeluruh / Lengkap mencakup semua aspek', 'example' => 'We completed a comprehensive English review.'],
+                            ['word' => 'Pedagogy', 'ipa' => '/ˈped.ə.ɡɒdʒ.i/', 'meaning' => 'Metode pembelajaran terstruktur', 'example' => 'Our pedagogy fosters spontaneous speaking.'],
+                            ['word' => 'Infinity', 'ipa' => '/ɪnˈfɪn.ə.ti/', 'meaning' => 'Tanpa batas (seperti infinity pool)', 'example' => 'The hotel features a rooftop infinity pool.'],
+                            ['word' => 'Culminate', 'ipa' => '/ˈkʌl.mɪ.neɪt/', 'meaning' => 'Mencapai puncak rangkaian acara/pembelajaran', 'example' => 'Our course culminates in an oral speaking exam.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
+                    // SUBTOPIC 02
                     [
-                        'en' => 'I rely on my smartphone and laptop for daily remote communication.',
-                        'id' => 'Saya mengandalkan ponsel pintar dan laptop untuk komunikasi jarak jauh harian.',
-                    ],
-                    [
-                        'en' => 'Artificial intelligence will revolutionize personalized online education.',
-                        'id' => 'Kecerdasan buatan akan merevolusi pendidikan online yang dipersonalisasi.',
-                    ],
-                    [
-                        'en' => 'We must safeguard our digital accounts with strong authentication.',
-                        'id' => 'Kita harus mengamankan akun digital kita dengan autentikasi yang kuat.',
-                    ],
-                    [
-                        'en' => 'Digital productivity tools help streamline collaborative project workflows.',
-                        'id' => 'Alat produktivitas digital membantu merampingkan alur kerja proyek kolaboratif.',
-                    ],
-                    [
-                        'en' => 'Taking regular breaks from digital screens promotes mental clarity.',
-                        'id' => 'Mengambil jeda rutin dari layar digital meningkatkan kejernihan pikiran.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about technology and communication with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang technology and communication dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Future predictions: Will + V1 vs Be going to + V1 for intentions',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Technology and Communication dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Technology and Communication today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Technology and Communication hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for technology and communication makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk technology and communication membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I rely on my smartphone and laptop for daily remote communication.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I rely on my smartphone and laptop for daily remote communication.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Technology and Communication memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Technology and Communication ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Technology and Communication?',
-                    'Seberapa sering kamu membahas tentang Technology and Communication dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Technology and Communication Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Technology and Communication membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
-                ],
-            ],
-            13 => [
-                'topic' => 'Environment and Weather',
-                'focus' => 'Climate, weather descriptions, eco-friendly habits, conservation',
-                'listening' => [
-                    'title' => 'Listening Practice: Environment and Weather',
-                    'audio_script' => 'Protecting our natural environment begins with mindful everyday choices. In my local community, residents actively participate in tree planting initiatives and plastic recycling programs. By conserving electricity and supporting renewable energy, we contribute to a greener planet.',
-                    'key_phrases' => [
-                        'Indonesia has a tropical climate characterized by dry and wet seasons.',
-                        'We should reduce single-use plastics to protect marine ecosystems.',
-                        'Transitioning to renewable solar and wind energy reduces carbon emissions.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Environment and Weather',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                        'id' => 'sec-m11-sub-2',
+                        'num' => '02',
+                        'title' => 'Final Oral Speaking Assessment & Interview',
+                        'subtitle' => 'Official Examiner Interview, Live Speaking Rubrics & Graduation Certification',
+                        'desc' => 'Ujian lisan akhir (Oral Examination): Simulasi wawancara tatap muka dengan penguji, rubrik penilaian resmi (Fluency, Pronunciation, Grammar, Vocabulary), serta evaluasi kelulusan.',
+                        'tab' => 'materi',
+                        'materi' => [
+                            'type' => 'final_oral_assessment',
+                            'title' => 'Official Speaking Assessment Framework & Scoring Rubrics',
+                            'rubric_criteria' => [
+                                ['criterion' => '1. Fluency & Coherence (25%)', 'standard' => 'Kemampuan berbicara mengalir tanpa jeda panjang, ide tersambung dengan kohesif.'],
+                                ['criterion' => '2. Pronunciation & Phonetics (25%)', 'standard' => 'Kejelasan artikulasi vokal, konsonan, penekanan kata (word stress), dan intonasi.'],
+                                ['criterion' => '3. Grammatical Accuracy (25%)', 'standard' => 'Ketepatan struktur To Be, Simple Present (-s/-es, don\'t/doesn\'t), Preposisi, dan SVOC.'],
+                                ['criterion' => '4. Lexical Resource / Vocabulary (25%)', 'standard' => 'Kekayaan kosa kata, penggunaan ekspresi lisan alami, dan kolokasi yang tepat.'],
                             ],
-                            'answer' => 'Environment and Weather',
+                            'exam_phases' => [
+                                ['phase' => 'Part 1: Identity & Warm-Up (3 Mins)', 'focus' => 'Personal background, spelling, contact details, daily routines.'],
+                                ['phase' => 'Part 2: Visual & Spatial Monologue (4 Mins)', 'focus' => 'Describing room layouts, photo relationships, comparing qualities with linking verbs.'],
+                                ['phase' => 'Part 3: Interactive Thematic Discussion (5 Mins)', 'focus' => 'In-depth opinion questions, aspirations, habits, and spontaneous responses.'],
+                            ],
                         ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'Indonesia has a tropical climate characterized by dry and wet seasons.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                                                'listening' => [
+                            'title' => 'Short Listening: Live Oral Speaking Examination & Fluency Demonstration',
+                            'audio_script' => "Mr. Harrison: Good morning, Dimas. Welcome to your official First Point Speaking Assessment. Please make yourself comfortable.
+Dimas: Good morning, Mr. Harrison. Thank you very much. It is a pleasure to meet you today.
+Mr. Harrison: To begin our oral evaluation, could you please introduce yourself and tell me about your daily routine?
+Dimas: Certainly! My name is Dimas, and I am a software developer from Jakarta. I usually wake up at six, exercise, and build mobile apps.
+Mr. Harrison: Wonderful. And how do you communicate with international colleagues when you encounter complex problems?
+Dimas: I always speak clearly, listen actively, and verify details using precise numbers and polite clarifying questions.
+Mr. Harrison: Excellent demonstration of natural fluency, Dimas! Your pronunciation, grammar, and confidence are commendable.
+Dimas: Thank you so much, Mr. Harrison! This course has truly transformed my conversational speaking confidence.",
+                            'key_phrases' => [
+                                'Welcome to your official First Point Speaking Assessment.',
+                                'Could you please introduce yourself and tell me about your daily routine?',
+                                'I always speak clearly, listen actively, and verify details using precise numbers.',
+                                'Your pronunciation, grammar, and confidence are commendable.',
                             ],
-                            'answer' => 'Indonesia has a tropical climate characterized by dry and wet seasons.',
+                            'questions' => [
+                                [
+                                    'q' => 'What is Dimas\'s occupation and city of residence?',
+                                    'options' => [
+                                        'Software developer from Jakarta',
+                                        'Hotel chef from Bandung',
+                                        'English teacher from London',
+                                        'Airline pilot from Bali',
+                                    ],
+                                    'answer' => 'Software developer from Jakarta',
+                                ],
+                                [
+                                    'q' => 'How does Dimas handle communication during complex tasks with foreign peers?',
+                                    'options' => [
+                                        'Speaks clearly, listens actively, and verifies details politely',
+                                        'Avoids speaking in meetings',
+                                        'Uses machine translation only',
+                                        'Speaks very quickly without pausing',
+                                    ],
+                                    'answer' => 'Speaks clearly, listens actively, and verifies details politely',
+                                ],
+                                [
+                                    'q' => 'What assessment feedback does Mr. Harrison give about Dimas\'s spoken performance?',
+                                    'options' => [
+                                        'His pronunciation, grammar, and confidence are commendable',
+                                        'He needs to repeat the course',
+                                        'He forgot his self-introduction',
+                                        'His voice is too quiet',
+                                    ],
+                                    'answer' => 'His pronunciation, grammar, and confidence are commendable',
+                                ],
+                            ],
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering environment and weather?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
-                            ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+'drilling' => [
+                            'Good morning, Examiner! I am fully prepared for the speaking assessment.',
+                            'I spell my last name H-E-N-D-E-R-S-O-N.',
+                            'On weekdays, I always prioritize high-impact development tasks.',
+                            'There are three international airports located in this metropolitan region.',
+                            'Our team finds collaborative problem-solving extremely rewarding.',
+                            'She doesn\'t hesitate to express her innovative ideas during discussions.',
+                            'What makes this English course truly unique is the interactive pairwork.',
+                            'I consider continuous self-improvement the cornerstone of long-term success.',
                         ],
-                    ],
-                ],
-                'drilling1' => [
-                    [
-                        'en' => 'Indonesia has a tropical climate characterized by dry and wet seasons.',
-                        'id' => 'Indonesia memiliki iklim tropis yang ditandai dengan musim kemarau dan hujan.',
-                    ],
-                    [
-                        'en' => 'We should reduce single-use plastics to protect marine ecosystems.',
-                        'id' => 'Kita harus mengurangi plastik sekali pakai untuk melindungi ekosistem laut.',
-                    ],
-                    [
-                        'en' => 'Transitioning to renewable solar and wind energy reduces carbon emissions.',
-                        'id' => 'Beralih ke energi surya dan angin terbarukan mengurangi emisi karbon.',
-                    ],
-                    [
-                        'en' => 'Community cleanup drives foster environmental awareness and civic pride.',
-                        'id' => 'Gerakan bersih-bersih lingkungan menumbuhkan kesadaran lingkungan dan kebanggaan warga.',
-                    ],
-                    [
-                        'en' => 'Small eco-friendly habits practiced consistently create lasting global impact.',
-                        'id' => 'Kebiasaan ramah lingkungan kecil yang dipraktikkan secara konsisten menciptakan dampak global yang langgeng.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about environment and weather with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang environment and weather dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Describing Weather: It is sunny/rainy/windy vs The weather is warm/humid',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Environment and Weather dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Environment and Weather today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Environment and Weather hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for environment and weather makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk environment and weather membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "Indonesia has a tropical climate characterized by dry and wet seasons.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "Indonesia has a tropical climate characterized by dry and wet seasons.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Environment and Weather memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Environment and Weather ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Environment and Weather?',
-                    'Seberapa sering kamu membahas tentang Environment and Weather dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Environment and Weather Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Environment and Weather membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
-                ],
-            ],
-            14 => [
-                'topic' => 'Culture and Traditions',
-                'focus' => 'Festivals, heritage, customary celebrations, intercultural dialogue',
-                'listening' => [
-                    'title' => 'Listening Practice: Culture and Traditions',
-                    'audio_script' => 'Indonesia is celebrated worldwide for its rich cultural diversity and ancient customs. During major festive holidays like Eid and Independence Day, families travel long distances to reunite, cook traditional delicacies, and celebrate the timeless values of mutual cooperation and unity in diversity.',
-                    'key_phrases' => [
-                        'Indonesia preserves hundreds of distinctive regional languages and arts.',
-                        'We wear traditional batik and regional costumes during official celebrations.',
-                        'Gotong royong embodies the spirit of solidarity and communal cooperation.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Culture and Traditions',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
+                        'dialogues' => [
+                            [
+                                'title' => 'Dialogue A: Official Oral Examination Simulation (Full Interview)',
+                                'turns' => [
+                                    ['speaker' => 'Assessor', 'text' => 'Good afternoon! Could you please state your full candidate name and registration number?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Candidate', 'text' => 'Good afternoon! My name is Maya Kartika, and my registration number is TP-2026-088.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Assessor', 'text' => 'Thank you, Maya. Tell me about your weekly schedule and how often you communicate in English.', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Candidate', 'text' => 'I work from Monday to Friday as a software architect. I speak English daily with overseas clients.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Assessor', 'text' => 'What do you hope to achieve after graduating from this First Point course?', 'avatar' => 'female_1'],
+                                    ['speaker' => 'Candidate', 'text' => 'I plan to deliver keynote technical presentations at global developer conferences.', 'avatar' => 'female_2'],
+                                    ['speaker' => 'Assessor', 'text' => 'Your fluency, pronunciation, and grammatical precision are exemplary. Congratulations!', 'avatar' => 'female_1'],
+                                ],
                             ],
-                            'answer' => 'Culture and Traditions',
+                            [
+                                'title' => 'Dialogue B: Receiving Course Completion Feedback and Certificate',
+                                'turns' => [
+                                    ['speaker' => 'Head Tutor', 'text' => 'Congratulations, team! You have all successfully passed the 11-Meeting First Point Speaking program.', 'avatar' => 'male_2'],
+                                    ['speaker' => 'Students', 'text' => 'Thank you so much, Coach! We feel vastly more confident and articulate now.', 'avatar' => 'female_3'],
+                                    ['speaker' => 'Head Tutor', 'text' => 'Keep practicing every day and never stop expanding your language horizons!', 'avatar' => 'male_2'],
+                                ],
+                            ],
                         ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'Indonesia preserves hundreds of distinctive regional languages and arts.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
+                        'game' => [
+                            'type' => 'final_assessment_rubric_master',
+                            'title' => 'Examiner Assessment Scorecard & Feedback Quest',
+                            'desc' => 'Evaluasi contoh ujaran lisan peserta berikut dan tentukan aspek penilaian apa yang paling menonjol!',
+                            'cards' => [
+                                ['utterance' => '"I always plan my daily tasks with great care." (Accurate frequency adverb placement)', 'evaluated_aspect' => 'Grammatical Accuracy & Precision'],
+                                ['utterance' => '"The conference room is situated between the lab and the lounge." (Clear spatial layout)', 'evaluated_aspect' => 'Lexical Resource & Prepositional Cohesion'],
+                                ['utterance' => 'Clear distinct pronunciation of consonant clusters /str/, /θ/, /ð/', 'evaluated_aspect' => 'Phonetics & Pronunciation Mastery'],
+                                ['utterance' => 'Spontaneous, continuous speaking without hesitation or long pauses', 'evaluated_aspect' => 'Fluency & Spoken Coherence'],
+                                ['utterance' => '"We consider Dimas an indispensable team leader."', 'evaluated_aspect' => 'Complex Transitive (SVOC) Mastery'],
+                                ['utterance' => '"It departs at quarter to eight on November 15th."', 'evaluated_aspect' => 'Time & Calendar Date Integration'],
                             ],
-                            'answer' => 'Indonesia preserves hundreds of distinctive regional languages and arts.',
                         ],
-                        [
-                            'q' => 'What positive outcome results from mastering culture and traditions?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
+                        'ai_interview' => [
+                            'title' => 'AI Speaking Practice: The Official Graduation Assessment',
+                            'intro' => 'This is your Final Capstone Oral Examination with the AI Senior Examiner. Answer all questions fluently using full sentences and diverse vocabulary.',
+                            'questions' => [
+                                'Candidate Exam Question 1: Introduce yourself in depth, spell your name, and describe your proudest personal achievement.',
+                                'Candidate Exam Question 2: Describe a memorable place you visited using sensory linking verbs and spatial prepositions.',
+                                'Candidate Exam Question 3: Summarize how this 11-meeting speaking journey has transformed your confidence in speaking English.',
                             ],
-                            'answer' => 'Enhanced fluency and articulate communication',
+                            'prompts' => [
+                                'Good day Examiner! My name is Maya, spelled M-A-Y-A. My proudest achievement is leading our team\'s app launch...',
+                                'I recently visited Mount Bromo. The morning breeze felt crisp, the volcanic landscape looked breathtaking...',
+                                'This 11-meeting curriculum has completely transformed my communication. I now speak spontaneously with accurate grammar and natural expression...',
+                            ],
+                        ],
+                        'vocabulary' => [
+                            ['word' => 'Articulate', 'ipa' => '/ɑːˈtɪk.jə.lət/', 'meaning' => 'Mampu mengungkapkan pikiran dengan jelas dan fasih', 'example' => 'She is an articulate and persuasive speaker.'],
+                            ['word' => 'Cornerstone', 'ipa' => '/ˈkɔː.nə.stəʊn/', 'meaning' => 'Batu penjuru / Fondasi paling mendasar', 'example' => 'Daily practice is the cornerstone of fluency.'],
+                            ['word' => 'Exemplary', 'ipa' => '/ɪɡˈzem.plər.i/', 'meaning' => 'Patut dicontoh / Sangat terpuji', 'example' => 'His exam performance was exemplary.'],
+                            ['word' => 'Avenues', 'ipa' => '/ˈæv.ə.njuːz/', 'meaning' => 'Peluang / Jalur jalan menuju sukses', 'example' => 'English opens exciting career avenues.'],
+                            ['word' => 'Ergonomic', 'ipa' => '/ˌɜː.ɡəˈnɒm.ɪk/', 'meaning' => 'Ergonomis / Nyaman dan ramah kesehatan postur', 'example' => 'We use ergonomic chairs in the office.'],
+                            ['word' => 'Horizons', 'ipa' => '/həˈraɪ.zənz/', 'meaning' => 'Cakrawala wawasan dan pandangan', 'example' => 'Reading expands your intellectual horizons.'],
+                            ['word' => 'Transform', 'ipa' => '/trænsˈfɔːm/', 'meaning' => 'Mengubah secara menyeluruh menjadi lebih baik', 'example' => 'This course will transform your speaking confidence.'],
+                            ['word' => 'Capstone', 'ipa' => '/ˈkæp.stəʊn/', 'meaning' => 'Puncak pencapaian tertinggi dalam suatu program', 'example' => 'Meeting 11 is the capstone speaking assessment.'],
                         ],
                     ],
-                ],
-                'drilling1' => [
-                    [
-                        'en' => 'Indonesia preserves hundreds of distinctive regional languages and arts.',
-                        'id' => 'Indonesia melestarikan ratusan bahasa dan kesenian daerah yang khas.',
-                    ],
-                    [
-                        'en' => 'We wear traditional batik and regional costumes during official celebrations.',
-                        'id' => 'Kami mengenakan batik tradisional dan busana daerah saat perayaan resmi.',
-                    ],
-                    [
-                        'en' => 'Gotong royong embodies the spirit of solidarity and communal cooperation.',
-                        'id' => 'Gotong royong melambangkan semangat solidaritas dan kerja sama masyarakat.',
-                    ],
-                    [
-                        'en' => 'Warm hospitality and kindness to strangers are core cultural values.',
-                        'id' => 'Keramahan yang hangat dan kebaikan kepada orang asing adalah nilai budaya utama.',
-                    ],
-                    [
-                        'en' => 'Embracing multicultural dialogue builds mutual understanding across nations.',
-                        'id' => 'Merangkul dialog multikultural membangun saling pengertian lintas bangsa.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about culture and traditions with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang culture and traditions dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Cultural expressions: Ancestral heritage, customary rituals, mutual cooperation, festive banquets',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Culture and Traditions dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Culture and Traditions today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Culture and Traditions hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for culture and traditions makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk culture and traditions membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "Indonesia preserves hundreds of distinctive regional languages and arts.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "Indonesia preserves hundreds of distinctive regional languages and arts.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Culture and Traditions memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Culture and Traditions ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Culture and Traditions?',
-                    'Seberapa sering kamu membahas tentang Culture and Traditions dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Culture and Traditions Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Culture and Traditions membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
-                ],
-            ],
-            15 => [
-                'topic' => 'Review and Final Assessment',
-                'focus' => 'Comprehensive evaluation, speaking exam simulation, fluency checklist',
-                'listening' => [
-                    'title' => 'Listening Practice: Review and Final Assessment',
-                    'audio_script' => 'Congratulations on successfully completing all fifteen meetings of the Introductory Speaking program! Throughout this course, you have built a solid foundation in daily conversation, pronunciation accuracy, grammatical structures, and spontaneous speech. You are now prepared to speak English with confidence in diverse real-world situations.',
-                    'key_phrases' => [
-                        'I can express my ideas and opinions in English fluently without hesitation.',
-                        'I have acquired rich vocabulary across a wide spectrum of daily topics.',
-                        'I construct accurate sentences using appropriate tenses and prepositions.',
-                    ],
-                    'questions' => [
-                        [
-                            'q' => 'What is the primary subject matter of this audio listening passage?',
-                            'options' => [
-                                'Review and Final Assessment',
-                                'Aerospace Engineering',
-                                'Deep Marine Biology',
-                                'Automotive Manufacturing',
-                            ],
-                            'answer' => 'Review and Final Assessment',
-                        ],
-                        [
-                            'q' => 'Which key idea is highlighted by the speaker?',
-                            'options' => [
-                                'I can express my ideas and opinions in English fluently without hesitation.',
-                                'Total disinterest',
-                                'Frequent complaining',
-                                'Ignoring instructions',
-                            ],
-                            'answer' => 'I can express my ideas and opinions in English fluently without hesitation.',
-                        ],
-                        [
-                            'q' => 'What positive outcome results from mastering review and final assessment?',
-                            'options' => [
-                                'Enhanced fluency and articulate communication',
-                                'Severe confusion',
-                                'Loss of confidence',
-                                'Reduced speaking ability',
-                            ],
-                            'answer' => 'Enhanced fluency and articulate communication',
-                        ],
-                    ],
-                ],
-                'drilling1' => [
-                    [
-                        'en' => 'I can express my ideas and opinions in English fluently without hesitation.',
-                        'id' => 'Saya dapat menyampaikan ide dan pendapat dalam bahasa Inggris dengan lancar tanpa ragu.',
-                    ],
-                    [
-                        'en' => 'I have acquired rich vocabulary across a wide spectrum of daily topics.',
-                        'id' => 'Saya telah memperoleh kosakata yang kaya di berbagai topik harian.',
-                    ],
-                    [
-                        'en' => 'I construct accurate sentences using appropriate tenses and prepositions.',
-                        'id' => 'Saya menyusun kalimat yang akurat menggunakan tenses dan preposisi yang tepat.',
-                    ],
-                    [
-                        'en' => 'My pronunciation and intonation are clear and pleasant to listen to.',
-                        'id' => 'Pelafalan dan intonasi saya jelas dan nyaman untuk didengarkan.',
-                    ],
-                    [
-                        'en' => 'This completion marks the beginning of my continuous English speaking journey.',
-                        'id' => 'Kelulusan ini menandai awal dari perjalanan berbicara bahasa Inggris saya yang berkelanjutan.',
-                    ],
-                ],
-                'drilling2' => [
-                    [
-                        'en' => 'We always practice expressing thoughts about review and final assessment with clarity.',
-                        'id' => 'Kami selalu berlatih menyampaikan pemikiran tentang review and final assessment dengan jelas.',
-                    ],
-                    [
-                        'en' => 'She usually asks constructive questions to deepen group discussions.',
-                        'id' => 'Dia biasanya mengajukan pertanyaan konstruktif untuk memperdalam diskusi kelompok.',
-                    ],
-                    [
-                        'en' => 'I often shadow native speakers to refine my natural rhythm and pronunciation.',
-                        'id' => 'Saya sering menirukan penutur asli untuk menyempurnakan ritme alami dan pelafalan saya.',
-                    ],
-                    [
-                        'en' => 'They rarely feel anxious when speaking English in front of new acquaintances.',
-                        'id' => 'Mereka jarang merasa cemas saat berbicara bahasa Inggris di depan kenalan baru.',
-                    ],
-                    [
-                        'en' => 'He sometimes records his speaking responses to assess grammatical precision.',
-                        'id' => 'Dia kadang-kadang merekam respon berbicaranya untuk menilai ketepatan tata bahasa.',
-                    ],
-                ],
-                'grammar_note' => 'Speaking Assessment Criteria: Fluency & Coherence, Lexical Resource, Grammatical Accuracy, Pronunciation',
-                'dialogue_setting' => 'Dua orang mendiskusikan topik Review and Final Assessment dalam suasana santai dan interaktif.',
-                'dialogue' => [
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'How do you feel about our discussion on Review and Final Assessment today?',
-                        'id' => 'Bagaimana pendapatmu tentang diskusi kita mengenai Review and Final Assessment hari ini?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'I find it very insightful! Learning practical phrases for review and final assessment makes speaking much easier.',
-                        'id' => 'Menurut saya sangat bermanfaat! Mempelajari frasa praktis untuk review and final assessment membuat berbicara jauh lebih mudah.',
-                    ],
-                    [
-                        'speaker' => 'Alex',
-                        'en' => 'Which key expression resonated most with you during the lesson?',
-                        'id' => 'Ungkapan kunci mana yang paling berkesan untukmu selama pelajaran?',
-                    ],
-                    [
-                        'speaker' => 'Budi',
-                        'en' => 'The phrase: "I can express my ideas and opinions in English fluently without hesitation.". It sounds very natural and professional.',
-                        'id' => 'Frasa: "I can express my ideas and opinions in English fluently without hesitation.". Terdengar sangat natural dan profesional.',
-                    ],
-                ],
-                'monolog_baku' => [
-                    'Mempelajari topik Review and Final Assessment memberikan wawasan yang luas dan keterampilan praktis dalam percakapan sehari-hari. Saya belajar menyusun kalimat secara runtut dan mengekspresikan pendapat dengan percaya diri.',
-                    'Dengan mempraktikkan kosakata dan mendengarkan contoh penutur asli secara rutin, kemampuan berbicara bahasa Inggris saya berkembang pesat.',
-                ],
-                'monolog_tidak_baku' => [
-                    'Topik Review and Final Assessment ini seru banget dipelajari bareng tutor dan temen-temen. Banyak frasa gaul dan ekspresi natural yang bisa langsung gue pake pas ngobrol.',
-                    'Gue ngerasa sekarang jauh lebih rileks dan gak takut salah lagi pas ngomong bahasa Inggris. Kuncinya emang konsisten latihan tiap hari.',
-                ],
-                'questions_part_a' => [
-                    'Apa yang pertama kali terlintas di pikiranmu tentang topik Review and Final Assessment?',
-                    'Seberapa sering kamu membahas tentang Review and Final Assessment dalam kehidupan sehari-hari?',
-                    'Kosakata baru apa yang paling menarik perhatianmu di meeting ini?',
-                    'Kamu lebih nyaman belajar topik ini lewat audio percakapan atau studi kasus?',
-                    'Ceritakan satu pengalaman menarik yang pernah kamu alami terkait topik ini.',
-                ],
-                'questions_part_b' => [
-                    'Menurutmu, apa tantangan terbesar saat mengekspresikan topik ini dalam bahasa Inggris?',
-                    'Bagaimana caramu menerapkan kosakata meeting ini ke dalam percakapan nyata?',
-                    'Siapa orang yang paling sering kamu ajak bertukar pikiran tentang topik ini?',
-                    'Apa strategi terbaikmu dalam memperluas perbendaharaan kosakata harian?',
-                ],
-                'impromptu_title' => 'Pertanyaan Lebih Sulit – Review and Final Assessment Mastery',
-                'impromptu' => [
-                    'Bagaimana penguasaan topik Review and Final Assessment membantumu berkomunikasi lebih efektif di lingkungan profesional maupun sosial?',
-                    'Jelaskan langkah-langkah yang kamu ambil untuk menyusun pidato singkat secara spontan dalam bahasa Inggris.',
-                    'Bagaimana cara kamu mengelola rasa cemas ketika harus berinteraksi dengan penutur asing?',
-                    'Ceritakan sebuah pencapaian yang membuktikan bahwa konsistensi belajar membawa perubahan besar dalam hidupmu.',
                 ],
             ],
         ];

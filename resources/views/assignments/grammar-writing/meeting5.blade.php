@@ -18,9 +18,27 @@
         .word-extra { color: #3498db; font-weight: bold; text-decoration: line-through; }
         .word-missing { color: #f1c40f; font-weight: bold; }
         .word-wrong { color: #e74c3c; font-weight: bold; text-decoration: underline; }
+
+        /* lg:top-6, lg:max-h-[calc(100vh-2rem)] and lg:self-start aren't in the
+           compiled Tailwind bundle on this deploy (the utility combo was never
+           used elsewhere, so it was never generated) - lg:sticky and
+           lg:overflow-y-auto DO exist and work, but without a top offset or a
+           max-height, sticky has nothing to stick to and overflow-y has no
+           constrained height to scroll within, so the left panel just grows to
+           full content height instead of staying pinned with its own scrollbar.
+           Plain CSS here matches Tailwind's own lg breakpoint (min-width: 1024px)
+           exactly, so it stays in sync with the lg:sticky / lg:block toggling
+           that already works. */
+        @media (min-width: 1024px) {
+            #materi-sticky-panel {
+                top: 1.5rem;
+                align-self: start;
+                max-height: calc(100vh - 2rem);
+            }
+        }
     </style>
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF] p-8">
+<body class="font-sans antialiased bg-[#F3F4FF] p-4 sm:p-6 lg:p-8">
     @include('components.impersonation-banner')
     @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
     <div class="w-full max-w-[1920px] mx-auto flex flex-col min-h-screen">
@@ -28,7 +46,7 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <span class="text-sm font-semibold text-purple-600 tracking-wider uppercase">Fast-track Grammar for Writing</span>
-                <h1 class="text-2xl font-bold text-gray-800">Gerund, To Infinitive, and Complex Ditransitive Verb (Pertemuan 5)</h1>
+                <h1 class="text-2xl font-bold text-gray-800">Latihan Gerund, Infinitive, & Complex Ditransitive (Pertemuan 5)</h1>
             </div>
             <x-grammar-meeting-actions :meetingNumber="5" track="fast-track" />
         </div>
@@ -40,21 +58,42 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting5.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting5.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm" x-data="{ mobileTab: 'soal' }">
             @csrf
 
+            @if(!empty($cheatSheet['__html__']))
+            <!-- Mobile View Switcher (< lg) -->
+            <div class="flex lg:hidden mb-4 p-1.5 bg-white rounded-2xl border border-purple-200 shadow-sm sticky top-3 z-30">
+                <button type="button" @click="mobileTab = 'soal'"
+                        :class="mobileTab === 'soal' ? 'bg-purple-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Soal Latihan</span>
+                </button>
+                <button type="button" @click="mobileTab = 'materi'"
+                        :class="mobileTab === 'materi' ? 'bg-purple-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Materi &amp; Rumus</span>
+                </button>
+            </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
-                <!-- Left Column: Materi (Sticky) -->
+                <!-- Left Column: Materi (Sticky on Desktop, Tab on Mobile) -->
                 @if(!empty($cheatSheet['__html__']))
-                <div class="lg:col-span-5 sticky top-6 self-start max-h-[calc(100vh-2rem)] overflow-y-auto pr-2">
+                <div id="materi-sticky-panel"
+                     class="lg:col-span-5 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto pr-0 lg:pr-2"
+                     :class="mobileTab === 'materi' ? 'block' : 'hidden lg:block'">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6">
                         {!! $cheatSheet['__html__'] !!}
                     </div>
                 </div>
                 @endif
 
-                <!-- Right Column: Exercise -->
-                <div class="{{ !empty($cheatSheet['__html__']) ? 'lg:col-span-7' : 'lg:col-span-12' }} space-y-6">
+                <!-- Right Column: Exercise (Always on Desktop, Tab on Mobile) -->
+                <div class="{{ !empty($cheatSheet['__html__']) ? 'lg:col-span-7' : 'lg:col-span-12' }} space-y-6"
+                     @if(!empty($cheatSheet['__html__'])) :class="mobileTab === 'soal' ? 'block' : 'hidden lg:block'" @endif>
                     <!-- Section A -->
                     <div class="bg-white rounded-3xl shadow-sm border border-purple-100 overflow-visible">
                         <div class="bg-gradient-to-r from-purple-50 via-violet-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-purple-100">
@@ -111,13 +150,13 @@
                                             </div>
                                         </div>
                                         <div class="ml-11 sm:ml-13">
-                                            <input type="text"
-                                                   name="userAnswers[gerundInfinitiveComplex][{{ $idx }}]"
-                                                   value="{{ old('userAnswers.gerundInfinitiveComplex.'.$idx, $userAnswers['gerundInfinitiveComplex'][$idx] ?? '') }}"
-                                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   placeholder="Translate to English..."
-                                                   {{ $submitted ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea name="userAnswers[gerundInfinitiveComplex][{{ $idx }}]"
+                                                      rows="1"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      placeholder="Translate to English..."
+                                                      {{ $submitted ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('userAnswers.gerundInfinitiveComplex.'.$idx, $userAnswers['gerundInfinitiveComplex'][$idx] ?? '') }}</textarea>
 
                                             @if($submitted)
                                                 @if($results['gerundInfinitiveComplex'][$idx]['score'] == 100)
@@ -195,13 +234,13 @@
                                             </div>
                                         </div>
                                         <div class="ml-11 sm:ml-13">
-                                            <input type="text"
-                                                   name="userAnswers[toInfinitive][{{ $idx }}]"
-                                                   value="{{ old('userAnswers.toInfinitive.'.$idx, $userAnswers['toInfinitive'][$idx] ?? '') }}"
-                                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   placeholder="Translate to English..."
-                                                   {{ $submitted ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea name="userAnswers[toInfinitive][{{ $idx }}]"
+                                                      rows="1"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      placeholder="Translate to English..."
+                                                      {{ $submitted ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('userAnswers.toInfinitive.'.$idx, $userAnswers['toInfinitive'][$idx] ?? '') }}</textarea>
 
                                             @if($submitted)
                                                 @if($results['toInfinitive'][$idx]['score'] == 100)
@@ -279,13 +318,13 @@
                                             </div>
                                         </div>
                                         <div class="ml-11 sm:ml-13">
-                                            <input type="text"
-                                                   name="userAnswers[gerund][{{ $idx }}]"
-                                                   value="{{ old('userAnswers.gerund.'.$idx, $userAnswers['gerund'][$idx] ?? '') }}"
-                                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   placeholder="Translate to English..."
-                                                   {{ $submitted ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea name="userAnswers[gerund][{{ $idx }}]"
+                                                      rows="1"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      placeholder="Translate to English..."
+                                                      {{ $submitted ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('userAnswers.gerund.'.$idx, $userAnswers['gerund'][$idx] ?? '') }}</textarea>
 
                                             @if($submitted)
                                                 @if($results['gerund'][$idx]['score'] == 100)
@@ -349,7 +388,8 @@
                                 <textarea
                                     name="userAnswers[paragraph]"
                                     rows="8"
-                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                    style="field-sizing: content;"
+                                    class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                     placeholder="Translate the paragraph to English..."
                                     {{ $submitted ? 'readonly' : '' }}
                                     autocomplete="off">{{ old('userAnswers.paragraph', $userAnswers['paragraph'] ?? '') }}</textarea>
@@ -418,7 +458,7 @@
         },
 
         checkIfSubmitted() {
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             return !!isReadonly;
         },
 

@@ -3,9 +3,9 @@
     $fixed = $fixed ?? true;
 @endphp
 
-<div class="{{ $fixed ? 'fixed top-0 left-0 right-0 md:left-64 z-40' : 'relative w-full rounded-b-2xl' }} bg-gradient-to-r from-blue-50 via-indigo-50 to-violet-50 shadow-lg border-b border-indigo-200">
+<div class="{{ $fixed ? 'fixed bottom-0 left-0 right-0 md:left-64 z-40' : 'relative w-full rounded-b-2xl' }} bg-gradient-to-r from-blue-50 via-indigo-50 to-violet-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-indigo-200">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-white/85 backdrop-blur border-b border-indigo-100">
+        <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-white/85 backdrop-blur border-t border-indigo-100">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-full flex items-center justify-center text-white shadow-md">
                     <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 5.5L7 9H4v6h3l4.5 3.5V5.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 9.5a4 4 0 010 5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7a7.5 7.5 0 010 10"></path></svg>
@@ -74,7 +74,11 @@
                     @if(isset($audio_url))
                         <source src="{{ $audio_url }}" type="audio/mpeg">
                     @elseif(isset($section) && $section && $section->audio_file)
-                        <source src="{{ asset($section->audio_file) }}" type="audio/mpeg">
+                        @php
+                            $_warmAudioPath = public_path($section->audio_file);
+                            $_warmAudioVer = file_exists($_warmAudioPath) ? '?v=' . filemtime($_warmAudioPath) : '';
+                        @endphp
+                        <source src="{{ asset($section->audio_file) . $_warmAudioVer }}" type="audio/mpeg">
                     @endif
                 </audio>
             </div>

@@ -24,6 +24,11 @@ class ToeflStructureMeetingSeeder extends Seeder
             9 => 'Inversi',
             10 => 'Fanboys & Pair Conjunction',
             11 => 'Comparative & Superlative',
+            12 => 'Expressions of Quantity',
+            13 => 'Possessive Adjectives & Pronouns',
+            14 => 'Make and Do',
+            15 => 'Other, Another, and Others',
+            16 => 'Adjectives and Adverbs',
         ];
 
         foreach ($topics as $number => $title) {

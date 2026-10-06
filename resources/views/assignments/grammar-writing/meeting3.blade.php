@@ -18,20 +18,50 @@
         .word-extra { color: #3498db; font-weight: bold; text-decoration: line-through; }
         .word-missing { color: #f1c40f; font-weight: bold; }
         .word-wrong { color: #e74c3c; font-weight: bold; text-decoration: underline; }
+
+        /* lg:top-6, lg:max-h-[calc(100vh-2rem)] and lg:self-start aren't in the
+           compiled Tailwind bundle on this deploy (the utility combo was never
+           used elsewhere, so it was never generated) - lg:sticky and
+           lg:overflow-y-auto DO exist and work, but without a top offset or a
+           max-height, sticky has nothing to stick to and overflow-y has no
+           constrained height to scroll within, so the left panel just grows to
+           full content height instead of staying pinned with its own scrollbar.
+           Plain CSS here matches Tailwind's own lg breakpoint (min-width: 1024px)
+           exactly, so it stays in sync with the lg:sticky / lg:block toggling
+           that already works. */
+        @media (min-width: 1024px) {
+            #materi-sticky-panel {
+                top: 1.5rem;
+                align-self: start;
+                max-height: calc(100vh - 2rem);
+            }
+        }
     </style>
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF] p-8">
+<body class="font-sans antialiased bg-[#F3F4FF] p-4 sm:p-6 lg:p-8">
     @include('components.impersonation-banner')
     @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
-    <div x-data="{ showAddQuestion: false }" class="w-full max-w-[1920px] mx-auto flex flex-col min-h-screen">
+    <div class="w-full max-w-[1920px] mx-auto flex flex-col min-h-screen">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
-                <span class="text-sm font-semibold text-blue-600 tracking-wider uppercase">Fast-track Grammar for Writing</span>
-                <h1 class="text-2xl font-bold text-gray-800">Latihan Modal & Translation (Pertemuan 3)</h1>
+                <span class="text-sm font-semibold text-indigo-600 tracking-wider uppercase">Fast-track Grammar for Writing</span>
+                <h1 class="text-2xl font-bold text-gray-800">Modals &amp; Phrasal Modals (Pertemuan 3)</h1>
             </div>
             <x-grammar-meeting-actions :meetingNumber="3" track="fast-track" />
         </div>
+
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                {{ $errors->first() }}
+            </div>
+        @endif
 
         @if($submitted)
             <div class="bg-blue-600 text-white p-6 rounded-xl text-center mb-6 shadow-md">
@@ -51,12 +81,30 @@
             </div>
         @endif
 
-        <form id="meeting3-main-form" method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting3.submit'), PHP_URL_PATH) }}">
+        <form id="meeting3-main-form" method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting3.submit'), PHP_URL_PATH) }}" x-data="{ mobileTab: 'soal' }">
             @csrf
 
+            <!-- Mobile View Switcher (< lg) -->
+            <div class="flex lg:hidden mb-4 p-1.5 bg-white rounded-2xl border border-indigo-200 shadow-sm sticky top-3 z-30">
+                <button type="button" @click="mobileTab = 'soal'"
+                        :class="mobileTab === 'soal' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Soal Latihan ({{ count($questions) }})</span>
+                </button>
+                <button type="button" @click="mobileTab = 'materi'"
+                        :class="mobileTab === 'materi' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-gray-600 hover:text-gray-900 font-semibold'"
+                        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Materi &amp; Rumus</span>
+                </button>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
-                <!-- Left Column: Materi (Sticky) -->
-                <div class="lg:col-span-5 sticky top-6 self-start max-h-[calc(100vh-2rem)] overflow-y-auto pr-2">
+                <!-- Left Column: Materi (Sticky on Desktop, Tab on Mobile) -->
+                <div id="materi-sticky-panel"
+                     class="lg:col-span-5 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto pr-0 lg:pr-2"
+                     :class="mobileTab === 'materi' ? 'block' : 'hidden lg:block'">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-6">
                         <div>
                             <!-- Header Title -->
@@ -426,8 +474,8 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Exercise -->
-                <div class="lg:col-span-7 space-y-6">
+                <!-- Right Column: Exercise (Always on Desktop, Tab on Mobile) -->
+                <div class="lg:col-span-7 space-y-6" :class="mobileTab === 'soal' ? 'block' : 'hidden lg:block'">
                     <div class="bg-white rounded-3xl shadow-sm border border-blue-100 overflow-visible">
                         <div class="bg-gradient-to-r from-blue-50 via-sky-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-blue-100">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -540,13 +588,13 @@
 
                                         <div class="ml-11 sm:ml-13 space-y-3">
                                             <div>
-                                                <input type="text"
-                                                       name="userAnswers[{{ $data['q_num'] }}][trans]"
-                                                       value="{{ old('userAnswers.'.$data['q_num'].'.trans', $userAnswers[$data['q_num']]['trans'] ?? '') }}"
-                                                       class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                       placeholder="Translate to English..."
-                                                       {{ $submitted ? 'readonly' : '' }}
-                                                       autocomplete="off">
+                                                <textarea name="userAnswers[{{ $data['q_num'] }}][trans]"
+                                                          rows="1"
+                                                          style="field-sizing: content;"
+                                                          class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                          placeholder="Translate to English..."
+                                                          {{ $submitted ? 'readonly' : '' }}
+                                                          autocomplete="off">{{ old('userAnswers.'.$data['q_num'].'.trans', $userAnswers[$data['q_num']]['trans'] ?? '') }}</textarea>
 
                                                 @if($submitted)
                                                     @if(($results[$data['q_num']]['answered'] ?? true) === false)
@@ -628,7 +676,8 @@
                                 <textarea
                                     name="userParagraphAnswer"
                                     rows="6"
-                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                    style="field-sizing: content;"
+                                    class="auto-expand-answer resize-none overflow-hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                     placeholder="Tulis terjemahan paragraf di sini..."
                                     {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                             </div>
@@ -715,7 +764,7 @@
                 return;
             }
 
-            const translationInputs = Array.from(mainForm.querySelectorAll('input[name^="userAnswers"][name$="[trans]"]'));
+            const translationInputs = Array.from(mainForm.querySelectorAll('input[name^="userAnswers"][name$="[trans]"], textarea[name^="userAnswers"][name$="[trans]"]'));
             const paragraphInput = mainForm.querySelector('textarea[name="userParagraphAnswer"]');
 
             // Progress display is still out of the full 20 (+ paragraph) so
@@ -902,7 +951,7 @@
             }
 
             // Scope readonly check to the main meeting form only.
-            const isReadonly = form.querySelector('input[type="text"][readonly]');
+            const isReadonly = form.querySelector('input[type="text"][readonly], textarea[readonly]');
             
             return !!isReadonly;
         },
@@ -1026,7 +1075,7 @@
             }
 
             const userAnswers = {};
-            const answerInputs = form.querySelectorAll('input[name^="userAnswers["]');
+            const answerInputs = form.querySelectorAll('input[name^="userAnswers["], textarea[name^="userAnswers["]');
             answerInputs.forEach((input) => {
                 const match = input.name.match(/^userAnswers\[(\d+)\](?:\[(tense|trans)\])?$/);
                 if (!match) {
@@ -1215,7 +1264,7 @@
                     if (qMatch) {
                         const qNum = qMatch[1];
                         const field = qMatch[2] || 'trans';
-                        input = document.querySelector(`input[name="userAnswers[${qNum}][${field}]"], input[name="userAnswers[${qNum}]"]`);
+                        input = document.querySelector(`input[name="userAnswers[${qNum}][${field}]"], textarea[name="userAnswers[${qNum}][${field}]"], input[name="userAnswers[${qNum}]"], textarea[name="userAnswers[${qNum}]"]`);
                     }
                 }
 

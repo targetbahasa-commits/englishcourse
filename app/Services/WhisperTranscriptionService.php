@@ -39,7 +39,7 @@ class WhisperTranscriptionService
 
     // ── Gemini (OpenAI-compatible endpoint) ───────────────────────────────────
     private const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-    private const GEMINI_MODEL = 'gemini-2.0-flash';
+    private const GEMINI_MODEL = 'gemini-3.6-flash';
 
     /**
      * Max SRT lines processed in a single AI call.

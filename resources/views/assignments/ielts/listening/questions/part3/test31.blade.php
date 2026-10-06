@@ -1,32 +1,209 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3 - Practice Test 31</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 21-22</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose the correct letters, <strong>A-C</strong>, and write each next to questions <strong>21</strong> and <strong class="text-blue-600 font-bold ml-1 mr-1">22</strong><input type="text" name="answers[22]" value="{{ old('answers.22') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">According to Betty, which lines describe the sales of both <strong>cheese and oil</strong> in <strong>New</strong><strong>Zealand</strong> and <strong>Colombia</strong>?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Exam preparation materials</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Vocabulary words list</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Free online tests</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">21</strong><input type="text" name="answers[21]" value="{{ old('answers.21') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Standardized & Admissions Tests</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">22</strong><input type="text" name="answers[22]" value="{{ old('answers.22') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 23-24</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Write the correct letters, <strong>A-E</strong>, next to questions <strong>23-24</strong>._</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Which <strong>TWO</strong> of the following are sales strategies for chocolate in Italy and Germany?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>Locate near a children’s school</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>Change the location of the product on shelves</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Give a free gift</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="D" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">D</span> <span>Make it the cheapest brand</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong>Make Schmutzig the second cheapest brand</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 25-30</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Research plan</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Betty is interested in how <strong class="text-blue-600 font-bold ml-1 mr-1">25</strong><input type="text" name="answers[25]" value="{{ old('answers.25') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> affects the sales of cosmetics and <strong class="text-blue-600 font-bold ml-1 mr-1">26</strong><input type="text" name="answers[26]" value="{{ old('answers.26') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Bruce is going to be concerned with how <strong class="text-blue-600 font-bold ml-1 mr-1">27</strong><input type="text" name="answers[27]" value="{{ old('answers.27') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> may impact on sales</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">of cookies and the relationships among <strong class="text-blue-600 font-bold ml-1 mr-1">28</strong><input type="text" name="answers[28]" value="{{ old('answers.28') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">, <strong class="text-blue-600 font-bold ml-1 mr-1">29</strong><input type="text" name="answers[29]" value="{{ old('answers.29') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">, and sales.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Books & Literature</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The professor advised the students to bear in mind the extensions of <strong class="text-blue-600 font-bold ml-1 mr-1">30</strong><input type="text" name="answers[30]" value="{{ old('answers.30') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 21-30</h4>
+        <p class="text-gray-600 font-medium">Choose the correct letter, A, B, or C.</p>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">A</span><span>Consultation with the Returning Students Advisor</span></div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">21</span> What does the man want to have?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">A break</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">A talk</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">A class</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">22</span> What does the man think of children nowadays?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Confident</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Intelligent</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[22]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Mature</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">23</span> What type of people does the man want to teach?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Children</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Students</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[23]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Adults</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">24</span> What did the man do when he encountered former students?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Had a conversation</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Ran away</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[24]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Taught them</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">25</span> What is the man’ s greatest weakness ?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Being old-fashioned</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Lack of confidence</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[25]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Being introverted</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">26</span> When did Doctor Lindsey go to college?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[26]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">18 years ago</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[26]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">After starting a family</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[26]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">When she was 35 years old</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">27</span> How did the woman feel when she was a freshman?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[27]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Hopeless</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[27]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Unsuccessful</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[27]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Stressed</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">28</span> How does the man feel about his career?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[28]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Unique</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[28]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Boring</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[28]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Impressive</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">29</span> What does the man finally decide to study?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[29]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Languages</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[29]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Business</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[29]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">Liberal Arts</span>
+                </label>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 my-4">
+            <p class="font-semibold text-gray-900 text-lg mb-3"><span class="text-gray-900 font-bold mr-2">30</span> Which change in students’ life is NOT important to Frank?</p>
+            <div class="space-y-2 pl-4">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[30]" value="A" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">A</span>
+                    <span class="text-gray-700">Classroom technology</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[30]" value="B" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">B</span>
+                    <span class="text-gray-700">Student housing</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
+                    <input type="radio" name="answers[30]" value="C" class="w-4 h-4 text-gray-800 border-gray-400 focus:ring-black cursor-pointer">
+                    <span class="font-bold text-gray-700">C</span>
+                    <span class="text-gray-700">University facilities</span>
+                </label>
+            </div>
+        </div>
     </div>
 </div>

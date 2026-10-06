@@ -87,7 +87,23 @@
             </div>
 
             <!-- Programs Grid -->
-            <div class="mb-8">
+            <div class="mb-8" x-data="{ activeTab: '{{ request('tab') === 'offline' ? 'offline' : 'online' }}' }">
+                <!-- Online / Offline Tabs -->
+                <div class="mb-4 flex">
+                    <div class="p-1 bg-gray-100 rounded-xl inline-flex">
+                        <button type="button" @click="activeTab = 'online'"
+                                :class="activeTab === 'online' ? 'bg-white text-sky-700 shadow-sm font-bold' : 'text-gray-500 hover:text-gray-700 font-medium'"
+                                class="px-4 py-2 text-sm rounded-lg transition-all whitespace-nowrap">
+                            Online
+                        </button>
+                        <button type="button" @click="activeTab = 'offline'"
+                                :class="activeTab === 'offline' ? 'bg-white text-teal-700 shadow-sm font-bold' : 'text-gray-500 hover:text-gray-700 font-medium'"
+                                class="px-4 py-2 text-sm rounded-lg transition-all whitespace-nowrap">
+                            Offline
+                        </button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @php
                     $isStudent = !Auth::user()->isAdmin() && !Auth::user()->isTeacher();
@@ -136,7 +152,11 @@
                     // Determine route based on program slug
                     $routeName = '#';
                     if ($programSlug === 'grammar-for-writing') {
-                    $routeName = route('assignments.grammar-writing.classes');
+                    // Online and Offline can run different batches/schedules
+                    // for the same tracks - carry which tab this card is on
+                    // through so the classes page links into the matching
+                    // Online/Offline program instead of always Online.
+                    $routeName = route('assignments.grammar-writing.classes', $program->delivery_mode === 'offline' ? ['mode' => 'offline'] : []);
                     } elseif ($programSlug === 'speaking') {
                     $routeName = route('assignments.speaking.classes');
                     } elseif ($programSlug === 'toefl-itp') {
@@ -155,6 +175,8 @@
                     $routeName = route('assignments.pte-academic');
                     } elseif ($programSlug === 'ielts-general') {
                     $routeName = route('assignments.ielts-general');
+                    } elseif ($programSlug === 'sat') {
+                    $routeName = route('assignments.sat');
                     }
 
                     $isLocked = $isStudent
@@ -170,7 +192,7 @@
                         $lockedCardClasses = "group relative bg-white/95 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-gray-200";
                     @endphp
 
-                    <div class="{{ $isLocked ? $lockedCardClasses : $cardClasses }}">
+                    <div class="{{ $isLocked ? $lockedCardClasses : $cardClasses }}" x-show="activeTab === '{{ $program->delivery_mode ?? 'online' }}'">
                         <!-- Gradient Header -->
                         <div class="h-28 md:h-32 bg-gradient-to-br {{ $colors['gradient'] }} relative overflow-hidden">
                             <div class="absolute inset-0 bg-black {{ $isLocked ? 'opacity-20' : 'opacity-0 group-hover:opacity-10' }} transition-opacity duration-300"></div>

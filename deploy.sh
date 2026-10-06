@@ -3,7 +3,7 @@
 # Konfigurasi FTP Hostinger
 HOST="153.92.9.128"
 USER="u822472458"
-PASS="@Dreamer19"
+PASS="19@Dreamer"
 REMOTE_DIR="/domains/targetbahasa.com/public_html"
 LOCAL_DIR="/Applications/MAMP/htdocs/TargetBahasaCourse"
 

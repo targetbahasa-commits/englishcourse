@@ -1,30 +1,107 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3 - Practice Test 41</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3</h3>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 21-23</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>21</strong>The proposal will</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>be reviewed by two examiners.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>be added to the final grade.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>be returned with feedback.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>22</strong>The proposal will consist mostly of</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>topics</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>methods</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>results</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>23</strong>For the practice paper, the tutor has directed the students to make sure to</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>pay attention to time limits.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>write at least 6,000 words.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>keep on topic.</span></label>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 24-30</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the sentences below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">There is no need to <strong class="text-blue-600 font-bold ml-1 mr-1">24</strong><input type="text" name="answers[24]" value="{{ old('answers.24') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> lots of people.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Pay attention to the <strong class="text-blue-600 font-bold ml-1 mr-1">25</strong><input type="text" name="answers[25]" value="{{ old('answers.25') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> of the final report.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Prepare two <strong class="text-blue-600 font-bold ml-1 mr-1">26</strong><input type="text" name="answers[26]" value="{{ old('answers.26') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">, one for the teacher, another for the students themselves.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The deadline of the final paper is <strong class="text-blue-600 font-bold ml-1 mr-1">27</strong><input type="text" name="answers[27]" value="{{ old('answers.27') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The students can <strong class="text-blue-600 font-bold ml-1 mr-1">28</strong><input type="text" name="answers[28]" value="{{ old('answers.28') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> their topics before the beginning of April.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Students deciding to change topics must deliver a <strong class="text-blue-600 font-bold ml-1 mr-1">29</strong><input type="text" name="answers[29]" value="{{ old('answers.29') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> to the teacher in advance.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">At the beginning of the report, the hypothesis and an outline of the <strong class="text-blue-600 font-bold ml-1 mr-1">30</strong><input type="text" name="answers[30]" value="{{ old('answers.30') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> are needed.</p>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Questions 21-30</h4>
+            <p class="text-gray-600 font-medium mt-1">Complete the notes below.</p>
+            <p class="text-gray-600 font-medium">Write <strong class="text-gray-900">NO MORE THAN THREE WORDS</strong> for each answer.</p>
+        </div>
+
+        <div class="border border-gray-300 rounded-xl overflow-hidden shadow-sm p-6 bg-white space-y-6">
+            <h4 class="text-lg font-bold text-gray-900 border-b border-gray-300 pb-3 tracking-wide">
+                Literature Study: Children's Novel Analysis
+            </h4>
+
+            {{-- Novel & Background --}}
+            <div class="space-y-3">
+                <div class="flex items-center flex-wrap gap-2 text-base text-gray-800">
+                    <span class="font-semibold text-gray-900">Novel:</span>
+                    <strong class="font-bold text-gray-900 ml-1">21</strong>
+                    <input type="text" name="answers[21]" value="{{ old('answers.21') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-48 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Title of novel" autocomplete="off">
+                </div>
+
+                <div class="text-base text-gray-700">
+                    <span class="font-semibold text-gray-900">Protagonists:</span> Mary Lennox; Colin Craven
+                </div>
+
+                <div class="flex items-center flex-wrap gap-2 text-base text-gray-800">
+                    <span class="font-semibold text-gray-900">Time period:</span> Early in
+                    <strong class="font-bold text-gray-900 ml-1">22</strong>
+                    <input type="text" name="answers[22]" value="{{ old('answers.22') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-40 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Time period" autocomplete="off">
+                </div>
+
+                <div class="flex items-center flex-wrap gap-2 text-base text-gray-800">
+                    <span class="font-semibold text-gray-900">Plot:</span> Mary arrives in the UK and meets Colin who thinks he’ll never be able to
+                    <strong class="font-bold text-gray-900 ml-1">23</strong>
+                    <input type="text" name="answers[23]" value="{{ old('answers.23') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Action" autocomplete="off">. They become friends.
+                </div>
+
+                <div class="flex items-center flex-wrap gap-2 text-base text-gray-800">
+                    <span class="font-semibold text-gray-900">Point of view:</span> “Omniscient” — narrator knows all about characters’ feelings, opinions and
+                    <strong class="font-bold text-gray-900 ml-1">24</strong>
+                    <input type="text" name="answers[24]" value="{{ old('answers.24') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off">
+                </div>
+
+                <div class="text-base text-gray-700">
+                    <span class="font-semibold text-gray-900">Audience:</span> Good for children — story simple to follow.
+                </div>
+            </div>
+
+            {{-- Symbols & Motifs --}}
+            <div class="border-t border-gray-200 pt-4 space-y-4">
+                <div>
+                    <div class="flex items-center flex-wrap gap-2 text-base text-gray-800 mb-2">
+                        <span class="font-semibold text-gray-900">Symbols</span> (physical items that represent
+                        <strong class="font-bold text-gray-900 ml-1">25</strong>
+                        <input type="text" name="answers[25]" value="{{ old('answers.25') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-40 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Meaning" autocomplete="off">):
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 pl-4 text-gray-700">
+                        <li>The robin redbreast</li>
+                        <li class="flex items-center gap-2 mt-1">
+                            <span>•</span>
+                            <strong class="font-bold text-gray-900">26</strong>
+                            <input type="text" name="answers[26]" value="{{ old('answers.26') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-44 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Symbol item" autocomplete="off">
+                        </li>
+                        <li>The portrait of Mistress Craven</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <span class="font-semibold text-gray-900 block mb-2">Motifs (patterns in the story):</span>
+                    <ul class="space-y-1.5 pl-4 text-gray-700">
+                        <li>• The Garden of Eden</li>
+                        <li class="flex items-center flex-wrap gap-2">
+                            <span>• Secrecy — metaphorical and literal transition from</span>
+                            <strong class="font-bold text-gray-900 ml-1">27</strong>
+                            <input type="text" name="answers[27]" value="{{ old('answers.27') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-40 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Transition state" autocomplete="off">
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <span class="font-semibold text-gray-900 block mb-2">Themes: Connections between</span>
+                    <ul class="space-y-2 pl-4 text-gray-700">
+                        <li class="flex items-center flex-wrap gap-2">
+                            <span>•</span>
+                            <strong class="font-bold text-gray-900 ml-1">28</strong>
+                            <input type="text" name="answers[28]" value="{{ old('answers.28') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Theme 1" autocomplete="off">
+                            <span>and outlook</span>
+                        </li>
+                        <li class="flex items-center flex-wrap gap-2">
+                            <span>•</span>
+                            <strong class="font-bold text-gray-900 ml-1">29</strong>
+                            <input type="text" name="answers[29]" value="{{ old('answers.29') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Theme 2" autocomplete="off">
+                            <span>and well-being</span>
+                        </li>
+                        <li class="flex items-center flex-wrap gap-2">
+                            <span>• Individuals and the need for</span>
+                            <strong class="font-bold text-gray-900 ml-1">30</strong>
+                            <input type="text" name="answers[30]" value="{{ old('answers.30') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-40 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Theme 3" autocomplete="off">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

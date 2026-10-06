@@ -137,7 +137,11 @@
                         $draftTotalCount = count($draftAnswers);
                         $draftFilledCount = collect($draftAnswers)->filter(function ($value) {
                             if (is_array($value)) {
-                                return collect($value)->contains(fn ($v) => trim((string) $v) !== '');
+                                // Some meetings' answers nest two levels deep (e.g.
+                                // trans_matrix[verb][form] for the Fast-Track/Complexity
+                                // Meeting 1 matrix) - flatten before checking so a nested
+                                // sub-array never reaches (string) casting directly.
+                                return collect($value)->flatten()->contains(fn ($v) => $v !== null && !is_array($v) && trim((string) $v) !== '');
                             }
                             return trim((string) $value) !== '';
                         })->count();

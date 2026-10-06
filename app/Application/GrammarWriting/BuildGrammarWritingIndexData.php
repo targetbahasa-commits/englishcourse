@@ -37,6 +37,23 @@ class BuildGrammarWritingIndexData
             $program->load('meetings'); // Reload meetings after creation
         }
 
+        // Auto-seed Bonus Meeting 11 for Fast Track if missing (default is_locked = true)
+        if ($programSlug === 'fast-track-grammar-for-writing' && $program) {
+            $bonusMeeting = $program->meetings->firstWhere('meeting_number', 11);
+            if (!$bonusMeeting) {
+                \App\Models\Meeting::firstOrCreate(
+                    ['program_id' => $program->id, 'meeting_number' => 11],
+                    [
+                        'title' => 'Pertemuan Bonus: Peringkasan (Reducing, Abridgement, Omitting)',
+                        'description' => 'Materi & latihan komprehensif teknik peringkasan: Reducing, Abridgement, dan Omitting.',
+                        'order' => 11,
+                        'is_locked' => true,
+                    ]
+                );
+                $program->load('meetings');
+            }
+        }
+
         $selectedClassPeriod = null;
         if ($user && $user->isStudent()) {
             $enrollment = $user->enrollments()->where('program_id', $program->id)->whereHas('classPeriod')->first();
@@ -52,19 +69,29 @@ class BuildGrammarWritingIndexData
             $classMeetings = $selectedClassPeriod->classMeetings()->whereIn('meeting_id', $program->meetings->pluck('id'))->get()->keyBy('meeting_id');
         }
 
+        // Keyed by meeting id, keeping the full pivot row (not just
+        // is_open) - ClassPeriod::meetings() already declares
+        // ->withTimestamps(), so pivot->updated_at is the exact moment an
+        // admin/teacher last toggled this meeting's lock for this batch via
+        // toggleMeetingLock(). That's a more trustworthy "this meeting
+        // became available on X" signal than classMeeting->meeting_date,
+        // which is just the auto-calculated (start_date + N weeks)
+        // schedule and can drift from reality once a meeting's been
+        // manually opened/locked out of band.
         $periodMeetingStatus = collect();
         if ($selectedClassPeriod) {
-            $periodMeetingStatus = $selectedClassPeriod->meetings()
-                ->pluck('class_period_meetings.is_open', 'meetings.id');
+            $periodMeetingStatus = $selectedClassPeriod->meetings()->get()->keyBy('id');
         }
 
         $program->meetings->transform(function ($meeting) use ($user, $selectedClassPeriod, $periodMeetingStatus, $classMeetings) {
             if ($selectedClassPeriod) {
-                $meeting->is_locked = !((bool) ($periodMeetingStatus[$meeting->id] ?? false));
+                $pivotMeeting = $periodMeetingStatus->get($meeting->id);
+                $meeting->is_locked = !((bool) ($pivotMeeting->pivot->is_open ?? false));
+                $meeting->lock_toggled_at = $pivotMeeting?->pivot->updated_at;
             } else {
                 $meeting->is_locked = $meeting->isLockedFor($user);
             }
-            
+
             $meeting->classMeeting = $classMeetings->get($meeting->id);
 
             return $meeting;

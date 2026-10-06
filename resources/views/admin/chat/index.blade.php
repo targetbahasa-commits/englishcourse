@@ -1,5 +1,13 @@
 @extends('layouts.admin')
 
+{{-- layouts.admin never outputs a csrf-token meta tag, so chatAdmin()'s
+     document.querySelector('meta[name="csrf-token"]').getAttribute(...) was
+     reading off a tag that never existed, throwing during Alpine init and
+     crashing the whole component before it could render anything. --}}
+@section('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('content')
 <div class="px-4 py-6 md:px-8 max-w-7xl mx-auto" x-data="chatAdmin()">
     <div class="flex justify-between items-center mb-6">

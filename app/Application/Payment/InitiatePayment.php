@@ -23,7 +23,7 @@ class InitiatePayment
      * @throws \RuntimeException if user is already enrolled or has a pending payment.
      * @return array{status: string, payment?: Payment, message?: string, redirect?: string}
      */
-    public function handle(Authenticatable $user, int $programId, string $paymentChannel, string $classType = 'regular'): array
+    public function handle(Authenticatable $user, int $programId, string $paymentChannel, string $classType = 'regular', ?int $excludeEnrollmentId = null, ?int $overrideAmount = null): array
     {
         $program = Program::query()->findOrFail($programId);
 
@@ -31,10 +31,16 @@ class InitiatePayment
             return ['status' => 'program_inactive'];
         }
 
+        // $excludeEnrollmentId lets a caller finalizing a specific booking
+        // (which is itself an Enrollment row with status 'active') invoice
+        // that same booking without it tripping its own already-enrolled
+        // check - without this, every booking-to-student conversion would
+        // always report already_enrolled and silently never create a Payment.
         $alreadyEnrolled = Enrollment::query()
             ->where('user_id', $user->id)
             ->where('program_id', $program->id)
             ->whereIn('status', ['active', 'completed'])
+            ->when($excludeEnrollmentId, fn ($query) => $query->where('id', '!=', $excludeEnrollmentId))
             ->exists();
 
         if ($alreadyEnrolled) {
@@ -52,25 +58,40 @@ class InitiatePayment
         }
 
         $paymentMethod = in_array($paymentChannel, ['bank_transfer', 'qris']) ? 'manual_transfer' : 'offline_cash';
-        
-        $basePrice = $program->price ?? 0;
-        if ($classType === 'private') {
-            $basePrice = $program->price_private ?? $basePrice;
-        } elseif ($classType === 'semi_private') {
-            $basePrice = $program->price_semi_private ?? $basePrice;
-        }
 
-        if (in_array($user->learning_mode, ['offline', 'both'])) {
-            if ($classType === 'private' && !is_null($program->price_private_offline)) {
-                $basePrice = $program->price_private_offline;
-            } elseif ($classType === 'semi_private' && !is_null($program->price_semi_private_offline)) {
-                $basePrice = $program->price_semi_private_offline;
-            } elseif (!is_null($program->price_offline)) {
-                $basePrice = $program->price_offline;
+        if ($overrideAmount !== null) {
+            // Admin typed a specific amount (e.g. negotiated/offline deal, or
+            // the program's price fields aren't configured) - use it as-is
+            // and skip the price-field/discount resolution below entirely,
+            // since that amount already represents the final figure.
+            $baseAmount = $overrideAmount;
+            $discount   = \App\Domain\Payment\DiscountResult::none();
+        } else {
+            $priceField = 'price';
+            if ($classType === 'private' && $program->price_private !== null) {
+                $priceField = 'price_private';
+            } elseif ($classType === 'semi_private' && $program->price_semi_private !== null) {
+                $priceField = 'price_semi_private';
             }
+
+            if (in_array($user->learning_mode, ['offline', 'both'])) {
+                if ($classType === 'private' && !is_null($program->price_private_offline)) {
+                    $priceField = 'price_private_offline';
+                } elseif ($classType === 'semi_private' && !is_null($program->price_semi_private_offline)) {
+                    $priceField = 'price_semi_private_offline';
+                } elseif (!is_null($program->price_offline)) {
+                    $priceField = 'price_offline';
+                }
+            }
+
+            // The per-price inline discount (fixed IDR or %) set on whichever
+            // price field was just resolved above is applied first, then the
+            // audience-based ProgramDiscount rules (guest/student/referral/...)
+            // are evaluated on top of that already-discounted amount - the two
+            // discount mechanisms stack rather than one replacing the other.
+            $baseAmount    = $program->discountedPrice($priceField);
+            $discount      = $this->discountResolver->resolve($user, $program, $baseAmount);
         }
-        $baseAmount    = max(0, (int) $basePrice);
-        $discount      = $this->discountResolver->resolve($user, $program, $baseAmount);
 
         $payment = Payment::query()->create([
             'user_id'          => $user->id,

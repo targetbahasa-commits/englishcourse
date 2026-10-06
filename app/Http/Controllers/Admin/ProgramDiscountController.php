@@ -25,7 +25,11 @@ class ProgramDiscountController extends Controller
     {
         $data = $request->validated();
 
-        $this->manageProgramDiscounts->create($program, $data, $request);
+        $discount = $this->manageProgramDiscounts->create($program, $data, $request);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'discount' => $discount]);
+        }
 
         return back()->with('success', 'Diskon berhasil ditambahkan!');
     }
@@ -34,13 +38,22 @@ class ProgramDiscountController extends Controller
     {
         // Toggle active or full update
         if ($request->has('toggle_active')) {
-            $this->manageProgramDiscounts->toggleActive($discount);
+            $discount = $this->manageProgramDiscounts->toggleActive($discount);
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'discount' => $discount]);
+            }
+
             return back()->with('success', 'Status diskon diperbarui.');
         }
 
         $data = $request->validated();
 
-        $this->manageProgramDiscounts->update($discount, $data, $request);
+        $discount = $this->manageProgramDiscounts->update($discount, $data, $request);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'discount' => $discount]);
+        }
 
         return back()->with('success', 'Diskon berhasil diperbarui!');
     }
@@ -48,6 +61,11 @@ class ProgramDiscountController extends Controller
     public function destroy(Program $program, ProgramDiscount $discount)
     {
         $this->manageProgramDiscounts->delete($discount);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Diskon berhasil dihapus.');
     }
 }

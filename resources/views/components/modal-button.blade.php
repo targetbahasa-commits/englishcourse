@@ -176,9 +176,8 @@
     <!-- Floating Button -->
     <button @click="open = true; searchQuery = ''"
             title="Modal Auxiliaries"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-2.5 sm:py-2.5 sm:px-4 rounded-full shadow-lg transition hover:scale-105 flex items-center justify-center gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-300">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        <span class="hidden sm:inline">Modal</span>
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-full shadow-lg transition hover:scale-105 flex items-center justify-center gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-300">
+        <span>Modal</span>
     </button>
 
     <!-- Modal Backdrop -->

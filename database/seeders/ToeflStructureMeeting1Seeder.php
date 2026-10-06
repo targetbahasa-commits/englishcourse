@@ -12,9 +12,16 @@ class ToeflStructureMeeting1Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 1)->firstOrFail();
-        
-        // Clear existing questions for this meeting
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 1],
+            [
+                'title' => 'Subject + Verb + Preposition',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
+        // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
         $questions = [
@@ -104,9 +111,9 @@ class ToeflStructureMeeting1Seeder extends Seeder
                 'question_text' => 'NASA\'s Lyndon B. Johnson Space Center ____ control center for the Mercury, Gemini, and Apollo space flights.',
                 'option_a' => 'it was at the',
                 'option_b' => 'it was the',
-                'option_c' => 'was the',
-                'option_d' => 'the',
-                'correct_answer' => 'C',
+                'option_c' => 'the',
+                'option_d' => 'was the',
+                'correct_answer' => 'D',
             ],
         ];
 
@@ -120,6 +127,7 @@ class ToeflStructureMeeting1Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

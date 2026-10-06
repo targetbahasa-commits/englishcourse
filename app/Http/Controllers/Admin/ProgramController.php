@@ -73,7 +73,11 @@ class ProgramController extends Controller
 
     public function brochure(Program $program)
     {
-        return view('admin.programs.brochure', compact('program'));
+        $aiPrompt = $this->managePrograms->buildBrochurePrompt($program);
+        $geminiAvailable = \App\Services\AiBrochureImageGenerator::isAvailable('gemini');
+        $openaiAvailable = \App\Services\AiBrochureImageGenerator::isAvailable('openai');
+
+        return view('admin.programs.brochure', compact('program', 'aiPrompt', 'geminiAvailable', 'openaiAvailable'));
     }
 
     /**
@@ -87,6 +91,38 @@ class ProgramController extends Controller
     }
 
     /**
+     * Generate an AI brochure image draft for review (not yet saved onto the program).
+     */
+    public function generateAiBrochureImage(\Illuminate\Http\Request $request, Program $program)
+    {
+        $request->validate([
+            'provider' => 'required|in:gemini,openai',
+            'prompt' => 'required|string|max:4000',
+        ]);
+
+        $result = $this->managePrograms->generateAiBrochureImage($request->input('provider'), $request->input('prompt'));
+
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    /**
+     * Accept a previously generated AI brochure draft as the program's brochure image.
+     */
+    public function acceptAiBrochureImage(\Illuminate\Http\Request $request, Program $program)
+    {
+        $request->validate([
+            'draft_path' => 'required|string|starts_with:brochures/ai-drafts/',
+        ]);
+
+        $finalPath = $this->managePrograms->acceptAiBrochureImage($program, $request->input('draft_path'));
+
+        return response()->json([
+            'success' => true,
+            'url' => \Illuminate\Support\Facades\Storage::disk('public')->url($finalPath),
+        ]);
+    }
+
+    /**
      * Deactivate a program (first step before permanent deletion).
      */
     public function deactivate(Program $program)
@@ -94,6 +130,44 @@ class ProgramController extends Controller
         $this->managePrograms->deactivate($program);
 
         return back()->with('success', 'Program "' . $program->name . '" has been deactivated. You can now delete it permanently.');
+    }
+
+    /**
+     * Quick toggle between Active/Not Active from the programs list, without
+     * going through the deactivate-then-delete flow above.
+     */
+    public function toggleActive(Program $program)
+    {
+        $program = $this->managePrograms->toggleActive($program);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'program' => $program]);
+        }
+
+        return back()->with('success', 'Program "' . $program->name . '" is now ' . ($program->is_active ? 'Active' : 'Not Active') . '.');
+    }
+
+    /**
+     * Sets which meeting is "current" for this program - a plain pacing
+     * counter for admin/teacher's own reference (see the floating
+     * meeting-progress-bar component on meeting pages), not an
+     * access-control flag. Students never get to change this.
+     */
+    public function updateCurrentMeeting(\Illuminate\Http\Request $request, Program $program)
+    {
+        $user = auth()->user();
+
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $request->validate(['meeting_number' => 'nullable|integer|min:0']);
+
+        $meetingNumber = $request->input('meeting_number');
+        $val = ($meetingNumber !== null && (int)$meetingNumber > 0) ? (int)$meetingNumber : null;
+        $program->update(['current_meeting_number' => $val]);
+
+        return response()->json(['success' => true, 'current_meeting_number' => $program->current_meeting_number]);
     }
 
     /**

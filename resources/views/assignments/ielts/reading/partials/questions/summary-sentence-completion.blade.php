@@ -48,7 +48,7 @@
         // Strip leading instruction lines (e.g. "Complete the following summary...", "Using NO MORE THAN...", "Write your answers...", etc.),
         // so they don't duplicate the question header instructions.
         if (!empty($rawSummary)) {
-            $instructionPattern = '/^(?:Questions?\s+\d+|Complete\b|Choose\b|Write\b|Using\b|Use\b|In\s+box|You\s+may\s+use|NB\b|Reading\s+Test\s+\d+|Do\s+the\s+following|Look\s+at|Match\s+each|Classify\b|Answers?\b|,?\s*write\s+the\s+correct)/i';
+            $instructionPattern = '/^(?:Questions?\s+\d+|Complete\s+(?:the|each|sentences?)\b|Choose\s+(?:NO|the|ONE|TWO|THREE|a\b)\b|Write\s+(?:your|the|NO|ONE|TWO|THREE)\b|Using\s+(?:NO|the|words?)\b|Use\s+(?:NO|the|words?)\b|In\s+boxes?\b|You\s+may\s+use\b|NB\b|Reading\s+Test\s+\d+|Do\s+the\s+following\b|Look\s+at\b|Match\s+each\b|Classify\b|Answers?\s+in\b|,?\s*write\s+the\s+correct)/i';
             $lines = preg_split('/<br\s*\/?>|\n/i', $rawSummary);
             $strippedLines = [];
             $stripping = true;
@@ -110,6 +110,12 @@
             $hasOptions = !empty($question['options']) || !empty($question['box_options']);
             $optionsData = !empty($question['options']) ? $question['options'] : (!empty($question['box_options']) ? $question['box_options'] : []);
 
+            // Ignore bogus TRUE/FALSE/NOT GIVEN options mistakenly stored on completion questions
+            if (isset($optionsData['TRUE']) || isset($optionsData['YES'])) {
+                $hasOptions = false;
+                $optionsData = [];
+            }
+
             $subQuestionLabels = [];
             if (!empty($question['sub_questions'])) {
                 foreach ($question['sub_questions'] as $sq) {
@@ -143,17 +149,38 @@
                 $oldSummaryText = $summaryText;
 
                 if (!empty($summaryText)) {
-                    // Match [N] bracket style (e.g. [8]) in summary_text
-                    $summaryText = str_replace('[' . $qNum . ']', $inputHtml, $summaryText);
-                    
-                    // Match [key] style (e.g. [q8]) if different from [N]
-                    if ((string)$key !== (string)$qNum) {
-                        $summaryText = str_replace('[' . $key . ']', $inputHtml, $summaryText);
+                    $safeKey = preg_quote((string)$key, '/');
+                    $safeNum = preg_quote((string)$qNum, '/');
+
+                    // Case B: [qNum] or [key] followed immediately by dots e.g. [27] .....................
+                    if (preg_match('/\[(?:' . $safeNum . '|' . $safeKey . ')\]\s*[\.\…\_]{2,}/u', $summaryText)) {
+                        $summaryText = preg_replace('/\[(?:' . $safeNum . '|' . $safeKey . ')\]\s*[\.\…\_]{2,}/u', $inputHtml, $summaryText, 1);
+                    }
+                    // Case A: [qNum] or [key] followed by text and then dots in the same clause e.g. [23] sentence text .....
+                    elseif (preg_match('/\[(?:' . $safeNum . '|' . $safeKey . ')\]\s*([^\[<]+?)[\.\…\_]{2,}/u', $summaryText)) {
+                        $summaryText = preg_replace_callback('/\[(?:' . $safeNum . '|' . $safeKey . ')\]\s*([^\[<]+?)[\.\…\_]{2,}/u', function($m) use ($inputHtml) {
+                            return trim($m[1]) . ' ' . $inputHtml;
+                        }, $summaryText, 1);
+                    }
+                    // Standard replacement if no dots attached
+                    else {
+                        $summaryText = str_replace(['[' . $qNum . ']', '[' . $key . ']'], $inputHtml, $summaryText);
                     }
 
-                    // ONLY run dot pattern preg_replace if bracket style was NOT found
+                    // Case C: Line starts with qNum, text, and then dots (e.g. "19 Farmers was founded as a ...... in Auckland")
                     if ($summaryText === $oldSummaryText) {
-                        $summaryText = preg_replace('/' . $qNum . '[\s\.\…\_]{2,}/u', $inputHtml, $summaryText, 1);
+                        $cPattern = '/(^|<br\s*\/?>|\n)\s*' . $safeNum . '[\s\x{00A0}]+([^<\n\r\[]*?)[\.\…\_]{2,}/u';
+                        if (preg_match($cPattern, $summaryText)) {
+                            $summaryText = preg_replace_callback($cPattern, function($m) use ($inputHtml) {
+                                return $m[1] . trim($m[2]) . ' ' . $inputHtml;
+                            }, $summaryText, 1);
+                        }
+                    }
+
+                    // ONLY run dot pattern preg_replace if bracket/line style was NOT found
+                    // Require at least one dot or underscore so we do not match spaces
+                    if ($summaryText === $oldSummaryText) {
+                        $summaryText = preg_replace('/' . $safeNum . '[\s\x{00A0}]*[\.\…\_]{2,}/u', $inputHtml, $summaryText, 1);
                     }
                 }
 
@@ -163,7 +190,10 @@
                 if (($summaryText === $oldSummaryText || empty($summaryText)) && isset($subQuestionLabels[$key])) {
                     $lbl = $subQuestionLabels[$key];
                     $oldLbl = $lbl;
-                    $lbl = str_replace(['[' . $qNum . ']', '[' . $key . ']'], $inputHtml, $lbl);
+                    $lbl = preg_replace('/\[(?:' . $qNum . '|' . preg_quote((string)$key, '/') . ')\]\s*[\.\…\_]{2,}/u', $inputHtml, $lbl);
+                    if ($lbl === $oldLbl) {
+                        $lbl = str_replace(['[' . $qNum . ']', '[' . $key . ']'], $inputHtml, $lbl);
+                    }
                     if ($lbl === $oldLbl) {
                         $lbl = preg_replace('/' . $qNum . '[\s\.\…\_]{1,}/u', $inputHtml, $lbl, 1);
                     }

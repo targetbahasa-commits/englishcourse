@@ -70,7 +70,7 @@
                     <!-- Q1 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">1. Angka tersebut kemudian turun tajam menjadi di bawah 5000, yang merupakan (which was) rekor terendah dalam 40 tahun.</label>
-                        <input type="text" name="q1" x-model="answers.q1" :class="getInputClass('q1')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The figure then fell sharply...">
+                        <textarea rows="1" name="q1" x-model="answers.q1" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q1') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The figure then fell sharply..."></textarea>
                         <template x-if="showResults && !isCorrect('q1')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q1[0]"></span></p>
                         </template>
@@ -79,7 +79,7 @@
                     <!-- Q2 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">2. Jumlah pengunjung terbesar datang dari Amerika Serikat, yang meningkat (which rose) dari 345 menjadi 609 ribu.</label>
-                        <input type="text" name="q2" x-model="answers.q2" :class="getInputClass('q2')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The largest number of visitors...">
+                        <textarea rows="1" name="q2" x-model="answers.q2" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q2') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The largest number of visitors..."></textarea>
                         <template x-if="showResults && !isCorrect('q2')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q2[0]"></span></p>
                         </template>
@@ -88,7 +88,7 @@
                     <!-- Q3 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">3. Biaya sewa melonjak dari 11% menjadi 21%, yang meningkat dua kali lipat (which doubled) selama periode sepuluh tahun tersebut.</label>
-                        <input type="text" name="q3" x-model="answers.q3" :class="getInputClass('q3')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Rental costs surged...">
+                        <textarea rows="1" name="q3" x-model="answers.q3" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q3') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Rental costs surged..."></textarea>
                         <template x-if="showResults && !isCorrect('q3')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q3[0]"></span></p>
                         </template>
@@ -97,7 +97,7 @@
                     <!-- Q4 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">4. Konsumsi tetap tidak berubah dengan dua puncak kecil, yang sesuai (which corresponded) dengan dua penurunan pada penggunaan energi nuklir.</label>
-                        <input type="text" name="q4" x-model="answers.q4" :class="getInputClass('q4')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Consumption remained unchanged...">
+                        <textarea rows="1" name="q4" x-model="answers.q4" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q4') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Consumption remained unchanged..."></textarea>
                         <template x-if="showResults && !isCorrect('q4')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q4[0]"></span></p>
                         </template>
@@ -106,7 +106,7 @@
                     <!-- Q5 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">5. Email dan pesan instan berada di posisi ketiga dan keempat, yang mencatat (which scored) angka masing-masing 17% dan 16% untuk pria.</label>
-                        <input type="text" name="q5" x-model="answers.q5" :class="getInputClass('q5')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Email and instant messaging...">
+                        <textarea rows="1" name="q5" x-model="answers.q5" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q5') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Email and instant messaging..."></textarea>
                         <template x-if="showResults && !isCorrect('q5')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q5[0]"></span></p>
                         </template>
@@ -115,7 +115,7 @@
                     <!-- Q6 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">6. Jumlah uang yang ditabung turun drastis, yang berkurang (which stepped down) dari 6% menjadi hanya 2%.</label>
-                        <input type="text" name="q6" x-model="answers.q6" :class="getInputClass('q6')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The amount of money saved...">
+                        <textarea rows="1" name="q6" x-model="answers.q6" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q6') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The amount of money saved..."></textarea>
                         <template x-if="showResults && !isCorrect('q6')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q6[0]"></span></p>
                         </template>
@@ -124,7 +124,7 @@
                     <!-- Q7 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">7. Jumlah pengguna internet mencapai 1,5 juta, yang merupakan dua kali lipat (which was double) dari perkiraan awal.</label>
-                        <input type="text" name="q7" x-model="answers.q7" :class="getInputClass('q7')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The number of internet users...">
+                        <textarea rows="1" name="q7" x-model="answers.q7" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q7') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The number of internet users..."></textarea>
                         <template x-if="showResults && !isCorrect('q7')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q7[0]"></span></p>
                         </template>
@@ -133,7 +133,7 @@
                     <!-- Q8 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">8. Jumlah pengguna internet melonjak lagi selama Maret dan April, yang melampaui (which outstripped) prediksi dengan selisih yang besar.</label>
-                        <input type="text" name="q8" x-model="answers.q8" :class="getInputClass('q8')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The number of internet users...">
+                        <textarea rows="1" name="q8" x-model="answers.q8" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q8') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The number of internet users..."></textarea>
                         <template x-if="showResults && !isCorrect('q8')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q8[0]"></span></p>
                         </template>
@@ -142,7 +142,7 @@
                     <!-- Q9 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">9. Angka pengangguran meningkat menjadi 10%, yang menandakan (which signaled) krisis ekonomi terburuk.</label>
-                        <input type="text" name="q9" x-model="answers.q9" :class="getInputClass('q9')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Unemployment figures rose...">
+                        <textarea rows="1" name="q9" x-model="answers.q9" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q9') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Unemployment figures rose..."></textarea>
                         <template x-if="showResults && !isCorrect('q9')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q9[0]"></span></p>
                         </template>
@@ -151,7 +151,7 @@
                     <!-- Q10 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">10. Produksi gandum naik mencapai 500 ton, yang melampaui (which surpassed) target tahunan.</label>
-                        <input type="text" name="q10" x-model="answers.q10" :class="getInputClass('q10')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Wheat production rose...">
+                        <textarea rows="1" name="q10" x-model="answers.q10" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q10') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Wheat production rose..."></textarea>
                         <template x-if="showResults && !isCorrect('q10')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q10[0]"></span></p>
                         </template>
@@ -160,7 +160,7 @@
                     <!-- Q11 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">11. Penggunaan batu bara menurun perlahan, yang mencapai (which reached) titik terendahnya di tahun 2010.</label>
-                        <input type="text" name="q11" x-model="answers.q11" :class="getInputClass('q11')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Coal usage declined slowly...">
+                        <textarea rows="1" name="q11" x-model="answers.q11" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q11') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Coal usage declined slowly..."></textarea>
                         <template x-if="showResults && !isCorrect('q11')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q11[0]"></span></p>
                         </template>
@@ -169,7 +169,7 @@
                     <!-- Q12 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">12. Populasi kota meningkat pesat, yang menyebabkan (which led) pada kurangnya ketersediaan perumahan.</label>
-                        <input type="text" name="q12" x-model="answers.q12" :class="getInputClass('q12')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="The city's population...">
+                        <textarea rows="1" name="q12" x-model="answers.q12" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q12') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="The city's population..."></textarea>
                         <template x-if="showResults && !isCorrect('q12')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q12[0]"></span></p>
                         </template>
@@ -178,7 +178,7 @@
                     <!-- Q13 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">13. Harga minyak berfluktuasi sepanjang tahun, yang berakhir (which ended) pada angka $80 per barel.</label>
-                        <input type="text" name="q13" x-model="answers.q13" :class="getInputClass('q13')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Oil prices fluctuated...">
+                        <textarea rows="1" name="q13" x-model="answers.q13" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q13') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Oil prices fluctuated..."></textarea>
                         <template x-if="showResults && !isCorrect('q13')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q13[0]"></span></p>
                         </template>
@@ -187,7 +187,7 @@
                     <!-- Q14 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">14. Tingkat kelulusan siswa naik menjadi 95%, yang merupakan (which was) pencapaian tertinggi sekolah tersebut.</label>
-                        <input type="text" name="q14" x-model="answers.q14" :class="getInputClass('q14')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Student graduation rates...">
+                        <textarea rows="1" name="q14" x-model="answers.q14" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q14') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Student graduation rates..."></textarea>
                         <template x-if="showResults && !isCorrect('q14')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q14[0]"></span></p>
                         </template>
@@ -196,7 +196,7 @@
                     <!-- Q15 -->
                     <div class="space-y-2">
                         <label class="block text-gray-700 font-medium text-base">15. Investasi asing turun di kuartal kedua, yang mencerminkan (which reflected) ketidakpastian pasar.</label>
-                        <input type="text" name="q15" x-model="answers.q15" :class="getInputClass('q15')" class="w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Foreign investment fell...">
+                        <textarea rows="1" name="q15" x-model="answers.q15" :style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block getInputClass('q15') resize-none overflow-hidden" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full px-4 py-3 rounded-lg border shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none overflow-hidden" placeholder="Foreign investment fell..."></textarea>
                         <template x-if="showResults && !isCorrect('q15')">
                             <p class="text-sm text-red-600 mt-1">Correct: <span x-text="correctAnswers.q15[0]"></span></p>
                         </template>
@@ -250,16 +250,17 @@ document.addEventListener('alpine:init', () => {
             }
             
             setTimeout(() => {
-                const inputs = document.querySelectorAll('input[name^="q"]');
+                const inputs = document.querySelectorAll('input[name^="q"], textarea[name^="q"]');
                 inputs.forEach(el => {
                     if (el.value) {
                          this.answers[el.name] = el.value;
                     }
+                    if (el.scrollHeight > 0) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
                 });
             }, 500);
 
             this.$root.addEventListener('input', (e) => {
-                if (e.target.matches('input[type="text"][name^="q"]')) {
+                if (e.target.matches('input[type="text"][name^="q"], textarea[name^="q"]')) {
                     this.queueDraftSync();
                 }
             });

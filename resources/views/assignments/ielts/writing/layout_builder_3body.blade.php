@@ -48,6 +48,20 @@
                 this.restoreFromServerAnswers();
             }
 
+            const resizeAll = () => {
+                this.$nextTick(() => {
+                    this.$el.querySelectorAll('textarea.auto-expand-answer').forEach((el) => {
+                        if (el.scrollHeight > 0) {
+                            el.style.height = 'auto';
+                            el.style.height = el.scrollHeight + 'px';
+                        }
+                    });
+                });
+            };
+            resizeAll();
+            setTimeout(resizeAll, 150);
+            this.$watch('mode', resizeAll);
+
             // Watch & Save
             const saver = () => {
                 localStorage.setItem(key, JSON.stringify({
@@ -55,6 +69,7 @@
                     essay: this.essay
                 }));
                 this.queueDraftSync();
+                resizeAll();
             };
 
             this.$watch('form', saver);
@@ -453,7 +468,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Introduction Text</label>
-                            <textarea name="form_intro" x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
+                            <textarea name="form_intro" x-model="form.intro" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -469,9 +484,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen</label>
-                            <input name="form_b1_a1" x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama...">
-                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <textarea name="form_b1_a1" x-model="form.b1_a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-500 text-sm resize-none overflow-hidden" placeholder="Poin utama..."></textarea>
+                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -487,9 +502,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen</label>
-                            <input name="form_b2_a1" x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama...">
-                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <textarea name="form_b2_a1" x-model="form.b2_a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-500 text-sm resize-none overflow-hidden" placeholder="Poin utama..."></textarea>
+                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -505,9 +520,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-purple-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-purple-600 uppercase mb-1">Argumen</label>
-                            <input name="form_b3_a1" x-model="form.b3_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-purple-500 text-sm" placeholder="Poin utama...">
-                            <textarea name="form_b3_a1_supp" x-model="form.b3_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea name="form_b3_a1_ex" x-model="form.b3_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <textarea name="form_b3_a1" x-model="form.b3_a1" rows="1" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-purple-500 text-sm resize-none overflow-hidden" placeholder="Poin utama..."></textarea>
+                            <textarea name="form_b3_a1_supp" x-model="form.b3_a1_supp" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b3_a1_ex" x-model="form.b3_a1_ex" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block w-full p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none overflow-hidden" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -522,7 +537,7 @@
                             x-text="(essay ? essay.trim().split(/\s+/).filter(w => /[A-Za-z]/.test(w)).length : 0) + ' Words'">
                         </span>
                     </div>
-                    <textarea name="essay" x-model="essay" class="flex-1 w-full p-4 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100 transition-colors resize-none font-serif text-lg leading-relaxed" placeholder="Tuliskan ketiga paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
+                    <textarea name="essay" x-model="essay" style="field-sizing: content;" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'" x-init="$nextTick(() => { if ($el.scrollHeight > 0) { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } })" class="auto-expand-answer block flex-1 w-full p-4 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100 transition-colors resize-none overflow-hidden font-serif text-lg leading-relaxed" placeholder="Tuliskan ketiga paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
                 </div>
             </div>
 

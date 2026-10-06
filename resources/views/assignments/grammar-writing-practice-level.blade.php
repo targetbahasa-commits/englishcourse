@@ -897,6 +897,20 @@
                                 },
                                 init() {
                                     this.loadState();
+
+                                    // Bridge for practice_toolbar.blade.php's "Lesson Explanation"
+                                    // button - without this it always explained the generic static
+                                    // meeting-prompt text passed in from the server ("Grammar
+                                    // Practice: Latihan terjemahan...") instead of whatever topics
+                                    // (e.g. Reducing, Abridgement) are actually checked above, since
+                                    // the two are separate Alpine components with no shared state.
+                                    // Reads this.selectedLessons live on every call, so it stays
+                                    // correct as the checkboxes change.
+                                    window.getCurrentLessonTopic = () => {
+                                        return this.selectedLessons && this.selectedLessons.length > 0
+                                            ? this.selectedLessons.join(', ')
+                                            : null;
+                                    };
                                 },
                                 saveState() {
                                     localStorage.setItem('practice_state_{{ $level }}', JSON.stringify({
@@ -1159,15 +1173,53 @@
                                     this.lessonExplanationHtml = '';
 
                                     try {
-                                        const topicsList = this.selectedLessons.includes('All Lessons') ? 'Semua Topik Grammar secara umum' : this.selectedLessons.join(', ');
+                                        const hasAllLessons = this.selectedLessons.length === 0 || 
+                                                              this.selectedLessons.includes('All Lessons') || 
+                                                              (this.availableLessons && this.selectedLessons.length >= this.availableLessons.length);
+
+                                        const topicsList = hasAllLessons 
+                                            ? 'Ringkasan Materi Grammar Terpadu (Seluruh Topik Tata Bahasa Utama: Tenses Dasar & Lanjutan, Active & Passive, Clauses, Modifiers, Reducing, Omitting, Abridgement, Inversion)' 
+                                            : this.selectedLessons.join(', ');
 
                                         let topicRules = "";
-                                        if (this.selectedLessons.includes('Omitting') || topicsList.includes('Omitting')) {
-                                            topicRules = `\n\nATURAN MUTLAK KHUSUS TOPIK "Omitting":
-                    - Topik "Omitting" HANYA mencakup dua hal berikut:
-                      1. Omitting "that" untuk Noun Clause as Object (contoh: I believe [that] education is essential / Saya percaya pendidikan itu penting).
-                      2. Omitting "that" untuk Relative Pronoun as Object (contoh: The report [that] he submitted was thorough / Laporan yang dia serahkan itu mendalam).
-                    - DILARANG KERAS menjelaskan atau memberikan contoh omitting kata/struktur selain dua hal di atas (seperti omitting "will", "be", subject pronoun, auxiliary verb, dsb).`;
+                                        const rulesList = [];
+
+                                        const hasTopic = (term) => {
+                                            return this.selectedLessons.some(l => l.toLowerCase().includes(term.toLowerCase())) || 
+                                                   topicsList.toLowerCase().includes(term.toLowerCase());
+                                        };
+                                        
+                                        if (hasTopic('reducing')) {
+                                            rulesList.push(`\n- ATURAN KHUSUS TOPIK "Reducing":
+  Hanya fokus pada "Adjective Clause Reduction" (menghilangkan Conjunction who/which/that sebagai subjek).
+  Hanya jelaskan 4 pola berikut:
+  1. Aktif -> V-ing (Present Participle). Contoh: Scientists who research -> Scientists researching
+  2. Pasif -> V3 (Past Participle). Contoh: Specimen which was found -> Specimen found
+  3. Nominal -> Adjective / Prepositional Phrase. Contoh: Island which is rich in species -> Island rich in species
+  4. Certain Words (the first, the second, the only, the best, dsb) -> To Infinitive. Contoh: The first man who walked -> The first man to walk
+  DILARANG KERAS menjelaskan bentuk reduction lainnya (misal gerundial clause, participle clause secara umum, dsb).`);
+                                        }
+
+                                        if (hasTopic('abridgement')) {
+                                            rulesList.push(`\n- ATURAN KHUSUS TOPIK "Abridgement":
+  Hanya fokus pada "Adverbial Clause Reduction" (penyederhanaan klausa keterangan dengan menghilangkan subjeknya, biasanya setelah when, while, after, before, although, unless, once).
+  Hanya jelaskan 3 pola berikut:
+  1. Aktif -> V-ing. Contoh: When they applied for the scholarship -> When applying for the scholarship
+  2. Pasif -> V3. Contoh: Although it is designed for students -> Although designed for students
+  3. Nominal -> Adjective / Prepositional Phrase. Contoh: While she was in the laboratory -> While in the laboratory
+  DILARANG KERAS menjelaskan bentuk abridgement/reduction lainnya.`);
+                                        }
+
+                                        if (hasTopic('omitting')) {
+                                            rulesList.push(`\n- ATURAN KHUSUS TOPIK "Omitting":
+  Hanya mencakup dua hal berikut:
+  1. Omitting "that" untuk Noun Clause as Object (contoh: I believe [that] education is essential / Saya percaya pendidikan itu penting).
+  2. Omitting "that/which/whom" untuk Relative Pronoun as Object (contoh: The report [that] he submitted was thorough / Laporan yang dia serahkan itu mendalam).
+  DILARANG KERAS menjelaskan atau memberikan contoh omitting kata/struktur selain dua hal di atas (seperti omitting "will", "be", subject pronoun, auxiliary verb, dsb).`);
+                                        }
+
+                                        if (rulesList.length > 0) {
+                                            topicRules = `\n\nATURAN MUTLAK KONTEN MATERI:` + rulesList.join('');
                                         }
 
                                         const prompt = `Anda adalah instruktur bahasa Inggris profesional. Tugas Anda adalah memberikan ringkasan materi untuk topik grammar: **${topicsList}**.${topicRules}
@@ -1246,8 +1298,19 @@
                                     // "activeLessons is not defined" right after the knowledge base fetch,
                                     // which aborted the whole function before it ever reached the AI request,
                                     // leaving isGenerating stuck true and the button spinning forever.
-                                    let activeLessons = this.selectedLessons.length > 0 ? this.selectedLessons : ['All Lessons'];
-                                    let topicsList = activeLessons.join(', ');
+                                    let isAllSelected = this.selectedLessons.length === 0 || 
+                                                        this.selectedLessons.includes('All Lessons') || 
+                                                        (this.availableLessons && this.selectedLessons.length >= this.availableLessons.length);
+
+                                    let activeLessons = isAllSelected 
+                                        ? ['All Lessons'] 
+                                        : (this.selectedLessons.length > 0 ? this.selectedLessons : ['All Lessons']);
+
+                                    let isMultiTopic = isAllSelected || activeLessons.includes('Mix') || activeLessons.length > 1;
+
+                                    let topicsList = isAllSelected
+                                        ? 'Seluruh Topik Grammar (Campuran Komprehensif Berbagai Pola Tata Bahasa)'
+                                        : activeLessons.join(', ');
                                     try {
                                         let words = [];
                                         let collocations = [];
@@ -1331,11 +1394,23 @@
                                         }
                                     }
 
-                                    if (activeLessons.includes('Omitting') || topicsList.includes('Omitting')) {
+                                    if (isAllSelected) {
+                                        customRules += `\n\n==============================================================
+                    INSTRUKSI KHUSUS "SEMUA TOPIK (ALL LESSONS)":
+                    ==============================================================
+                    SEMUA 10 KALIMAT LATIHAN DAN PARAGRAF HARUS MENCERMINKAN CAMPURAN KOMPREHENSIF DARI BERBAGAI TINGKATAN GRAMMAR:
+                    - Campurkan struktur Tenses (Simple Present, Simple Past, Present Perfect)
+                    - Campurkan struktur Active dan Passive Voice
+                    - Campurkan struktur Clauses (Adjective Clause, Adverbial Clause, Noun Clause)
+                    - Campurkan struktur Advanced (Reducing / Abridgement / Omitting / Inversion / Cleft Sentence)
+                    Pastikan setiap nomor kalimat memiliki fokus grammar yang beraneka ragam dan menantang sesuai level CEFR ${levelStr}!`;
+                                    }
+
+                                    if (!isAllSelected && (activeLessons.includes('Omitting') || topicsList.toLowerCase().includes('omitting'))) {
                                         customRules += `\n\n==============================================================
                     INSTRUKSI MUTLAK KHUSUS TOPIK "OMITTING":
                     ==============================================================
-                    SEMUA 10 KALIMAT LATIHAN (NOMOR 1 SAMPAI 10) WAJIB MERUPAKAN KALIMAT OMITTING.
+                    JIKA TOPIK INI DIPILIH BERSAMA TOPIK LAIN, BAGILAH BEBERAPA KALIMAT UNTUK TOPIK OMITTING INI. JIKA HANYA TOPIK INI, SEMUA 10 KALIMAT WAJIB OMITTING.
                     DILARANG KERAS MEMBUAT SEKALIPUN 1 KALIMAT BIASA/AKTIF/PASIF TANPA STRUKTUR OMITTING (seperti "Perusahaan mengalokasikan dana...").
 
                     Topik Omitting HANYA BOLEH menggunakan 2 jenis pola ini (kombinasikan keduanya untuk tema ${this.selectedVocabTopic || 'Business'} dan level ${this.selectedLevel || 'B2'}):
@@ -1373,11 +1448,11 @@
                     SEMUA 10 KALIMAT HARUS MENGIKUTI POLA DI ATAS SESUAI TEMA ${this.selectedVocabTopic || 'Business'} DAN LEVEL ${this.selectedLevel || 'B2'}.`;
                                     }
 
-                                    if (activeLessons.includes('Reducing') || topicsList.includes('Reducing')) {
+                                    if (!isAllSelected && (activeLessons.includes('Reducing') || topicsList.toLowerCase().includes('reducing'))) {
                                         customRules += `\n\n==============================================================
                     INSTRUKSI MUTLAK KHUSUS TOPIK "REDUCING" (REDUCED RELATIVE CLAUSES / PARTICIPLE CLAUSES):
                     ==============================================================
-                    SEMUA 10 KALIMAT LATIHAN (NOMOR 1 SAMPAI 10) WAJIB MERUPAKAN KALIMAT REDUCING RELATIVE CLAUSE (PARTICIPLE CLAUSES).
+                    JIKA TOPIK INI DIPILIH BERSAMA TOPIK LAIN, BAGILAH BEBERAPA KALIMAT UNTUK TOPIK REDUCING INI. JIKA HANYA TOPIK INI, SEMUA 10 KALIMAT WAJIB REDUCING.
                     DILARANG KERAS MEMBUAT SEKALIPUN 1 KALIMAT BIASA DENGAN KATA KERJA "MENGURANGI" (seperti "Pemerintah mengurangi emisi..." ATAU "Perusahaan memperbarui teknologi untuk mengurangi..."). 
                     "REDUCING" DI SINI ADALAH PENYEDERHANAAN KLAUSA RELATIF (ADJECTIVE CLAUSE REDUCTION)!
 
@@ -1398,11 +1473,11 @@
                     DILARANG HANYA MEMBUAT KALIMAT AKTIF! WAJIB MENYERTAKAN KALIMAT PASIF DAN NOMINAL AGAR TERDAPAT MIX DENGAN SEIMBANG (AKTIF, PASIF, DAN NOMINAL).`;
                                     }
 
-                                    if (activeLessons.includes('Abridgement') || topicsList.includes('Abridgement')) {
+                                    if (!isAllSelected && (activeLessons.includes('Abridgement') || topicsList.toLowerCase().includes('abridgement'))) {
                                         customRules += `\n\n==============================================================
                     INSTRUKSI MUTLAK KHUSUS TOPIK "ABRIDGEMENT" (REDUCED ADVERBIAL CLAUSES):
                     ==============================================================
-                    SEMUA 10 KALIMAT LATIHAN (NOMOR 1 SAMPAI 10) WAJIB MERUPAKAN KALIMAT ABRIDGEMENT (REDUCED ADVERBIAL CLAUSE).
+                    JIKA TOPIK INI DIPILIH BERSAMA TOPIK LAIN, BAGILAH BEBERAPA KALIMAT UNTUK TOPIK ABRIDGEMENT INI. JIKA HANYA TOPIK INI, SEMUA 10 KALIMAT WAJIB ABRIDGEMENT.
                     DILARANG KERAS MEMBUAT SEKALIPUN 1 KALIMAT BIASA SEPERTI "Pemerintah mengembangkan kebijakan..." ATAU "Perusahaan memiliki komitmen...".
 
                     ABRIDGEMENT DI SINI ADALAH PENYEDERHANAAN KLAUSA ADVERBIA (ADVERBIAL CLAUSE REDUCTION) YANG MEMUAT KATA HUBUNG SEPERTI: after, before, while, when, whenever, although, though, if, unless, once, wherever, until, as.
@@ -1511,8 +1586,11 @@
                     ATURAN MUTLAK YANG TIDAK BOLEH DILANGGAR SAMA SEKALI:
                     ==============================================================
 
-                    1. HANYA BOLEH menggunakan SATU struktur grammar utama: **${topicsList}**.
-                       - Setiap kalimat, baik di bagian latihan kalimat maupun paragraf, WAJIB memuat struktur grammar tersebut.
+                    1. STRUKTUR GRAMMAR DAN DISTRIBUSI TOPIK:
+                    ${isMultiTopic ? `   - Topik yang dipilih merupakan kombinasi: **${topicsList}**.
+                       - WAJIB mendistribusikan 10 kalimat latihan dan 2 paragraf secara seimbang dan bervariasi mencakup topik-topik grammar tersebut.
+                       - DILARANG hanya menggunakan 1 topik saja! Pastikan setiap kalimat latihan melatih pola grammar yang bervariasi dari topik-topik yang dipilih di atas agar latihan bersifat komprehensif.` : `   - HANYA BOLEH menggunakan SATU struktur grammar utama: **${topicsList}**.
+                       - Setiap kalimat, baik di bagian latihan kalimat maupun paragraf, WAJIB memuat struktur grammar tersebut secara eksplisit.`}
                        - Paragraf ini harus bernada akademis, argumentatif, dan memiliki linking words (transisi) yang sangat baik ala IELTS.
 
                     2. KOMPOSISI BENTUK KALIMAT (WAJIB MIX SEIMBANG ANTARA AKTIF, PASIF, DAN NOMINAL):
@@ -1562,9 +1640,12 @@
                     ATURAN MUTLAK YANG TIDAK BOLEH DILANGGAR SAMA SEKALI:
                     ==============================================================
 
-                    1. HANYA BOLEH menggunakan SATU struktur grammar utama: **${topicsList}**.
+                    1. STRUKTUR GRAMMAR DAN DISTRIBUSI TOPIK:
+                    ${isMultiTopic ? `   - Topik yang dipilih merupakan kombinasi: **${topicsList}**.
+                       - WAJIB mendistribusikan 10 kalimat latihan dan paragraf secara merata dan bervariasi di antara topik-topik tersebut.
+                       - DILARANG hanya menggunakan 1 topik saja! Pastikan kalimat melatih pola-pola grammar yang dipilih secara variatif.` : `   - HANYA BOLEH menggunakan SATU struktur grammar utama: **${topicsList}**.
                        - Setiap kalimat WAJIB menunjukkan struktur grammar tersebut secara eksplisit.
-                       - DILARANG KERAS menggunakan struktur grammar LAIN yang tidak termasuk dalam topik "${topicsList}".
+                       - DILARANG KERAS menggunakan struktur grammar LAIN yang tidak termasuk dalam topik "${topicsList}".`}
                        - Contoh TERLARANG jika topiknya adalah "Modal":
                          * DILARANG menggunakan Gerund (V-ing sebagai noun, contoh: "dengan menggunakan", "by using", "swimming is...")
                          * DILARANG menggunakan To-Infinitive sebagai fokus kalimat (contoh: "to study is...", "I want to go...")

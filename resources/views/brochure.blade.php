@@ -394,14 +394,15 @@
                 foreach($group['items'] as $prog) {
                     $is_default = !in_array($prog->slug, ['ielts-academic-full-package', 'toefl-itp', 'toefl-ibt', 'ielts-general', 'pte-academic']);
                     
+                    // $prog is already scoped to $type via Program::where('delivery_mode', $type) in the controller
                     if ($is_default) {
-                        $bp = $type === 'offline' ? ($prog->price_offline ?? $prog->price ?? 0) : ($prog->price ?? 0);
-                        $bs = $type === 'offline' ? ($prog->price_semi_private_offline ?? $prog->price_semi_private ?? 0) : ($prog->price_semi_private ?? 0);
-                        $bpv = $type === 'offline' ? ($prog->price_private_offline ?? $prog->price_private ?? 0) : ($prog->price_private ?? 0);
+                        $bp = $prog->price ?? 0;
+                        $bs = $prog->price_semi_private ?? 0;
+                        $bpv = $prog->price_private ?? 0;
                     } else {
-                        $bp = $type === 'offline' ? (($prog->price_offline ?? 0) > 0 ? $prog->price_offline : (($prog->price ?? 0) > 0 ? $prog->price : 1999000)) : (($prog->price ?? 0) > 0 ? $prog->price : 1999000);
-                        $bs = $type === 'offline' ? (($prog->price_semi_private_offline ?? 0) > 0 ? $prog->price_semi_private_offline : (($prog->price_semi_private ?? 0) > 0 ? $prog->price_semi_private : 2499000)) : (($prog->price_semi_private ?? 0) > 0 ? $prog->price_semi_private : 2499000);
-                        $bpv = $type === 'offline' ? (($prog->price_private_offline ?? 0) > 0 ? $prog->price_private_offline : (($prog->price_private ?? 0) > 0 ? $prog->price_private : 3499000)) : (($prog->price_private ?? 0) > 0 ? $prog->price_private : 3499000);
+                        $bp = ($prog->price ?? 0) > 0 ? $prog->price : 1999000;
+                        $bs = ($prog->price_semi_private ?? 0) > 0 ? $prog->price_semi_private : 2499000;
+                        $bpv = ($prog->price_private ?? 0) > 0 ? $prog->price_private : 3499000;
                     }
 
                     if ($bp > 0) $hasRegular = true;
@@ -419,9 +420,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
                     @php $__currentLoopData = $group['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $program): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); @endphp
                     
-                    @php $base_price = $type === 'offline' ? (($program->price_offline ?? 0) > 0 ? $program->price_offline : (($program->price ?? 0) > 0 ? $program->price : 1999000)) : (($program->price ?? 0) > 0 ? $program->price : 1999000);
-$base_semi = $type === 'offline' ? (($program->price_semi_private_offline ?? 0) > 0 ? $program->price_semi_private_offline : (($program->price_semi_private ?? 0) > 0 ? $program->price_semi_private : 2499000)) : (($program->price_semi_private ?? 0) > 0 ? $program->price_semi_private : 2499000);
-$base_priv = $type === 'offline' ? (($program->price_private_offline ?? 0) > 0 ? $program->price_private_offline : (($program->price_private ?? 0) > 0 ? $program->price_private : 3499000)) : (($program->price_private ?? 0) > 0 ? $program->price_private : 3499000); @endphp
+                    @php
+                        // $program is already scoped to $type via Program::where('delivery_mode', $type) in the controller
+                        $base_price = ($program->price ?? 0) > 0 ? $program->price : 1999000;
+                        $base_semi = ($program->price_semi_private ?? 0) > 0 ? $program->price_semi_private : 2499000;
+                        $base_priv = ($program->price_private ?? 0) > 0 ? $program->price_private : 3499000;
+                    @endphp
 <div x-show="(classType === 'regular' && {{ $base_price ?: 0 }} > 0) || (classType === 'semi_private' && {{ $base_semi ?: 0 }} > 0) || (classType === 'private' && {{ $base_priv ?: 0 }} > 0)" x-transition>
                     @switch($program->slug)
                         @case('ielts-academic-full-package')
@@ -1673,9 +1677,12 @@ Fokus penuh 1-on-1 dengan tutor. Jadwal lebih fleksibel.
                                 </div>
                             </div>
 
-                            @php $base_price = $type === 'offline' ? ($program->price_offline ?? $program->price ?? 0) : ($program->price ?? 0);
-                                    $base_semi = $type === 'offline' ? ($program->price_semi_private_offline ?? $program->price_semi_private ?? 0) : ($program->price_semi_private ?? 0);
-                                    $base_priv = $type === 'offline' ? ($program->price_private_offline ?? $program->price_private ?? 0) : ($program->price_private ?? 0); @endphp
+                            @php
+                                // $program is already scoped to $type via Program::where('delivery_mode', $type) in the controller
+                                $base_price = $program->price ?? 0;
+                                $base_semi = $program->price_semi_private ?? 0;
+                                $base_priv = $program->price_private ?? 0;
+                            @endphp
                                 @if($base_price > 0 || $base_semi > 0 || $base_priv > 0)
 @php
     $priceCount = ($base_price > 0 ? 1 : 0) + ($base_semi > 0 ? 1 : 0) + ($base_priv > 0 ? 1 : 0);

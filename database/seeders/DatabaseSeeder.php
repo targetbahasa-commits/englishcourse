@@ -222,6 +222,7 @@ class DatabaseSeeder extends Seeder
             ToeflStructureMeeting10Seeder::class,
             ToeflStructureMeeting11Seeder::class,
             ToeflStructureMeeting12Seeder::class,
+            ToeflStructureMeeting13Seeder::class,
             ToeflStructureMeeting14Seeder::class,
             ToeflStructureMeeting15Seeder::class,
             ToeflStructureMeeting16Seeder::class,

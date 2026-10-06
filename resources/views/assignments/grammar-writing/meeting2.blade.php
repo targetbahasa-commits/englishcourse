@@ -101,13 +101,14 @@
                                             @php
                                                 $key = str_replace(' ', '_', strtolower($tenseName)) . '_' . $type;
                                             @endphp
-                                            <input type="text"
-                                                   name="tenses[{{ $key }}]"
-                                                   x-model="matrixAnswers['{{ $key }}']"
-                                                   x-init="matrixAnswers['{{ $key }}'] = '{{ addslashes(old('tenses.'.$key, isset($results[$tenseName][$type]['user_answer']) ? $results[$tenseName][$type]['user_answer'] : '')) }}'"
-                                                   class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 font-mono text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   {{ $stage === 3 ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea name="tenses[{{ $key }}]"
+                                                      rows="1"
+                                                      style="field-sizing: content;"
+                                                      x-model="matrixAnswers['{{ $key }}']"
+                                                      x-init="matrixAnswers['{{ $key }}'] = '{{ addslashes(old('tenses.'.$key, isset($results[$tenseName][$type]['user_answer']) ? $results[$tenseName][$type]['user_answer'] : '')) }}'"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 font-mono text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      {{ $stage === 3 ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('tenses.'.$key, isset($results[$tenseName][$type]['user_answer']) ? $results[$tenseName][$type]['user_answer'] : '') }}</textarea>
 
 
                                            
@@ -275,13 +276,13 @@
                             <div x-show="matrixAnswers['{{ $key }}'] && matrixAnswers['{{ $key }}'].trim() !== ''" style="display: none;" class="text-xs text-sky-600 font-mono mb-2 bg-sky-50 inline-block px-2 py-1 rounded border border-sky-100">
                                 <span x-text="matrixAnswers['{{ $key }}']"></span>
                             </div>
-                            <input type="text"
-                                   name="trans_sent[{{ $idx }}]"
-                                   value="{{ old('trans_sent.'.$idx, $transResults['sentences'][$idx]['user_answer'] ?? ($draftAnswers['trans_sent'][$idx] ?? '')) }}"
-                                   class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                   placeholder="Translate to English..."
-                                   {{ $stage === 3 ? 'readonly' : '' }}
-                                   autocomplete="off">
+                            <textarea name="trans_sent[{{ $idx }}]"
+                                      rows="1"
+                                      style="field-sizing: content;"
+                                      class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                      placeholder="Translate to English..."
+                                      {{ $stage === 3 ? 'readonly' : '' }}
+                                      autocomplete="off">{{ old('trans_sent.'.$idx, $transResults['sentences'][$idx]['user_answer'] ?? ($draftAnswers['trans_sent'][$idx] ?? '')) }}</textarea>
                            
                             @if($stage === 3 && isset($transResults['sentences'][$idx]))
                                 @php
@@ -419,13 +420,13 @@
                                             <div x-show="matrixAnswers['{{ $key }}'] && matrixAnswers['{{ $key }}'].trim() !== ''" style="display: none;" class="mb-2 text-xs text-sky-600 font-mono bg-sky-50 inline-block px-2 py-1 rounded border border-sky-100">
                                                 <span x-text="matrixAnswers['{{ $key }}']"></span>
                                             </div>
-                                            <input type="text"
-                                                   name="trans_matrix[{{ $key }}]"
-                                                   value="{{ old('trans_matrix.'.$key, $transResults['matrix'][$tenseName][$type]['user_answer'] ?? ($draftAnswers['trans_matrix'][$key] ?? '')) }}"
-                                                   class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                                   placeholder="Translate..."
-                                                   {{ $stage === 3 ? 'readonly' : '' }}
-                                                   autocomplete="off">
+                                            <textarea name="trans_matrix[{{ $key }}]"
+                                                      rows="1"
+                                                      style="field-sizing: content;"
+                                                      class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                      placeholder="Translate..."
+                                                      {{ $stage === 3 ? 'readonly' : '' }}
+                                                      autocomplete="off">{{ old('trans_matrix.'.$key, $transResults['matrix'][$tenseName][$type]['user_answer'] ?? ($draftAnswers['trans_matrix'][$key] ?? '')) }}</textarea>
                                            
                                             @if($stage === 3 && isset($transResults['matrix'][$tenseName][$type]))
                                                 @php
@@ -571,8 +572,7 @@
          */
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
-            // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             
             return !!isReadonly;
         },

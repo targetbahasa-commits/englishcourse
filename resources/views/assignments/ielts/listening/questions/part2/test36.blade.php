@@ -1,32 +1,364 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 36</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11 - 16</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">English vocabulary topics</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Writing mock tests</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">IELTS online training</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Advantages of Stanfield Childcare Centre</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Detail</strong><strong>Another Detail</strong></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>1</strong>Walls are <strong class="text-blue-600 font-bold ml-1 mr-1">11</strong><input type="text" name="answers[11]" value="{{ old('answers.11') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">includes the <strong class="text-blue-600 font-bold ml-1 mr-1">12</strong><input type="text" name="answers[12]" value="{{ old('answers.12') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>2</strong>Teachers are able to teach a <strong class="text-blue-600 font-bold ml-1 mr-1">13</strong><input type="text" name="answers[13]" value="{{ old('answers.13') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">There are many special <strong class="text-blue-600 font-bold ml-1 mr-1">14</strong><input type="text" name="answers[14]" value="{{ old('answers.14') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>3</strong>They <strong class="text-blue-600 font-bold ml-1 mr-1">15</strong><input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> Surfaces daily.procedures to limit the spread of <strong class="text-blue-600 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 17-20</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong>, or <strong>C</strong>.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>NB</strong>_You may use a letter more than once_.</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[3]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>Andrea</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Books & Literature</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[3]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>Bella</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[3]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Cathy</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Which childcare worker:</strong></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>17</strong> has her own children?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>18</strong> often sleeps at the center?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>19</strong> is good with shy children?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>20</strong> is a good cook?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Online English Courses</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">IELTS writing topics</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">General training tests</p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 11 - 12</h4>
+        <p class="text-gray-600 font-medium">Choose TWO letters, A-E.</p>
+        <p class="text-gray-600 font-medium">Which TWO things are included in the price of the tour?</p>
+        <div class="space-y-2 pl-4 mb-4">
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">A</span>
+                <span>garden gloves</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">B</span>
+                <span>ladybugs</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">C</span>
+                <span>bush timbering lessons</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">D</span>
+                <span>food</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">E</span>
+                <span>hummina birds</span>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">11</strong>
+                <span class="text-gray-700 font-medium">Question 11</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[11]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">12</strong>
+                <span class="text-gray-700 font-medium">Question 12</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[12]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">Questions 13 and 14</h4>
+        <p class="text-gray-600 font-medium">Which TWO facilities of Pine Garden are open today?</p>
+        <div class="space-y-2 pl-4 mb-4">
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">A</span>
+                <span>plant care centre</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">B</span>
+                <span>cafe</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">C</span>
+                <span>gift shop</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">D</span>
+                <span>model town</span>
+            </div>
+            <div class="flex items-center gap-3 text-base text-gray-700">
+                <span class="font-bold text-gray-900 w-6">E</span>
+                <span>tourist office</span>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">13</strong>
+                <span class="text-gray-700 font-medium">Question 13</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[13]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">14</strong>
+                <span class="text-gray-700 font-medium">Question 14</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[14]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">Questions 15-20</h4>
+        <p class="text-gray-600 font-medium">Choose SIX answers from the box and write the correct letter, A-H, next to</p>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">15</strong>
+                <span class="text-gray-700 font-medium">Question 15</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[15]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">16</strong>
+                <span class="text-gray-700 font-medium">Question 16</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[16]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">17</strong>
+                <span class="text-gray-700 font-medium">Question 17</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[17]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">18</strong>
+                <span class="text-gray-700 font-medium">Question 18</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[18]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">19</strong>
+                <span class="text-gray-700 font-medium">Question 19</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[19]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">20</strong>
+                <span class="text-gray-700 font-medium">Question 20</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[20]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">questions 15-20.</h4>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">A</span><span>varieties of desert</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">B</span><span>edible plants</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">C</span><span>lawns and lawn alternatives</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">D</span><span>native plants</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">E</span><span>storing water</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">F</span><span>plants attract wildlife</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">G</span><span>unified design</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">H</span><span>soil nutrients</span></div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">15</strong>
+                <span class="text-gray-800 font-medium">Mary</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[15]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">16</strong>
+                <span class="text-gray-800 font-medium">Berson</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[16]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">17</strong>
+                <span class="text-gray-800 font-medium">Smith</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[17]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">18</strong>
+                <span class="text-gray-800 font-medium">Nunee</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[18]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">19</strong>
+                <span class="text-gray-800 font-medium">Scanlan</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[19]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">20</strong>
+                <span class="text-gray-800 font-medium">Mandelson</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[20]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>

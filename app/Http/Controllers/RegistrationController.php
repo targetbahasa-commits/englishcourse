@@ -36,14 +36,26 @@ class RegistrationController extends Controller
             'full_name'            => 'required|string|max:150',
             'whatsapp'             => 'required|string|max:20',
             // Blocks registering with an email that already belongs to a
-            // DIFFERENT account - shows a clear "already registered" error
-            // instead of silently logging the submitter into someone
+            // DIFFERENT real account - shows a clear "already registered"
+            // error instead of silently logging the submitter into someone
             // else's account (the previous behavior of the lookup below).
             // ->ignore(auth()->id()) lets an already-logged-in user keep
             // using their own email to register for an additional program
             // via this same form - the one legitimate case of "resubmitting
             // with an email that's already in `users`".
-            'email'                => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore(auth()->id())],
+            //
+            // ->where(role != guest) is the other legitimate case: a
+            // booking (BookingClassController::submit()) creates a
+            // role=guest placeholder for that email so admin can see the
+            // lead, and the guest-upgrade logic a few lines below this
+            // validator is specifically written to convert that same row
+            // to role=student on real registration - but this unique rule
+            // ran first and rejected the request before that logic was
+            // ever reached, so completing registration with your own
+            // booking email always failed with "already registered". A
+            // genuinely-taken email still blocks registration either way,
+            // since real accounts are never role=guest.
+            'email'                => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->where(fn ($query) => $query->where('role', '!=', 'guest'))->ignore(auth()->id())],
             'city'                 => 'required|string|max:100',
             'age'                  => 'nullable|integer|min:10|max:100',
             'profession'           => 'required|in:student_sma,mahasiswa,karyawan,other',
@@ -51,7 +63,7 @@ class RegistrationController extends Controller
             'program_id'           => ['required', Rule::exists('programs', 'id')->where('is_active', true)],
             'class_period_id'      => 'nullable|exists:class_periods,id',
             'program_interest'     => 'nullable|string|max:100',
-            'mode'                 => 'required|in:online,offline,flexible',
+            'mode'                 => 'required|in:online,offline',
             'schedule_preference'  => 'required|in:weekday,weekend,flexible',
             'preferred_time'       => 'required|in:pagi,siang,sore,malam,flexible',
             'learning_goal'        => 'nullable|string|max:1000',
@@ -82,6 +94,13 @@ class RegistrationController extends Controller
             'program_id.exists'   => 'Program yang dipilih tidak valid.',
             'email.unique'        => 'Email ini sudah terdaftar. Silakan login jika ini akun kamu, atau gunakan email lain.',
         ]);
+
+        $selectedProgram = \App\Models\Program::find($data['program_id']);
+        if ($selectedProgram && $selectedProgram->delivery_mode !== $data['mode']) {
+            return back()
+                ->withErrors(['mode' => 'Moda belajar yang dipilih tidak sesuai dengan program ini.'])
+                ->withInput();
+        }
 
         $data = array_merge($data, $this->extractAttributionData($request));
         $data['has_previous_course'] = $request->boolean('has_previous_course');
@@ -122,11 +141,15 @@ class RegistrationController extends Controller
         // `users` row every time. This was the single biggest source of
         // duplicate student accounts sitewide (investigation dated
         // 2026-09-01 found 6 duplicate-name groups, 12+ accounts).
-        // Scoped to role=student so a shared family phone doesn't
-        // accidentally match an unrelated admin/teacher account.
+        // Scoped to student/guest so a shared family phone doesn't
+        // accidentally match an unrelated admin/teacher account. Includes
+        // guest for the same reason the email check above does: a booking
+        // made with no email (synthetic placeholder) but a real phone
+        // number should still be found and upgraded on real registration,
+        // not spawn a second account.
         if (!$user && $rawPhone) {
-            $user = \App\Models\User::where('phone_number', $rawPhone)
-                ->where('role', 'student')
+            $user = \App\Models\User::whereIn('role', ['student', 'guest'])
+                ->where('phone_number', $rawPhone)
                 ->first();
         }
 
@@ -156,7 +179,7 @@ class RegistrationController extends Controller
                     'status'          => 'active',
                     'program_id'      => $data['program_id'] ?? null,
                     'class_period_id' => $data['class_period_id'] ?? null,
-                    'learning_mode'   => ($data['mode'] ?? 'flexible') === 'flexible' ? 'both' : ($data['mode'] ?? 'online'),
+                    'learning_mode'   => $data['mode'],
                     'referral_code'   => $newReferralCode,
                     'referred_by_id'  => $referrer ? $referrer->id : null,
                     'bio'             => $bioStr,
@@ -244,7 +267,7 @@ class RegistrationController extends Controller
             session([
                 'registration_last_program_id' => $data['program_id'],
                 'registration_last_class_period_id' => $data['class_period_id'] ?? null,
-                'registration_last_mode' => $data['mode'] ?? 'flexible',
+                'registration_last_mode' => $data['mode'],
                 'registration_last_referral_valid' => $referrer ? true : false,
             ]);
         }
@@ -281,11 +304,9 @@ class RegistrationController extends Controller
         if ($programId) {
             $program = \App\Models\Program::find($programId);
             if ($program) {
-                $basePrice = $program->price ?? 0;
-                if (in_array($mode, ['offline', 'flexible']) && !is_null($program->price_offline)) {
-                    $basePrice = $program->price_offline;
-                }
-                $baseAmount    = (int) $basePrice;
+                // $program is already mode-scoped (delivery_mode), so its own price
+                // column is always the correct one regardless of session $mode.
+                $baseAmount    = (int) ($program->price ?? 0);
                 $discountAmount = 0;
 
                 $hasReferral = session('registration_last_referral_valid', false);
@@ -367,7 +388,18 @@ class RegistrationController extends Controller
             abort(404);
         }
 
-        Auth::login($user);
+        // Admin/teacher clicks this straight from the Booking Class admin
+        // page (new tab) to preview or copy the link for the student - it
+        // must never log the CURRENT browser session into the lead's
+        // account in that case, or the staff member's own session silently
+        // becomes the student's account (shared cookie jar across tabs).
+        // Only auto-login when nobody's signed in yet, or the signed-in
+        // user already IS this lead - the actual case this was built for:
+        // the student opening their own link.
+        $currentUser = Auth::user();
+        if (!$currentUser || $currentUser->id === $user->id) {
+            Auth::login($user);
+        }
 
         return redirect()->route('registration.show', [
             'full_name' => $user->name,

@@ -17,6 +17,52 @@
 @endpush
 
 @section('content')
+@php
+    $hasExistingSubmission = !empty($existingSubmission) && !empty($existingSubmission->scores);
+    $existingOverallBand = $hasExistingSubmission ? ($existingSubmission->scores['overall_band'] ?? $existingSubmission->teacher_score ?? null) : null;
+    $initialResultData = $hasExistingSubmission ? [
+        'status' => 'success',
+        'scores' => $existingSubmission->scores ?? [],
+        'feedback' => $existingSubmission->scores['feedback'] ?? null,
+        'correction_html' => $existingSubmission->scores['correction_html'] ?? null,
+        'better_version' => $existingSubmission->scores['better_version'] ?? null,
+        'lexical_improvements' => $existingSubmission->scores['lexical_improvements'] ?? null,
+        'topic_vocabularies' => $existingSubmission->scores['topic_vocabularies'] ?? null,
+        'grammar_improvements' => $existingSubmission->scores['grammar_improvements'] ?? null,
+        'topic_grammar' => $existingSubmission->scores['topic_grammar'] ?? null,
+        'task_response_improvements' => $existingSubmission->scores['task_response_improvements'] ?? null,
+        'coherence_improvements' => $existingSubmission->scores['coherence_improvements'] ?? null,
+    ] : [
+        'status' => 'pending',
+        'scores' => [
+            'overall_band' => '-',
+            'task_achievement' => '-',
+            'coherence_cohesion' => '-',
+            'lexical_resource' => '-',
+            'grammatical_range' => '-'
+        ],
+        'feedback' => [
+            'overall_comment' => '',
+            'task_achievement' => '',
+            'coherence_cohesion' => '',
+            'lexical_resource' => '',
+            'grammatical_range' => '',
+            'coherence_improvements' => [],
+            'grammar_improvements' => []
+        ],
+        'correction_html' => null,
+        'better_version' => null,
+        'lexical_improvements' => null,
+        'topic_vocabularies' => null,
+        'grammar_improvements' => null,
+        'topic_grammar' => null,
+        'task_response_improvements' => null,
+        'coherence_improvements' => null
+    ];
+@endphp
+<script>
+    window.__ieltsWritingServerDraft = {{ Js::from($savedAnswers ?? []) }};
+</script>
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('ieltsWritingTask', (idioms = [], collocations = []) => ({
@@ -28,11 +74,16 @@
             interval: null,
             loading: false,
             improving: false,
-            essay: '',
+            essay: @json($existingSubmission?->essay ?? ''),
+            // Magic Sentence (inline-in-textarea, same UX as the promo test page)
+            msOpen: false,
+            msText: '',
+            msLoading: false,
+            msError: null,
             draftSyncTimer: null,
             error: null,
-            lastSubmissionId: null,
-            showResults: false,
+            lastSubmissionId: {{ $existingSubmission?->id ?? 'null' }},
+            showResults: {{ $hasExistingSubmission ? 'true' : 'false' }},
             correctionFailed: false,
             feedbackFailed: false,
             improveFailed: false,
@@ -47,33 +98,7 @@
             coherenceError: null,
 
             // INITIALIZE IMMEDIATELY
-            result: {
-                status: 'pending',
-                scores: {
-                    overall_band: '-',
-                    task_achievement: '-',
-                    coherence_cohesion: '-',
-                    lexical_resource: '-',
-                    grammatical_range: '-'
-                },
-                feedback: {
-                    overall_comment: '',
-                    task_achievement: '',
-                    coherence_cohesion: '',
-                    lexical_resource: '',
-                    grammatical_range: '',
-                    coherence_improvements: [],
-                    grammar_improvements: []
-                },
-                correction_html: null,
-                better_version: null,
-                lexical_improvements: null,
-                topic_vocabularies: null,
-                grammar_improvements: null,
-                topic_grammar: null,
-                task_response_improvements: null,
-                coherence_improvements: null
-            },
+            result: {{ Js::from($initialResultData) }},
             
             get safeHtml() {
                 const html = this.result?.correction_html;
@@ -111,15 +136,71 @@
                 this.plan.extras.splice(index, 1);
             },
 
+            toggleMagicSentence() {
+                this.msOpen = !this.msOpen;
+                if (this.msOpen) {
+                    this.msText = '';
+                    if (this.$refs.msInput) {
+                        this.$refs.msInput.innerText = '';
+                    }
+                    setTimeout(() => {
+                        if (this.$refs.msInput) {
+                            this.$refs.msInput.focus();
+                            try {
+                                let sel = window.getSelection();
+                                let range = document.createRange();
+                                range.selectNodeContents(this.$refs.msInput);
+                                range.collapse(false);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            } catch(e) {}
+                        }
+                    }, 50);
+                }
+            },
+
+            async translateSentence() {
+                if (!this.msText.trim()) return;
+                this.msLoading = true;
+                this.msError = null;
+                try {
+                    const response = await fetch('/api/ollama/translate-sentence', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content')
+                        },
+                        body: JSON.stringify({ text: this.msText.trim() })
+                    });
+                    if (!response.ok) throw new Error('Translation failed.');
+                    const data = await response.json();
+                    if (data.translation) {
+                        const current = this.essay || '';
+                        const prefix = current.length > 0 && !current.endsWith(' ') && !current.endsWith('\n') ? ' ' : '';
+                        this.essay = current + prefix + data.translation;
+                        this.msText = '';
+                        this.msOpen = false;
+                    } else {
+                        this.msError = 'Unexpected response from AI.';
+                    }
+                } catch (e) {
+                    this.msError = e.message;
+                } finally {
+                    this.msLoading = false;
+                }
+            },
+
             init() {
+                @if(!$hasExistingSubmission)
                 this.interval = setInterval(() => { 
                     if (this.time > 0) {
                         this.time--; 
                     } else {
                         clearInterval(this.interval);
-                        // Optional: alert('Time is up!');
                     }
                 }, 1000);
+                @endif
                 
                 // Load Plan from LocalStorage
                 const planKey = 'ielts_plan_' + '{{ $meeting->id }}';
@@ -149,27 +230,27 @@
                 });
 
                 setTimeout(() => {
-                    const textarea = document.querySelector('textarea[name="essay"]');
-                    if (textarea && textarea.value) {
-                        if (textarea.value.trim() === 'undefined' || textarea.value.includes('undefined')) {
-                            console.warn('Found "undefined" in saved essay. Purging corruption.');
-                            textarea.value = ''; 
-                            this.essay = '';     
-                            if (window.AutoSave) {
-                                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    if (!this.essay) {
+                        const textarea = document.querySelector('textarea[name="essay"]');
+                        if (textarea && textarea.value) {
+                            if (textarea.value.trim() === 'undefined' || textarea.value.includes('undefined')) {
+                                console.warn('Found "undefined" in saved essay. Purging corruption.');
+                                textarea.value = ''; 
+                                this.essay = '';     
+                                if (window.AutoSave) {
+                                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                            } else {
+                                this.essay = textarea.value;
                             }
-                        } else {
-                            this.essay = textarea.value;
                         }
                     }
 
-                    // Only reach for the server copy if this browser's own
-                    // localStorage (via AutoSave.js above and the plan-
-                    // specific watcher) had nothing for either field - see
-                    // restoreFromServerAnswers()'s docblock.
+                    @if(!$hasExistingSubmission)
                     if (!this.essay || !planRestoredLocally) {
                         this.restoreFromServerAnswers(!this.essay, !planRestoredLocally);
                     }
+                    @endif
                 }, 500);
 
                 this.$watch('result', (val) => {
@@ -207,6 +288,33 @@
                 }, 45000);
             },
 
+            updateAutosaveStatus(text, type = 'active') {
+                const textEl = document.getElementById('autosave-status-text');
+                const dotEl = document.getElementById('autosave-status-dot');
+                if (textEl) textEl.textContent = text;
+                if (dotEl) {
+                    if (type === 'saving') {
+                        dotEl.className = 'w-2 h-2 rounded-full bg-amber-500 animate-spin';
+                    } else if (type === 'saved') {
+                        dotEl.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                    } else {
+                        dotEl.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                    }
+                }
+            },
+
+            confirmResetPractice() {
+                if (confirm('Apakah Anda yakin ingin mengerjakan ulang latihan ini? Hasil evaluasi dan draft sebelumnya akan direset.')) {
+                    const planKey = 'ielts_plan_' + '{{ $meeting->id }}';
+                    localStorage.removeItem(planKey);
+                    localStorage.removeItem('ielts_writing_practice_{{ $meeting->id }}');
+                    if (window.AutoSave && typeof window.AutoSave.clearSaved === 'function') {
+                        try { window.AutoSave.clearSaved(); } catch (e) {}
+                    }
+                    window.location.href = window.location.pathname + '?retry=1';
+                }
+            },
+
             // Rebuilds essay/plan from the flat "essay"/"plan_body1"/
             // "plan_extra_{index}" shape saveMeetingDraft() stores server-
             // side (see buildDraftPayload() below - the exact inverse of
@@ -239,6 +347,8 @@
                         this.plan.extras = extras;
                     }
                 }
+
+                this.updateAutosaveStatus('Draft dipulihkan', 'saved');
             },
 
             // Inverse of restoreFromServerAnswers() - flattens essay/plan
@@ -259,8 +369,11 @@
             },
 
             queueDraftSync() {
+                @if(!$hasExistingSubmission)
+                this.updateAutosaveStatus('Menyimpan...', 'saving');
                 clearTimeout(this.draftSyncTimer);
                 this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+                @endif
             },
 
             async syncDraftToServer() {
@@ -304,6 +417,12 @@
                         }
                     }
 
+                    if (response.ok) {
+                        const now = new Date();
+                        const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+                        this.updateAutosaveStatus('✓ Tersimpan (' + timeStr + ')', 'saved');
+                    }
+
                     return response.ok;
                 } catch (e) {
                     console.error('Failed to sync draft to server:', e);
@@ -335,12 +454,12 @@
                 }
 
                 const indicator = document.createElement('div');
-                indicator.style.transition = 'opacity 0.3s';
+                indicator.style.cssText = 'position: fixed; bottom: 72px; right: 24px; z-index: 50; transition: opacity 0.3s;';
                 if (ok) {
-                    indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                    indicator.className = 'bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium';
                     indicator.innerHTML = '✓ Tersimpan';
                 } else {
-                    indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                    indicator.className = 'bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium';
                     indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
                 }
                 document.body.appendChild(indicator);
@@ -802,11 +921,8 @@
      @toggle-collocations.window="isCollocationsOpen = !isCollocationsOpen; if(isCollocationsOpen) isIdiomsOpen = false"
      @toggle-idioms.window="isIdiomsOpen = !isIdiomsOpen; if(isIdiomsOpen) isCollocationsOpen = false"
 >
-    {{-- Fixed bottom-center, horizontally aligned with the Whiteboard
-         toggle button (layouts.admin includes <x-live-drawing />, which
-         uses the same left: 50%; transform: translateX(-50%) centering,
-         but pinned to the top instead of the bottom). --}}
-    <div x-show="!showResults" class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+    {{-- Fixed bottom-right Save button so it does not overlap the bottom-center practice_toolbar --}}
+    <div x-show="!showResults" class="fixed bottom-4 right-4 z-50" style="position: fixed; bottom: 20px; right: 24px; z-index: 50;">
         <button type="button" id="manual-save-btn" @click="manualSaveDraft()"
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
@@ -827,23 +943,43 @@
         </div>
         
           <div class="flex gap-3 items-center">
-                 @if(Auth::check() && Auth::user()->isAdmin())
-                     <button type="button" @click="previewEvaluasi()" :disabled="loading" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2" title="Khusus Admin: Preview Hasil Evaluasi AI (menggunakan sistem evaluasi yang sama dengan submission asli)">
-                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                         <span>Preview Evaluasi</span>
-                     </button>
-                 @endif
-                 <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-mono font-medium">
-                     <span x-text="new Date(time * 1000).toISOString().substr(11, 8)">00:00:00</span>
-                 </div>
-                 <button @click="refreshEssay()" type="button" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                     Reset Essay
-                 </button>
-                 <button @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-white font-bold rounded-lg shadow-md hover:bg-{{ $task == 1 ? 'teal' : 'orange' }}-700 transition-colors flex items-center gap-2">
-                     <span x-show="!loading">Submit Answer</span>
-                     <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                     <span x-show="loading" x-text="statusMessage || 'Evaluating...'"></span>
-                 </button>
+              @if(!$hasExistingSubmission)
+                  <div id="autosave-status" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span id="autosave-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span id="autosave-status-text">Autosave Aktif</span>
+                  </div>
+              @else
+                  <div class="flex items-center gap-2">
+                      <div class="student-score-badge flex items-center gap-1.5 px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-sm">
+                          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                          <span>Band {{ is_numeric($existingOverallBand) ? number_format((float)$existingOverallBand, 1) : $existingOverallBand }}</span>
+                      </div>
+                      <button type="button" @click="confirmResetPractice()" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                          <span>Kerjakan Ulang</span>
+                      </button>
+                      <button type="button" @click="showResults = true" class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                          <span>Lihat Hasil Evaluasi →</span>
+                      </button>
+                  </div>
+              @endif
+              @if(Auth::check() && Auth::user()->isAdmin())
+                  <button type="button" @click="previewEvaluasi()" :disabled="loading" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2" title="Khusus Admin: Preview Hasil Evaluasi AI (menggunakan sistem evaluasi yang sama dengan submission asli)">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                      <span>Preview Evaluasi</span>
+                  </button>
+              @endif
+              <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-mono font-medium">
+                  <span x-text="new Date(time * 1000).toISOString().substr(11, 8)">00:00:00</span>
+              </div>
+              <button @click="refreshEssay()" type="button" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                  Reset Essay
+              </button>
+              <button @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-white font-bold rounded-lg shadow-md hover:bg-{{ $task == 1 ? 'teal' : 'orange' }}-700 transition-colors flex items-center gap-2">
+                  <span x-show="!loading">Submit Answer</span>
+                  <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                  <span x-show="loading" x-text="statusMessage || 'Evaluating...'"></span>
+              </button>
           </div>
     </div>
 
@@ -1091,9 +1227,10 @@
                         </button>
 
                          <!-- Resize Handle -->
-                        <div x-show="isFloating" 
+                        <div x-show="isFloating"
                              @mousedown.prevent.stop="startResize($event)"
-                             class="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize flex items-end justify-end p-1 z-50">
+                             class="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize flex items-end justify-end p-1 z-50"
+                             style="display: none;">
                             <svg class="w-4 h-4 text-orange-300" fill="currentColor" viewBox="0 0 24 24"><path d="M22 22H20V20H22V22ZM22 18H20V16H22V18ZM18 22H16V20H18V22ZM22 14H20V12H22V14ZM14 22H12V20H14V22ZM18 18H16V16H18V18Z"></path></svg>
                         </div>
                     </div>
@@ -1130,8 +1267,53 @@
                     x-init="count = countWords(essay || ''); $watch('essay', value => count = countWords(value))"
                 >Word Count: <span x-text="count">0</span></span>
             </div>
-            <textarea name="essay" x-model="essay" class="flex-1 min-h-0 w-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
-            
+            <div class="flex-1 min-h-0 relative">
+                <textarea name="essay" x-model="essay" x-show="!msOpen" class="absolute inset-0 w-full h-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
+
+                {{-- Magic Sentence inline overlay: mirrors the essay text as a static
+                     span immediately followed by a contenteditable span, so the
+                     Indonesian sentence appears to be typed right where the cursor
+                     was in the essay - same UX as the promo test page - instead of
+                     a separate popup dialog. --}}
+                <div x-show="msOpen" x-cloak class="absolute inset-0 w-full h-full z-10 bg-white">
+                    <div class="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-20">
+                        <div class="bg-gray-900 bg-opacity-90 text-white px-4 py-2 rounded-full shadow-lg text-[11px] sm:text-xs flex items-center gap-2 backdrop-blur-sm">
+                            <span class="text-white"><strong>Magic Sentence:</strong> Ketik B. Indonesia →
+                                tekan <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Ctrl+Enter</kbd> /
+                                <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Cmd+Return</kbd>
+                                untuk translate ke gaya IELTS, atau <kbd class="bg-gray-700 text-white rounded px-1 font-mono">Esc</kbd> untuk keluar.</span>
+                        </div>
+                    </div>
+                    <div class="absolute inset-0 w-full h-full p-6 font-serif leading-relaxed text-gray-800 text-lg overflow-y-auto whitespace-pre-wrap break-words cursor-text"
+                        @click="if($refs.msInput) {
+                            $refs.msInput.focus();
+                            try {
+                                let sel = window.getSelection();
+                                let range = document.createRange();
+                                range.selectNodeContents($refs.msInput);
+                                range.collapse(false);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            } catch(e) {}
+                        }"><span x-text="essay"></span><span x-ref="msInput" contenteditable="true" inputmode="text"
+                            class="outline-none border-b-2 border-dashed border-blue-400 bg-blue-50 text-blue-900 empty:before:content-[attr(data-placeholder)] empty:before:text-blue-300 cursor-text inline"
+                            data-placeholder="Ketik kalimat di sini..."
+                            @keydown.enter.ctrl.prevent="msText = $el.innerText; translateSentence()"
+                            @keydown.enter.meta.prevent="msText = $el.innerText; translateSentence()"
+                            @keydown.escape.prevent="msOpen = false; msText = ''"
+                            @input="msText = $el.innerText"></span><button
+                            type="button" x-show="msText.trim().length > 0 && !msLoading"
+                            @click.stop="if($refs.msInput) { msText = $refs.msInput.innerText; translateSentence(); }"
+                            class="inline-flex items-center justify-center w-4 h-4 ml-0.5 bg-blue-500 hover:bg-blue-600 text-white rounded shadow-sm transition-transform hover:scale-110 focus:outline-none align-baseline"
+                            title="Translate (Ctrl+Enter / Cmd+Enter)">
+                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                        </button><span x-show="msLoading" class="inline-flex items-center ml-1 text-blue-500 align-baseline">
+                            <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Footer -->
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
                 <!-- Refresh button removed per UX update -->
@@ -1161,8 +1343,14 @@
                 </div>
             </div>
 
-            <!-- Score Summary Cards -->
-            <div v-if="result" class="flex gap-4">
+            <!-- Score Summary Cards & Retry -->
+            <div class="flex items-center gap-4">
+                <button type="button" @click="confirmResetPractice()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Kerjakan Ulang ↺</span>
+                </button>
+
+                <div v-if="result" class="flex gap-3">
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Task</span>
                     <span class="text-xl font-bold text-red-700" x-text="result?.scores?.task_achievement"></span>
@@ -1178,6 +1366,7 @@
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Grammar</span>
                     <span class="text-xl font-bold text-red-700" x-text="result?.scores?.grammatical_range"></span>
+                </div>
                 </div>
             </div>
         </div>
@@ -1636,7 +1825,7 @@
         </div>
     </div>
     @include('assignments.ielts.writing.partials.practice_panels')
-    @include('assignments.ielts.writing.practice_toolbar')
+    @include('assignments.ielts.writing.practice_toolbar', ['inlineMagicSentence' => true])
 </div>
 
 <script>

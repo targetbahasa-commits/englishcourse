@@ -16,5 +16,10 @@ class ToeflReadingScore extends Model
         'score',
         'correct_count',
         'total_questions',
+        'answers',
+    ];
+
+    protected $casts = [
+        'answers' => 'array',
     ];
 }

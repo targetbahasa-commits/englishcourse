@@ -2,6 +2,10 @@
 
 @section('title', !empty($isMockTestView) ? 'Manage Mock Tests' : 'Manage Programs')
 
+@section('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('content')
 @php
     $isMockProgram = static function ($program) {
@@ -50,8 +54,8 @@
     @endif
 
     <!-- Programs Master Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" x-data="{ searchQuery: '' }">
-        
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" x-data="{ searchQuery: '', activeTab: 'online' }">
+
         <!-- Table Toolbar -->
         <div class="p-5 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
             <div class="relative w-full md:w-96">
@@ -60,16 +64,27 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input 
+                <input
                     x-model="searchQuery"
-                    type="text" 
-                    placeholder="Search program name or description..." 
+                    type="text"
+                    placeholder="Search program name or description..."
                     class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm"
                 >
             </div>
-            
+
             <div class="flex items-center gap-3 w-full md:w-auto">
-                {{-- Placeholder for Future Filters if needed --}}
+                <div class="p-1 bg-gray-100 rounded-xl inline-flex w-full md:w-auto">
+                    <button type="button" @click="activeTab = 'online'"
+                            :class="activeTab === 'online' ? 'bg-white text-sky-700 shadow-sm font-bold' : 'text-gray-500 hover:text-gray-700 font-medium'"
+                            class="flex-1 md:flex-none px-4 py-2 text-sm rounded-lg transition-all whitespace-nowrap">
+                        Online
+                    </button>
+                    <button type="button" @click="activeTab = 'offline'"
+                            :class="activeTab === 'offline' ? 'bg-white text-teal-700 shadow-sm font-bold' : 'text-gray-500 hover:text-gray-700 font-medium'"
+                            class="flex-1 md:flex-none px-4 py-2 text-sm rounded-lg transition-all whitespace-nowrap">
+                        Offline
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -103,13 +118,18 @@
                         });
                     @endphp
                     @forelse($groupedPrograms as $category => $categoryPrograms)
-                        <tr class="bg-gray-100/70 border-b border-gray-200" x-show="!searchQuery">
+                        @php
+                            $categoryHasOnline = $categoryPrograms->contains(fn($p) => $p->delivery_mode === 'online');
+                            $categoryHasOffline = $categoryPrograms->contains(fn($p) => $p->delivery_mode === 'offline');
+                        @endphp
+                        <tr class="bg-gray-100/70 border-b border-gray-200"
+                            x-show="!searchQuery && ((activeTab === 'online' && {{ $categoryHasOnline ? 'true' : 'false' }}) || (activeTab === 'offline' && {{ $categoryHasOffline ? 'true' : 'false' }}))">
                             <td colspan="5" class="px-5 py-3 font-extrabold text-red-600 text-sm uppercase tracking-wider">
                                 {{ $category }}
                             </td>
                         </tr>
                         @foreach($categoryPrograms as $program)
-                                        <tr>
+                                        <tr x-show="activeTab === '{{ $program->delivery_mode }}'">
                                             <td colspan="5" class="bg-blue-50/30 p-0 border-t-0">
                                                 <div class="px-8 pb-4 pt-2">
                                                     <div class="text-xs font-semibold text-blue-700 mb-1">Access Audit Log</div>
@@ -145,7 +165,31 @@
                                                 </div>
                                             </td>
                                         </tr>
-                    <tr class="hover:bg-gray-50/50 transition-colors group" x-show="!searchQuery || '{{ strtolower(addslashes($program->name . ' ' . $program->description)) }}'.includes(searchQuery.toLowerCase())">
+                    <tr class="hover:bg-gray-50/50 transition-colors group"
+                        x-data="{
+                            isActive: {{ $program->is_active ? 'true' : 'false' }},
+                            toggleLoading: false,
+                            async toggleActiveStatus() {
+                                if (this.toggleLoading) return;
+                                this.toggleLoading = true;
+                                try {
+                                    const res = await fetch('{{ route('programs.toggle-active', $program->id) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content,
+                                        },
+                                    });
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        this.isActive = !!Number(data.program.is_active);
+                                    }
+                                } finally {
+                                    this.toggleLoading = false;
+                                }
+                            }
+                        }"
+                        x-show="activeTab === '{{ $program->delivery_mode }}' && (!searchQuery || '{{ strtolower(addslashes($program->name . ' ' . $program->description)) }}'.includes(searchQuery.toLowerCase()))">
                         <td class="p-5">
                             <div class="flex items-start gap-4">
                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-sm" style="background-color: {{ $program->color ?? '#3B82F6' }}; color: white;">
@@ -158,6 +202,24 @@
                                 <div>
                                     <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                         {{ $program->name }}
+                                        @if($program->delivery_mode === 'offline')
+                                            <span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-black bg-teal-100 text-teal-800 border border-teal-200" title="Program mode Offline">
+                                                🏫 Offline
+                                            </span>
+                                        @else
+                                            <span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-black bg-sky-100 text-sky-800 border border-sky-200" title="Program mode Online">
+                                                💻 Online
+                                            </span>
+                                        @endif
+                                        @if($program->offlineSibling)
+                                            <button type="button" @click="$dispatch('open-program-modal', { program: {{ Js::from($program->offlineSibling->load('discounts')) }} })" class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200" title="Buka versi Offline: {{ $program->offlineSibling->name }}">
+                                                🔗 Versi Offline: {{ $program->offlineSibling->name }}
+                                            </button>
+                                        @elseif($program->onlineSibling)
+                                            <button type="button" @click="$dispatch('open-program-modal', { program: {{ Js::from($program->onlineSibling->load('discounts')) }} })" class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200" title="Buka versi Online: {{ $program->onlineSibling->name }}">
+                                                🔗 Versi Online: {{ $program->onlineSibling->name }}
+                                            </button>
+                                        @endif
                                         @if($program->min_cefr_level || $program->max_cefr_level)
                                             @php
                                                 $cefrText = $program->min_cefr_level ?? 'A1';
@@ -230,18 +292,21 @@
                             @php
                                 $activeBatches = collect($program->classPeriods)->whereIn('status', ['active', 'upcoming']);
                                 $allBatches    = collect($program->classPeriods);
+                                $batchPreviewLimit = 2;
+                                $extraActiveBatchesCount = max(0, $activeBatches->count() - $batchPreviewLimit);
                             @endphp
 
                             @if($activeBatches->isEmpty())
                                 <p class="text-xs text-gray-400 italic">Belum ada batch aktif</p>
                                 <p class="text-xs text-gray-400 mt-0.5">{{ $program->meetings_count }} total meetings</p>
                             @else
-                                <div class="space-y-1.5">
-                                    @foreach($activeBatches as $batch)
+                                <div class="space-y-1.5" x-data="{ showAllBatches: false }">
+                                    @foreach($activeBatches as $batchIndex => $batch)
                                     <div class="flex items-center gap-2"
                                          x-data="{ hovered: false }"
                                          @mouseenter="hovered = true"
-                                         @mouseleave="hovered = false">
+                                         @mouseleave="hovered = false"
+                                         @if($batchIndex >= $batchPreviewLimit) x-show="showAllBatches" x-cloak @endif>
                                         <span class="mt-0.5 w-2 h-2 rounded-full flex-shrink-0 {{ $batch->status === 'active' ? 'bg-emerald-400' : 'bg-blue-400' }}"></span>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-1 flex-wrap">
@@ -283,6 +348,14 @@
                                     </div>
                                     @endforeach
 
+                                    @if($extraActiveBatchesCount > 0)
+                                        <button type="button" @click="showAllBatches = !showAllBatches"
+                                            class="text-[10px] font-semibold text-blue-600 hover:text-blue-800 pl-4">
+                                            <span x-show="!showAllBatches">+{{ $extraActiveBatchesCount }} batch lainnya</span>
+                                            <span x-show="showAllBatches" x-cloak>Sembunyikan</span>
+                                        </button>
+                                    @endif
+
                                     @if($allBatches->count() > $activeBatches->count())
                                         <p class="text-[10px] text-gray-400 pl-4">+{{ $allBatches->count() - $activeBatches->count() }} closed</p>
                                     @endif
@@ -296,15 +369,15 @@
                             </div>
                         </td>
                         <td class="p-5">
-                            @if($program->is_active)
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Draft
-                                </span>
-                            @endif
+                            <div>
+                                <button type="button" @click="toggleActiveStatus()" :disabled="toggleLoading"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border transition disabled:opacity-50 disabled:cursor-wait"
+                                    :class="isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'"
+                                    :title="isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'">
+                                    <span class="w-1.5 h-1.5 rounded-full" :class="isActive ? 'bg-emerald-500' : 'bg-gray-400'"></span>
+                                    <span x-text="isActive ? 'Active' : 'Not Active'"></span>
+                                </button>
+                            </div>
                         </td>
                         <td class="p-5">
                             <div class="flex justify-end items-center gap-2">
@@ -337,11 +410,10 @@
                                 </a>
                                 
                                 {{-- Edit Button --}}
-                                <button 
-                                    type="button" 
-                                    x-data 
-                                    @click="$dispatch('open-program-modal', { program: {{ Js::from($program) }} })"
-                                    class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100" 
+                                <button
+                                    type="button"
+                                    @click="$dispatch('open-program-modal', { program: Object.assign({{ Js::from($program->load('discounts')) }}, { is_active: isActive ? 1 : 0 }) })"
+                                    class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
                                     title="Edit Program Settings / Price"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -358,7 +430,7 @@
                                          class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-10 py-1"
                                          style="display: none;">
                                         
-                                        @if($program->is_active)
+                                        <template x-if="isActive">
                                             {{-- Step 1: Deactivate (for active programs) --}}
                                             <form method="POST" action="{{ route('programs.deactivate', $program->id) }}" onsubmit="return confirm('Deactivate program \'{{ addslashes($program->name) }}\'? It will be hidden from students. You can delete it permanently after deactivating.');">
                                                 @csrf
@@ -367,20 +439,23 @@
                                                     Deactivate Program
                                                 </button>
                                             </form>
-                                        @else
-                                            {{-- Step 2: Delete Permanently (only for inactive programs) --}}
-                                            <div class="px-4 py-2 border-b border-gray-100">
-                                                <p class="text-xs text-gray-400 font-medium">Program is inactive</p>
+                                        </template>
+                                        <template x-if="!isActive">
+                                            <div>
+                                                {{-- Step 2: Delete Permanently (only for inactive programs) --}}
+                                                <div class="px-4 py-2 border-b border-gray-100">
+                                                    <p class="text-xs text-gray-400 font-medium">Program is inactive</p>
+                                                </div>
+                                                <form method="POST" action="{{ route('programs.destroy', $program->id) }}" onsubmit="return confirm('PERMANENTLY DELETE \'{{ addslashes($program->name) }}\'? This cannot be undone!');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                        Delete Permanently
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <form method="POST" action="{{ route('programs.destroy', $program->id) }}" onsubmit="return confirm('PERMANENTLY DELETE \'{{ addslashes($program->name) }}\'? This cannot be undone!');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    Delete Permanently
-                                                </button>
-                                            </form>
-                                        @endif
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -430,12 +505,43 @@
             price_private_offline: '',
             price_semi_private: '',
             price_semi_private_offline: '',
+            price_discount_type: '',
+            price_discount_value: '',
+            price_offline_discount_type: '',
+            price_offline_discount_value: '',
+            price_semi_private_discount_type: '',
+            price_semi_private_discount_value: '',
+            price_semi_private_offline_discount_type: '',
+            price_semi_private_offline_discount_value: '',
+            price_private_discount_type: '',
+            price_private_discount_value: '',
+            price_private_offline_discount_type: '',
+            price_private_offline_discount_value: '',
             program_type: 'paket',
+            delivery_mode: 'online',
             min_cefr_level: '',
             max_cefr_level: '',
             subprograms: [],
             access_key: '',
             is_active: true
+        },
+        discounts: [],
+        // Live 'harga setelah diskon' preview next to a price field, using
+        // whatever type/value are currently in the two sibling discount
+        // inputs - purely client-side, mirrors Program::discountedPrice()
+        // on the backend so what the admin sees here matches what gets saved.
+        discountedPreview(priceField, typeField, valueField) {
+            const base = parseInt(String(this.form[priceField] || '0').replace(/[^0-9]/g, ''), 10) || 0;
+            const type = this.form[typeField];
+            const value = parseInt(String(this.form[valueField] || '0').replace(/[^0-9]/g, ''), 10) || 0;
+            if (base <= 0 || !type || value <= 0) {
+                return null;
+            }
+            let discountAmount = type === 'percentage'
+                ? Math.floor(base * Math.min(100, Math.max(0, value)) / 100)
+                : Math.min(base, value);
+            const net = Math.max(0, base - discountAmount);
+            return net.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
     }"
     @open-program-modal.window="
@@ -452,12 +558,26 @@
             form.price_private_offline = $event.detail.program.price_private_offline ? $event.detail.program.price_private_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
             form.price_semi_private = $event.detail.program.price_semi_private ? $event.detail.program.price_semi_private.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
             form.price_semi_private_offline = $event.detail.program.price_semi_private_offline ? $event.detail.program.price_semi_private_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_discount_type = $event.detail.program.price_discount_type || '';
+            form.price_discount_value = $event.detail.program.price_discount_value ?? '';
+            form.price_offline_discount_type = $event.detail.program.price_offline_discount_type || '';
+            form.price_offline_discount_value = $event.detail.program.price_offline_discount_value ?? '';
+            form.price_semi_private_discount_type = $event.detail.program.price_semi_private_discount_type || '';
+            form.price_semi_private_discount_value = $event.detail.program.price_semi_private_discount_value ?? '';
+            form.price_semi_private_offline_discount_type = $event.detail.program.price_semi_private_offline_discount_type || '';
+            form.price_semi_private_offline_discount_value = $event.detail.program.price_semi_private_offline_discount_value ?? '';
+            form.price_private_discount_type = $event.detail.program.price_private_discount_type || '';
+            form.price_private_discount_value = $event.detail.program.price_private_discount_value ?? '';
+            form.price_private_offline_discount_type = $event.detail.program.price_private_offline_discount_type || '';
+            form.price_private_offline_discount_value = $event.detail.program.price_private_offline_discount_value ?? '';
             form.program_type = $event.detail.program.program_type || 'paket';
+            form.delivery_mode = $event.detail.program.delivery_mode || 'online';
             form.min_cefr_level = $event.detail.program.min_cefr_level || '';
             form.max_cefr_level = $event.detail.program.max_cefr_level || '';
             form.subprograms = $event.detail.program.subprograms ? $event.detail.program.subprograms.map(p => p.id) : [];
             form.access_key = $event.detail.program.access_key || '';
             form.is_active = $event.detail.program.is_active == 1;
+            discounts = $event.detail.program.discounts || [];
         } else {
             isEdit = false;
             form.id = null;
@@ -470,12 +590,26 @@
             form.price_private_offline = '';
             form.price_semi_private = '';
             form.price_semi_private_offline = '';
+            form.price_discount_type = '';
+            form.price_discount_value = '';
+            form.price_offline_discount_type = '';
+            form.price_offline_discount_value = '';
+            form.price_semi_private_discount_type = '';
+            form.price_semi_private_discount_value = '';
+            form.price_semi_private_offline_discount_type = '';
+            form.price_semi_private_offline_discount_value = '';
+            form.price_private_discount_type = '';
+            form.price_private_discount_value = '';
+            form.price_private_offline_discount_type = '';
+            form.price_private_offline_discount_value = '';
             form.program_type = 'paket';
+            form.delivery_mode = 'online';
             form.min_cefr_level = '';
             form.max_cefr_level = '';
             form.subprograms = [];
             form.access_key = '';
             form.is_active = true;
+            discounts = [];
         }
     "
     x-show="isOpen" 
@@ -529,7 +663,7 @@
                     </div>
 
                     <!-- Duration Tag & Tipe Program -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label for="period" class="block text-sm font-semibold text-gray-700 mb-1">Duration Tag <span class="text-red-500">*</span></label>
                             <input type="text" x-model="form.period" name="period" id="period" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 3 Months, 20 Meetings">
@@ -540,6 +674,16 @@
                                 <option value="paket">Program Paket (IELTS/TOEFL/PTE)</option>
                                 <option value="satuan">Program Satuan / Skill Khusus</option>
                             </select>
+                        </div>
+                        <div>
+                            <label for="delivery_mode" class="block text-sm font-semibold text-gray-700 mb-1">Moda Belajar <span class="text-red-500">*</span></label>
+                            <select x-model="form.delivery_mode" name="delivery_mode" id="delivery_mode" required
+                                @change="if(form.delivery_mode === 'online') { form.price_offline = ''; form.price_semi_private_offline = ''; form.price_private_offline = ''; } else { form.price = ''; form.price_semi_private = ''; form.price_private = ''; }"
+                                class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                <option value="online">💻 Online</option>
+                                <option value="offline">🏫 Offline (Pare)</option>
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">Program ini punya kurikulum sendiri untuk moda yang dipilih.</p>
                         </div>
                     </div>
 
@@ -624,39 +768,130 @@
                         </div>
                     </div>
 
-                    <!-- Regular Prices -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-                        <div>
+                    {{-- Each program row is only ever online OR offline (see the Moda Belajar
+                         select above) - showing both price columns regardless of that mode
+                         just invited filling in a price for a delivery mode this program
+                         doesn't even offer. Only the input matching form.delivery_mode is
+                         shown; the other's value is cleared by the @change handler on that
+                         select above whenever an admin actively switches modes.
+
+                         Each price now has its own inline discount (fixed IDR or %) right
+                         next to it - separate from the audience-based "Diskon Program" list
+                         further down. This one actually reduces what a student pays at
+                         checkout for that exact price field (see Program::discountedPrice()
+                         and its use in InitiatePayment/BuildStudentPaymentIndexData). --}}
+
+                    <!-- Regular Price -->
+                    <div class="grid grid-cols-1 gap-4 pt-2 border-t border-gray-100">
+                        <div x-show="form.delivery_mode === 'online'">
                             <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Regular Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price" @input="form.price = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price" id="price" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.000.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price" @input="form.price = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price" id="price" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.000.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_discount_type" name="price_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_discount_value" @input="form.price_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price', 'price_discount_type', 'price_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price', 'price_discount_type', 'price_discount_value')"></span></span></p>
+                            </template>
                         </div>
-                        <div>
+                        <div x-show="form.delivery_mode === 'offline'">
                             <label for="price_offline" class="block text-sm font-semibold text-gray-700 mb-1">Regular Offline / Pare Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price_offline" @input="form.price_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_offline" id="price_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.500.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price_offline" @input="form.price_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_offline" id="price_offline" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.500.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_offline_discount_type" name="price_offline_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_offline_discount_value" @input="form.price_offline_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_offline_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price_offline', 'price_offline_discount_type', 'price_offline_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price_offline', 'price_offline_discount_type', 'price_offline_discount_value')"></span></span></p>
+                            </template>
                         </div>
                     </div>
 
-                    <!-- Semi Private Prices -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-                        <div>
+                    <!-- Semi Private Price -->
+                    <div class="grid grid-cols-1 gap-4 pt-2 border-t border-gray-100">
+                        <div x-show="form.delivery_mode === 'online'">
                             <label for="price_semi_private" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price_semi_private" @input="form.price_semi_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private" id="price_semi_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.000.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price_semi_private" @input="form.price_semi_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private" id="price_semi_private" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.000.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_semi_private_discount_type" name="price_semi_private_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_semi_private_discount_value" @input="form.price_semi_private_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_semi_private_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price_semi_private', 'price_semi_private_discount_type', 'price_semi_private_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price_semi_private', 'price_semi_private_discount_type', 'price_semi_private_discount_value')"></span></span></p>
+                            </template>
                         </div>
-                        <div>
+                        <div x-show="form.delivery_mode === 'offline'">
                             <label for="price_semi_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline" @input="form.price_semi_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private_offline" id="price_semi_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.500.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline" @input="form.price_semi_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private_offline" id="price_semi_private_offline" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.500.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_semi_private_offline_discount_type" name="price_semi_private_offline_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline_discount_value" @input="form.price_semi_private_offline_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_semi_private_offline_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price_semi_private_offline', 'price_semi_private_offline_discount_type', 'price_semi_private_offline_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price_semi_private_offline', 'price_semi_private_offline_discount_type', 'price_semi_private_offline_discount_value')"></span></span></p>
+                            </template>
                         </div>
                     </div>
 
-                    <!-- Private Prices -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-                        <div>
+                    <!-- Private Price -->
+                    <div class="grid grid-cols-1 gap-4 pt-2 border-t border-gray-100">
+                        <div x-show="form.delivery_mode === 'online'">
                             <label for="price_private" class="block text-sm font-semibold text-gray-700 mb-1">Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price_private" @input="form.price_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private" id="price_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.000.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price_private" @input="form.price_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private" id="price_private" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.000.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_private_discount_type" name="price_private_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_private_discount_value" @input="form.price_private_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_private_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price_private', 'price_private_discount_type', 'price_private_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price_private', 'price_private_discount_type', 'price_private_discount_value')"></span></span></p>
+                            </template>
                         </div>
-                        <div>
+                        <div x-show="form.delivery_mode === 'offline'">
                             <label for="price_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="text" inputmode="numeric" x-model="form.price_private_offline" @input="form.price_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private_offline" id="price_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.500.000">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" inputmode="numeric" x-model="form.price_private_offline" @input="form.price_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private_offline" id="price_private_offline" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.500.000">
+                                <div class="flex gap-2 sm:w-48 shrink-0">
+                                    <select x-model="form.price_private_offline_discount_type" name="price_private_offline_discount_type" class="block w-20 border border-gray-300 rounded-xl px-2 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                        <option value="">Diskon</option>
+                                        <option value="percentage">%</option>
+                                        <option value="fixed_idr">Rp</option>
+                                    </select>
+                                    <input type="text" inputmode="numeric" x-model="form.price_private_offline_discount_value" @input="form.price_private_offline_discount_value = $event.target.value.replace(/[^0-9]/g, '')" name="price_private_offline_discount_value" class="block flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="0">
+                                </div>
+                            </div>
+                            <template x-if="discountedPreview('price_private_offline', 'price_private_offline_discount_type', 'price_private_offline_discount_value')">
+                                <p class="text-xs text-emerald-600 mt-1">Harga setelah diskon: <span class="font-semibold">Rp <span x-text="discountedPreview('price_private_offline', 'price_private_offline_discount_type', 'price_private_offline_discount_value')"></span></span></p>
+                            </template>
                         </div>
                     </div>
 
@@ -665,6 +900,188 @@
                         <label for="access_key" class="block text-sm font-semibold text-gray-700 mb-1">Access Key <span class="text-gray-400 font-normal">(Optional, can be changed anytime)</span></label>
                         <input type="text" x-model="form.access_key" name="access_key" id="access_key" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., secret2026">
                         <span class="text-xs text-gray-400 mt-0.5 block">Kosongkan jika program ini tidak memerlukan kunci akses khusus.</span>
+                    </div>
+
+                    <!-- Discounts -->
+                    <div class="pt-2 border-t border-gray-100" x-show="isEdit" x-cloak
+                        x-data="{
+                            showAddForm: false,
+                            saving: false,
+                            error: '',
+                            newDiscount: { type: 'guest', label: '', discount_type: 'percentage', discount_value: '', start_date: '', end_date: '', regions: '', is_active: true },
+                            typeLabels: { guest: '👤 Guest', new_user: '🆕 New User', student: '🎓 Student', referral: '🤝 Referral Teman', holiday: '🎉 Hari Libur', region: '📍 Daerah Khusus' },
+                            formattedValue(d) {
+                                return d.discount_type === 'percentage'
+                                    ? d.discount_value + '%'
+                                    : 'Rp ' + Number(d.discount_value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                            },
+                            resetNewDiscount() {
+                                this.newDiscount = { type: 'guest', label: '', discount_type: 'percentage', discount_value: '', start_date: '', end_date: '', regions: '', is_active: true };
+                                this.error = '';
+                            },
+                            async addDiscount() {
+                                this.saving = true;
+                                this.error = '';
+                                try {
+                                    const body = new FormData();
+                                    body.append('type', this.newDiscount.type);
+                                    body.append('label', this.newDiscount.label);
+                                    body.append('discount_type', this.newDiscount.discount_type);
+                                    body.append('discount_value', this.newDiscount.discount_value);
+                                    if (this.newDiscount.start_date) body.append('start_date', this.newDiscount.start_date);
+                                    if (this.newDiscount.end_date) body.append('end_date', this.newDiscount.end_date);
+                                    if (this.newDiscount.regions) body.append('regions', this.newDiscount.regions);
+                                    if (this.newDiscount.is_active) body.append('is_active', '1');
+                                    const res = await fetch(`/admin/programs/${form.id}/discounts`, {
+                                        method: 'POST',
+                                        body,
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content
+                                        }
+                                    });
+                                    if (res.status === 422) {
+                                        const data = await res.json();
+                                        this.error = Object.values(data.errors || {}).flat().join(' ') || 'Data diskon tidak valid.';
+                                        return;
+                                    }
+                                    if (!res.ok) { this.error = 'Gagal menyimpan diskon.'; return; }
+                                    const data = await res.json();
+                                    discounts.push(data.discount);
+                                    this.resetNewDiscount();
+                                    this.showAddForm = false;
+                                } catch (e) {
+                                    this.error = 'Terjadi kesalahan jaringan.';
+                                } finally {
+                                    this.saving = false;
+                                }
+                            },
+                            async toggleDiscount(d) {
+                                const body = new FormData();
+                                body.append('_method', 'PUT');
+                                body.append('toggle_active', '1');
+                                const res = await fetch(`/admin/programs/${form.id}/discounts/${d.id}`, {
+                                    method: 'POST',
+                                    body,
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content
+                                    }
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    d.is_active = data.discount.is_active;
+                                }
+                            },
+                            async deleteDiscount(d) {
+                                if (!confirm('Hapus diskon \'' + d.label + '\'?')) return;
+                                const body = new FormData();
+                                body.append('_method', 'DELETE');
+                                const res = await fetch(`/admin/programs/${form.id}/discounts/${d.id}`, {
+                                    method: 'POST',
+                                    body,
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content
+                                    }
+                                });
+                                if (res.ok) {
+                                    discounts.splice(discounts.indexOf(d), 1);
+                                }
+                            }
+                        }">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-semibold text-gray-700">🏷️ Diskon Program</label>
+                            <button type="button" @click="showAddForm = !showAddForm; if (!showAddForm) resetNewDiscount()" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                                <span x-show="!showAddForm">+ Tambah Diskon</span>
+                                <span x-show="showAddForm" x-cloak>Batal</span>
+                            </button>
+                        </div>
+
+                        <!-- Existing discounts list -->
+                        <template x-if="discounts.length === 0">
+                            <p class="text-xs text-gray-400 italic bg-gray-50 rounded-lg px-3 py-2">Belum ada diskon untuk program ini.</p>
+                        </template>
+                        <div class="space-y-1.5" x-show="discounts.length > 0">
+                            <template x-for="d in discounts" :key="d.id">
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200" :class="d.is_active ? 'bg-white' : 'bg-gray-50 opacity-60'">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-600" x-text="typeLabels[d.type] || d.type"></span>
+                                            <span class="text-xs font-semibold text-gray-800" x-text="d.label"></span>
+                                            <span class="text-xs font-bold text-orange-600" x-text="formattedValue(d)"></span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="toggleDiscount(d)" class="relative inline-flex items-center shrink-0" :title="d.is_active ? 'Nonaktifkan' : 'Aktifkan'">
+                                        <div class="w-8 h-4.5 rounded-full transition-colors" :class="d.is_active ? 'bg-emerald-500' : 'bg-gray-300'"></div>
+                                        <div class="absolute w-3.5 h-3.5 bg-white rounded-full shadow transition-all m-0.5" :class="d.is_active ? 'left-3.5' : 'left-0'"></div>
+                                    </button>
+                                    <button type="button" @click="deleteDiscount(d)" class="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0" title="Hapus">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Add discount form -->
+                        <div x-show="showAddForm" x-cloak class="mt-3 p-3 bg-orange-50/50 rounded-xl border border-orange-100 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tipe</label>
+                                    <select x-model="newDiscount.type" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400 bg-white">
+                                        <option value="guest">👤 Guest</option>
+                                        <option value="new_user">🆕 New User</option>
+                                        <option value="student">🎓 Student</option>
+                                        <option value="referral">🤝 Referral Teman</option>
+                                        <option value="holiday">🎉 Hari Libur Khusus</option>
+                                        <option value="region">📍 Daerah Khusus</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Label</label>
+                                    <input type="text" x-model="newDiscount.label" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400" placeholder="e.g., Diskon Lebaran">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis</label>
+                                    <select x-model="newDiscount.discount_type" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400 bg-white">
+                                        <option value="percentage">% Persentase</option>
+                                        <option value="fixed_idr">Rp Nominal</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nilai</label>
+                                    <input type="number" min="1" x-model="newDiscount.discount_value" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400" placeholder="e.g., 20">
+                                </div>
+                            </div>
+                            <div x-show="newDiscount.type === 'holiday'" x-cloak class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Mulai</label>
+                                    <input type="date" x-model="newDiscount.start_date" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Selesai</label>
+                                    <input type="date" x-model="newDiscount.end_date" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400">
+                                </div>
+                            </div>
+                            <div x-show="newDiscount.type === 'region'" x-cloak>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Daerah (pisahkan koma)</label>
+                                <input type="text" x-model="newDiscount.regions" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-orange-400 focus:border-orange-400" placeholder="e.g., Jakarta, Bandung">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center gap-2 text-xs font-medium text-gray-600">
+                                    <input type="checkbox" x-model="newDiscount.is_active" class="w-3.5 h-3.5 text-orange-600 border-gray-300 rounded focus:ring-orange-400">
+                                    Aktifkan sekarang
+                                </label>
+                            </div>
+                            <p x-show="error" x-cloak class="text-xs text-red-600" x-text="error"></p>
+                            <button type="button" @click="addDiscount()" :disabled="saving || !newDiscount.label || !newDiscount.discount_value"
+                                class="w-full py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors">
+                                <span x-show="!saving">Simpan Diskon</span>
+                                <span x-show="saving" x-cloak>Menyimpan...</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Subprograms for Paket -->

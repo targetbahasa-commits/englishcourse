@@ -232,7 +232,7 @@
             }
         }" x-init="$watch('openTenses', v => { if(v) resetZoom(); })">
             <button title="Tenses" @click="openTenses = true"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Tenses</span>
         </button>
@@ -333,7 +333,7 @@
         <!-- TENSES CHART (HTML Table) -->
         <div x-data="{ openTensesChart: false }">
             <button title="Tenses Chart" @click="openTensesChart = true"
-                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Tenses Chart</span>
         </button>
@@ -694,7 +694,7 @@
                 }
             }">
             <button title="Linking Words" @click="open = true"
-                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Linking Words</span>
         </button>
@@ -749,7 +749,7 @@
     <!-- 6. DICTIONARY (Full Logic) -->
 <div x-data="dictionaryDataToolbar()">
     <button title="Dictionary" @click="open = true"
-        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Dictionary</span>
         </button>
@@ -1033,7 +1033,7 @@
         }
     }">
         <button title="Irregular Verbs" @click="open = true"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Irregular Verbs</span>
         </button>
@@ -1082,11 +1082,360 @@
         </template>
     </div>
 
+    {{-- MODAL AUXILIARIES - same self-contained component used on grammar-writing
+         pages (resources/views/components/modal-button.blade.php), rendered inline
+         here since IELTS Writing has no <x-modal-button /> equivalent - just its own
+         local x-data, no page-specific variables needed. --}}
+    <x-modal-button />
+
+    {{-- TENSES CHART (HTML Table) - same self-contained block as the one inside the
+         task_type==3 branch above, duplicated here (task-agnostic zone, between the
+         task_type==3 and task_type==1 @if blocks) so IELTS Writing Task 2 pages also
+         get the button - previously it only showed on task_type==3 pages. --}}
+    <div x-data="{ openTensesChart: false }">
+        <button title="Tenses Chart" @click="openTensesChart = true"
+            class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
+        <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        <span class="hidden md:inline text-sm font-medium">Tenses Chart</span>
+    </button>
+        <template x-teleport="body">
+            <div x-show="openTensesChart" style="display: none;"
+                class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-[100]"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                <div @click.outside="openTensesChart = false"
+                    class="bg-white rounded-xl shadow-2xl p-3 md:p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg md:text-2xl font-bold text-gray-800">Tenses Reference Chart</h3>
+                        <button @click="openTensesChart = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300 text-sm">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="border border-gray-300 p-2 w-12"></th>
+                                    <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Simple</th>
+                                    <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Continuous</th>
+                                    <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Perfect</th>
+                                    <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Perfect
+                                        Continuous</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Present -->
+                                <tr>
+                                    <th class="border border-gray-300 p-0 bg-[#8cb6e8] text-black w-12 align-middle">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
+                                            class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Present</div>
+                                    </th>
+                                    <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + V1(s/es) + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + V-ing + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + being + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + being + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + has/have + V3 + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + V-ing + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + being + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1 text-opacity-70">
+                                                    Nominal</div>
+                                                <p class="italic text-gray-500 mt-1">Gunakan pola Present Perfect
+                                                    Nominal</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Past -->
+                                <tr>
+                                    <th class="border border-gray-300 p-0 bg-[#f4b68e] text-black w-12 align-middle">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
+                                            class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Past</div>
+                                    </th>
+                                    <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + V2 + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + was/were + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + was/were + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + was/were + V-ing + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + was/were + being + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + was/were + being + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + had + V3 + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + had + been + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + had + been + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + had been + V-ing + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + had been + being + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1 text-opacity-70">
+                                                    Nominal</div>
+                                                <p class="italic text-gray-500 mt-1">Gunakan pola Past Perfect Nominal
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Future -->
+                                <tr>
+                                    <th class="border border-gray-300 p-0 bg-[#eade78] text-black w-12 align-middle">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
+                                            class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Future</div>
+                                    </th>
+                                    <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + V1 + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + ANA</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + V-ing + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + being + V3</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1 text-opacity-70">
+                                                    Nominal</div>
+                                                <p class="italic text-gray-500 mt-1">Jarang digunakan</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + V3 + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Passive)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + V3
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Nominal</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + ANA
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
+                                                    Verbal (Active)</div>
+                                                <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + V-ing
+                                                    + O</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1 text-opacity-70">
+                                                    Verbal (Passive)</div>
+                                                <p class="italic text-gray-500 mt-1">Sangat jarang digunakan</p>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1 text-opacity-70">
+                                                    Nominal</div>
+                                                <p class="italic text-gray-500 mt-1">Gunakan pola Future Perfect Nominal
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
     <!-- 3. GRAPHICAL VOCABULARIES (Task 1 Only) -->
     @if(($meeting->task_type ?? 0) == 1)
         <div x-data="{ open: false }">
             <button @click="open = true"
-                class="bg-gray-700 hover:bg-gray-800 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+                class="bg-gray-700 hover:bg-gray-800 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
                 <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 <span class="hidden md:inline text-sm font-medium">Describing Trends</span>
             </button>
@@ -1404,7 +1753,7 @@
     @if(($meeting->task_type ?? 0) == 1)
             <div x-data="{ open: false }">
                 <button @click="open = true"
-                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
                     <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
                     <span class="hidden md:inline text-sm font-medium">Making Comparisons</span>
                 </button>
@@ -1641,7 +1990,7 @@
 @if(($meeting->task_type ?? 0) == 1)
     <div x-data="{ open: false }">
         <button @click="open = true"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Direction & Maps</span>
         </button>
@@ -1874,7 +2223,7 @@
 @if(($meeting->task_type ?? 0) == 1)
     <div x-data="{ open: false }">
         <button @click="open = true"
-            class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Describing Process</span>
         </button>
@@ -1992,7 +2341,7 @@
 @if(($meeting->task_type ?? 0) == 2)
     @if(empty($hideCollocations))
     <button @click="$dispatch('toggle-collocations')"
-        class="bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+        class="bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
         <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
         <span class="hidden md:inline text-sm font-medium">Collocations</span>
     </button>
@@ -2001,7 +2350,7 @@
     <!-- 4. IDIOMS -->
     @if(empty($hideIdioms))
     <button @click="$dispatch('toggle-idioms')"
-        class="bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+        class="bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
         <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
         <span class="hidden md:inline text-sm font-medium">Idioms</span>
     </button>
@@ -2052,7 +2401,7 @@
                         }
                     }">
         <button @click="open = true; fetchIdeas()"
-            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105">
+            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100">
             <span class="btn-glow-content bg-pink-500 hover:bg-pink-600 text-white font-bold flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-md md:gap-2">
                 <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 <span class="hidden md:inline text-sm font-medium">Ideas</span>
@@ -2167,6 +2516,20 @@
 
     <!-- 6. MAGIC SENTENCE -->
     @if(empty($hideMagicSentence))
+    @if(!empty($inlineMagicSentence))
+        {{-- Pages with a single essay textarea (meeting.blade.php, layout_builder.blade.php,
+             practice_view.blade.php) own msOpen/toggleMagicSentence()/translateSentence() on
+             their root x-data and render the typing surface inline over the textarea itself
+             (same UX as the promo test page), so this button is just a plain toggle. --}}
+        <button title="Magic Sentence" @click="toggleMagicSentence()"
+            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100">
+            <span class="btn-glow-content text-white text-sm font-bold flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-md md:gap-2"
+                  :class="msOpen ? 'bg-blue-700 ring-2 ring-blue-300' : 'bg-blue-500 hover:bg-blue-600'">
+                <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                <span class="hidden md:inline text-sm font-medium">Magic Sentence</span>
+            </span>
+        </button>
+    @else
     <div x-data="{
         msOpen: false,
         msText: '',
@@ -2179,7 +2542,7 @@
             this.msError = null;
             this.msResult = '';
             try {
-                const response = await fetch('/api/ollama/magic-sentence', {
+                const response = await fetch('/api/ollama/translate-sentence', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2190,8 +2553,26 @@
                 });
                 if (!response.ok) throw new Error('Gagal memproses kalimat.');
                 const data = await response.json();
-                if (data.result) this.msResult = data.result;
-                else this.msError = 'Format respons AI tidak sesuai.';
+                if (data.translation) {
+                    // Pages with a single free-form essay textarea (x-model=essay,
+                    // e.g. meeting.blade.php / layout_builder.blade.php / practice_view.blade.php)
+                    // expose it on this shared scope-chain since this component is nested
+                    // inside their root x-data. Same append-and-close UX as the promo test
+                    // page Magic Sentence, instead of leaving the student to copy-paste.
+                    if (typeof this.essay !== 'undefined') {
+                        const current = this.essay || '';
+                        const prefix = current.length > 0 && !current.endsWith(' ') && !current.endsWith('\n') ? ' ' : '';
+                        this.essay = current + prefix + data.translation;
+                        this.msText = '';
+                        this.msOpen = false;
+                    } else {
+                        // No single essay field on this page type - fall back to
+                        // showing the result with a copy button, as before.
+                        this.msResult = data.translation;
+                    }
+                } else {
+                    this.msError = 'Format respons AI tidak sesuai.';
+                }
             } catch(e) { this.msError = e.message; } finally { this.msLoading = false; }
         },
         copyResult() {
@@ -2206,7 +2587,7 @@
         }
     }">
         <button title="Magic Sentence" @click="msOpen = true"
-            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105">
+            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100">
             <span class="btn-glow-content bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-md md:gap-2">
                 <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                 <span class="hidden md:inline text-sm font-medium">Magic Sentence</span>
@@ -2257,6 +2638,7 @@
         </template>
     </div>
     @endif
+    @endif
 
     <!-- 7. COLLOCATION DICTIONARY -->
     @if(empty($hideCollocationDictionary))
@@ -2298,7 +2680,7 @@
                         }
                     }">
         <button @click="open = true"
-            class="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Collocation Dictionary</span>
         </button>
@@ -2489,6 +2871,7 @@
                     open: false,
                     isExplaining: false,
                     explanationHtml: '',
+                    lastLoadedTopic: null,
                     formatRawTextToMarkdown(text) {
                         if (!text) return '';
                         // If it is already full markdown with headings, return it
@@ -2505,9 +2888,18 @@
                     },
                     async loadExplanation() {
                         this.open = true;
-                        if (this.explanationHtml) return;
+                        // Pages with their own grammar-topic checkboxes (e.g.
+                        // grammar-writing-practice-level.blade.php) expose the
+                        // currently-selected topics via this bridge, since
+                        // that's a separate Alpine component with no other
+                        // shared state - falls back to the static lessonTitle
+                        // passed in from the server everywhere else.
+                        var title = (typeof window.getCurrentLessonTopic === 'function' && window.getCurrentLessonTopic())
+                            || lessonTitle || 'Grammar Practice';
+                        if (this.explanationHtml && title === this.lastLoadedTopic) return;
+                        this.explanationHtml = '';
+                        this.lastLoadedTopic = title;
                         this.isExplaining = true;
-                        var title = lessonTitle || 'Grammar Practice';
                         try {
                             var r = await fetch(explainUrl, {
                                 method: 'POST',
@@ -2546,7 +2938,7 @@
     </script>
     <div x-data="lessonExplanationToolbar(@js($meeting->prompt ?? ($grammarLevel ?? 'Grammar Practice')), @js($lessonExplainUrl ?? route('assignments.grammar-writing.explain-lesson')))" @open-lesson-explanation.window="loadExplanation()">
         <button title="Lesson Explanation" @click="loadExplanation()"
-            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 opacity-70 hover:opacity-100 flex items-center gap-2 whitespace-nowrap">
             <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span class="hidden md:inline text-sm font-medium">Lesson Explanation</span>
         </button>

@@ -146,7 +146,19 @@
                     </div>
 
                     <div class="flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-5 sm:flex-row sm:items-center">
-                        @if($certificateAvailable)
+                        @if(!Auth::user()->isAdmin() && (float) $result->score < 50)
+                            <div class="flex flex-col gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-3">
+                                <span class="text-sm font-semibold text-rose-700">Skor Anda ({{ $result->score }}) belum mencapai batas kelulusan (50). Ulangi Final Test untuk mendapatkan sertifikat.</span>
+                                <a href="{{ route('final-test') }}" class="inline-flex w-fit items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 transition">
+                                    Ulangi Final Test
+                                </a>
+                            </div>
+                        @elseif($certificateAvailable && !Auth::user()->isAdmin() && $result->certificate_downloads_count >= 3)
+                            <span class="inline-flex h-11 items-center rounded-xl border border-rose-200 bg-white px-5 text-sm font-semibold text-rose-600">
+                                Batas download sertifikat (3x) sudah tercapai
+                            </span>
+                        @elseif($certificateAvailable)
+                            <div class="flex flex-col gap-1">
                             <div x-data="{
                                 hasReviewed: localStorage.getItem('reviewed_google') === 'true',
                                 showReviewModal: false,
@@ -159,7 +171,7 @@
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        Download Certificate PDF
+                                        Silahkan Download Certificate
                                     </a>
                                 </template>
                                 
@@ -233,6 +245,10 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            @if(!Auth::user()->isAdmin())
+                                <span class="text-xs text-slate-400">Sisa kuota download: {{ max(0, 3 - $result->certificate_downloads_count) }}x</span>
+                            @endif
                             </div>
                         @else
                             <span class="inline-flex h-11 items-center rounded-xl border border-amber-200 bg-white px-5 text-sm font-semibold text-amber-700">

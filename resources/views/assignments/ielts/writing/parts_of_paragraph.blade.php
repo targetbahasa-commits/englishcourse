@@ -164,23 +164,23 @@
                 <div class="space-y-6">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">1. Topic Sentence</label>
-                        <textarea name="q{{ $question->id }}_topic" x-model="answers['q{{ $question->id }}_topic']" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all resize-y font-serif" rows="2" placeholder="Mulailah dengan ide utama yang jelas..."></textarea>
+                        <textarea name="q{{ $question->id }}_topic" x-model="answers['q{{ $question->id }}_topic']" style="field-sizing: content;" @input="autoResize($event.target)" x-init="$nextTick(() => autoResize($el))" class="auto-expand-answer block w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="2" placeholder="Mulailah dengan ide utama yang jelas..."></textarea>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">2. Explanation / Reason</label>
-                        <textarea name="q{{ $question->id }}_explanation" x-model="answers['q{{ $question->id }}_explanation']" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 focus:outline-none transition-all resize-y font-serif" rows="3" placeholder="Jelaskan mengapa ide utama Anda benar..."></textarea>
+                        <textarea name="q{{ $question->id }}_explanation" x-model="answers['q{{ $question->id }}_explanation']" style="field-sizing: content;" @input="autoResize($event.target)" x-init="$nextTick(() => autoResize($el))" class="auto-expand-answer block w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="3" placeholder="Jelaskan mengapa ide utama Anda benar..."></textarea>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">3. Example</label>
-                        <textarea name="q{{ $question->id }}_example" x-model="answers['q{{ $question->id }}_example']" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 focus:outline-none transition-all resize-y font-serif" rows="3" placeholder="Berikan contoh konkret..."></textarea>
+                        <textarea name="q{{ $question->id }}_example" x-model="answers['q{{ $question->id }}_example']" style="field-sizing: content;" @input="autoResize($event.target)" x-init="$nextTick(() => autoResize($el))" class="auto-expand-answer block w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="3" placeholder="Berikan contoh konkret..."></textarea>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">4. Result / Consequence (Optional)</label>
-                        <textarea name="q{{ $question->id }}_result" x-model="answers['q{{ $question->id }}_result']" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-200 focus:border-pink-400 focus:outline-none transition-all resize-y font-serif" rows="2" placeholder="Apa hasilnya?"></textarea>
+                        <textarea name="q{{ $question->id }}_result" x-model="answers['q{{ $question->id }}_result']" style="field-sizing: content;" @input="autoResize($event.target)" x-init="$nextTick(() => autoResize($el))" class="auto-expand-answer block w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-200 focus:border-pink-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="2" placeholder="Apa hasilnya?"></textarea>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">5. Concluding Sentence (Optional)</label>
-                        <textarea name="q{{ $question->id }}_conclusion" x-model="answers['q{{ $question->id }}_conclusion']" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-y font-serif" rows="2" placeholder="Rangkum paragraf tersebut..."></textarea>
+                        <textarea name="q{{ $question->id }}_conclusion" x-model="answers['q{{ $question->id }}_conclusion']" style="field-sizing: content;" @input="autoResize($event.target)" x-init="$nextTick(() => autoResize($el))" class="auto-expand-answer block w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 focus:outline-none transition-all resize-none overflow-hidden font-serif" rows="2" placeholder="Rangkum paragraf tersebut..."></textarea>
                     </div>
                 </div>
             </div>
@@ -319,10 +319,11 @@
                                 <div class="mt-3">
                                     <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $theme['label'] }}">Jawaban Translate</label>
                                     <textarea
+                                        style="field-sizing: content;"
                                         name="translate_{{ $exercise['id'] }}"
                                         @input="autoResize($event.target)"
                                         x-init="$nextTick(() => autoResize($el))"
-                                        class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $theme['textarea'] }}"
+                                        class="auto-expand-answer block w-full rounded-lg border bg-white px-3 py-2 text-sm resize-none overflow-hidden focus:ring-2 focus:outline-none {{ $theme['textarea'] }}"
                                         rows="4"
                                         placeholder="Tulis hasil terjemahan bahasa Inggris untuk Latihan {{ $exercise['id'] }} di sini...">{{ $savedAnswers['translate_' . $exercise['id']] ?? '' }}</textarea>
                                 </div>
@@ -371,10 +372,11 @@
                                         <div>
                                             <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Topic Sentence</label>
                                             <textarea
+                                                style="field-sizing: content;"
                                                 name="part2_{{ $topicNumber }}_topic"
                                                 @input="autoResize($event.target)"
                                                 x-init="$nextTick(() => autoResize($el))"
-                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                class="auto-expand-answer block w-full rounded-lg border bg-white px-3 py-2 text-sm resize-none overflow-hidden focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
                                                 placeholder="Write your topic sentence for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_topic'] ?? '' }}</textarea>
                                         </div>
@@ -382,10 +384,11 @@
                                         <div>
                                             <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Explanation / Reason</label>
                                             <textarea
+                                                style="field-sizing: content;"
                                                 name="part2_{{ $topicNumber }}_explanation"
                                                 @input="autoResize($event.target)"
                                                 x-init="$nextTick(() => autoResize($el))"
-                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                class="auto-expand-answer block w-full rounded-lg border bg-white px-3 py-2 text-sm resize-none overflow-hidden focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
                                                 placeholder="Write your explanation for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_explanation'] ?? '' }}</textarea>
                                         </div>
@@ -393,10 +396,11 @@
                                         <div>
                                             <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Example</label>
                                             <textarea
+                                                style="field-sizing: content;"
                                                 name="part2_{{ $topicNumber }}_example"
                                                 @input="autoResize($event.target)"
                                                 x-init="$nextTick(() => autoResize($el))"
-                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                class="auto-expand-answer block w-full rounded-lg border bg-white px-3 py-2 text-sm resize-none overflow-hidden focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
                                                 placeholder="Write your example for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_example'] ?? '' }}</textarea>
                                         </div>
@@ -404,10 +408,11 @@
                                         <div>
                                             <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Result</label>
                                             <textarea
+                                                style="field-sizing: content;"
                                                 name="part2_{{ $topicNumber }}_result"
                                                 @input="autoResize($event.target)"
                                                 x-init="$nextTick(() => autoResize($el))"
-                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                class="auto-expand-answer block w-full rounded-lg border bg-white px-3 py-2 text-sm resize-none overflow-hidden focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
                                                 placeholder="Write the result for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_result'] ?? '' }}</textarea>
                                         </div>
@@ -596,11 +601,12 @@
                 }
 
                 setTimeout(() => {
-                    const textareas = document.querySelectorAll('textarea[name^="q"]');
+                    const textareas = document.querySelectorAll('textarea[name]');
                     textareas.forEach(el => {
-                        if (el.value) {
+                        if (el.name.startsWith('q') && el.value) {
                              this.answers[el.name] = el.value;
                         }
+                        this.autoResize(el);
                     });
                 }, 500);
 

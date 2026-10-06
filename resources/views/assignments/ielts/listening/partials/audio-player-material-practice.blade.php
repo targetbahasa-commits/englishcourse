@@ -6,7 +6,17 @@
 --}}
 @php
 $fixed   = $fixed ?? true;
-$_audioUrl    = isset($material) && filled($material->audio_file) ? asset($material->audio_file) : null;
+$_audioUrl    = null;
+if (isset($material) && filled($material->audio_file)) {
+    $_audioUrl = asset($material->audio_file);
+    $_materialAudioPath = public_path($material->audio_file);
+    if (file_exists($_materialAudioPath)) {
+        // Cache-bust with the file's mtime so a replaced audio file (same
+        // filename, new content) is fetched fresh instead of served from a
+        // browser's stale cache alongside an already-updated transcript.
+        $_audioUrl .= '?v=' . filemtime($_materialAudioPath);
+    }
+}
 $_hasAudio    = (bool) $_audioUrl;
 $_hasTranscript = isset($material) && (filled($material->transcript_en) || filled($material->transcript_id));
 $_answerKeyField = 'answer_key_practice_' . ($practice ?? 1);
@@ -444,11 +454,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function highlightTranscript(currentTime) {
         document.querySelectorAll('.transcript-line').forEach(el => {
             const s = parseFloat(el.dataset.start), e = parseFloat(el.dataset.end);
+            const isId = !!el.closest('.transcript-id');
+            const activeClasses = isId
+                ? ['bg-purple-50', 'text-purple-900', 'font-medium', 'ring-1', 'ring-purple-200']
+                : ['bg-indigo-50', 'text-indigo-900', 'font-medium', 'ring-1', 'ring-indigo-200'];
             if (currentTime >= s && currentTime <= e) {
-                el.classList.add('bg-white', 'text-indigo-900');
+                el.classList.add(...activeClasses);
                 if (isAutoscrollEnabled) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
-                el.classList.remove('bg-white', 'text-indigo-900');
+                el.classList.remove('bg-purple-50', 'text-purple-900', 'bg-indigo-50', 'text-indigo-900', 'font-medium', 'ring-1', 'ring-purple-200', 'ring-indigo-200');
             }
         });
     }

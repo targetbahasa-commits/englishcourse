@@ -2,6 +2,15 @@
 
 @section('title', 'Class Schedule')
 
+{{-- layouts.admin never outputs a csrf-token meta tag, so saveMeeting()'s
+     fetch()-based save (below) has been reading
+     document.querySelector('meta[name="csrf-token"]').getAttribute(...) off
+     a tag that never existed - every "Save Changes" click threw "Cannot
+     read properties of null" and silently never reached the server. --}}
+@section('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('content')
 
 <!-- FullCalendar CSS -->
@@ -292,6 +301,79 @@
                             </div>
                         </div>
 
+                        <!-- Recording URLs -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                <svg class="inline w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Link Rekaman (Video Review)
+                            </label>
+                            <div class="space-y-1.5" x-show="formData.recording_urls.length > 0">
+                                <template x-for="(url, index) in formData.recording_urls" :key="index">
+                                    <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-200">
+                                        <a :href="url" target="_blank" class="flex-1 min-w-0 truncate text-xs text-indigo-600 hover:text-indigo-700" x-text="url"></a>
+                                        <button type="button" @click="formData.recording_urls.splice(index, 1)" class="text-gray-400 hover:text-red-500 shrink-0" title="Hapus">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="relative mt-1.5">
+                                <input type="url" x-model="newRecordingUrl"
+                                       @keydown.enter.prevent="if (newRecordingUrl.trim()) { formData.recording_urls.push(newRecordingUrl.trim()); newRecordingUrl = ''; }"
+                                       class="w-full border-gray-200 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-gray-50 hover:bg-white transition pr-10"
+                                       placeholder="Zoom, Google Drive, YouTube, dll... lalu tekan Enter">
+                                <button type="button"
+                                        @click="if (newRecordingUrl.trim()) { formData.recording_urls.push(newRecordingUrl.trim()); newRecordingUrl = ''; }"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition"
+                                        title="Tambah link">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-400">Bisa lebih dari satu link (mis. Zoom + Google Drive + YouTube). Muncul sebagai tombol "Tonton Rekaman" di kartu meeting untuk student.</p>
+                        </div>
+
+                        <!-- Recording Passwords -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                <svg class="inline w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Password Rekaman
+                            </label>
+                            <div class="space-y-1.5" x-show="formData.recording_passwords.length > 0">
+                                <template x-for="(entry, index) in formData.recording_passwords" :key="index">
+                                    <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-200">
+                                        <span class="text-xs font-semibold text-gray-500 shrink-0" x-text="entry.label"></span>
+                                        <span class="flex-1 min-w-0 truncate text-xs font-mono text-gray-700" x-text="entry.password"></span>
+                                        <button type="button" @click="formData.recording_passwords.splice(index, 1)" class="text-gray-400 hover:text-red-500 shrink-0" title="Hapus">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <datalist id="recording-password-label-suggestions">
+                                <option value="Zoom"></option>
+                                <option value="Google Drive"></option>
+                                <option value="YouTube"></option>
+                                <option value="Lainnya"></option>
+                            </datalist>
+                            <div class="flex items-center gap-1.5 mt-1.5">
+                                <input type="text" x-model="newRecordingPasswordLabel" list="recording-password-label-suggestions"
+                                       class="w-32 shrink-0 border-gray-200 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-gray-50 hover:bg-white transition"
+                                       placeholder="Zoom, GDrive, dll..."
+                                       @keydown.enter.prevent="$refs.newRecordingPasswordValueInput.focus()">
+                                <input type="text" x-model="newRecordingPasswordValue" x-ref="newRecordingPasswordValueInput"
+                                       class="flex-1 min-w-0 border-gray-200 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-gray-50 hover:bg-white transition"
+                                       placeholder="Password..."
+                                       @keydown.enter.prevent="if (newRecordingPasswordValue.trim()) { formData.recording_passwords.push({label: newRecordingPasswordLabel.trim() || 'Password', password: newRecordingPasswordValue.trim()}); newRecordingPasswordLabel = ''; newRecordingPasswordValue = ''; }">
+                                <button type="button"
+                                        @click="if (newRecordingPasswordValue.trim()) { formData.recording_passwords.push({label: newRecordingPasswordLabel.trim() || 'Password', password: newRecordingPasswordValue.trim()}); newRecordingPasswordLabel = ''; newRecordingPasswordValue = ''; }"
+                                        class="text-gray-400 hover:text-indigo-500 transition shrink-0"
+                                        title="Tambah password">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-400">Bisa lebih dari satu password dengan keterangan (mis. Zoom + Google Drive). Ditampilkan ke student di samping tombol "Tonton Rekaman", bisa langsung di-copy.</p>
+                        </div>
+
                         <!-- Error Banner -->
                         <div x-show="errorMessage" x-transition
                              class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-sm">
@@ -362,8 +444,13 @@
                 start_time: '',
                 end_time: '',
                 topic: '',
-                meeting_link: ''
+                meeting_link: '',
+                recording_urls: [],
+                recording_passwords: []
             },
+            newRecordingUrl: '',
+            newRecordingPasswordLabel: '',
+            newRecordingPasswordValue: '',
 
             init() {
                 const calendarEl = document.getElementById('calendar');
@@ -506,8 +593,13 @@
                     start_time: start ? this.pad(start.getHours()) + ':' + this.pad(start.getMinutes()) : '',
                     end_time: end ? this.pad(end.getHours()) + ':' + this.pad(end.getMinutes()) : '',
                     topic: props.topic || '',
-                    meeting_link: props.meeting_link || ''
+                    meeting_link: props.meeting_link || '',
+                    recording_urls: Array.isArray(props.recording_urls) ? props.recording_urls.slice() : [],
+                    recording_passwords: Array.isArray(props.recording_passwords) ? props.recording_passwords.slice() : []
                 };
+                this.newRecordingUrl = '';
+                this.newRecordingPasswordLabel = '';
+                this.newRecordingPasswordValue = '';
 
                 this.errorMessage = '';
                 this.successMessage = '';

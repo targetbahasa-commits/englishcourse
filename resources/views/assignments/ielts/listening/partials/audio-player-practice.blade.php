@@ -9,7 +9,14 @@
 $fixed   = $fixed ?? true;
 $testId  = $testId ?? request()->route('test') ?? request()->route('testId') ?? request()->get('testId');
 
-$_audioUrl    = isset($section) && filled($section->audio_file) ? asset($section->audio_file) : null;
+$_audioUrl    = null;
+if (isset($section) && filled($section->audio_file)) {
+    $_audioUrl = asset($section->audio_file);
+    $_sectionAudioPath = public_path($section->audio_file);
+    if (file_exists($_sectionAudioPath)) {
+        $_audioUrl .= '?v=' . filemtime($_sectionAudioPath);
+    }
+}
 
 if (!$_audioUrl && isset($set) && filled($testId)) {
     $relAudio = 'assets/audio/ielts/listening/practice/part' . $set . '/test' . $testId . '.mp3';
@@ -17,8 +24,21 @@ if (!$_audioUrl && isset($set) && filled($testId)) {
     $pathB = public_path('public/' . $relAudio);
     $pathC = base_path('public/' . $relAudio);
     $pathD = ($_SERVER['DOCUMENT_ROOT'] ?? '') . '/' . $relAudio;
-    if (file_exists($pathA) || file_exists($pathB) || file_exists($pathC) || file_exists($pathD)) {
-        $_audioUrl = asset($relAudio);
+    $_audioFoundPath = null;
+    if (file_exists($pathA)) $_audioFoundPath = $pathA;
+    elseif (file_exists($pathB)) $_audioFoundPath = $pathB;
+    elseif (file_exists($pathC)) $_audioFoundPath = $pathC;
+    elseif (file_exists($pathD)) $_audioFoundPath = $pathD;
+    if ($_audioFoundPath) {
+        // Cache-bust with the file's mtime so a replaced audio file (same
+        // filename, new content) is fetched fresh instead of served from a
+        // browser's stale cache alongside an already-updated transcript.
+        $_audioUrl = asset($relAudio) . '?v=' . filemtime($_audioFoundPath);
+    } else {
+        $onlineAudios = config('ielts_listening_audios');
+        if (isset($onlineAudios[$set][$testId]) && filled($onlineAudios[$set][$testId])) {
+            $_audioUrl = $onlineAudios[$set][$testId];
+        }
     }
 }
 
@@ -611,11 +631,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function highlightTranscript(currentTime) {
         document.querySelectorAll('.transcript-line').forEach(el => {
             const s = parseFloat(el.dataset.start), e = parseFloat(el.dataset.end);
+            const isId = !!el.closest('.transcript-id');
+            const activeClasses = isId
+                ? ['bg-purple-50', 'text-purple-900', 'font-medium', 'ring-1', 'ring-purple-200']
+                : ['bg-indigo-50', 'text-indigo-900', 'font-medium', 'ring-1', 'ring-indigo-200'];
             if (currentTime >= s && currentTime <= e) {
-                el.classList.add('bg-white', 'text-indigo-900');
+                el.classList.add(...activeClasses);
                 if (isAutoscrollEnabled) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
-                el.classList.remove('bg-white', 'text-indigo-900');
+                el.classList.remove('bg-purple-50', 'text-purple-900', 'bg-indigo-50', 'text-indigo-900', 'font-medium', 'ring-1', 'ring-purple-200', 'ring-indigo-200');
             }
         });
     }

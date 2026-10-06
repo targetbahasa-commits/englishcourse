@@ -488,7 +488,7 @@ trait HasProficiencyMeetingContent
         };
     }
 
-    private function proficiencyMeetingCheatSheet(int $meeting): ?array
+    public function proficiencyMeetingCheatSheet(int $meeting): ?array
     {
         return match ($meeting) {
             1 => ['__html__' => <<<'HTML'

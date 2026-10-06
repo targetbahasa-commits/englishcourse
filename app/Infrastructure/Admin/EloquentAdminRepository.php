@@ -481,8 +481,27 @@ class EloquentAdminRepository implements AdminRepository
             return $fallback;
         }
 
+        // Grammar for Writing has 4 separate track programs (Fast Track,
+        // Complexity, Introductory, Proficiency) that all live under this
+        // same URL prefix, distinguished only by the next path segment -
+        // collapsing all of them to the generic 'Grammar for Writing' label
+        // below discarded that distinction even when the URL itself (or
+        // $fallback, the student's real assigned program name) already had
+        // it, which is why Live Preview showed some Fast Track students as
+        // plain "Grammar for Writing" while others correctly showed "Fast
+        // Track Grammar for Writing" depending on which activity source
+        // happened to be their most recent one.
+        if (str_starts_with($path, '/assignments/grammar-writing')) {
+            return match (true) {
+                str_starts_with($path, '/assignments/grammar-writing/fast-track') => 'Fast Track Grammar for Writing',
+                str_starts_with($path, '/assignments/grammar-writing/complexity') => 'Complexity Grammar for Writing',
+                str_starts_with($path, '/assignments/grammar-writing/introductory') => 'Introductory Grammar for Writing',
+                str_starts_with($path, '/assignments/grammar-writing/proficiency') => 'Proficiency Grammar for Writing',
+                default => $fallback === 'Student Dashboard' ? 'Grammar for Writing' : $fallback,
+            };
+        }
+
         return match (true) {
-            str_starts_with($path, '/assignments/grammar-writing') => 'Grammar for Writing',
             str_starts_with($path, '/assignments/toefl-itp') => 'TOEFL ITP',
             str_starts_with($path, '/assignments/pte-academic') => 'PTE Academic',
             str_starts_with($path, '/assignments/ielts-general') => 'IELTS General',

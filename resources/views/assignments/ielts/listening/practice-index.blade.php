@@ -48,24 +48,41 @@
             @endphp
 
             @foreach($practiceParts as $partNum => $data)
+                @php
+                    $stats = $userPartStats[$partNum] ?? null;
+                    $completedCount = $stats['completed_count'] ?? 0;
+                    $avgBand = $stats['avg_band'] ?? null;
+                @endphp
                 <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="px-4 py-1.5 bg-white text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
+                        <span class="px-4 py-1.5 bg-purple-50 text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
                             PRACTICE
                         </span>
+                        @if($completedCount > 0)
+                            <span class="px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-xs">
+                                {{ $completedCount }}/50 Selesai
+                            </span>
+                        @endif
                     </div>
                     
                     <div class="flex-1 mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white text-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="font-bold text-xl">{{ $partNum }}</span>
                             </div>
-                            <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $data['title'] }}</h3>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $data['title'] }}</h3>
+                                @if($completedCount > 0 && $avgBand !== null)
+                                    <p class="text-xs text-emerald-700 font-semibold mt-1">Rata-rata: Band {{ number_format($avgBand, 1) }}</p>
+                                @else
+                                    <p class="text-xs text-gray-400 mt-1">50 Practice Tests</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     
-                    <a href="{{ route('assignments.ielts-academic.listening.practice-index.part', ['set' => $partNum]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
-                        Start Part
+                    <a href="{{ route('assignments.ielts-academic.listening.practice-index.part', ['set' => $partNum]) }}" class="block w-full py-3 {{ $completedCount > 0 ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-purple-600 hover:bg-purple-700' }} text-white text-center rounded-xl font-bold transition shadow-sm hover:shadow active:scale-95">
+                        {{ $completedCount > 0 ? 'Buka Soal & Review →' : 'Start Part' }}
                     </a>
                 </div>
             @endforeach

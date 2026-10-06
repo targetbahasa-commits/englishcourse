@@ -5,6 +5,7 @@ namespace App\Infrastructure\Program;
 use App\Domain\Program\Repositories\ProgramRepository;
 use App\Models\Meeting;
 use App\Models\Program;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EloquentProgramRepository implements ProgramRepository
@@ -18,7 +19,7 @@ class EloquentProgramRepository implements ProgramRepository
 
     public function listWithCounts(): array
     {
-        return Program::with(['subprograms', 'classPeriods' => function ($q) {
+        return Program::with(['subprograms', 'onlineSibling', 'offlineSibling', 'classPeriods' => function ($q) {
                 $q->withCount('users')->orderBy('created_at', 'desc');
             }])
             ->withCount([
@@ -71,6 +72,13 @@ class EloquentProgramRepository implements ProgramRepository
         $program->update(['is_active' => false]);
     }
 
+    public function toggleActive(mixed $program): mixed
+    {
+        $program->update(['is_active' => !$program->is_active]);
+
+        return $program;
+    }
+
     public function delete(mixed $program): void
     {
         $program->delete();
@@ -116,5 +124,68 @@ class EloquentProgramRepository implements ProgramRepository
     public function findMeetingOrFail(int $id): mixed
     {
         return Meeting::findOrFail($id);
+    }
+
+    public function findSplittableCandidates(): array
+    {
+        return Program::where(function ($q) {
+                $q->where('price_offline', '>', 0)
+                    ->orWhere('price_private_offline', '>', 0)
+                    ->orWhere('price_semi_private_offline', '>', 0);
+            })
+            ->whereNull('linked_program_id')
+            ->whereDoesntHave('offlineSibling')
+            ->get()
+            ->all();
+    }
+
+    public function splitIntoOfflineVariant(mixed $program, ?string $nameSuffix = null): mixed
+    {
+        $nameSuffix ??= ' (Offline)';
+
+        return DB::transaction(function () use ($program, $nameSuffix) {
+            $offlineProgram = Program::create([
+                'name'                       => $program->name . $nameSuffix,
+                'slug'                       => Str::slug($program->name . $nameSuffix),
+                'period'                     => $program->period,
+                'description'                => $program->description,
+                'color'                      => $program->color,
+                'icon'                       => $program->icon,
+                'price'                      => $program->price_offline,
+                'price_private'              => $program->price_private_offline,
+                'price_semi_private'         => $program->price_semi_private_offline,
+                'price_offline'              => 0,
+                'price_private_offline'      => 0,
+                'price_semi_private_offline' => 0,
+                'is_active'                  => $program->is_active,
+                'brochure_image'             => $program->brochure_image,
+                'brochure_pdf'               => $program->brochure_pdf,
+                'program_type'               => $program->program_type,
+                'min_cefr_level'             => $program->min_cefr_level,
+                'max_cefr_level'             => $program->max_cefr_level,
+                'delivery_mode'              => 'offline',
+                'linked_program_id'          => $program->id,
+            ]);
+
+            foreach ($program->meetings()->orderBy('meeting_number')->get() as $meeting) {
+                $offlineProgram->meetings()->create([
+                    'meeting_number' => $meeting->meeting_number,
+                    'title'          => $meeting->title,
+                    'is_locked'      => $meeting->is_locked,
+                    'is_free_tier'   => $meeting->is_free_tier,
+                    'promo_start'    => $meeting->promo_start,
+                    'promo_deadline' => $meeting->promo_deadline,
+                ]);
+            }
+
+            $program->update([
+                'delivery_mode'              => 'online',
+                'price_offline'              => 0,
+                'price_private_offline'      => 0,
+                'price_semi_private_offline' => 0,
+            ]);
+
+            return $offlineProgram;
+        });
     }
 }

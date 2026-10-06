@@ -162,7 +162,7 @@
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors focus:outline-none"
                                     :class="filterOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
                                 <span class="relative flex h-2 w-2">
-                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" style="display: none;"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2"
                                           :class="filterOnline ? 'bg-green-500' : 'bg-gray-400'"></span>
                                 </span>
@@ -492,7 +492,7 @@
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors focus:outline-none"
                                     :class="filterOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
                                 <span class="relative flex h-2 w-2">
-                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" style="display: none;"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2"
                                           :class="filterOnline ? 'bg-green-500' : 'bg-gray-400'"></span>
                                 </span>

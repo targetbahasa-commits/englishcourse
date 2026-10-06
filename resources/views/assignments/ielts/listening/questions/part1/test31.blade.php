@@ -1,28 +1,43 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 1 - Practice Test 31</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 1</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 1-4</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the form below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS AND/OR A NUMBER</strong> for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Product Incident Report</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>_Example_</strong><strong>_Answer_</strong></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Product:_ _rice cooker_</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Model Number:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">1</strong><input type="text" name="answers[1]" value="{{ old('answers.1') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Price of the Product:</strong>£ <strong class="text-blue-600 font-bold ml-1 mr-1">2</strong><input type="text" name="answers[2]" value="{{ old('answers.2') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Name of the Branch:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">3</strong><input type="text" name="answers[3]" value="{{ old('answers.3') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Problem:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">4</strong><input type="text" name="answers[4]" value="{{ old('answers.4') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 5-10</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Industrial & Product Design</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the form below.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN THREE WORDS AND/OR A NUMBER</strong> for each answer.</p>
-<h4 class="text-xl font-bold mb-4 text-gray-800">CUSTOMER’S INFORMATION DETAILS</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Name:</strong>Herbert Hewitt</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Address:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">5</strong><input type="text" name="answers[5]" value="{{ old('answers.5') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Postcode:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">6</strong><input type="text" name="answers[6]" value="{{ old('answers.6') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Method of payment:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">7</strong><input type="text" name="answers[7]" value="{{ old('answers.7') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Card’s Expiry Date:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">8</strong><input type="text" name="answers[8]" value="{{ old('answers.8') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Method of Compensation:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">9</strong><input type="text" name="answers[9]" value="{{ old('answers.9') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Shopping Frequency:</strong><strong class="text-blue-600 font-bold ml-1 mr-1">10</strong><input type="text" name="answers[10]" value="{{ old('answers.10') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 1-5</h4>
+        <p class="text-gray-600 font-medium">Complete the form below</p>
+        <p class="text-gray-600 font-medium">Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Example</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Answer</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Aim:</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">protecting environment through recycling</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Type of group:</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">non-profit</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Frequency of newspaper collection:</p>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">1</strong><input type="text" name="answers[1]" value="{{ old('answers.1') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">Name:</p>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">2</strong><input type="text" name="answers[2]" value="{{ old('answers.2') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">Address:</p>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">3</strong><input type="text" name="answers[3]" value="{{ old('answers.3') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">E-mail:</p>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">4</strong><input type="text" name="answers[4]" value="{{ old('answers.4') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">Postcode:</p>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">5</strong><input type="text" name="answers[5]" value="{{ old('answers.5') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">Questions 6-10</h4>
+        <p class="text-gray-600 font-medium">Complete the form below.</p>
+        <p class="text-gray-600 font-medium">Write NO MORE THAN TWO WORDS for each answer.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Recycling</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Ways of recycling</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Newspaper: in a <strong class="text-gray-900 font-bold ml-1 mr-1">6</strong><input type="text" name="answers[6]" value="{{ old('answers.6') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"> box</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Nearest rubbish collection centre</h5>
+        <p class="text-gray-800 text-base leading-relaxed">On the East Side of <strong class="text-gray-900 font-bold ml-1 mr-1">7</strong><input type="text" name="answers[7]" value="{{ old('answers.7') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Rubbish that can be recycled</h5>
+        <p class="text-gray-800 text-base leading-relaxed">Blue box: <strong class="text-gray-900 font-bold ml-1 mr-1">8</strong><input type="text" name="answers[8]" value="{{ old('answers.8') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Green box: glass and plastics</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Yellow box: paper</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Rubbish that cannot be recycled</h5>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">9</strong><input type="text" name="answers[9]" value="{{ old('answers.9') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Name of a booklet</h5>
+        <p class="text-gray-800 text-base leading-relaxed"><strong class="text-gray-900 font-bold ml-1 mr-1">10</strong><input type="text" name="answers[10]" value="{{ old('answers.10') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
     </div>
 </div>

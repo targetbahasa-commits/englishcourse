@@ -119,4 +119,72 @@ class StudentController extends Controller
 
         return response()->json($this->manageStudents->getCurrentAssignmentJsonData($student));
     }
+
+    /**
+     * JSON endpoint backing the "Lihat Jawaban" modal's refresh button on the
+     * student profile page - refetches a single meeting's latest submitted
+     * score or in-progress draft without reloading the whole page.
+     */
+    public function meetingAnswers(Request $request, User $student)
+    {
+        if ($student->role !== 'student') {
+            return response()->json(['error' => 'User is not a student.'], 403);
+        }
+
+        $request->validate([
+            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'meeting_number' => ['required', 'integer'],
+        ]);
+
+        $program = \App\Models\Program::findOrFail($request->integer('program_id'));
+        $meetingNumber = $request->integer('meeting_number');
+
+        $meeting = \App\Models\Meeting::where('program_id', $program->id)
+            ->where('meeting_number', $meetingNumber)
+            ->first();
+
+        $score = \App\Models\MeetingScore::where('user_id', $student->id)
+            ->where('program_id', $program->id)
+            ->where('meeting_number', $meetingNumber)
+            ->where('is_reported', true)
+            ->first();
+
+        $draft = \App\Models\AssignmentDraft::where('user_id', $student->id)
+            ->where('program_id', $program->id)
+            ->where('meeting_number', $meetingNumber)
+            ->first();
+
+        $status = $score ? 'submitted' : ($draft ? 'in_progress' : 'not_started');
+
+        $answers = $status === 'submitted'
+            ? (is_array($score->answers_data) ? $score->answers_data : [])
+            : ($status === 'in_progress' ? (is_array($draft->answers) ? $draft->answers : []) : []);
+
+        $questions = AdminGrammarWritingReviewController::resolveQuestionsForMeeting(
+            $program->slug ?? '',
+            $meetingNumber
+        );
+
+        $savedAt = $status === 'submitted'
+            ? $score->submitted_at?->diffForHumans()
+            : ($status === 'in_progress' ? $draft->last_saved_at?->diffForHumans() : null);
+
+        $isGrammarWritingTrack = in_array(
+            $program->slug ?? '',
+            array_column(AdminGrammarWritingReviewController::TRACKS, 'slug'),
+            true
+        );
+
+        return response()->json([
+            'programName' => $program->name,
+            'meetingNumber' => $meetingNumber,
+            'title' => $meeting->title ?? null,
+            'status' => $status,
+            'score' => $score->score ?? null,
+            'meetingScoreId' => $isGrammarWritingTrack ? ($score->id ?? null) : null,
+            'savedAt' => $savedAt,
+            'answers' => $answers,
+            'questions' => $questions,
+        ]);
+    }
 }

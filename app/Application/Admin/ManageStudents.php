@@ -69,6 +69,22 @@ class ManageStudents
         $sessionRow  = $this->repository->getLatestSessionForStudent($student->id);
         $sessionData = $this->decodeSessionPayload($sessionRow->payload ?? null);
         $activityUrl = $this->resolveActivityUrl($sessionData, (int) $student->id);
+
+        // Resolve the URL fallback BEFORE deriving programName from it: when the
+        // raw session has no usable URL yet, resolveActivityUrl() returns null,
+        // and mapUrlToProgramName(null) short-circuits to 'Unknown Program' -
+        // which then fell through to resolveStudentProgramName()'s
+        // profile/enrollment lookup below, picking the student's *enrolled*
+        // program (e.g. the TOEFL ITP package) rather than whatever page they're
+        // actually on. The activityUrl fallback a few lines down (drafts/scores/
+        // cached last-valid-URL) usually resolves the real page just fine - it
+        // just used to run too late to inform programName. Resolving it first
+        // means programName and activityUrl are always derived from the same
+        // (fully-resolved) URL, matching what "Current Page URL" displays.
+        if (!$activityUrl) {
+            $activityUrl = $this->resolveFallbackActivityUrl($student, $sessionData);
+        }
+
         $programName = $this->mapUrlToProgramName($activityUrl);
 
         // Online/last-activity is derived from users.last_seen_at (stamped by
@@ -85,14 +101,10 @@ class ManageStudents
         $lastActivityAt = $student->last_seen_at;
         $isOnline = $lastActivityAt && $lastActivityAt->gte(now()->subSeconds(180));
 
-        // If programName is Unknown Program, resolve it from student profile/enrollments/scores
+        // If programName is still Unknown Program even after the activityUrl
+        // fallback above, resolve it from student profile/enrollments/scores.
         if ($programName === 'Unknown Program') {
             $programName = $this->resolveStudentProgramName($student);
-        }
-
-        // If activityUrl is null, resolve fallback activity URL from student's drafts / scores / enrolled program
-        if (!$activityUrl) {
-            $activityUrl = $this->resolveFallbackActivityUrl($student, $sessionData);
         }
 
         // If lastActivityAt is null, resolve fallback last activity timestamp
@@ -165,53 +177,13 @@ class ManageStudents
         }
 
         // ── Step 2: Filter out internal API / background-poll URLs ────────
-        // These are XHR requests that Laravel still saves in _previous.url.
-        // They must never surface as the student's "current page".
-        //
-        // Patterns to reject:
-        //   /api/live-drawing/fetch/{id}?last_time=...
-        //   /api/live-draft/...
-        //   /broadcasting/auth
-        //   /api/*  (all internal JSON endpoints)
-        //   /admin/students/*/current-assignment-json  (admin polling endpoint)
-        //   any /*-pdf or /*/pdf download route (a student clicking "Download
-        //   Materi PDF"/"Download Evaluation PDF" makes THAT the last real
-        //   page nav in their session; surfaced into the Live Preview iframe,
-        //   a PDF response just triggers the browser's native Save dialog and
-        //   leaves the iframe blank instead of showing their actual work)
-        $ignoredPrefixes = [
-            '/api/',
-            '/broadcasting/',
-        ];
-        $ignoredContains = [
-            '/current-assignment-json',
-            '/download-material-pdf',
-            '/download-pdf',
-            '/materi/pdf',
-            '/hasil/pdf',
-        ];
-
+        // These are XHR-like requests that Laravel still saves in
+        // _previous.url. They must never surface as the student's "current
+        // page" - see isIgnoredActivityPath() for the full pattern list.
         if (is_string($url) && trim($url) !== '') {
             $path = (string) parse_url($url, PHP_URL_PATH);
-            $isIgnored = false;
 
-            foreach ($ignoredPrefixes as $prefix) {
-                if (str_starts_with($path, $prefix)) {
-                    $isIgnored = true;
-                    break;
-                }
-            }
-
-            if (!$isIgnored) {
-                foreach ($ignoredContains as $needle) {
-                    if (str_contains($path, $needle)) {
-                        $isIgnored = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!$isIgnored) {
+            if (!$this->isIgnoredActivityPath($path)) {
                 // ── Step 3a: Valid URL found — normalize and cache it ─────
                 $normalized = $this->normalizeActivityUrlToCurrentHost($url);
 
@@ -229,7 +201,91 @@ class ManageStudents
         // ── Step 3b: No valid URL in session — fall back to cached URL ────
         // This happens when background polling has overwritten _previous.url.
         // The cached URL was saved the last time the student visited a real page.
-        return Cache::get('student_last_valid_activity_url_' . $studentId);
+        // Guard against a stale ignored-pattern entry cached before this
+        // function's own ignore check existed (see Step 2 above) - skip it
+        // so the caller's own draft/score-aware fallback chain gets a chance
+        // to run instead of getting short-circuited by a truthy bad value.
+        $cachedUrl = Cache::get('student_last_valid_activity_url_' . $studentId);
+        if ($cachedUrl) {
+            $cachedPath = (string) parse_url($cachedUrl, PHP_URL_PATH);
+            if ($this->isIgnoredActivityPath($cachedPath)) {
+                return null;
+            }
+        }
+
+        return $cachedUrl;
+    }
+
+    /**
+     * URLs that must never surface as a student's "current page" in Live
+     * Preview - internal API/background-poll requests that Laravel still
+     * saves into _previous.url because they're plain GET requests without
+     * the X-Requested-With header (e.g. a bare fetch() call), so Laravel's
+     * own ajax() detection doesn't exclude them. Shared by every read path
+     * (fresh session URL AND both cache-read fallbacks) so a bad value
+     * already sitting in cache under an old version of this list gets
+     * rejected too, not just newly-resolved ones - see resolveActivityUrl()
+     * Step 3b and resolveFallbackActivityUrl() for why a single check here
+     * isn't enough on its own.
+     */
+    private function isIgnoredActivityPath(string $path): bool
+    {
+        // The bare homepage is never a genuine "current assignment page" -
+        // if _previous.url resolves to it, it almost always means the
+        // student briefly visited the homepage, then returned to their
+        // exercise via the browser Back button, which restores the page
+        // from the browser's own cache without a fresh server request.
+        // Their autosave keeps firing via fetch() regardless (updating
+        // AssignmentDraft/session normally), but Laravel's _previous.url
+        // never gets refreshed to reflect it, so this would otherwise get
+        // cached as their "last valid page" and stick for up to 2 hours.
+        if ($path === '' || $path === '/') {
+            return true;
+        }
+
+        // Patterns to reject:
+        //   /api/live-drawing/fetch/{id}?last_time=...
+        //   /api/live-draft/...
+        //   /broadcasting/auth
+        //   /api/*  (all internal JSON endpoints)
+        //   /refresh-csrf  (periodic fetch() CSRF-token keepalive call, hit
+        //   from every grammar-writing meeting page - fetch() never sets
+        //   X-Requested-With, so Laravel treats it as a real GET navigation)
+        $ignoredPrefixes = [
+            '/api/',
+            '/broadcasting/',
+            '/refresh-csrf',
+        ];
+
+        foreach ($ignoredPrefixes as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+
+        // /admin/students/*/current-assignment-json (admin polling endpoint) -
+        // not PDF-related, kept as its own explicit check.
+        if (str_contains($path, '/current-assignment-json')) {
+            return true;
+        }
+
+        // Any route that actually responds with a PDF (a student clicking
+        // "Download Materi PDF"/"Download Evaluation PDF"/the Fast Track
+        // handbook book-pdf/etc. makes THAT the last real page nav in their
+        // session). Surfaced into the Live Preview iframe, a PDF response
+        // just renders the PDF viewer or triggers a native download instead
+        // of showing their actual work. Matched by pattern instead of a
+        // growing whitelist of exact route strings (previously
+        // /download-material-pdf, /download-pdf, /materi/pdf, /hasil/pdf -
+        // missed /fast-track/book-pdf, which is what motivated this) so any
+        // future *-pdf or /pdf/ route is caught automatically.
+        foreach (explode('/', trim($path, '/')) as $segment) {
+            if ($segment === 'pdf' || str_ends_with($segment, '-pdf')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function normalizeActivityUrlToCurrentHost(string $url): ?string
@@ -338,10 +394,16 @@ class ManageStudents
 
     private function resolveFallbackActivityUrl(mixed $student, array $sessionData): ?string
     {
-        // 1. Check cache for last valid URL
+        // 1. Check cache for last valid URL - but a stale ignored-pattern
+        // entry cached before the guard in resolveActivityUrl() existed must
+        // not keep winning over the draft/score checks below for up to its
+        // remaining 2h TTL.
         $cached = Cache::get('student_last_valid_activity_url_' . $student->id);
         if ($cached) {
-            return $cached;
+            $cachedPath = (string) parse_url($cached, PHP_URL_PATH);
+            if (!$this->isIgnoredActivityPath($cachedPath)) {
+                return $cached;
+            }
         }
 
         // 2. Check latest draft
@@ -453,19 +515,36 @@ class ManageStudents
 
         $path = strtolower((string) parse_url((string) $activityUrl, PHP_URL_PATH));
 
+        // URL-matched resolvers are authoritative - each one's own regex
+        // only matches when $path is LITERALLY that program type's meeting
+        // URL, so at most one of these two can ever fire for a given path.
+        // These must both run BEFORE either whole-session-scanning fallback
+        // below: a student who worked on a Grammar Writing meeting earlier
+        // in this same session (leaving a "meeting7_user_answers" key
+        // lingering) then moved on to an IELTS Writing page would otherwise
+        // have resolveGrammarMeetingSnapshotFromSession() - which ignores
+        // the URL entirely - match that STALE grammar key and win before
+        // resolveIeltsWritingMeetingSnapshot() (which correctly matches the
+        // CURRENT page's URL) ever got a chance to run. Confirmed live: the
+        // admin preview showed an old Grammar Writing answer while the
+        // student was actively typing on IELTS Writing Task 2, with nothing
+        // wrong in the sync pipeline itself - purely a priority ordering bug.
         $grammarSnapshot = $this->resolveGrammarMeetingSnapshot($userId, $path, $sessionData);
         if ($grammarSnapshot !== null) {
             return array_merge($snapshot, $grammarSnapshot);
         }
 
-        $grammarSessionSnapshot = $this->resolveGrammarMeetingSnapshotFromSession($sessionData);
-        if ($grammarSessionSnapshot !== null) {
-            return array_merge($snapshot, $grammarSessionSnapshot);
-        }
-
         $ieltsWritingSnapshot = $this->resolveIeltsWritingMeetingSnapshot($userId, $path, $sessionData);
         if ($ieltsWritingSnapshot !== null) {
             return array_merge($snapshot, $ieltsWritingSnapshot);
+        }
+
+        // Only now fall back to whole-session scanning (a guess, since it
+        // ignores the URL) - first the two program-specific guessers, then
+        // the fully generic one.
+        $grammarSessionSnapshot = $this->resolveGrammarMeetingSnapshotFromSession($sessionData);
+        if ($grammarSessionSnapshot !== null) {
+            return array_merge($snapshot, $grammarSessionSnapshot);
         }
 
         $ieltsWritingSessionSnapshot = $this->resolveIeltsWritingMeetingSnapshotFromSession($sessionData);
@@ -611,7 +690,29 @@ class ManageStudents
             if ($dbDraft && !empty($dbDraft->answers)) {
                 $rawAnswers = is_array($dbDraft->answers) ? $dbDraft->answers : (json_decode((string) $dbDraft->answers, true) ?? []);
                 if (is_array($rawAnswers) && $rawAnswers !== []) {
-                    $answersWrapperKey = ($isSharedTensesMatrixMeeting || !in_array("{$track}_meeting{$meetingNumber}_draft_answers", $modernAnswerKeys, true))
+                    // Unlike the cache/session branches above, there's no
+                    // "which literal key had data" signal here - the
+                    // AssignmentDraft row doesn't record which endpoint
+                    // wrote it. But which endpoint that is turns out to be
+                    // a static fact of (track, meetingNumber), not
+                    // something that varies at runtime: every fast-track
+                    // page (and the shared tenses/matrix meeting, even when
+                    // reused under the 'complexity' track - see
+                    // meeting2.blade.php) posts to
+                    // LegacyGrammarWritingController::meetingDraft(), which
+                    // saves the raw payload as-is (needing
+                    // resolveLegacyAnswersWrapperKey()'s wrap to match real
+                    // DOM field names); every other track's ordinary
+                    // meeting posts to grammarWritingMeetingDraft(), which
+                    // also saves its payload as-is but under DOM fields
+                    // named "answers[...]" (needing the 'answers' wrap).
+                    // A null $track behaves like "not fast-track" in
+                    // resolveLegacyAnswersWrapperKey() anyway, so route it
+                    // through the same branch for parity with the
+                    // cache/session lookup above (where an empty
+                    // $modernAnswerKeys list made that branch always taken
+                    // when $track was empty).
+                    $answersWrapperKey = (!$track || $track === 'fast-track' || $isSharedTensesMatrixMeeting)
                         ? $this->resolveLegacyAnswersWrapperKey($track, $meetingNumber)
                         : 'answers';
                 }
@@ -643,7 +744,7 @@ class ManageStudents
             }
             foreach (['trans_matrix', 'tenses'] as $group) {
                 if (isset($answers[$group]) && is_array($answers[$group])
-                    && collect($answers[$group])->contains(fn ($v) => $v !== null && trim((string) $v) !== '')) {
+                    && collect($answers[$group])->flatten()->contains(fn ($v) => $v !== null && !is_array($v) && trim((string) $v) !== '')) {
                     return true;
                 }
             }

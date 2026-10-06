@@ -37,7 +37,7 @@
                         </div>
                         <div>
                             <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Grammar for Writing
+                                Grammar for Writing{{ $mode === 'offline' ? ' (Offline)' : '' }}
                             </h1>
                             <p class="text-gray-600 mt-1">Pilih kelas dan mulai perjalanan belajarmu!</p>
                         </div>
@@ -50,7 +50,7 @@
                             </svg>
                             Nilai &amp; Koreksi Guru
                         </a>
-                        <a href="{{ route('assignments.index') }}"
+                        <a href="{{ route('assignments.index', $mode === 'offline' ? ['tab' => 'offline'] : []) }}"
                             class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -65,7 +65,7 @@
 
                     <!-- Introductory Grammar for Writing -->
                     @if($accessIntroductory)
-                    <a href="{{ route('assignments.grammar-writing.track', 'introductory') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                    <a href="{{ route('assignments.grammar-writing.track', ['track' => 'introductory'] + ($mode === 'offline' ? ['mode' => 'offline'] : [])) }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     @else
                     <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
                     @endif
@@ -109,7 +109,7 @@
 
                     <!-- Complexity Grammar for Writing -->
                     @if($accessComplexity)
-                    <a href="{{ route('assignments.grammar-writing.track', 'complexity') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+                    <a href="{{ route('assignments.grammar-writing.track', ['track' => 'complexity'] + ($mode === 'offline' ? ['mode' => 'offline'] : [])) }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
                     @else
                     <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
                     @endif
@@ -154,7 +154,7 @@
 
                     <!-- Proficiency Grammar for Writing -->
                     @if($accessProficiency)
-                    <a href="{{ route('assignments.grammar-writing.track', 'proficiency') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+                    <a href="{{ route('assignments.grammar-writing.track', ['track' => 'proficiency'] + ($mode === 'offline' ? ['mode' => 'offline'] : [])) }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
                     @else
                     <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
                     @endif
@@ -200,7 +200,7 @@
                     <!-- Fast Track Grammar for Writing -->
                     <div class="md:col-start-2 md:col-span-1">
                     @if($accessFastTrack)
-                    <a href="{{ route('assignments.grammar-writing') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1 w-full">
+                    <a href="{{ route('assignments.grammar-writing', $mode === 'offline' ? ['mode' => 'offline'] : []) }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1 w-full">
                     @else
                     <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200 w-full">
                     @endif

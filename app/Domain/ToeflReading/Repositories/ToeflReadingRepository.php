@@ -24,6 +24,10 @@ interface ToeflReadingRepository
 
     public function getQuestionsByMeeting(int $meetingId): array;
 
+    public function getScoreForUser(int $userId, int $meetingNumber): mixed;
+
+    public function deleteScoreForUser(int $userId, int $meetingNumber): bool;
+
     public function saveScore(int $userId, int $meetingNumber, array $data): void;
 
     public function createPassage(array $data): void;

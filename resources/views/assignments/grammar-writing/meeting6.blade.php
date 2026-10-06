@@ -121,13 +121,13 @@
                             @endif
                             
                             <div class="mb-2">
-                                <input type="text"
-                                       name="userAnswers[verbPatterns][{{ $idx }}]"
-                                       value="{{ old('userAnswers.verbPatterns.'.$idx, $userAnswers['verbPatterns'][$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                <textarea name="userAnswers[verbPatterns][{{ $idx }}]"
+                                          rows="1"
+                                          style="field-sizing: content;"
+                                          class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                          placeholder="Translate to English..."
+                                          {{ $submitted ? 'readonly' : '' }}
+                                          autocomplete="off">{{ old('userAnswers.verbPatterns.'.$idx, $userAnswers['verbPatterns'][$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results['verbPatterns'][$idx]['score'] == 100)
@@ -223,13 +223,13 @@
                             @endif
                             
                             <div class="mb-2">
-                                <input type="text"
-                                       name="userAnswers[toInfinitive][{{ $idx }}]"
-                                       value="{{ old('userAnswers.toInfinitive.'.$idx, $userAnswers['toInfinitive'][$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                <textarea name="userAnswers[toInfinitive][{{ $idx }}]"
+                                          rows="1"
+                                          style="field-sizing: content;"
+                                          class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                          placeholder="Translate to English..."
+                                          {{ $submitted ? 'readonly' : '' }}
+                                          autocomplete="off">{{ old('userAnswers.toInfinitive.'.$idx, $userAnswers['toInfinitive'][$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results['toInfinitive'][$idx]['score'] == 100)
@@ -325,13 +325,13 @@
                             @endif
                             
                             <div class="mb-2">
-                                <input type="text"
-                                       name="userAnswers[gerund][{{ $idx }}]"
-                                       value="{{ old('userAnswers.gerund.'.$idx, $userAnswers['gerund'][$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
+                                <textarea name="userAnswers[gerund][{{ $idx }}]"
+                                          rows="1"
+                                          style="field-sizing: content;"
+                                          class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                          placeholder="Translate to English..."
+                                          {{ $submitted ? 'readonly' : '' }}
+                                          autocomplete="off">{{ old('userAnswers.gerund.'.$idx, $userAnswers['gerund'][$idx] ?? '') }}</textarea>
                                 
                                 @if($submitted)
                                     @if($results['gerund'][$idx]['score'] == 100)
@@ -414,7 +414,8 @@
                         <textarea
                             name="userAnswers[paragraph]"
                             rows="8"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Translate the paragraph to English..."
                             {{ $submitted ? 'readonly' : '' }}
                             autocomplete="off">{{ old('userAnswers.paragraph', $userAnswers['paragraph'] ?? '') }}</textarea>
@@ -518,8 +519,7 @@
          */
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
-            // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const isReadonly = document.querySelector('form[action*="/assignments/grammar-writing/meeting"] input[type="text"][readonly], form[action*="/assignments/grammar-writing/meeting"] textarea[readonly]');
             
             return !!isReadonly;
         },

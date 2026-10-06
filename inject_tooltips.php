@@ -40,6 +40,9 @@ $jsTooltip = <<<'JSEOF'
 <script>
 (function(){
     const tip = document.getElementById('tb-tooltip');
+    if (tip) {
+        document.body.appendChild(tip);
+    }
     let hideTimer;
     document.addEventListener('mouseover', function(e){
         const btn = e.target.closest('[data-tooltip]');

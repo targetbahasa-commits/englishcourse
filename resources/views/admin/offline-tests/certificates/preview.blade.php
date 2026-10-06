@@ -38,7 +38,8 @@
     }
 
     .cert-border-outer {
-        border: 4px solid var(--main-color);
+        border: 4px solid var(--frame-solid);
+        border-image: var(--frame-grad) 1;
         height: 100%;
         box-sizing: border-box;
         padding: 8px;
@@ -47,7 +48,8 @@
     }
 
     .cert-border-inner {
-        border: 1px solid var(--main-color);
+        border: 1.2px solid var(--frame-solid);
+        border-image: var(--frame-grad) 1;
         height: 100%;
         box-sizing: border-box;
         padding: 20px 40px;
@@ -64,7 +66,8 @@
         position: absolute;
         width: 24px;
         height: 24px;
-        border-color: var(--main-color);
+        border-color: var(--frame-solid);
+        border-image: var(--frame-grad) 1;
         border-style: solid;
         pointer-events: none;
     }
@@ -251,7 +254,7 @@
     .cert-footer-line {
         width: 200px;
         height: 1px;
-        background-color: var(--main-color);
+        background-color: var(--ribbon-col);
         opacity: 0.3;
         margin-bottom: 10px;
     }
@@ -263,22 +266,21 @@
         color: var(--main-color);
     }
 
-    /* Premium Gold-colored Seal styling */
     .cert-seal-wrapper {
         position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 140px;
+        width: 150px;
+        margin-top: 10px;
     }
 
     .cert-seal {
-        width: 110px;
-        height: 110px;
+        width: 128px;
+        height: 128px;
         border-radius: 50%;
-        background: radial-gradient(circle, #ffffff 0%, #fffbeb 60%, #fef08a 100%);
-        border: 3px double var(--main-color);
-        box-shadow: 0 10px 25px -5px rgba(250, 204, 21, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        background: radial-gradient(circle, #ffffff 0%, #fffdf5 45%, #fffbeb 70%, #fef8c6 100%);
+        box-shadow: inset 0 0 0 2px #d4af37, inset 0 0 0 3.5px #fffbeb, inset 0 0 0 6px #b8860b, 0 0 0 3px #c59b27, 0 0 0 6px rgba(245, 224, 138, 0.4), 0 12px 25px -5px rgba(184, 134, 11, 0.35);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -289,21 +291,21 @@
 
     .cert-seal-ribbon-l, .cert-seal-ribbon-r {
         position: absolute;
-        bottom: -16px;
-        width: 24px;
-        height: 50px;
-        background-color: var(--main-color);
+        bottom: -20px;
+        width: 28px;
+        height: 52px;
+        background-color: var(--ribbon-col);
         opacity: 0.85;
         clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
         z-index: 5;
     }
     .cert-seal-ribbon-l {
-        left: 42px;
-        transform: rotate(-12deg);
+        left: 46px;
+        transform: rotate(-13deg);
     }
     .cert-seal-ribbon-r {
-        right: 42px;
-        transform: rotate(12deg);
+        right: 46px;
+        transform: rotate(13deg);
     }
 
     .cert-seal-label {
@@ -374,15 +376,15 @@
 
         @php
             $config = $certificate->template_config ?? [];
-            $eyebrow = $config['eyebrow'] ?? 'Certificate of Achievement';
-            $title = $config['title'] ?? 'Certificate of Completion';
-            $subtitle = $config['subtitle'] ?? 'Offline Test Practice Result';
-            $scoreLabel = $config['score_label'] ?? 'Final Score';
-            $bodyText = $config['body'] ?? 'This certificate is awarded to the candidate for successfully completing the free test.';
-            $footerLeft = $config['footer_left_label'] ?? 'Date';
-            $footerRight = $config['footer_right_label'] ?? 'Authorized Signature';
-            $signatureName = $config['signature_name'] ?? 'Target Bahasa';
-            $signatureTitle = $config['signature_title'] ?? (($signatureName === 'Nendra Wirawan' || empty($config['signature_title'])) ? 'Founder & Developer' : $config['signature_title']);
+            $eyebrow = array_key_exists('eyebrow', $config) ? $config['eyebrow'] : 'Certificate of Achievement';
+            $title = array_key_exists('title', $config) ? $config['title'] : 'Certificate of Completion';
+            $subtitle = array_key_exists('subtitle', $config) ? $config['subtitle'] : 'Offline Test Practice Result';
+            $scoreLabel = array_key_exists('score_label', $config) ? $config['score_label'] : 'Final Score';
+            $bodyText = array_key_exists('body', $config) ? $config['body'] : 'This certificate is awarded to the candidate for successfully completing the free test.';
+            $footerLeft = array_key_exists('footer_left_label', $config) ? $config['footer_left_label'] : 'Date';
+            $footerRight = array_key_exists('footer_right_label', $config) ? $config['footer_right_label'] : 'Authorized Signature';
+            $signatureName = array_key_exists('signature_name', $config) ? $config['signature_name'] : 'Target Bahasa';
+            $signatureTitle = array_key_exists('signature_title', $config) ? $config['signature_title'] : '';
             $mainColor = $certificate->text_color;
 
             $hasResult = $result !== null;
@@ -443,7 +445,69 @@
                     $grammarLevel = 'Fail';
                 }
             }
+            $rawBgOpacity = array_key_exists('background_opacity', $config) && is_numeric($config['background_opacity']) ? (float)$config['background_opacity'] : 18;
+            $bgOpacity = $rawBgOpacity > 1 ? ($rawBgOpacity / 100) : $rawBgOpacity;
         @endphp
+    @php
+        $hasResult = isset($result) && $result;
+        $useGradeScore = in_array($certificate->test_type, [
+            'introductory_grammar_for_writing', 'complexity_grammar_for_writing',
+            'proficiency_grammar_for_writing', 'fast_track_grammar_for_writing',
+            'introductory_speaking', 'intermediate_speaking', 'advanced_speaking',
+        ]);
+        $grade = 'Distinction';
+        if ($hasResult && $useGradeScore) {
+            $scoreInt = (int) $result->score;
+            if ($scoreInt >= 90) $grade = 'Distinction';
+            elseif ($scoreInt >= 80) $grade = 'High Merit';
+            elseif ($scoreInt >= 70) $grade = 'Merit';
+            elseif ($scoreInt >= 60) $grade = 'Pass with Credit';
+            elseif ($scoreInt >= 50) $grade = 'Pass';
+            else $grade = 'Fail';
+        }
+
+        $schemes = [
+            'Distinction' => [
+                'ribbon' => '#1a202c',
+                'frame_solid' => '#c59b27',
+                'preview_border' => 'linear-gradient(135deg, #c59b27 0%, #f5e08a 18%, #b8860b 35%, #fef8c6 52%, #d4af37 70%, #f7e696 85%, #a07018 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #b8860b 0%, #f5e08a 35%, #c59b27 60%, #a07018 100%)',
+            ],
+            'High Merit' => [
+                'ribbon' => '#475569',
+                'frame_solid' => '#757f9a',
+                'preview_border' => 'linear-gradient(135deg, #757f9a 0%, #d7dde8 25%, #e1e4eb 50%, #b4bac7 75%, #8992a6 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #e1e4eb 0%, #d7dde8 35%, #757f9a 60%, #8992a6 100%)',
+            ],
+            'Merit' => [
+                'ribbon' => '#78350f',
+                'frame_solid' => '#8a5a2b',
+                'preview_border' => 'linear-gradient(135deg, #8a5a2b 0%, #e3a869 25%, #b96e32 50%, #f0be82 75%, #cd7f32 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #b96e32 0%, #e3a869 35%, #8a5a2b 60%, #cd7f32 100%)',
+            ],
+            'Pass with Credit' => [
+                'ribbon' => '#0f172a',
+                'frame_solid' => '#0f2027',
+                'preview_border' => 'linear-gradient(135deg, #0f2027 0%, #28505f 25%, #3c788c 50%, #203a43 75%, #2c5364 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #3c788c 0%, #28505f 35%, #0f2027 60%, #2c5364 100%)',
+            ],
+            'Pass' => [
+                'ribbon' => '#064e3b',
+                'frame_solid' => '#11998e',
+                'preview_border' => 'linear-gradient(135deg, #11998e 0%, #28b496 30%, #41d2aa 50%, #28b496 70%, #38ef7d 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #41d2aa 0%, #28b496 35%, #11998e 60%, #38ef7d 100%)',
+            ],
+            'Fail' => [
+                'ribbon' => '#1e293b',
+                'frame_solid' => '#333333',
+                'preview_border' => 'linear-gradient(135deg, #333333 0%, #464646 30%, #5a5a5a 50%, #464646 70%, #555555 100%)',
+                'preview_seal' => 'radial-gradient(ellipse at top left, #5a5a5a 0%, #464646 35%, #333333 60%, #555555 100%)',
+            ],
+        ];
+
+        $currentScheme = $schemes[$grade] ?? $schemes['Distinction'];
+    @endphp
+
 
         @if(! $hasResult)
             <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
@@ -454,11 +518,11 @@
 
         <div class="rounded-3xl border border-slate-200 bg-slate-100 p-6 md:p-12 shadow-inner flex justify-center">
             <div class="certificate-container">
-                <div class="certificate-canvas">
+                <div class="certificate-canvas" style="--frame-grad: {{ $currentScheme['preview_border'] }}; --frame-solid: {{ $currentScheme['frame_solid'] }}; --seal-grad: {{ $currentScheme['preview_seal'] }}; --ribbon-col: {{ $currentScheme['ribbon'] }};">
                     <div class="cert-bg-pattern"></div>
                     
                     @if($certificate->background_image)
-                        <div style="position:absolute; inset:0; background-image:url('{{ route('admin.offline-test-certificates.background', $certificate->id) }}'); background-size:cover; background-position:center; opacity:0.18; z-index:0; pointer-events:none;"></div>
+                        <div style="position:absolute; inset:0; background-image:url('{{ route('admin.offline-test-certificates.background', $certificate->id) }}'); background-size:cover; background-position:center; opacity:{{ $bgOpacity }}; z-index:0; pointer-events:none;"></div>
                     @endif
 
                     <div class="cert-border-outer">
@@ -475,16 +539,24 @@
 
                             <!-- Header Labels -->
                             <div class="flex flex-col items-center">
-                                <div class="cert-eyebrow">{{ $eyebrow }}</div>
-                                <h1 class="cert-title">{{ $title }}</h1>
-                                <div class="cert-subtitle">{{ $subtitle }}</div>
+                                @if(!empty($eyebrow))
+                                    <div class="cert-eyebrow">{{ $eyebrow }}</div>
+                                @endif
+                                @if(!empty($title))
+                                    <h1 class="cert-title">{{ $title }}</h1>
+                                @endif
+                                @if(!empty($subtitle))
+                                    <div class="cert-subtitle">{{ $subtitle }}</div>
+                                @endif
                             </div>
 
                             <!-- Presentation Section -->
                             <div class="flex flex-col items-center w-full">
                                 <div class="cert-presented-to">This certificate is proudly presented to</div>
                                 <div class="cert-recipient-name">{{ $studentName }}</div>
-                                <div class="cert-body-text">{{ $bodyText }}</div>
+                                @if(!empty($bodyText))
+                                    <div class="cert-body-text">{{ $bodyText }}</div>
+                                @endif
 
                                 @if($certificate->test_type === 'toefl_itp')
                                     <div class="cert-score-card" role="group" aria-label="TOEFL ITP scores">
@@ -536,10 +608,10 @@
                                 <div class="cert-footer-col">
                                     <div class="cert-signature-wrap" style="position: relative; height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }}; width: 230px; display: flex; align-items: center; justify-content: center;">
                                         @if(!empty($config['stamp_image']))
-                                            <img src="{{ route('offline-test-certificates.stamp', $certificate->id) }}" alt="Stamp" style="position: absolute; height: 95px; max-width: 115px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                            <img src="{{ route('admin.offline-test-certificates.stamp', $certificate->id) }}" alt="Stamp" style="position: absolute; height: 95px; max-width: 115px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
                                         @endif
                                     </div>
-                                    <span class="cert-footer-label" style="margin-top: 4px; margin-bottom: 8px;">{{ $footerLeft }}</span>
+                                    <span class="cert-footer-label" style="margin-top: 4px; margin-bottom: 8px; visibility: {{ empty($footerLeft) ? 'hidden' : 'visible' }};">{!! $footerLeft ?: '&nbsp;' !!}</span>
                                     <div class="cert-footer-line"></div>
                                     <span class="cert-footer-value">{{ $certificateDate }}</span>
                                     @if(!empty($signatureTitle))
@@ -553,11 +625,11 @@
                                         <div class="cert-seal-ribbon-r"></div>
                                         <div class="cert-seal">
                                             @if($useGradeScore)
-                                                <span class="cert-seal-label" style="font-size: 8px; margin-bottom: 3px;">SCORE: {{ $hasResult ? $result->score : '85' }}</span>
-                                                <span class="cert-seal-value" style="font-size: {{ strlen($grammarLevel) > 10 ? '14px' : '18px' }}; text-align: center; line-height: 1.1; margin-top: 0; padding: 0 4px;">{{ $grammarLevel }}</span>
+                                                <span class="cert-seal-label" style="font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 3px;">SCORE: {{ $hasResult ? floatval($result->score) : '85' }}/100</span>
+                                                <span class="cert-seal-value" style="font-size: {{ strlen($grammarLevel) > 13 ? '14px' : (strlen($grammarLevel) > 9 ? '18px' : (strlen($grammarLevel) > 5 ? '20px' : '26px')) }}; font-weight: 800; text-align: center; line-height: 1.1; margin-top: 0; padding: 0 4px;">{{ $grammarLevel }}</span>
                                             @else
-                                                <span class="cert-seal-label">{{ $scoreLabel }}</span>
-                                                <span class="cert-seal-value">{{ $hasResult ? $scoreValue : '577' }}</span>
+                                                <span class="cert-seal-label" style="font-size: 11px; font-weight: 700;">{{ $scoreLabel }}</span>
+                                                <span class="cert-seal-value" style="font-size: 38px; font-weight: 800;">{{ $hasResult ? $scoreValue : '577' }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -566,20 +638,32 @@
                                 @endif
 
                                 <div class="cert-footer-col">
-                                    <span class="cert-footer-label">{{ $footerRight }}</span>
+                                    <span class="cert-footer-label" style="visibility: {{ empty($footerRight) ? 'hidden' : 'visible' }};">{!! $footerRight ?: '&nbsp;' !!}</span>
                                     <div class="cert-signature-wrap" style="position: relative; height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }}; width: 230px; display: flex; align-items: center; justify-content: center;">
                                         @if(!empty($config['signature_image']))
-                                            <img src="{{ route('offline-test-certificates.signature', $certificate->id) }}" alt="Signature" style="position: relative; max-height: 95px; max-width: 220px; object-fit: contain; z-index: 2;">
+                                            <img src="{{ route('admin.offline-test-certificates.signature', $certificate->id) }}" alt="Signature" style="position: relative; max-height: 95px; max-width: 220px; transform: scale(1.6); transform-origin: bottom center; object-fit: contain; z-index: 2;">
                                         @endif
                                     </div>
                                     <div class="cert-footer-line"></div>
-                                    <span class="cert-footer-value">{{ $signatureName }}</span>
+                                    @if(!empty($signatureName))
+                                        <span class="cert-footer-value">{{ $signatureName }}</span>
+                                    @endif
                                     @if(!empty($signatureTitle))
                                         <span class="cert-footer-role" style="display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500; color: #64748b; margin-top: 2px;">{{ $signatureTitle }}</span>
                                     @endif
                                 </div>
                             </div>
                         </div>
+
+                        @if($hasResult && !empty($result->certificate_number))
+                            <div style="position: absolute; top: 14px; left: 40px; text-align: left; z-index: 20; max-width: 260px;">
+                                <span style="background-color: rgba(255,255,255,0.9); padding: 1px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-size: 9px; color: #64748b;">Certificate No.: {{ $result->certificate_number }} &middot; Verification: {{ route('certificates.verify', $result->certificate_number) }}</span>
+                            </div>
+                        @elseif(!$hasResult)
+                            <div style="position: absolute; top: 14px; left: 40px; text-align: left; z-index: 20; max-width: 260px;">
+                                <span style="background-color: rgba(255,255,255,0.9); padding: 1px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-size: 9px; color: #64748b;">Certificate No.: TB{{ \App\Application\Certificates\GenerateCertificateNumber::codeFor($certificate->test_type) }}0000000000 (Example)</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

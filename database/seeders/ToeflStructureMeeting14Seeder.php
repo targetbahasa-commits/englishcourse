@@ -12,139 +12,118 @@ class ToeflStructureMeeting14Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 14)->first();
-        
-        if (!$meeting) {
-            $meeting = \App\Models\ToeflStructureMeeting::create([
-                'meeting_number' => 14,
-                'title' => 'Structure Exercise: Review (Skills 1-15)',
-                'is_locked' => false
-            ]);
-        }
-        
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 14],
+            [
+                'title' => 'Make and Do',
+                'description' => 'Structure Meeting 14 - Distinguish Make and Do (Skills 58-60)',
+                'is_locked' => false,
+            ]
+        );
+
         // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
         $questions = [
-            // Multiple Choice (1-4)
             [
                 'question_number' => 1,
-                'question_text' => 'Most cells in multicelled organisms perform _______ functions.',
-                'option_a' => 'specialize',
-                'option_b' => 'specialized',
-                'option_c' => 'they specialize',
-                'option_d' => 'specialization',
+                'question_text' => 'The buffalo and the bison <span class="error-option" data-label="A">are</span> <span class="error-option" data-label="B">like</span> <span class="error-option" data-label="C">except for</span> the <span class="error-option" data-label="D">size</span> and shape of the head and shoulders.',
+                'option_a' => 'are',
+                'option_b' => 'like',
+                'option_c' => 'except for',
+                'option_d' => 'size',
                 'correct_answer' => 'B',
+                'explanation' => 'Membedakan "like" dan "alike" (Skill 59): Kata "like" berfungsi sebagai kata depan (preposition) atau kata sifat yang harus diikuti oleh objek kata benda (misalnya "Buffalo is like bison"). Sebaliknya, karena kedua kata benda telah disebutkan sebelumnya sebagai subjek jamak ("The buffalo and the bison") dan diikuti oleh linking verb "are" tanpa objek benda lagi setelahnya, maka yang dibutuhkan adalah predicate adjective "alike". Perbaikan: "like" diganti menjadi "alike". Kunci: (B).',
             ],
             [
                 'question_number' => 2,
-                'question_text' => 'The big island of Hawaii, in the middle of the Pacific Ocean, _______ by five volcanoes.',
-                'option_a' => 'creation',
-                'option_b' => 'it was created',
-                'option_c' => 'creating',
-                'option_d' => 'was created',
-                'correct_answer' => 'D',
+                'question_text' => '<span class="error-option" data-label="A">Other</span> <span class="error-option" data-label="B">interesting</span> aspect of tachistopic training in recent years <span class="error-option" data-label="C">has been</span> the newfound <span class="error-option" data-label="D">use</span> by professional teams.',
+                'option_a' => 'Other',
+                'option_b' => 'interesting',
+                'option_c' => 'has been',
+                'option_d' => 'use',
+                'correct_answer' => 'A',
+                'explanation' => 'Membedakan "another" dan "other" (Skill 60): Kata benda "aspect" adalah kata benda tunggal dapat dihitung (singular countable noun) yang belum spesifik (indefinite). Kata "other" tanpa determiner hanya dapat mendampingi kata benda jamak ("other aspects") atau tak terhitung. Untuk mendampingi kata benda tunggal tak tentu ("interesting aspect"), kata yang wajib digunakan adalah "Another" (an + other). Perbaikan: "Other" diganti menjadi "Another". Kunci: (A).',
             ],
             [
                 'question_number' => 3,
-                'question_text' => 'The Sun uses up over 4 million tons of hydrogen per second, _______ still has enough hydrogen to last for the next 5 billion years.',
-                'option_a' => 'it does not',
-                'option_b' => 'it',
-                'option_c' => 'but it',
-                'option_d' => 'to it',
-                'correct_answer' => 'C',
+                'question_text' => '<span class="error-option" data-label="A">Only about</span> 3 percent of <span class="error-option" data-label="B">oil wells</span> <span class="error-option" data-label="C">actually</span> <span class="error-option" data-label="D">do</span> a profit.',
+                'option_a' => 'Only about',
+                'option_b' => 'oil wells',
+                'option_c' => 'actually',
+                'option_d' => 'do',
+                'correct_answer' => 'D',
+                'explanation' => 'Membedakan penggunaan "make" dan "do" (Skill 58): Kata kerja "do" digunakan untuk aktivitas menyelesaikan pekerjaan umum atau tugas ("do work", "do research"), sedangkan "make" digunakan untuk makna menciptakan, menghasilkan, atau membangun sesuatu. Dalam bahasa Inggris, ungkapan baku untuk menghasilkan keuntungan finansial adalah "make a profit", bukan "do a profit". Perbaikan: "do" diganti menjadi "make". Kunci: (D).',
             ],
             [
                 'question_number' => 4,
-                'question_text' => 'For Katherine L. Bates, who _______ the top of Pikes Peak in 1893, the view provided the inspiration for her hymn "America the Beautiful."',
-                'option_a' => 'reached',
-                'option_b' => 'she reached',
-                'option_c' => 'reaching',
-                'option_d' => 'she was reaching',
+                'question_text' => '<span class="error-option" data-label="A">Dislike</span> sumac <span class="error-option" data-label="B">with</span> red berries, sumac with white berries <span class="error-option" data-label="C">is</span> <span class="error-option" data-label="D">poisonous</span>.',
+                'option_a' => 'Dislike',
+                'option_b' => 'with',
+                'option_c' => 'is',
+                'option_d' => 'poisonous',
                 'correct_answer' => 'A',
+                'explanation' => 'Membedakan "unlike" dan "dislike" (Skill 59): Kata "dislike" adalah kata kerja (verb) yang berarti "tidak menyukai". Pada kalimat ini, dibutuhkan kata depan (preposition) yang berarti "tidak seperti / berbeda dengan" untuk mengawali frasa preposisi pembanding sebelum kata benda "sumac with red berries". Kata depan yang tepat adalah "Unlike". Perbaikan: "Dislike" diganti menjadi "Unlike". Kunci: (A).',
             ],
-            // Written Expression (5-10)
             [
                 'question_number' => 5,
-                'question_text' => 'Coal, petroleum, and natural <span class="error-option" data-label="A">gaseous</span> <span class="error-option" data-label="B">are</span> all fossil <span class="error-option" data-label="C">fuels</span> <span class="error-option" data-label="D"></span>.',
-                // Wait, Q5: "Coal, petroleum, and natural gaseous are all fossil fuels."
-                // Labels: A under Coal?? No.
-                // Image: "Coal, petroleum, and natural gaseous are all fossil fuels."
-                // Underlines: Coal (A), gaseous (B), are (C), fuels (D). Wait, looking closely at line segments.
-                // ___ Coal (A if preceding line? No, usually under words).
-                // Actually, standard TOEFL:
-                // A: gaseous (No, wait. "Coal" has line A? Or is line A under "Coal"? It looks like line A is under "Coal"?)
-                // Actually, usually 4 underlines.
-                // "Coal" (A), "gaseous" (B), "are" (C), "fuels" (D).
-                // "natural gaseous" -> "natural gas". Adjective vs Noun parallelism.
-                // So B is likely the answer.
-                // Let's assume A is Coal.
-                'question_text' => '<span class="error-option" data-label="A">Coal</span>, petroleum, and natural <span class="error-option" data-label="B">gaseous</span> <span class="error-option" data-label="C">are</span> all fossil <span class="error-option" data-label="D">fuels</span>.',
-                'option_a' => 'Coal',
-                'option_b' => 'gaseous',
-                'option_c' => 'are',
-                'option_d' => 'fuels',
-                'correct_answer' => 'B',
+                'question_text' => 'Pittsburgh has reduced <span class="error-option" data-label="A">its</span> smog by requiring <span class="error-option" data-label="B">more</span> complete oxidation of fuel in cars, and <span class="error-option" data-label="C">others</span> cities can <span class="error-option" data-label="D">do</span> the same thing.',
+                'option_a' => 'its',
+                'option_b' => 'more',
+                'option_c' => 'others',
+                'option_d' => 'do',
+                'correct_answer' => 'C',
+                'explanation' => 'Membedakan "other" dan "others" (Skill 60): Kata "others" adalah kata ganti jamak (plural pronoun) yang berdiri sendiri menggantikan kata benda dan tidak boleh diikuti oleh kata benda lagi. Karena di belakangnya terdapat kata benda jamak "cities", maka yang diperlukan adalah kata sifat (adjective) yang tidak pernah berakhiran -s, yaitu "other" ("other cities"). Perhatikan juga bahwa "do the same thing" pada pilihan (D) sudah benar sesuai Skill 58. Perbaikan: "others" diganti menjadi "other". Kunci: (C).',
             ],
             [
                 'question_number' => 6,
-                'question_text' => 'The mass of <span class="error-option" data-label="A">neutron stars</span> generally <span class="error-option" data-label="B">range</span> from one-tenth to <span class="error-option" data-label="C">twice</span> the <span class="error-option" data-label="D">mass</span> of the Sun.',
-                'option_a' => 'neutron stars',
-                'option_b' => 'range',
-                'option_c' => 'twice',
-                'option_d' => 'mass',
-                'correct_answer' => 'B',
+                'question_text' => '<span class="error-option" data-label="A">Alike</span> <span class="error-option" data-label="B">all</span> <span class="error-option" data-label="C">other</span> mammals, dolphins <span class="error-option" data-label="D">have</span> lungs.',
+                'option_a' => 'Alike',
+                'option_b' => 'all',
+                'option_c' => 'other',
+                'option_d' => 'have',
+                'correct_answer' => 'A',
+                'explanation' => 'Membedakan "like" dan "alike" (Skill 59): Kata "alike" adalah predicate adjective yang hanya digunakan setelah linking verb dan tidak dapat diletakkan di depan kata benda. Karena di awal kalimat ini diikuti oleh objek kata benda "all other mammals", maka yang diperlukan adalah kata depan (preposition) "Like" ("Like all other mammals"). Perbaikan: "Alike" diganti menjadi "Like". Kunci: (A).',
             ],
             [
                 'question_number' => 7,
-                'question_text' => '<span class="error-option" data-label="A">Grasses</span> <span class="error-option" data-label="B">grow</span> in ways <span class="error-option" data-label="C">that help</span> them to survive being nibbled, <span class="error-option" data-label="D">chilly</span>, or dried.',
-                // Wait, underlining.
-                // "Grasses" line A? No.
-                // Line A is under "Grasses"? Or "grow"?
-                // Let's look at letters.
-                // Q7: Line A under "grow"? Or "Grasses"?
-                // Actually: "Grasses grow in ways that help them to survive being nibbled, chilly, or dried."
-                // Underline A: grow. Underline B: ways (or "in ways"?).
-                // Underline C: help (or "that help"?). Underline D: chilly.
-                // Let's assume typical placement.
-                // A: grow. (Subject Grasses plural, grow plural. OK).
-                // B: ways. (Correct).
-                // C: help. (relative clause).
-                // D: chilly. (Parallelism error).
-                // I will use these.
-                'question_text' => 'Grasses <span class="error-option" data-label="A">grow</span> in <span class="error-option" data-label="B">ways</span> that help them <span class="error-option" data-label="C">to survive</span> being nibbled, <span class="error-option" data-label="D">chilly</span>, or dried.',
-                'option_a' => 'grow',
-                'option_b' => 'ways',
-                'option_c' => 'to survive',
-                'option_d' => 'chilly',
-                'correct_answer' => 'D',
+                'question_text' => 'Up to World War II <span class="error-option" data-label="A">almost all</span> important research in physics had been <span class="error-option" data-label="B">made</span> in universities, <span class="error-option" data-label="C">with only</span> university funds <span class="error-option" data-label="D">for support</span>.',
+                'option_a' => 'almost all',
+                'option_b' => 'made',
+                'option_c' => 'with only',
+                'option_d' => 'for support',
+                'correct_answer' => 'B',
+                'explanation' => 'Membedakan penggunaan "make" dan "do" (Skill 58): Kegiatan penelitian ilmiah ("research") merupakan proses pelaksanaan pekerjaan/investigasi, bukan pembuatan objek fisik baru. Oleh karena itu, kata benda "research" berpasangan dengan kata kerja "do" ("do research" / dalam bentuk pasif "research had been done"), bukan "made". Perbaikan: "made" diganti menjadi "done". Kunci: (B).',
             ],
             [
                 'question_number' => 8,
-                'question_text' => '<span class="error-option" data-label="A">Most of</span> Hemingway\'s novels <span class="error-option" data-label="B">glorifies</span> heroic <span class="error-option" data-label="C">exploits</span> such as <span class="error-option" data-label="D">bullfighting</span> or boxing.',
-                'option_a' => 'Most of',
-                'option_b' => 'glorifies',
-                'option_c' => 'exploits',
-                'option_d' => 'bullfighting',
-                'correct_answer' => 'B',
+                'question_text' => 'Because the plan <span class="error-option" data-label="A">that was made</span> yesterday is <span class="error-option" data-label="B">no longer</span> feasible, the manager <span class="error-option" data-label="C">had to</span> choose another <span class="error-option" data-label="D">alternatives</span>.',
+                'option_a' => 'that was made',
+                'option_b' => 'no longer',
+                'option_c' => 'had to',
+                'option_d' => 'alternatives',
+                'correct_answer' => 'D',
+                'explanation' => 'Kesesuaian kata benda setelah "another" (Skill 60): Kata "another" berasal dari "an + other" sehingga secara mutlak hanya boleh diikuti oleh kata benda tunggal (singular noun). Oleh karena itu, kata benda jamak "alternatives" setelah kata "another" salah dan harus diubah menjadi bentuk tunggal "alternative" ("another alternative"). Perhatikan bahwa frasa "the plan that was made" pada (A) sudah benar sesuai Skill 58 ("make a plan"). Perbaikan: "alternatives" diganti menjadi "alternative". Kunci: (D).',
             ],
             [
                 'question_number' => 9,
-                'question_text' => 'Paleographers study <span class="error-option" data-label="A">ancient</span> and medieval <span class="error-option" data-label="B">handwriting</span> in order to <span class="error-option" data-label="C">establish</span> not only its age <span class="error-option" data-label="D">and also</span> its background.',
-                'option_a' => 'ancient',
-                'option_b' => 'handwriting',
-                'option_c' => 'establish',
-                'option_d' => 'and also',
-                'correct_answer' => 'D',
+                'question_text' => 'Particles with <span class="error-option" data-label="A">unlike</span> charges attract each other, <span class="error-option" data-label="B">while</span> particles with <span class="error-option" data-label="C">alike</span> charges repel each <span class="error-option" data-label="D">other</span>.',
+                'option_a' => 'unlike',
+                'option_b' => 'while',
+                'option_c' => 'alike',
+                'option_d' => 'other',
+                'correct_answer' => 'C',
+                'explanation' => 'Membedakan kata sifat "like" dan "alike" (Skill 59): Kata sifat "alike" hanya dapat menempati posisi predikat (setelah linking verb) dan tidak boleh diletakkan sebelum kata benda yang diterangkannya. Untuk menerangkan kata benda "charges" secara langsung di depannya (sebagaimana "unlike charges" pada bagian A), kata sifat yang harus digunakan adalah "like" ("with like charges" = dengan muatan yang sejenis). Perbaikan: "alike" diganti menjadi "like". Kunci: (C).',
             ],
             [
                 'question_number' => 10,
-                'question_text' => 'The sounds <span class="error-option" data-label="A">produced</span> by bullfrogs and toads <span class="error-option" data-label="B">vary</span> greatly because each species <span class="error-option" data-label="C">have</span> its <span class="error-option" data-label="D">own</span> particular call.',
-                'option_a' => 'produced',
-                'option_b' => 'vary',
-                'option_c' => 'have',
-                'option_d' => 'own',
-                'correct_answer' => 'C',
+                'question_text' => '<span class="error-option" data-label="A">One another</span> <span class="error-option" data-label="B">surprising</span> method of forest <span class="error-option" data-label="C">conservation is</span> <span class="error-option" data-label="D">controlled cutting</span> of trees.',
+                'option_a' => 'One another',
+                'option_b' => 'surprising',
+                'option_c' => 'conservation is',
+                'option_d' => 'controlled cutting',
+                'correct_answer' => 'A',
+                'explanation' => 'Penggunaan determiner "another" (Skill 60): Frasa "one another" adalah kata ganti resiprokal (saling / satu sama lain) yang berfungsi sebagai objek di akhir klausa, bukan sebagai determiner di depan kata benda. Untuk menerangkan kata benda tunggal "surprising method" dengan makna "satu metode mengejutkan lainnya", kata yang tepat di awal kalimat adalah "Another". Perbaikan: "One another" diganti menjadi "Another". Kunci: (A).',
             ],
         ];
 
@@ -158,6 +137,7 @@ class ToeflStructureMeeting14Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

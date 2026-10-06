@@ -2569,6 +2569,5 @@
 @endif
     <!-- Irregular Verbs Button -->
     <x-irregular-verbs-button />
-    <x-live-drawing />
 
 @endsection

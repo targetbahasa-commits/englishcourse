@@ -65,9 +65,9 @@
                         
                         // Student Result Highlighting
                         $studentClass = '';
-                        if (session('score_data')) {
-                            $userAnswers = session('score_data')['user_answers'];
-                            $userAns = $userAnswers[$question->id] ?? null;
+                        $evalAnswers = session('score_data')['user_answers'] ?? ($existingScore->answers ?? null);
+                        if ($evalAnswers) {
+                            $userAns = $evalAnswers[$question->id] ?? null;
                             $correctAns = $question->correct_answer;
                             
                             if ($option === $correctAns) {
@@ -86,8 +86,8 @@
                                name="question_{{ $question->id }}" 
                                value="{{ $option }}" 
                                class="sr-only peer"
-                               @if($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
-                               required>
+                               @if(isset($evalAnswers[$question->id]) && $evalAnswers[$question->id] === $option) checked @elseif($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
+                               @if(!$evalAnswers) required @endif>
                         
                         {{-- Visual Bubble --}}
                         <div class="flex items-center justify-center mr-3 flex-none">

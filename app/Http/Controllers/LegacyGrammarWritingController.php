@@ -400,17 +400,26 @@ class LegacyGrammarWritingController extends Controller
 
                             $isNewEmpty = !isset($mergedAnswers[$k])
                                 || (is_string($mergedAnswers[$k]) && trim($mergedAnswers[$k]) === '')
-                                || (is_array($mergedAnswers[$k]) && !collect($mergedAnswers[$k])->contains(fn($v) => trim((string)$v) !== ''));
+                                || (is_array($mergedAnswers[$k]) && !collect($mergedAnswers[$k])->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== ''));
 
                             if ($isNewEmpty) {
                                 if (is_string($oldVal) && trim($oldVal) !== '') {
                                     $mergedAnswers[$k] = $oldVal;
-                                } elseif (is_array($oldVal) && collect($oldVal)->contains(fn($v) => trim((string)$v) !== '')) {
+                                } elseif (is_array($oldVal) && collect($oldVal)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== '')) {
                                     if (!isset($mergedAnswers[$k]) || !is_array($mergedAnswers[$k])) {
                                         $mergedAnswers[$k] = $oldVal;
                                     } else {
+                                        // $subV may itself be a nested array (e.g. trans_matrix[verb] form
+                                        // map) - never cast it to string directly.
                                         foreach ($oldVal as $subK => $subV) {
-                                            if ((!isset($mergedAnswers[$k][$subK]) || trim((string)$mergedAnswers[$k][$subK]) === '') && trim((string)$subV) !== '') {
+                                            $currentSubVal = $mergedAnswers[$k][$subK] ?? null;
+                                            $currentSubEmpty = $currentSubVal === null
+                                                || (is_string($currentSubVal) && trim($currentSubVal) === '')
+                                                || (is_array($currentSubVal) && !collect($currentSubVal)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== ''));
+                                            $subHasContent = is_array($subV)
+                                                ? collect($subV)->flatten()->contains(fn($v) => $v !== null && !is_array($v) && trim((string)$v) !== '')
+                                                : trim((string)$subV) !== '';
+                                            if ($currentSubEmpty && $subHasContent) {
                                                 $mergedAnswers[$k][$subK] = $subV;
                                             }
                                         }

@@ -134,14 +134,13 @@
                             @endif
                         </div>
                         
-                        <input 
-                            type="text" 
+                        <textarea rows="1"
                             name="userAnswers[{{ $idx }}]" 
-                            value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                            class="w-full p-2 border border-gray-300 rounded focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-2 border border-gray-300 rounded focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan di sini..."
                             @if($submitted) readonly="readonly" @endif
-                            autocomplete="off">
+                            autocomplete="off">{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}</textarea>
                         
                         @if($submitted && isset($results[$idx]))
                             <div class="mt-2">
@@ -248,7 +247,8 @@
                         <textarea
                             name="userParagraphAnswer"
                             rows="10"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            style="field-sizing: content;"
+                            class="auto-expand-answer resize-none overflow-hidden w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Tulis terjemahan paragraf di sini..."
                             @if($submitted) readonly="readonly" @endif>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
                     </div>
@@ -581,7 +581,7 @@
         },
 
         checkIfSubmitted() {
-            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly], #meetingAnswerForm textarea[readonly]');
             return !!isReadonly;
         },
 

@@ -195,7 +195,13 @@
             <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Certificates 🎓</h1>
             <p class="text-sm text-slate-500 mt-1">Kelola template sertifikat untuk setiap jenis Free Test dan Program.</p>
         </div>
-        <div x-data>
+        <div x-data class="flex items-center gap-3">
+            <button type="button" @click="$dispatch('open-manual-certificate-modal')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm font-bold shadow-md hover:shadow-lg transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                Terbitkan Sertifikat Manual
+            </button>
             <button type="button" @click="$dispatch('open-review-modal')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold transition">
                 Preview Review Modal
             </button>
@@ -269,6 +275,44 @@
                             
                             <input type="file" name="background_image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 file:cursor-pointer transition">
                             <p class="text-xs text-slate-400 mt-1.5">Gunakan gambar resolusi tinggi landscape (misal A4 landscape).</p>
+
+                            <!-- Background Opacity Control -->
+                            <div class="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-semibold text-slate-700">Opacity / Transparansi Background</label>
+                                    <span id="opacity-val-{{ $cert->id }}" class="text-xs font-bold text-indigo-600 px-2 py-0.5 bg-indigo-50 border border-indigo-200/60 rounded-md">
+                                        {{ old('background_opacity', array_key_exists('background_opacity', $templateConfig) ? $templateConfig['background_opacity'] : '18') }}%
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" name="background_opacity" min="0" max="100" step="1" 
+                                           value="{{ old('background_opacity', array_key_exists('background_opacity', $templateConfig) ? $templateConfig['background_opacity'] : '18') }}" 
+                                           class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                           oninput="
+                                               const val = this.value;
+                                               document.getElementById('opacity-val-{{ $cert->id }}').innerText = val + '%';
+                                               const numInput = document.getElementById('opacity-num-{{ $cert->id }}');
+                                               if (numInput) numInput.value = val;
+                                               const previewBg = document.getElementById('mini-bg-{{ $cert->id }}');
+                                               if (previewBg) previewBg.style.opacity = (val / 100);
+                                           ">
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="opacity-num-{{ $cert->id }}" min="0" max="100" 
+                                               value="{{ old('background_opacity', array_key_exists('background_opacity', $templateConfig) ? $templateConfig['background_opacity'] : '18') }}" 
+                                               class="w-16 px-2 py-1 text-xs text-center font-semibold rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                               oninput="
+                                                   let val = Math.min(100, Math.max(0, this.value || 0));
+                                                   const rangeInput = this.closest('.flex').querySelector('input[type=range]');
+                                                   if (rangeInput) rangeInput.value = val;
+                                                   document.getElementById('opacity-val-{{ $cert->id }}').innerText = val + '%';
+                                                   const previewBg = document.getElementById('mini-bg-{{ $cert->id }}');
+                                                   if (previewBg) previewBg.style.opacity = (val / 100);
+                                               ">
+                                        <span class="text-xs text-slate-400 font-medium">%</span>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Rentang 0% (transparan) hingga 100% (solid/jelas). Default: 18%.</p>
+                            </div>
                         </div>
 
                         <!-- Signature and Stamp Upload Section -->
@@ -320,11 +364,11 @@
                         <div class="grid gap-4 md:grid-cols-2">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Penanda Tangan</label>
-                                <input type="text" name="signature_name" value="{{ old('signature_name', $templateConfig['signature_name'] ?? 'Target Bahasa') }}" placeholder="Target Bahasa" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <input type="text" name="signature_name" value="{{ old('signature_name', array_key_exists('signature_name', $templateConfig) ? ($templateConfig['signature_name'] ?? '') : 'Target Bahasa') }}" placeholder="Target Bahasa" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Jabatan / Gelar Penanda Tangan</label>
-                                <input type="text" name="signature_title" value="{{ old('signature_title', $templateConfig['signature_title'] ?? (($templateConfig['signature_name'] ?? '') === 'Nendra Wirawan' ? 'Founder & Developer' : ($templateConfig['signature_title'] ?? 'Founder & Developer'))) }}" placeholder="Founder & Developer" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <input type="text" name="signature_title" value="{{ old('signature_title', array_key_exists('signature_title', $templateConfig) ? ($templateConfig['signature_title'] ?? '') : 'Founder & Developer') }}" placeholder="Founder & Developer" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                             </div>
                             
                             <div>
@@ -353,31 +397,31 @@
                             <div x-show="openAdvanced" class="p-4 border-t border-slate-100 bg-white grid gap-4 md:grid-cols-2" x-cloak>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Eyebrow Sertifikat</label>
-                                    <input type="text" name="eyebrow" value="{{ old('eyebrow', $templateConfig['eyebrow'] ?? 'Certificate of Achievement') }}" placeholder="Certificate of Achievement" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="eyebrow" value="{{ old('eyebrow', array_key_exists('eyebrow', $templateConfig) ? ($templateConfig['eyebrow'] ?? '') : 'Certificate of Achievement') }}" placeholder="Certificate of Achievement" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Judul Sertifikat</label>
-                                    <input type="text" name="title" value="{{ old('title', $templateConfig['title'] ?? 'Certificate of Completion') }}" placeholder="Certificate of Completion" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="title" value="{{ old('title', array_key_exists('title', $templateConfig) ? ($templateConfig['title'] ?? '') : 'Certificate of Completion') }}" placeholder="Certificate of Completion" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Subjudul Sertifikat</label>
-                                    <input type="text" name="subtitle" value="{{ old('subtitle', $templateConfig['subtitle'] ?? 'Free Test Practice Result') }}" placeholder="Free Test Practice Result" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="subtitle" value="{{ old('subtitle', array_key_exists('subtitle', $templateConfig) ? ($templateConfig['subtitle'] ?? '') : 'Free Test Practice Result') }}" placeholder="Free Test Practice Result" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Label Nilai</label>
-                                    <input type="text" name="score_label" value="{{ old('score_label', $templateConfig['score_label'] ?? 'Final Score') }}" placeholder="Final Score" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="score_label" value="{{ old('score_label', array_key_exists('score_label', $templateConfig) ? ($templateConfig['score_label'] ?? '') : 'Final Score') }}" placeholder="Final Score" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Kalimat Sertifikat</label>
-                                    <textarea name="body" rows="3" placeholder="This certificate is awarded to the candidate for successfully completing the free test." class="form-textarea w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('body', $templateConfig['body'] ?? 'This certificate is awarded to the candidate for successfully completing the free test.') }}</textarea>
+                                    <textarea name="body" rows="3" placeholder="This certificate is awarded to the candidate for successfully completing the free test." class="form-textarea w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('body', array_key_exists('body', $templateConfig) ? ($templateConfig['body'] ?? '') : 'This certificate is awarded to the candidate for successfully completing the free test.') }}</textarea>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Label Tanggal</label>
-                                    <input type="text" name="footer_left_label" value="{{ old('footer_left_label', $templateConfig['footer_left_label'] ?? 'Date') }}" placeholder="Date" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="footer_left_label" value="{{ old('footer_left_label', array_key_exists('footer_left_label', $templateConfig) ? ($templateConfig['footer_left_label'] ?? '') : 'Date') }}" placeholder="Date" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Label Tanda Tangan</label>
-                                    <input type="text" name="footer_right_label" value="{{ old('footer_right_label', $templateConfig['footer_right_label'] ?? 'Authorized Signature') }}" placeholder="Authorized Signature" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="text" name="footer_right_label" value="{{ old('footer_right_label', array_key_exists('footer_right_label', $templateConfig) ? ($templateConfig['footer_right_label'] ?? '') : 'Authorized Signature') }}" placeholder="Authorized Signature" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Deskripsi Tambahan (Opsional)</label>
@@ -464,9 +508,14 @@
                         }
                     @endphp
 
+                    @php
+                        $bgOpVal = array_key_exists('background_opacity', $templateConfig) && is_numeric($templateConfig['background_opacity']) ? (float)$templateConfig['background_opacity'] : 18;
+                        $bgOpCss = $bgOpVal > 1 ? ($bgOpVal / 100) : $bgOpVal;
+                    @endphp
+
                     <div class="mini-cert-canvas" style="--cert-color: {{ $cert->text_color ?: '#0f172a' }};">
                         @if($cert->background_image)
-                            <div style="position:absolute; inset:0; background-image:url('{{ route('admin.free-tests.certificates.background', $cert->id) }}'); background-size:cover; background-position:center; opacity:0.15; z-index:0; pointer-events:none;"></div>
+                            <div id="mini-bg-{{ $cert->id }}" style="position:absolute; inset:0; background-image:url('{{ route('admin.free-tests.certificates.background', $cert->id) }}'); background-size:cover; background-position:center; opacity:{{ $bgOpCss }}; z-index:0; pointer-events:none; transition: opacity 0.15s ease;"></div>
                         @endif
                         <div class="mini-cert-border-outer">
                             <div class="mini-cert-border-inner">
@@ -475,18 +524,26 @@
                                 
                                 <!-- Header info -->
                                 <div>
-                                    <div class="mini-cert-eyebrow">{{ $templateConfig['eyebrow'] ?? 'Certificate of Achievement' }}</div>
-                                    <h4 class="mini-cert-title">{{ $templateConfig['title'] ?? 'Certificate of Completion' }}</h4>
-                                    <div class="mini-cert-subtitle">{{ $templateConfig['subtitle'] ?? 'Free Test Practice Result' }}</div>
+                                    @if(!empty($templateConfig['eyebrow']))
+                                        <div class="mini-cert-eyebrow">{{ $templateConfig['eyebrow'] }}</div>
+                                    @endif
+                                    @if(!empty($templateConfig['title']))
+                                        <h4 class="mini-cert-title">{{ $templateConfig['title'] }}</h4>
+                                    @endif
+                                    @if(!empty($templateConfig['subtitle']))
+                                        <div class="mini-cert-subtitle">{{ $templateConfig['subtitle'] }}</div>
+                                    @endif
                                 </div>
 
                                 <!-- Presentation -->
                                 <div>
                                     <div class="mini-cert-presented">This certificate is proudly presented to</div>
                                     <div class="mini-cert-name">{{ $previewName }}</div>
-                                    <div class="mini-cert-body">
-                                        {{ $templateConfig['body'] ?? 'This certificate is awarded to the candidate for successfully completing the free test.' }}
-                                    </div>
+                                    @if(!empty($templateConfig['body']))
+                                        <div class="mini-cert-body">
+                                            {{ $templateConfig['body'] }}
+                                        </div>
+                                    @endif
                                 </div>
 
                                 @if($cert->test_type === 'toefl_itp')
@@ -701,4 +758,6 @@
             </div>
         </div>
     </div>
+
+    @include('components.manual-certificate-modal')
 @endsection

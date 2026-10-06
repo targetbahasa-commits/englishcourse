@@ -12,9 +12,16 @@ class ToeflStructureMeeting3Seeder extends Seeder
      */
     public function run(): void
     {
-        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', 3)->firstOrFail();
-        
-        // Clear existing questions for this meeting
+        $meeting = \App\Models\ToeflStructureMeeting::updateOrCreate(
+            ['meeting_number' => 3],
+            [
+                'title' => 'Appositives',
+                'description' => '',
+                'is_locked' => false,
+            ]
+        );
+
+        // Clear existing questions
         \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->delete();
 
         $questions = [
@@ -39,11 +46,11 @@ class ToeflStructureMeeting3Seeder extends Seeder
             [
                 'question_number' => 3,
                 'question_text' => 'A pride of lions ____ up to forty lions, including one to three males, several females, and cubs.',
-                'option_a' => 'can contain',
-                'option_b' => 'it contains',
+                'option_a' => 'it contains',
+                'option_b' => 'can contain',
                 'option_c' => 'contain',
                 'option_d' => 'containing',
-                'correct_answer' => 'A',
+                'correct_answer' => 'B',
             ],
             [
                 'question_number' => 4,
@@ -120,6 +127,7 @@ class ToeflStructureMeeting3Seeder extends Seeder
                 'option_c' => $q['option_c'],
                 'option_d' => $q['option_d'],
                 'correct_answer' => $q['correct_answer'],
+                'explanation' => $q['explanation'] ?? null,
             ]);
         }
     }

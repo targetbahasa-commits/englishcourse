@@ -65,6 +65,7 @@ class AdminPromoTestController extends Controller
         $grammarTests = \App\Models\Meeting::whereIn('program_id', $grammarPrograms->pluck('id'))->orderBy('program_id')->orderBy('meeting_number')->get();
 
         $grammarPracticeTopics = \App\Models\GrammarTopic::withCount('questions')->orderBy('order')->get();
+        $toeflPromoStructureTests = \App\Models\ToeflPromoTest::where('section', 'structure')->withCount('questions')->orderBy('order')->get();
 
         $pteSpeakingWritingTypes = array_map(function($item) {
             $item['slug'] = 'speaking_writing_' . $item['id'];
@@ -92,7 +93,7 @@ class AdminPromoTestController extends Controller
 
         return view('admin.promo-tests.index', compact(
             'writingTests', 'writingGeneralTests', 'speakingTests',
-            'toeflListening', 'toeflStructure', 'toeflReading',
+            'toeflListening', 'toeflStructure', 'toeflReading', 'toeflPromoStructureTests',
             'listeningTests', 'readingGeneralTests', 'readingAcademicTests', 'grammarTests', 'grammarPracticeTopics',
             'pteSpeakingWritingTypes', 'pteReadingTypes', 'pteListeningTypes'
         ));
@@ -764,6 +765,128 @@ PROMPT;
             'promo_deadline' => $request->promo_deadline,
         ]);
         return back()->with('success', 'Promo settings for TOEFL Structure updated successfully.');
+    }
+
+    public function storeToeflPromoStructure(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'duration_minutes' => 'nullable|integer|min:5|max:120',
+        ]);
+
+        $maxOrder = \App\Models\ToeflPromoTest::where('section', 'structure')->max('order') ?? 0;
+
+        \App\Models\ToeflPromoTest::create([
+            'section' => 'structure',
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'duration_minutes' => $validated['duration_minutes'] ?? 25,
+            'is_free_tier' => $request->has('is_free_tier'),
+            'promo_start' => $request->promo_start ?: null,
+            'promo_deadline' => $request->promo_deadline ?: null,
+            'order' => $maxOrder + 1,
+        ]);
+
+        return back()->with('success', 'Paket Promo Test TOEFL Structure baru berhasil dibuat. Silakan klik "Edit Soal" untuk mengelola bank soal.');
+    }
+
+    public function updateToeflPromoStructure(Request $request, $id)
+    {
+        $test = \App\Models\ToeflPromoTest::findOrFail($id);
+        $test->update([
+            'title' => $request->title ?: $test->title,
+            'description' => $request->description ?: $test->description,
+            'duration_minutes' => $request->duration_minutes ?: $test->duration_minutes,
+            'is_free_tier' => $request->has('is_free_tier'),
+            'promo_start' => $request->promo_start ?: null,
+            'promo_deadline' => $request->promo_deadline ?: null,
+        ]);
+
+        return back()->with('success', 'Pengaturan Promo TOEFL Structure berhasil diperbarui.');
+    }
+
+    public function destroyToeflPromoStructure($id)
+    {
+        \App\Models\ToeflPromoTest::findOrFail($id)->delete();
+        return back()->with('success', 'Paket Promo TOEFL Structure berhasil dihapus.');
+    }
+
+    public function toeflStructureQuestionsEditor($testId)
+    {
+        $test = \App\Models\ToeflPromoTest::findOrFail($testId);
+        $questions = $test->questions()->orderBy('question_number')->get();
+
+        return view('admin.promo-tests.toefl-structure-questions', compact('test', 'questions'));
+    }
+
+    public function storeToeflStructureQuestion(Request $request, $testId)
+    {
+        $test = \App\Models\ToeflPromoTest::findOrFail($testId);
+
+        $validated = $request->validate([
+            'part' => 'required|in:part_a,part_b',
+            'question_text' => 'required|string',
+            'option_a' => 'required|string',
+            'option_b' => 'required|string',
+            'option_c' => 'required|string',
+            'option_d' => 'required|string',
+            'correct_answer' => 'required|in:A,B,C,D',
+            'explanation' => 'nullable|string',
+        ]);
+
+        $maxNumber = $test->questions()->max('question_number') ?? 0;
+
+        $test->questions()->create([
+            'question_number' => $maxNumber + 1,
+            'part' => $validated['part'],
+            'question_text' => $validated['question_text'],
+            'option_a' => $validated['option_a'],
+            'option_b' => $validated['option_b'],
+            'option_c' => $validated['option_c'],
+            'option_d' => $validated['option_d'],
+            'correct_answer' => $validated['correct_answer'],
+            'explanation' => $validated['explanation'] ?? null,
+            'order' => $maxNumber + 1,
+        ]);
+
+        return back()->with('success', 'Soal promo berhasil ditambahkan ke bank soal.');
+    }
+
+    public function updateToeflStructureQuestion(Request $request, $questionId)
+    {
+        $question = \App\Models\ToeflPromoQuestion::findOrFail($questionId);
+
+        $validated = $request->validate([
+            'part' => 'required|in:part_a,part_b',
+            'question_text' => 'required|string',
+            'option_a' => 'required|string',
+            'option_b' => 'required|string',
+            'option_c' => 'required|string',
+            'option_d' => 'required|string',
+            'correct_answer' => 'required|in:A,B,C,D',
+            'explanation' => 'nullable|string',
+        ]);
+
+        $question->update($validated);
+
+        return back()->with('success', 'Soal promo berhasil diperbarui.');
+    }
+
+    public function destroyToeflStructureQuestion($questionId)
+    {
+        $question = \App\Models\ToeflPromoQuestion::findOrFail($questionId);
+        $question->delete();
+
+        return back()->with('success', 'Soal promo berhasil dihapus.');
+    }
+
+    public function clearToeflStructureQuestions($testId)
+    {
+        $test = \App\Models\ToeflPromoTest::findOrFail($testId);
+        $test->questions()->delete();
+
+        return back()->with('success', 'Semua soal pada paket promo ini berhasil dikosongkan.');
     }
 
     public function updateToeflReading(Request $request, $id)

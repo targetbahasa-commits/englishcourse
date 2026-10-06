@@ -1,45 +1,187 @@
-<div class="mb-8">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 48</h3>
+<div class="space-y-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2</h3>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11-15</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>.</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>11</strong>Why does the speaker recommend the Sky Hotel?</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Mock test simulations</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>Because it is quite comfortable.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>Because it provides ski and snowboard equipment rentals.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Because it has health and sports club.</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>12</strong>What is new in this year’s exhibition?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>photos of top ski resorts worldwide</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>ski equipment</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>computer simulation</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>13</strong>How do people enter the skiing and snowboarding competition?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>They can send emails to the committee.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>They can fill out the back of the entrance ticket.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>They can check out the exhibition newsletter</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>14</strong>What did the media focus on this year?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>not enough snow</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>reduction in fee</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>the decline of participants</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>15</strong>Why does the speaker recommend the ski program?</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>The instructors are quite friendly and patient.</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>It includes lessons and sessions that suit only beginners</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>It provides special offers at the moment.</span></label>
-<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 16-20</h4>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>FIVE</strong> answers from the box and write the correct letter, <strong>A-F</strong>, next to Questions <strong>16-20</strong>._</p>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>exploring new destinations</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>how to make the skiing boots comfortable</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>how to become a ski instructor</span></label>
-    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="D" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">D</span> <span>how to combine other activities with skiing</span></label>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong>how to improve the skills of skiing</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>F</strong>information about skiing safety</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Presentation</strong></p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>16</strong> Simon’s talk</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>17</strong> Solution</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>18</strong> Film</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>19</strong> Tricks</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>20</strong> Johnson’s talk</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Education</p>
-<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Psychology</p>
+        <h4 class="text-xl font-bold text-gray-800">Questions 11-15</h4>
+        <p class="text-gray-800 text-base leading-relaxed">The following are essential requirements for which jobs?</p>
+        <p class="text-gray-800 text-base leading-relaxed">Write the correct letter, A, B or C, next to questions 11-15.</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">Essential requirements</h5>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">A</span><span>foreign languages</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">B</span><span>willingness to travel abroad</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">C</span><span>professional qualification</span></div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">11</strong>
+                <span class="text-gray-800 font-medium">conference organizer</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[11]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">12</strong>
+                <span class="text-gray-800 font-medium">catering manager</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[12]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">13</strong>
+                <span class="text-gray-800 font-medium">housekeeper</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[13]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">14</strong>
+                <span class="text-gray-800 font-medium">fitness centre staff</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[14]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-md">
+            <div class="flex items-center gap-3">
+                <strong class="text-gray-900 font-bold">15</strong>
+                <span class="text-gray-800 font-medium">reservations assistant</span>
+            </div>
+            <div class="w-28">
+                <select name="answers[15]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">Questions 16-20</h4>
+        <p class="text-gray-600 font-medium">Choose FIVE answers from the box and write the correct letter, A-G, next to</p>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">16</strong>
+                <span class="text-gray-700 font-medium">Question 16</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[16]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">17</strong>
+                <span class="text-gray-700 font-medium">Question 17</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[17]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 my-2">
+            <strong class="text-gray-900 font-bold">18</strong>
+            <input type="text" name="answers[18]" value="{{ old('answers.18') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer 18" autocomplete="off">
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">19</strong>
+                <span class="text-gray-700 font-medium">Question 19</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[19]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 p-2 rounded transition-colors max-w-xs">
+            <div class="flex items-center gap-2">
+                <strong class="text-gray-900 font-bold">20</strong>
+                <span class="text-gray-700 font-medium">Question 20</span>
+            </div>
+            <div class="w-24">
+                <select name="answers[20]" class="w-full border border-gray-300 focus:border-black outline-none px-3 py-1.5 rounded-lg text-center font-bold bg-white text-gray-800 transition-colors cursor-pointer shadow-sm">
+                    <option value="" disabled selected>___</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <h4 class="text-xl font-bold text-gray-800">questions 16-20.</h4>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">A</span><span>CV</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">B</span><span>names of referees</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">C</span><span>work permit</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">D</span><span>recruitment seminar</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">E</span><span>evidence of qualifications</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">F</span><span>conditions of employment</span></div>
+        <div class="flex items-center gap-3 text-base text-gray-700 pl-4"><span class="font-bold text-gray-900 w-6">G</span><span>initial interview</span></div>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">INTERNATIONAL FINEST GROUP</h5>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">RECRUITMENT PROCEDURES</h5>
+        <p class="text-gray-800 text-base leading-relaxed">register interest in working for International Finest Group</p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">↓</h5>
+        <p class="text-gray-800 text-base leading-relaxed">receive personal code and check <strong class="text-gray-900 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <h5 class="text-lg font-bold text-gray-800 mt-4 mb-2">download application form</h5>
+        <p class="text-gray-800 text-base leading-relaxed">send in form and attach <strong class="text-gray-900 font-bold ml-1 mr-1">17</strong><input type="text" name="answers[17]" value="{{ old('answers.17') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">receive reply and confirm <strong class="text-gray-900 font-bold ml-1 mr-1">18</strong><input type="text" name="answers[18]" value="{{ old('answers.18') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">send in <strong class="text-gray-900 font-bold ml-1 mr-1">19</strong><input type="text" name="answers[19]" value="{{ old('answers.19') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
+        <p class="text-gray-800 text-base leading-relaxed">attend <strong class="text-gray-900 font-bold ml-1 mr-1">20</strong><input type="text" name="answers[20]" value="{{ old('answers.20') }}" class="border-0 border-b-2 border-gray-700 focus:border-black outline-none px-2 py-0.5 w-36 bg-transparent text-center font-bold text-gray-900 transition-colors placeholder-gray-400" placeholder="Answer" autocomplete="off"></p>
     </div>
 </div>

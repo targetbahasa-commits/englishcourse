@@ -35,10 +35,12 @@ class BuildReadingMeetingViewData
         }
 
         $allPassages = $this->repository->getPassagesWithQuestions($meeting->id);
+        $existingScore = $user ? $this->repository->getScoreForUser($user->id, $number) : null;
 
         return [
             'meeting' => $meeting,
             'passages' => $allPassages,
+            'existingScore' => $existingScore,
             'isLocked' => $isLocked,
             'lockedRedirectRoute' => 'assignments.toefl-itp.reading',
             'view' => $number === 13

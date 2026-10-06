@@ -308,8 +308,13 @@
             @foreach($practices as $topic)
             @php
                 $theme = $colorMap[$topic['color']] ?? $colorMap['blue'];
+                $res = ($studentResults ?? collect())[$topic['slug']] ?? null;
+                $hasCompleted = ($res !== null);
+                $cardRoute = $hasCompleted 
+                    ? route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topic['slug'], 'part' => 1])
+                    : route('assignments.ielts-academic.speaking.practice', ['topic' => $topic['slug']]);
             @endphp
-            <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => $topic['slug']]) }}" 
+            <a href="{{ $cardRoute }}" 
                class="bg-white rounded-3xl p-6 cursor-pointer border {{ $theme['border'] }} {{ $theme['border_hover'] }} hover:shadow-lg {{ $theme['shadow_hover'] }} {{ $theme['bg_hover'] }} transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden block">
                 
                 <!-- Decorative Blob -->
@@ -323,17 +328,46 @@
                         </svg>
                     </div>
                     
-                    <!-- Question Count Badge -->
-                    <span class="px-3 py-1 rounded-full bg-white text-gray-500 border border-gray-100 text-xs font-bold {{ $theme['badge_bg'] }} {{ $theme['badge_text'] }} transition-colors">
-                        {{ count($topic['questions'] ?? []) }} Qs
-                    </span>
+                    <!-- Question Count Badge & Band Score -->
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        @if($hasCompleted)
+                            <div class="student-score-badge flex items-center gap-1 px-2.5 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-emerald-400 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Band {{ number_format((float)$res->overall_score, 1) }}</span>
+                            </div>
+                        @endif
+                        <span class="px-3 py-1 rounded-full bg-white text-gray-500 border border-gray-100 text-xs font-bold {{ $theme['badge_bg'] }} {{ $theme['badge_text'] }} transition-colors">
+                            {{ count($topic['questions'] ?? []) }} Qs
+                        </span>
+                    </div>
                 </div>
 
                 <h3 class="relative z-10 text-xl font-bold text-gray-800 mb-1 group-hover:text-gray-900 transition-colors">
                     {{ $topic['title'] }}
                 </h3>
+
+                @if($hasCompleted)
+                    <div class="my-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-200/80 flex items-center justify-between shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">✓</div>
+                            <div>
+                                <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Sudah Dikerjakan</p>
+                                <p class="text-xs text-emerald-700 font-medium">Hasil evaluasi tersimpan</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-500 font-medium block uppercase tracking-wider">Skor Band</span>
+                            <span class="text-sm font-black text-emerald-700">Band {{ number_format((float)$res->overall_score, 1) }}</span>
+                        </div>
+                    </div>
+                @endif
                 
-                @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                @if($hasCompleted)
+                    <p class="text-xs font-semibold text-emerald-600 group-hover:text-emerald-700 transition flex items-center gap-1">
+                        <span>Review Hasil & Kerjakan Ulang</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </p>
+                @elseif(!empty($isClassEnded) && Auth::user()->isStudent())
                     <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
                 @else
                     <p class="text-sm {{ $theme['text'] }} font-medium opacity-60 group-hover:opacity-100 transition-opacity">
