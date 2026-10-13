@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/tts/stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('tts.stream');
 
 
-
 Route::get('/guest/quick-access/{testType}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccess'])->name('guest.quick-access');
 Route::get('/guest/quick-access-toefl/{type}/{number}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccessToeflPromo'])->name('guest.quick-access-toefl');
 Route::get('/guest/dashboard', [App\Http\Controllers\GuestController::class, 'dashboard'])->name('guest.dashboard');
@@ -313,8 +312,6 @@ Route::middleware([
         ->name('student.payments.upload-proof')
         ->middleware('role:student');
 
-
-
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
@@ -577,11 +574,34 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mock-test/ielts-general/british-council', function () {
         return view('assignments.ielts.mockup.british-council', ['isGeneral' => true]);
     })->name('mock-test.ielts-general.british-council');
+    Route::get('/mock-test/sat', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'hub'])->name('mock-test.sat');
+    Route::get('/mock-test/sat/reading-writing', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'index'])->name('mock-test.sat.reading-writing');
+    Route::post('/mock-test/sat/reading-writing/meeting', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'storeMeeting'])->name('mock-test.sat.reading-writing.meeting.store');
+    Route::get('/mock-test/sat/reading-writing/meeting/{number}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'showMeeting'])->name('mock-test.sat.reading-writing.meeting');
+    Route::post('/mock-test/sat/reading-writing/meeting/{meeting}/update', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'updateMeeting'])->name('mock-test.sat.reading-writing.meeting.update');
+    Route::post('/mock-test/sat/reading-writing/meeting/{meeting}/toggle-lock', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'toggleLock'])->name('mock-test.sat.reading-writing.meeting.toggle-lock');
+    Route::delete('/mock-test/sat/reading-writing/meeting/{meeting}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'destroyMeeting'])->name('mock-test.sat.reading-writing.meeting.destroy');
+    Route::post('/mock-test/sat/reading-writing/submit', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'submit'])->name('mock-test.sat.reading-writing.submit');
+    Route::post('/mock-test/sat/reading-writing/question', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'storeQuestion'])->name('mock-test.sat.reading-writing.question.store');
+    Route::put('/mock-test/sat/reading-writing/question/{question}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'updateQuestion'])->name('mock-test.sat.reading-writing.question.update');
+    Route::delete('/mock-test/sat/reading-writing/question/{question}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'destroyQuestion'])->name('mock-test.sat.reading-writing.question.destroy');
+    Route::get('/mock-test/sat/practice-test/{number}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'practiceTest'])->name('mock-test.sat.practice-test');
+    Route::get('/mock-test/sat/mockup/{number}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'practiceTest'])->name('mock-test.sat.mockup');
+    Route::get('/mock-test/sat/break/{testNumber}', [App\Http\Controllers\MockTest\SatReadingWritingController::class, 'breakScreen'])->whereNumber('testNumber')->name('mock-test.sat.break');
+
+    Route::get('/mock-test/sat/math', [App\Http\Controllers\MockTest\SatMathController::class, 'hub'])->name('mock-test.sat.math');
+    Route::get('/mock-test/sat/math/meeting/{number}', [App\Http\Controllers\MockTest\SatMathController::class, 'showMeeting'])->name('mock-test.sat.math.meeting');
+    Route::get('/mock-test/sat/math/practice-test/{number}', [App\Http\Controllers\MockTest\SatMathController::class, 'practiceTest'])->name('mock-test.sat.math.practice-test');
+    Route::get('/mock-test/sat/math/mockup/{number}', [App\Http\Controllers\MockTest\SatMathController::class, 'practiceTest'])->name('mock-test.sat.math.mockup');
+    Route::post('/mock-test/sat/math/submit', [App\Http\Controllers\MockTest\SatMathController::class, 'submit'])->name('mock-test.sat.math.submit');
+    Route::post('/mock-test/sat/math/meeting/{meeting}/toggle-lock', [App\Http\Controllers\MockTest\SatMathController::class, 'toggleLock'])->name('mock-test.sat.math.meeting.toggle-lock');
+    Route::get('/mock-test/sat/score-report/{testNumber}', [App\Http\Controllers\MockTest\SatMathController::class, 'scoreReport'])->whereNumber('testNumber')->name('mock-test.sat.score-report');
+    Route::get('/mock-test/sat/score-report/{testNumber}/download', [App\Http\Controllers\MockTest\SatMathController::class, 'downloadScoreReportPdf'])->whereNumber('testNumber')->name('mock-test.sat.score-report.download');
 
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])
         ->name('assignments.index')
         ;
-    Route::get('/assignments/final-test', function () {
+            Route::get('/assignments/final-test', function () {
         return redirect()->route('final-test');
     })->name('assignments.final-test')
         ;
@@ -1168,11 +1188,36 @@ Route::middleware(['auth'])->group(function () {
         ->name('assignments.sat.reading-writing.question.store');
     Route::put('/assignments/sat/reading-writing/question/{question}', [App\Http\Controllers\SatReadingWritingController::class, 'updateQuestion'])
         ->name('assignments.sat.reading-writing.question.update');
+    Route::get('/assignments/sat/practice-test/{number}', [App\Http\Controllers\SatReadingWritingController::class, 'practiceTest'])
+        ->name('assignments.sat.practice-test');
+    Route::get('/assignments/sat/mockup/{number}', [App\Http\Controllers\SatReadingWritingController::class, 'practiceTest'])
+        ->name('assignments.sat.mockup');
     Route::delete('/assignments/sat/reading-writing/question/{question}', [App\Http\Controllers\SatReadingWritingController::class, 'destroyQuestion'])
         ->name('assignments.sat.reading-writing.question.destroy');
 
     Route::get('/assignments/sat/math', [App\Http\Controllers\AssignmentController::class, 'satMath'])
         ->name('assignments.sat.math');
+    Route::get('/assignments/sat/math/meeting/{number}', [App\Http\Controllers\SatMathController::class, 'showMeeting'])
+        ->name('assignments.sat.math.meeting');
+    Route::get('/assignments/sat/math/practice-test/{number}', [App\Http\Controllers\SatMathController::class, 'practiceTest'])
+        ->name('assignments.sat.math.practice-test');
+    Route::get('/assignments/sat/math/mockup/{number}', [App\Http\Controllers\SatMathController::class, 'practiceTest'])
+        ->name('assignments.sat.math.mockup');
+    Route::post('/assignments/sat/math/submit', [App\Http\Controllers\SatMathController::class, 'submit'])
+        ->name('assignments.sat.math.submit');
+    Route::get('/assignments/sat/break/{testNumber}', [App\Http\Controllers\SatReadingWritingController::class, 'breakScreen'])
+        ->whereNumber('testNumber')
+        ->name('assignments.sat.break');
+    Route::get('/assignments/sat/score-report/{testNumber}', [App\Http\Controllers\SatMathController::class, 'scoreReport'])
+        ->whereNumber('testNumber')
+        ->name('assignments.sat.score-report');
+    Route::get('/assignments/sat/score-report/{testNumber}/download', [App\Http\Controllers\SatMathController::class, 'downloadScoreReportPdf'])
+        ->whereNumber('testNumber')
+        ->name('assignments.sat.score-report.download');
+    Route::post('/assignments/sat/math/meeting/{meeting}/toggle-lock', [App\Http\Controllers\SatMathController::class, 'toggleLock'])
+        ->name('assignments.sat.math.meeting.toggle-lock');
+    Route::post('/assignments/sat/ai-explain', [App\Http\Controllers\SatMathController::class, 'getAiExplanation'])
+        ->name('assignments.sat.ai-explain');
 
     // IELTS Academic Listening Routes
     Route::get('/assignments/ielts-academic/listening', [App\Http\Controllers\IeltsListeningController::class, 'index'])
@@ -1257,7 +1302,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/transcribe', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'transcribeAudio'])->name('assignments.ielts-academic.mockup.cambridge.transcribe');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-srt', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadSrt'])->name('assignments.ielts-academic.mockup.cambridge.upload-srt');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-answer-key', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadAnswerKey'])->name('assignments.ielts-academic.mockup.cambridge.upload-answer-key');
-
     // Reading Mockup
     Route::get('/assignments/ielts-academic/mockup/reading', [App\Http\Controllers\IeltsMockupController::class, 'reading'])->name('assignments.ielts-academic.mockup.reading');
 
@@ -1514,7 +1558,6 @@ Route::middleware(['auth'])->group(function () {
         ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
         ->whereNumber('meeting')
         ->name('assignments.speaking.meeting.draft.get');
-
     // Admin-only editing of a Speaking meeting's "AI Interview" tab
     // questions - see SpeakingAdminController::speakingMeeting()'s
     // SpeakingAiInterviewOverride lookup for how these take effect.
@@ -1669,7 +1712,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members', [App\Http\Controllers\Admin\ClassPeriodController::class, 'addGroupMember'])->name('class-periods.groups.add-member')->middleware('role:admin');
     Route::delete('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members/{user}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'removeGroupMember'])->name('class-periods.groups.remove-member')->middleware('role:admin');
     Route::resource('admin/class-periods', App\Http\Controllers\Admin\ClassPeriodController::class)->names('class-periods')->middleware('role:admin');
-
     Route::get('/admin/class-schedules', [App\Http\Controllers\Admin\ClassScheduleController::class, 'index'])->name('admin.class-schedules.index')->middleware('role:admin');
     Route::get('/api/admin/class-schedules/events', [App\Http\Controllers\Admin\ClassScheduleController::class, 'apiEvents'])->name('admin.class-schedules.events')->middleware('role:admin');
     Route::patch('/admin/class-schedules/{meeting}', [App\Http\Controllers\Admin\ClassScheduleController::class, 'update'])->name('admin.class-schedules.update')->middleware('role:admin');
@@ -1895,6 +1937,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin Free Test Certificates
     // Camp Management
     Route::get('/admin/camp-management', [App\Http\Controllers\Admin\CampManagementController::class, 'index'])->name('admin.camp-management.index')->middleware('role:admin');
+    
     Route::resource('/admin/camps', App\Http\Controllers\Admin\CampController::class, ['as' => 'admin'])->middleware('role:admin');
     Route::resource('/admin/camps.rooms', App\Http\Controllers\Admin\CampRoomController::class, ['as' => 'admin'])->shallow()->except(['index', 'show'])->middleware('role:admin');
     Route::get('/admin/camp-reviews', [App\Http\Controllers\Admin\CampReviewController::class, 'index'])->name('admin.camp-reviews.index')->middleware('role:admin');

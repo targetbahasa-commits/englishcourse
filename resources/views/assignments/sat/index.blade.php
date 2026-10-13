@@ -43,25 +43,39 @@
                                 <p class="text-gray-600 mt-1">Scholastic Assessment Test - pilih section dan mulai latihanmu!</p>
                             </div>
                         </div>
-                        <a href="{{ route('assignments.index') }}"
-                            class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200 shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            Back
-                        </a>
+                        <div class="flex items-center gap-3">
+                            @if(Auth::check() && Auth::user()->isAdmin())
+                                <a href="{{ route('admin.impersonate', 'student') }}"
+                                   class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl shadow-md hover:shadow-lg font-bold transition text-sm shrink-0"
+                                   title="Masuk mode siswa untuk melihat tampilan student">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Lihat Tampilan Siswa
+                                </a>
+                            @endif
+
+                            <a href="{{ route('assignments.index') }}"
+                                class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Back
+                            </a>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Section Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                     <!-- Reading & Writing -->
                     <a href="{{ route('assignments.sat.reading-writing') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
-                        <div class="h-32 bg-gradient-to-br from-blue-500 to-indigo-600 relative overflow-hidden shrink-0">
+                        <div class="h-32 bg-indigo-600 relative overflow-hidden shrink-0">
                             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div class="absolute top-4 right-4">
-                                <span class="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-indigo-700 shadow-sm">Curriculum &amp; Guide</span>
+                                <span class="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-indigo-700 shadow-sm">4 Domains</span>
                             </div>
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
@@ -73,9 +87,36 @@
                         </div>
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Reading &amp; Writing</h3>
-                            <p class="text-gray-600 text-sm leading-relaxed flex-1">Pemahaman bacaan, tata bahasa standar, dan 4 domain kemampuan bahasa Inggris akademik.</p>
+                            <p class="text-gray-600 text-sm leading-relaxed flex-1">Pemahaman bacaan, struktur teks, analisis data, dan 4 domain keahlian Digital SAT.</p>
                             <div class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
-                                Buka Materi &amp; Panduan
+                                Start Learning
+                                <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Grammar Lessons -->
+                    <a href="{{ route('assignments.sat.reading-writing') }}?tab=grammar" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                        <div class="h-32 bg-purple-600 relative overflow-hidden shrink-0">
+                            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                            <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-purple-700 shadow-sm">9 Lessons</span>
+                            </div>
+                            <div class="absolute bottom-4 left-6">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
+                                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
+                            <h3 class="text-lg font-bold text-gray-800 mb-1">Grammar Lessons</h3>
+                            <p class="text-gray-600 text-sm leading-relaxed flex-1">Panduan lengkap tata bahasa Digital SAT: kalimat, tanda baca, tenses, modifier, dan transisi.</p>
+                            <div class="w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
+                                Start Learning
                                 <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
@@ -88,7 +129,7 @@
                         <div class="h-32 bg-gradient-to-br from-emerald-500 to-teal-600 relative overflow-hidden shrink-0">
                             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div class="absolute top-4 right-4">
-                                <span class="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-teal-700 shadow-sm">2 Modules</span>
+                                <span class="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-teal-700 shadow-sm">4 Domains</span>
                             </div>
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
@@ -100,7 +141,7 @@
                         </div>
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Math</h3>
-                            <p class="text-gray-600 text-sm leading-relaxed flex-1">Aljabar, geometri, fungsi lanjutan, dan analisis data.</p>
+                            <p class="text-gray-600 text-sm leading-relaxed flex-1">Aljabar, geometri, fungsi lanjutan, dan analisis data kuantitatif.</p>
                             <div class="w-full text-center bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
                                 Start Learning
                                 <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,10 +150,40 @@
                             </div>
                         </div>
                     </a>
-
                 </div>
 
-                <!-- Practice Tests Section -->
+                @php $fullTests = $fullTests ?? collect(); $drills = $drills ?? collect(); @endphp
+
+                <!-- SAT Score Estimate Banner -->
+                <div class="mt-10 p-6 sm:p-7 bg-gradient-to-r from-sky-600 to-blue-700 rounded-3xl text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-6 border border-sky-400/30">
+                    <div class="space-y-2 max-w-2xl">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-white/20 text-white">
+                                Estimasi &mdash; Bukan Skor Resmi
+                            </span>
+                            <span class="text-xs text-sky-100 font-medium tracking-wide">Skala estimasi 400 &ndash; 1600</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Digital SAT &mdash; Estimasi Skor Latihan</h3>
+                        <p class="text-xs sm:text-sm text-sky-100 leading-relaxed">
+                            Selesaikan salah satu Full Test di bawah (Reading &amp; Writing + Math, 4 modul) untuk melihat estimasi skor latihanmu. Ini bukan skor resmi College Board.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                        @forelse($fullTests->filter(fn($t) => $t->score_report_available) as $t)
+                            <a href="{{ route('assignments.sat.score-report', $t->test_number) }}"
+                               class="px-5 py-3 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-extrabold text-sm shadow-md hover:shadow-lg transition flex items-center gap-2">
+                                <span>Lihat Estimasi Test {{ $t->test_number }}</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </a>
+                        @empty
+                            <span class="px-4 py-3 rounded-xl bg-white/10 text-sky-100 text-xs font-semibold border border-white/20">
+                                Belum ada Full Test yang selesai
+                            </span>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Full Tests Section -->
                 <div class="mt-12" id="practice-tests">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                         <div>
@@ -120,7 +191,7 @@
                                 <span class="w-2.5 h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full inline-block"></span>
                                 SAT Full Practice Tests
                             </h2>
-                            <p class="text-sm text-gray-500 mt-0.5">Simulasi ujian Digital SAT adaptif penuh sesuai format Princeton Review 2024.</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Simulasi ujian Digital SAT 4 modul (RW 1&ndash;2 + Math 1&ndash;2) dengan estimasi skor 400&ndash;1600.</p>
                         </div>
                         <div class="flex items-center gap-2">
                             @if(Auth::user()->isAdmin())
@@ -130,87 +201,51 @@
                             </button>
                             @endif
                             <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 self-start sm:self-auto">
-                                Adaptive Full-Length
+                                {{ $fullTests->count() }} Full Test{{ $fullTests->count() === 1 ? '' : 's' }}
                             </span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        @forelse($practiceSets ?? [] as $set)
                         @php
-                            $colors = [
-                                1 => ['from' => 'from-blue-600', 'to' => 'to-indigo-600', 'text' => 'text-indigo-700', 'bg' => 'bg-indigo-50', 'btn' => 'bg-indigo-600 hover:bg-indigo-700'],
-                                2 => ['from' => 'from-purple-600', 'to' => 'to-violet-700', 'text' => 'text-purple-700', 'bg' => 'bg-purple-50', 'btn' => 'bg-purple-600 hover:bg-purple-700'],
-                                3 => ['from' => 'from-teal-600', 'to' => 'to-emerald-600', 'text' => 'text-teal-700', 'bg' => 'bg-teal-50', 'btn' => 'bg-teal-600 hover:bg-teal-700'],
-                                4 => ['from' => 'from-amber-500', 'to' => 'to-orange-600', 'text' => 'text-amber-700', 'bg' => 'bg-amber-50', 'btn' => 'bg-amber-600 hover:bg-amber-700'],
+                            $colorStyles = [
+                                1 => ['header' => 'background: linear-gradient(135deg, #2563eb, #4f46e5);', 'text' => '#4338ca', 'btn' => 'background-color: #4f46e5; color: #ffffff;'],
+                                2 => ['header' => 'background: linear-gradient(135deg, #0d9488, #059669);', 'text' => '#0f766e', 'btn' => 'background-color: #0d9488; color: #ffffff;'],
+                                3 => ['header' => 'background: linear-gradient(135deg, #be123c, #f43f5e);', 'text' => '#be123c', 'btn' => 'background-color: #e11d48; color: #ffffff;'],
                             ];
-                            $c = $colors[$set->meeting_number] ?? $colors[1];
                         @endphp
+                        @forelse($fullTests as $t)
+                        @php $cs = $colorStyles[$t->test_number] ?? $colorStyles[1]; @endphp
                         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col group hover:-translate-y-1">
-                            <div class="min-h-[6.5rem] bg-gradient-to-br {{ $c['from'] }} {{ $c['to'] }} p-5 flex flex-col justify-between text-white relative">
+                            <div class="min-h-[6.5rem] p-5 flex flex-col justify-between text-white relative" style="{{ $cs['header'] }}">
                                 <div class="flex items-center justify-between gap-2 mb-2">
                                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm border border-white/20">
-                                        Practice Set {{ $set->meeting_number }}
+                                        Full Test {{ $t->test_number }} &bull; Adaptive
                                     </span>
-
-                                    <div class="flex items-center gap-1.5">
-                                        @if($set->completed)
-                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400 text-gray-900 shadow-xs">
-                                                ✓ Skor: {{ round($set->user_score) }}
-                                            </span>
-                                        @else
-                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white">
-                                                {{ $set->questions_count }} Soal
-                                            </span>
-                                        @endif
-
-                                        @if(Auth::user()->isAdmin())
-                                        <!-- Lock/Unlock Toggle -->
-                                        <form action="{{ route('assignments.sat.reading-writing.meeting.toggle-lock', $set->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="p-1 rounded-lg transition {{ $set->is_locked ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30' }}" title="{{ $set->is_locked ? 'Buka Kunci' : 'Kunci Practice Test' }}">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    @if($set->is_locked)
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
-                                                    @else
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
-                                                    @endif
-                                                </svg>
-                                            </button>
-                                        </form>
-
-                                        <!-- Edit Button -->
-                                        <button onclick='openEditPracticeTestModal(@json($set))' class="p-1 rounded-lg bg-white/20 text-white hover:bg-white/30 transition" title="Edit Practice Test">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                        </button>
-
-                                        <!-- Delete Button -->
-                                        <form action="{{ route('assignments.sat.reading-writing.meeting.destroy', $set->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus practice test ini beserta semua soalnya?');" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-1 rounded-lg bg-white/20 text-red-200 hover:text-white hover:bg-red-500 transition" title="Hapus Practice Test">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </form>
-                                        @endif
-                                    </div>
+                                    @if($t->rw_completed)
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400 text-gray-900 shadow-xs">
+                                            ✓ RW Selesai
+                                        </span>
+                                    @endif
                                 </div>
-                                <h3 class="text-lg font-bold text-white drop-shadow-sm leading-snug line-clamp-2" title="{{ $set->title }}">{{ $set->title }}</h3>
+                                <h3 class="text-lg font-bold text-white drop-shadow-sm leading-snug line-clamp-2" title="{{ $t->title }}">{{ $t->title }}</h3>
                             </div>
                             <div class="p-5 flex-1 flex flex-col justify-between">
                                 <div>
-                                    @if($set->subtitle)
-                                        <p class="text-xs font-semibold {{ $c['text'] }} mb-1.5">{{ $set->subtitle }}</p>
-                                    @endif
-                                    <p class="text-xs sm:text-sm text-gray-500 line-clamp-2 leading-relaxed mb-4">
-                                        {{ $set->description }}
+                                    <p class="text-xs sm:text-sm text-gray-500 leading-relaxed mb-4">
+                                        Section 1: Reading &amp; Writing (2 modul adaptif) &bull; Section 2: Math (2 modul adaptif). Estimasi skor 400&ndash;1600 setelah keempat modul selesai.
                                     </p>
                                 </div>
-                                <div class="pt-3 border-t border-gray-100">
-                                    @if(!$set->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                                        <a href="{{ route('assignments.sat.reading-writing.meeting', $set->meeting_number) }}" class="block w-full py-3 px-4 text-center rounded-xl text-sm font-bold text-white {{ $c['btn'] }} transition shadow-sm hover:shadow-md">
-                                            {{ $set->completed ? 'Buka Latihan' : 'Mulai Latihan' }} &rarr;
+                                <div class="pt-3 border-t border-gray-100 space-y-2">
+                                    @if(!$t->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                        <a href="{{ route('assignments.sat.practice-test', $t->module1->meeting_number) }}" class="block w-full py-3 px-4 text-center rounded-xl text-sm font-bold transition shadow-sm hover:shadow-md" style="{{ $cs['btn'] }}">
+                                            {{ $t->rw_completed ? 'Lanjutkan / Review' : 'Mulai Full Test' }} &rarr;
                                         </a>
+                                        @if($t->score_report_available)
+                                            <a href="{{ route('assignments.sat.score-report', $t->test_number) }}" class="block w-full py-2 px-3 text-center rounded-xl text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition">
+                                                Lihat Estimasi Skor
+                                            </a>
+                                        @endif
                                     @else
                                         <button disabled class="block w-full py-3 px-4 text-center rounded-xl text-sm font-bold text-gray-400 bg-gray-100 cursor-not-allowed">
                                             🔒 Terkunci
@@ -221,11 +256,47 @@
                         </div>
                         @empty
                         <div class="col-span-full bg-white rounded-2xl p-8 text-center text-gray-500 border border-gray-100">
-                            Belum ada paket practice test yang ditambahkan.
+                            Belum ada Full Test yang ditambahkan.
                         </div>
                         @endforelse
                     </div>
                 </div>
+
+                <!-- Topical Drills Section -->
+                @if($drills->isNotEmpty())
+                <div class="mt-12" id="topical-drills">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2.5 h-6 bg-gradient-to-b from-gray-400 to-gray-500 rounded-full inline-block"></span>
+                            Latihan Topikal (Reading &amp; Writing)
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Latihan satu-modul untuk mengasah skill tertentu. Skor ditampilkan dalam persen (0&ndash;100%) dan <strong>tidak</strong> masuk ke estimasi 400&ndash;1600.</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($drills as $drill)
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Latihan {{ $drill->meeting_number }}</span>
+                                    @if($drill->completed)
+                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">{{ round($drill->user_score) }}%</span>
+                                    @endif
+                                </div>
+                                <h4 class="font-bold text-gray-800 text-sm leading-snug mb-1 line-clamp-2">{{ $drill->title }}</h4>
+                                <p class="text-xs text-gray-400">{{ $drill->questions_count }} soal</p>
+                            </div>
+                            @if(!$drill->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                <a href="{{ route('assignments.sat.practice-test', $drill->meeting_number) }}" class="mt-3 block w-full py-2 px-3 text-center rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition">
+                                    {{ $drill->completed ? 'Kerjakan Lagi' : 'Mulai Latihan' }} &rarr;
+                                </a>
+                            @else
+                                <button disabled class="mt-3 block w-full py-2 px-3 text-center rounded-lg text-xs font-bold text-gray-400 bg-gray-100 cursor-not-allowed">🔒 Terkunci</button>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </main>
     </div>
@@ -258,7 +329,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Singkat</label>
-                            <textarea name="description" rows="3" class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Tuliskan gambaran latihan ini..."></textarea>
+                            <textarea name="description" rows="3" class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Tuliskan cakupan simulasi practice test ini..."></textarea>
                         </div>
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="add_is_locked" name="is_locked" value="1" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">

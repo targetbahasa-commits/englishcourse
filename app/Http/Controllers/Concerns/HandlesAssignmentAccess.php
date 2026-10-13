@@ -37,8 +37,12 @@ trait HandlesAssignmentAccess
 
             // Allow public access to top-level program landing pages (e.g. assignments.ielts-academic)
             // but keep access checks for deeper assignment routes (meetings/materials/practice).
+            // mock-test.sat is included here too: it's the SAT hub/catalog page (lists all 15
+            // practice sets with a locked state for non-entitled users), the Digital SAT
+            // equivalent of an assignments.{slug} landing page - everything under it
+            // (mock-test.sat.*) still goes through the entitlement check below.
             $routeName = $request->route()?->getName();
-            if ($routeName && preg_match('/^assignments\.[^.]+$/', $routeName)) {
+            if ($routeName && (preg_match('/^assignments\.[^.]+$/', $routeName) || $routeName === 'mock-test.sat')) {
                 return $next($request);
             }
 
@@ -237,6 +241,15 @@ trait HandlesAssignmentAccess
 
     protected function resolveAssignmentProgramSlugFromRequest(Request $request): ?string
     {
+        // Digital SAT Mock Test is sold as its own product (see Program slug
+        // 'sat'), independent of the Mock Test hub's other previews
+        // (ielts-academic/toefl-itp etc. stay ungated there deliberately -
+        // this only tightens the SAT branch of mock-test.*). Both route
+        // namespaces share one program entitlement.
+        if ($request->routeIs('assignments.sat*') || $request->routeIs('mock-test.sat*')) {
+            return 'sat';
+        }
+
         if ($request->routeIs('assignments.toefl-itp*')) {
             return 'toefl-itp';
         }

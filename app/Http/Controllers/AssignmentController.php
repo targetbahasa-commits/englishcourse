@@ -903,24 +903,70 @@ class AssignmentController extends Controller
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
 
-        $practiceSets = \App\Models\SatReadingWritingMeeting::withCount('questions')
+        $context = 'assignments';
+
+        $allMeetings = \App\Models\SatReadingWritingMeeting::withCount('questions')
+            ->where('context', $context)
             ->orderBy('meeting_number')
             ->get();
 
         $scoresByMeeting = $user
             ? \App\Models\SatReadingWritingScore::where('user_id', $user->id)
+                ->where('context', $context)
                 ->get()
                 ->keyBy('meeting_number')
             : collect();
 
-        $practiceSets->each(function ($set) use ($scoresByMeeting) {
-            $userScore = $scoresByMeeting->get($set->meeting_number);
-            $set->completed = ($userScore !== null);
-            $set->user_score = $userScore ? $userScore->score : null;
+        $allMeetings->each(function ($meeting) use ($scoresByMeeting) {
+            $userScore = $scoresByMeeting->get($meeting->meeting_number);
+            $meeting->completed = ($userScore !== null);
+            $meeting->user_score = $userScore ? $userScore->score : null;
         });
 
+        $mathModuleMeetingNumbers = $user
+            ? \App\Models\SatMathMeeting::where('context', $context)->whereNotNull('test_number')->get(['test_number', 'module_number', 'meeting_number'])
+            : collect();
+
+        $mathCompletedMeetingNumbers = $user
+            ? \App\Models\SatMathScore::where('user_id', $user->id)
+                ->where('context', $context)
+                ->where('type', 'practice')
+                ->pluck('meeting_number')
+                ->all()
+            : [];
+
+        $fullTests = $allMeetings->whereNotNull('test_number')
+            ->groupBy('test_number')
+            ->map(function ($modules, $testNumber) use ($mathModuleMeetingNumbers, $mathCompletedMeetingNumbers) {
+                $module1 = $modules->firstWhere('module_number', 1);
+                $module2 = $modules->firstWhere('module_number', 2);
+
+                $mathModules = $mathModuleMeetingNumbers->where('test_number', (int) $testNumber);
+                $mathDone = $mathModules->isNotEmpty() && $mathModules->every(
+                    fn ($m) => in_array($m->meeting_number, $mathCompletedMeetingNumbers, true)
+                );
+
+                return (object) [
+                    'test_number' => $testNumber,
+                    'module1' => $module1,
+                    'module2' => $module2,
+                    'title' => $module1->title ?? "Digital SAT Practice Test {$testNumber}",
+                    'description' => $module1->description ?? null,
+                    'is_locked' => (bool) ($module1->is_locked ?? false),
+                    'rw_completed' => (bool) ($module2->completed ?? false),
+                    'score_report_available' => (bool) ($module2->completed ?? false) && $mathDone,
+                ];
+            })
+            ->sortKeys()
+            ->values();
+
+        $drills = $allMeetings->whereNull('test_number')->values();
+
         return view('assignments.sat.index', [
-            'practiceSets' => $practiceSets,
+            'fullTests' => $fullTests,
+            'drills' => $drills,
+            // kept for any legacy view reference during the transition
+            'practiceSets' => $allMeetings,
         ]);
     }
 

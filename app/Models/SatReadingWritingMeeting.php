@@ -13,6 +13,9 @@ class SatReadingWritingMeeting extends Model
 
     protected $fillable = [
         'meeting_number',
+        'test_number',
+        'module_number',
+        'context',
         'title',
         'subtitle',
         'description',
@@ -22,6 +25,8 @@ class SatReadingWritingMeeting extends Model
     protected $casts = [
         'is_locked' => 'boolean',
         'meeting_number' => 'integer',
+        'test_number' => 'integer',
+        'module_number' => 'integer',
     ];
 
     public function questions()
