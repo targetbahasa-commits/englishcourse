@@ -148,7 +148,12 @@ class BuildStudentDashboard
 
         $offlineTestResults = \App\Models\OfflineTestResult::where('email', $user->email)->orderBy('created_at', 'desc')->get();
 
+        $weeklyStreak = $this->repository->weeklyStreak($user->id);
+        $leaderboard = $this->repository->monthlyLeaderboard($user->id, $enrolledProgram?->id);
+        $lastStudied = $recentActivity[0] ?? null;
+
         return [
+            'user' => $user,
             'progressPercentage' => $progressPercentage,
             'totalCompleted' => $completedAssignments,
             'totalAssignments' => $totalAssignments,
@@ -171,6 +176,9 @@ class BuildStudentDashboard
             'targetScholarship' => $targetScholarship,
             'offlineTestResults' => $offlineTestResults,
             'pteScores' => $this->repository->getPteScores($user->id),
+            'weeklyStreak' => $weeklyStreak,
+            'leaderboard' => $leaderboard,
+            'lastStudied' => $lastStudied,
         ];
     }
 }

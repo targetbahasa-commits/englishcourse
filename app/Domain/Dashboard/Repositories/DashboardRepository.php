@@ -33,4 +33,8 @@ interface DashboardRepository
     public function findProgramBySlug(string $slug): mixed;
 
     public function getPteScores(int $userId): array;
+
+    public function weeklyStreak(int $userId): array;
+
+    public function monthlyLeaderboard(int $userId, ?int $programId, int $limit = 5): array;
 }

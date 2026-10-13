@@ -41,6 +41,7 @@ class EloquentDashboardRepository implements DashboardRepository
     public function recentMeetingActivity(int $userId, int $limit = 5): array
     {
         return MeetingScore::where('is_reported', true)->where('user_id', $userId)
+            ->with('program')
             ->orderByDesc('submitted_at')
             ->limit($limit)
             ->get()->all();
@@ -150,6 +151,93 @@ class EloquentDashboardRepository implements DashboardRepository
             'reading' => $avgReading,
             'listening' => $avgListening,
             'speaking_writing' => $avgSpeakingWriting,
+        ];
+    }
+
+    public function weeklyStreak(int $userId): array
+    {
+        $start = now()->startOfWeek(\Carbon\CarbonInterface::MONDAY)->startOfDay();
+        $end = now()->endOfWeek(\Carbon\CarbonInterface::SUNDAY)->endOfDay();
+
+        $activeDates = collect()
+            ->merge(
+                MeetingScore::where('user_id', $userId)
+                    ->whereBetween('submitted_at', [$start, $end])
+                    ->pluck('submitted_at')
+            )
+            ->merge(
+                FreeTestResult::where('user_id', $userId)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->pluck('created_at')
+            )
+            ->merge(
+                \App\Models\PtePracticeResult::where('user_id', $userId)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->pluck('created_at')
+            )
+            ->filter()
+            ->map(fn ($date) => \Carbon\Carbon::parse($date)->toDateString())
+            ->unique();
+
+        $days = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = $start->copy()->addDays($i);
+            $days[] = [
+                'date' => $date->toDateString(),
+                'label' => $date->format('D'),
+                'day' => $date->format('d M'),
+                'studied' => $activeDates->contains($date->toDateString()),
+                'is_today' => $date->isToday(),
+                'is_future' => $date->isFuture() && ! $date->isToday(),
+            ];
+        }
+
+        return $days;
+    }
+
+    public function monthlyLeaderboard(int $userId, ?int $programId, int $limit = 5): array
+    {
+        $start = now()->startOfMonth();
+        $end = now()->endOfMonth();
+
+        $query = MeetingScore::query()
+            ->selectRaw('user_id, SUM(score) as total_points')
+            ->where('is_reported', true)
+            ->whereBetween('submitted_at', [$start, $end])
+            ->groupBy('user_id');
+
+        if ($programId) {
+            $query->where('program_id', $programId);
+        }
+
+        $ranked = $query->orderByDesc('total_points')->get()->values();
+
+        $names = \App\Models\User::whereIn('id', $ranked->pluck('user_id'))->pluck('name', 'id');
+
+        $entries = $ranked->take($limit)->map(function ($row, $idx) use ($names) {
+            return [
+                'rank' => $idx + 1,
+                'user_id' => (int) $row->user_id,
+                'name' => $names[$row->user_id] ?? 'Student',
+                'points' => (int) $row->total_points,
+            ];
+        })->all();
+
+        $currentUserRank = null;
+        $currentUserPoints = 0;
+        foreach ($ranked as $idx => $row) {
+            if ((int) $row->user_id === $userId) {
+                $currentUserRank = $idx + 1;
+                $currentUserPoints = (int) $row->total_points;
+                break;
+            }
+        }
+
+        return [
+            'entries' => $entries,
+            'total_participants' => $ranked->count(),
+            'current_user_rank' => $currentUserRank,
+            'current_user_points' => $currentUserPoints,
         ];
     }
 }
