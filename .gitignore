@@ -8,6 +8,12 @@
 .env.production
 .phpunit.result.cache
 database/database.sqlite
+
+# Claude Code's local permission allowlist records approved Bash commands
+# verbatim, including any literal credentials passed on the command line
+# (e.g. `sshpass -p '...'`). It was previously committed and leaked real
+# SSH/MySQL passwords to GitHub (flagged by GitGuardian) - never track it.
+.claude/settings.local.json
 Homestead.json
 Homestead.yaml
 auth.json
