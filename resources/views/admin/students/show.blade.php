@@ -133,13 +133,33 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Batch Kelas</p>
-                    <p class="font-semibold text-gray-900">
-                        @if($student->classPeriod)
-                            {{ $student->classPeriod->name }}
-                        @else
-                            <span class="text-gray-400 italic">Belum ditentukan</span>
-                        @endif
-                    </p>
+                    @php
+                        // A student enrolled in more than one program has one
+                        // Enrollment (and one batch/classPeriod) per program -
+                        // the legacy classPeriod() FK only ever points at one
+                        // of them, so it's included here too but deduplicated
+                        // against the enrollments by id.
+                        $allBatches = collect();
+                        if ($student->classPeriod) {
+                            $allBatches->put($student->classPeriod->id, $student->classPeriod);
+                        }
+                        foreach ($student->enrollments as $enrollment) {
+                            if ($enrollment->classPeriod && in_array($enrollment->status, ['active', 'completed'])) {
+                                $allBatches->put($enrollment->classPeriod->id, $enrollment->classPeriod);
+                            }
+                        }
+                    @endphp
+                    @if($allBatches->isEmpty())
+                        <p class="font-semibold text-gray-900"><span class="text-gray-400 italic">Belum ditentukan</span></p>
+                    @elseif($allBatches->count() === 1)
+                        <p class="font-semibold text-gray-900">{{ $allBatches->first()->name }}</p>
+                    @else
+                        <ul class="space-y-0.5">
+                            @foreach($allBatches as $batch)
+                                <li class="font-semibold text-gray-900 text-sm">{{ $batch->name }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Assigned Teacher</p>
@@ -437,41 +457,65 @@
                     Class Schedule
                 </h3>
 
-                @if($student->classPeriod)
-                <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100 mb-4">
-                    <h4 class="font-bold text-indigo-900">{{ $student->classPeriod->name }}</h4>
-                    <p class="text-xs text-indigo-700 mt-1">{{ $student->classPeriod->classMeetings->count() }} total meetings</p>
-                </div>
-                
-                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Upcoming Meetings</h4>
-                <div class="space-y-3">
+                @php
+                    // Same dedup'd batch list as the "Batch Kelas" stat above -
+                    // a student enrolled in multiple programs has one classPeriod
+                    // per enrollment, not just the single legacy classPeriod() FK.
+                    $scheduleBatches = collect();
+                    if ($student->classPeriod) {
+                        $scheduleBatches->put($student->classPeriod->id, $student->classPeriod);
+                    }
+                    foreach ($student->enrollments as $enrollment) {
+                        if ($enrollment->classPeriod && in_array($enrollment->status, ['active', 'completed'])) {
+                            $scheduleBatches->put($enrollment->classPeriod->id, $enrollment->classPeriod);
+                        }
+                    }
+                @endphp
+
+                @forelse($scheduleBatches as $batch)
                     @php
-                        $upcoming = $student->classPeriod->classMeetings()
+                        $batchOpenByDefault = $scheduleBatches->count() <= 1 ? 'true' : 'false';
+                        $upcoming = $batch->classMeetings()
                             ->where('meeting_date', '>=', now()->toDateString())
                             ->orderBy('meeting_date')
                             ->orderBy('start_time')
                             ->take(3)
                             ->get();
                     @endphp
-                    
-                    @forelse($upcoming as $meet)
-                    <div class="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
-                        <div class="bg-indigo-100 text-indigo-700 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                            <span class="text-xs font-bold leading-none">{{ \Carbon\Carbon::parse($meet->meeting_date)->format('M') }}</span>
-                            <span class="text-lg font-black leading-none mt-0.5">{{ \Carbon\Carbon::parse($meet->meeting_date)->format('d') }}</span>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-900 text-sm line-clamp-1">{{ $meet->assignment->title ?? 'Meeting ' . $meet->meeting_number }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ \Carbon\Carbon::parse($meet->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($meet->end_time)->format('H:i') }}</p>
+                    <div class="mb-4 last:mb-0" x-data="{ open: {{ $batchOpenByDefault }} }">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-3 p-4 bg-indigo-50 hover:bg-indigo-100 rounded-xl border border-indigo-100 transition text-left">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-indigo-900 truncate">{{ $batch->name }}</h4>
+                                <p class="text-xs text-indigo-700 mt-1">{{ $batch->classMeetings->count() }} total meetings</p>
+                            </div>
+                            @if($scheduleBatches->count() > 1)
+                                <svg class="w-4 h-4 text-indigo-500 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            @endif
+                        </button>
+
+                        <div x-show="open" x-cloak class="pt-3">
+                            <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Upcoming Meetings</h5>
+                            <div class="space-y-3">
+                                @forelse($upcoming as $meet)
+                                <div class="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <div class="bg-indigo-100 text-indigo-700 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                        <span class="text-xs font-bold leading-none">{{ \Carbon\Carbon::parse($meet->meeting_date)->format('M') }}</span>
+                                        <span class="text-lg font-black leading-none mt-0.5">{{ \Carbon\Carbon::parse($meet->meeting_date)->format('d') }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm line-clamp-1">{{ $meet->assignment->title ?? 'Meeting ' . $meet->meeting_number }}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">{{ \Carbon\Carbon::parse($meet->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($meet->end_time)->format('H:i') }}</p>
+                                    </div>
+                                </div>
+                                @empty
+                                <p class="text-sm text-gray-500 italic">No upcoming meetings scheduled.</p>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
-                    @empty
-                    <p class="text-sm text-gray-500 italic">No upcoming meetings scheduled.</p>
-                    @endforelse
-                </div>
-                @else
+                @empty
                 <p class="text-sm text-gray-500">Not assigned to any class period yet.</p>
-                @endif
+                @endforelse
             </div>
 
             <!-- Enrolled Programs & Scores -->

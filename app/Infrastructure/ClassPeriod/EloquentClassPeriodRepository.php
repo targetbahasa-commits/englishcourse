@@ -10,7 +10,24 @@ class EloquentClassPeriodRepository implements ClassPeriodRepository
 {
     public function listWithCounts(array $filters): array
     {
-        $query = ClassPeriod::with(['teacher', 'program'])
+        $query = ClassPeriod::with([
+                'teacher',
+                'program',
+                // Lightweight columns only - this feeds the expandable
+                // "who's in this batch" row in the admin list, not a full
+                // student profile view.
+                //
+                // Two sources, both needed: 'users' is the legacy single
+                // class_period_id FK on the users table - still the only
+                // record for ~11 students who predate the enrollments
+                // table. 'enrollments.user' is the real per-program link a
+                // student enrolled in multiple programs actually has (one
+                // Enrollment row per program/batch). Neither alone is
+                // complete; the view merges and dedupes both by user id.
+                'users' => fn ($q) => $q->select('users.id', 'users.name', 'users.email', 'users.class_period_id'),
+                'enrollments' => fn ($q) => $q->whereIn('status', ['active', 'completed']),
+                'enrollments.user' => fn ($q) => $q->select('users.id', 'users.name', 'users.email'),
+            ])
             ->withCount([
                 'users',
                 'enrollments as booked_count' => function ($q) {

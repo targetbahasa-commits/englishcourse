@@ -181,9 +181,23 @@
                                                     <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200">
+                                            <tbody class="bg-white divide-y divide-gray-200" x-data="{ expandedId: null }">
                                                 @foreach ($periodsInProgram as $period)
-                                                    <tr class="hover:bg-gray-50 transition-colors">
+                                                    @php
+                                                        // Merge both sources of "who's actually in this batch":
+                                                        // the legacy users.class_period_id FK (still the only
+                                                        // record for students predating the enrollments table)
+                                                        // and real Enrollment rows (how a student enrolled in
+                                                        // multiple programs/batches actually gets linked).
+                                                        // Relying on either alone misses students the other
+                                                        // one has.
+                                                        $allStudents = $period->users
+                                                            ->merge($period->enrollments->pluck('user')->filter())
+                                                            ->unique('id')
+                                                            ->values();
+                                                    @endphp
+                                                    <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
+                                                        @click="expandedId = expandedId === {{ $period->id }} ? null : {{ $period->id }}">
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="flex items-center gap-1.5 flex-wrap mb-1">
                                                                 @if($period->is_custom)
@@ -192,7 +206,10 @@
                                                                     <span class="inline-flex items-center justify-center bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs font-bold">Batch {{ $period->batch_number }}</span>
                                                                 @endif
                                                             </div>
-                                                            <div class="text-sm font-bold text-gray-900">{{ $period->name }}</div>
+                                                            <div class="flex items-center gap-1.5">
+                                                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform" :class="expandedId === {{ $period->id }} ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                                                <div class="text-sm font-bold text-gray-900">{{ $period->name }}</div>
+                                                            </div>
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             @if($period->teacher)
@@ -225,13 +242,13 @@
                                                             </span>
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                            <div class="text-sm font-medium text-gray-900">{{ $period->users_count }}</div>
+                                                            <div class="text-sm font-medium text-gray-900">{{ $allStudents->count() }}</div>
                                                             <div class="text-xs text-gray-500">enrolled</div>
                                                             @if($period->booked_count > 0)
                                                                 <div class="text-xs font-bold text-blue-600 mt-0.5">{{ $period->booked_count }} booking sendiri</div>
                                                             @endif
                                                         </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                        <td class="px-6 py-4 whitespace-nowrap" @click.stop>
                                                             <form action="{{ route('class-periods.status', $period) }}" method="POST">
                                                                 @csrf
                                                                 @method('PATCH')
@@ -247,10 +264,52 @@
                                                                 </select>
                                                             </form>
                                                         </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
                                                             <a href="{{ route('class-periods.show', $period) }}" class="inline-flex items-center px-3 py-1.5 border border-indigo-600 rounded-md text-indigo-600 hover:bg-indigo-50 font-medium text-xs transition duration-150 ease-in-out">
                                                                 Manage
                                                             </a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr x-show="expandedId === {{ $period->id }}" x-cloak>
+                                                        <td colspan="8" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                <div>
+                                                                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">Pengajar</p>
+                                                                    @if($period->teacher)
+                                                                        <div class="flex items-center gap-2">
+                                                                            <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                                                                {{ strtoupper(substr($period->teacher->name, 0, 1)) }}
+                                                                            </div>
+                                                                            <div>
+                                                                                <div class="text-sm font-semibold text-gray-900">{{ $period->teacher->name }}</div>
+                                                                                <div class="text-xs text-gray-500">{{ $period->teacher->email }}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @else
+                                                                        <p class="text-sm text-gray-400 italic">Belum ada pengajar yang ditugaskan.</p>
+                                                                    @endif
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">
+                                                                        Siswa ({{ $allStudents->count() }})
+                                                                    </p>
+                                                                    @if($allStudents->isEmpty())
+                                                                        <p class="text-sm text-gray-400 italic">Belum ada siswa terdaftar di batch ini.</p>
+                                                                    @else
+                                                                        <ul class="space-y-1.5">
+                                                                            @foreach($allStudents as $student)
+                                                                                <li class="flex items-center gap-2">
+                                                                                    <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                                                                        {{ strtoupper(substr($student->name, 0, 1)) }}
+                                                                                    </div>
+                                                                                    <span class="text-sm text-gray-800">{{ $student->name }}</span>
+                                                                                    <span class="text-xs text-gray-400">{{ $student->email }}</span>
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 @endforeach

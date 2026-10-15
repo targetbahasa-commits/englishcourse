@@ -25,7 +25,20 @@ class ManageStudents
 
     public function show(mixed $student): array
     {
-        $student->load(['program', 'teacher', 'classPeriod.classMeetings', 'classes', 'enrollments.program']);
+        $student->load([
+            'program',
+            'teacher',
+            'classPeriod.classMeetings',
+            'classes',
+            // 'Batch Kelas'/'Class Schedule' used to read only the single
+            // deprecated classPeriod() FK above, so a student enrolled in
+            // more than one program (each with its own Enrollment ->
+            // classPeriod) only ever showed one batch and that batch's
+            // meetings - the others existed but were never loaded.
+            'enrollments.program',
+            'enrollments.classPeriod.classMeetings',
+            'enrollments.teacher',
+        ]);
 
         $recentActivity      = $this->repository->getRecentActivity($student->id);
         $progressStats       = $this->repository->getProgressStats($student->id);
@@ -802,6 +815,33 @@ class ManageStudents
                 $paragraphAnswer = (string) $scoreAnswers['paragraph_answer'];
             } elseif (isset($scoreAnswers['user_paragraph_answer'])) {
                 $paragraphAnswer = (string) $scoreAnswers['user_paragraph_answer'];
+            }
+        }
+
+        // $rawAnswers above already falls back to AssignmentDraft (see the
+        // "if (empty($rawAnswers))" block earlier in this method), but
+        // that fallback only ever assigns $rawAnswers - it never reads the
+        // SAME draft row's own 'paragraph_answer' key, even though
+        // GrammarWritingSessionController::meeting2Practice() saves both the
+        // per-question answers and the paragraph answer into that one
+        // AssignmentDraft.answers blob together (see its 'paragraph_answer'
+        // unset/extract right before building $draftAnswers). Without this,
+        // a student's in-progress (not yet submitted) paragraph answer was
+        // invisible to the admin live preview even though the per-question
+        // answers on the same page showed up fine - it was always being
+        // looked up from a different source than where it's actually saved.
+        if ($paragraphAnswer === '') {
+            $paragraphDraft = \App\Models\AssignmentDraft::where('user_id', $userId)
+                ->where('meeting_number', $meetingNumber)
+                ->latest('updated_at')
+                ->first();
+            if ($paragraphDraft && !empty($paragraphDraft->answers)) {
+                $draftAnswers = is_array($paragraphDraft->answers) ? $paragraphDraft->answers : (json_decode((string) $paragraphDraft->answers, true) ?? []);
+                if (isset($draftAnswers['paragraph_answer']) && trim((string) $draftAnswers['paragraph_answer']) !== '') {
+                    $paragraphAnswer = trim((string) $draftAnswers['paragraph_answer']);
+                } elseif (isset($draftAnswers['user_paragraph_answer']) && trim((string) $draftAnswers['user_paragraph_answer']) !== '') {
+                    $paragraphAnswer = trim((string) $draftAnswers['user_paragraph_answer']);
+                }
             }
         }
 
