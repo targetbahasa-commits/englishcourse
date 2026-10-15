@@ -3,282 +3,140 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IELTS Reading Mock Test 4 - Cambridge 20 - {{ config('app.name', 'Target Bahasa') }}</title>
+    <title>IELTS Reading Mock Test {{ $testId }} - {{ config('app.name', 'Target Bahasa') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        .paper-shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-        .dotted-line { border-bottom: 1px dotted #000; display: inline-block; width: 150px; }
-        .reading-text p { margin-bottom: 1rem; line-height: 1.8; text-align: justify; }
-        .reading-text p.indent { text-indent: 2rem; }
-        .reading-text h2, .reading-text h3 { text-align: center; font-weight: bold; margin-bottom: 1.5rem; }
-        .highlight-yellow { background-color: rgba(253, 224, 71, 0.4); border-bottom: 2px solid #eab308; }
-        .highlight-green { background-color: rgba(134, 239, 172, 0.4); border-bottom: 2px solid #22c55e; }
-        .highlight-blue { background-color: rgba(147, 197, 253, 0.4); border-bottom: 2px solid #3b82f6; }
-        .highlight-pink { background-color: rgba(249, 168, 212, 0.4); border-bottom: 2px solid #ec4899; }
-        [x-cloak] { display: none !important; }
-        .drawing-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
-        .drawing-canvas.active { pointer-events: auto; cursor: crosshair; }
+        html, body { height: 100%; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
-    <script>
-        window.readingTest = function() {
-            return {
-                activeTool: null,
-                activeColor: null,
-                isDrawingMode: false,
-                penSize: 3,
-                
-                setTool(tool, color = null) {
-                    if (this.activeTool === tool && this.activeColor === color) {
-                        this.activeTool = null;
-                        this.activeColor = null;
-                    } else {
-                        this.activeTool = tool;
-                        this.activeColor = color;
-                        this.isDrawingMode = false;
-                    }
-                    this.updateCursor();
-                },
-
-                toggleDrawing() {
-                    this.isDrawingMode = !this.isDrawingMode;
-                    if (this.isDrawingMode) {
-                        this.activeTool = 'draw';
-                        this.activeColor = 'blue';
-                        this.initCanvas();
-                    } else {
-                        this.activeTool = null;
-                    }
-                    this.updateCursor();
-                },
-
-                updateCursor() {
-                    const textPane = this.$refs.textPane;
-                    const canvas = document.getElementById('drawingCanvas');
-                    
-                    if (this.isDrawingMode) {
-                        textPane.style.cursor = 'crosshair';
-                        canvas.classList.add('active');
-                    } else if (this.activeTool === 'highlight') {
-                        textPane.style.cursor = 'text';
-                        canvas.classList.remove('active');
-                    } else if (this.activeTool === 'remove_highlight') {
-                        textPane.style.cursor = 'pointer';
-                        canvas.classList.remove('active');
-                    } else {
-                        textPane.style.cursor = 'auto';
-                        canvas.classList.remove('active');
-                    }
-                },
-
-                startSelection(e) {
-                    if (this.activeTool === 'remove_highlight') {
-                        if (e.target.tagName === 'SPAN' && e.target.className.includes('highlight-')) {
-                            const text = e.target.innerText;
-                            const textNode = document.createTextNode(text);
-                            e.target.parentNode.replaceChild(textNode, e.target);
-                        }
-                    }
-                },
-
-                handleMouseUp() {
-                    if (this.activeTool !== 'highlight') return;
-                    
-                    const selection = window.getSelection();
-                    if (!selection.rangeCount || selection.isCollapsed) return;
-
-                    const range = selection.getRangeAt(0);
-                    const container = range.commonAncestorContainer;
-                    
-                    if (this.$refs.textPane.contains(container.nodeType === 3 ? container.parentNode : container)) {
-                        const span = document.createElement('span');
-                        span.className = `highlight-${this.activeColor}`;
-                        
-                        try {
-                            range.surroundContents(span);
-                        } catch (e) {
-                            console.warn("Complex selection spanning multiple elements. Simplifying.");
-                            const text = range.toString();
-                            const fragment = range.extractContents();
-                            span.appendChild(fragment);
-                            range.insertNode(span);
-                        }
-                        selection.removeAllRanges();
-                    }
-                },
-
-                initCanvas() {
-                    const canvas = document.getElementById('drawingCanvas');
-                    const textPane = this.$refs.textPane;
-                    const ctx = canvas.getContext('2d');
-                    
-                    canvas.width = textPane.clientWidth;
-                    canvas.height = window.innerHeight; // Fill viewport height to allow drawing across scroll
-                    
-                    let isDrawing = false;
-                    let lastX = 0;
-                    let lastY = 0;
-
-                    const getPos = (e) => {
-                        const rect = canvas.getBoundingClientRect();
-                        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-                    };
-
-                    const draw = (e) => {
-                        if (!isDrawing || !this.isDrawingMode) return;
-                        
-                        const {x, y} = getPos(e);
-                        ctx.beginPath();
-                        ctx.moveTo(lastX, lastY);
-                        ctx.lineTo(x, y);
-                        ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)'; // blue-500 semantic
-                        ctx.lineWidth = this.penSize;
-                        ctx.lineCap = 'round';
-                        ctx.lineJoin = 'round';
-                        ctx.stroke();
-                        [lastX, lastY] = [x, y];
-                    };
-
-                    canvas.onmousedown = (e) => {
-                        if (!this.isDrawingMode) return;
-                        isDrawing = true;
-                        const {x, y} = getPos(e);
-                        [lastX, lastY] = [x, y];
-                    };
-                    canvas.onmousemove = draw;
-                    canvas.onmouseup = () => isDrawing = false;
-                    canvas.onmouseout = () => isDrawing = false;
-                },
-
-                resizeCanvas() {
-                    const canvas = document.getElementById('drawingCanvas');
-                    if(canvas && canvas.width) {
-                        const textPane = this.$refs.textPane;
-                        const ctx = canvas.getContext('2d');
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = canvas.width;
-                        tempCanvas.height = canvas.height;
-                        tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
-                        
-                        canvas.width = textPane.clientWidth;
-                        canvas.height = window.innerHeight;
-                        ctx.drawImage(tempCanvas, 0, 0);
-                    }
-                },
-
-                clearCanvas() {
-                    const canvas = document.getElementById('drawingCanvas');
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-            };
-        };
-    </script>
 </head>
-
-<body class="font-sans antialiased bg-white h-screen flex flex-col overflow-hidden" 
-      x-data="readingTest()" 
-      @mouseup="handleMouseUp" 
-      @resize.window="resizeCanvas">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200 z-30 relative px-6 py-4 flex-shrink-0">
-        <div class="flex items-center justify-between max-w-[1400px] mx-auto pl-14">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
+
+    {{-- Top header --}}
+    <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
+        <div class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="p-2.5 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <div class="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
                 </div>
                 <div>
-                     <h1 class="text-xl font-bold text-gray-800">IELTS Reading Mock Test 4</h1>
-                     <p class="text-sm text-gray-500">Cambridge IELTS 20</p>
+                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            
-                <div class="bg-white p-1.5 rounded-lg flex gap-1 hidden">
-                    <!-- Removed passage navigation to match C16 style -->
-                </div>
-
-                <!-- Tools Menu -->
-                <div class="relative" x-data="{ toolsOpen: false }" @click.away="toolsOpen = false">
-                    <button @click="toolsOpen = !toolsOpen" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-white flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Tools
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
                     </button>
-                    <div x-show="toolsOpen" x-transition class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-50">
-                        <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100 mb-2">Highlighter</div>
-                        <div class="grid grid-cols-4 gap-2 mb-3">
-                            <button @click="setTool('highlight', 'yellow')" class="h-8 rounded flex items-center justify-center bg-yellow-200 hover:bg-yellow-300 ring-2 ring-transparent transition" :class="{'ring-yellow-500 shadow-md': activeTool === 'highlight' && activeColor === 'yellow'}"></button>
-                            <button @click="setTool('highlight', 'green')" class="h-8 rounded flex items-center justify-center bg-green-200 hover:bg-green-300 ring-2 ring-transparent transition" :class="{'ring-green-500 shadow-md': activeTool === 'highlight' && activeColor === 'green'}"></button>
-                            <button @click="setTool('highlight', 'blue')" class="h-8 rounded flex items-center justify-center bg-blue-200 hover:bg-blue-300 ring-2 ring-transparent transition" :class="{'ring-blue-500 shadow-md': activeTool === 'highlight' && activeColor === 'blue'}"></button>
-                            <button @click="setTool('highlight', 'pink')" class="h-8 rounded flex items-center justify-center bg-pink-200 hover:bg-pink-300 ring-2 ring-transparent transition" :class="{'ring-pink-500 shadow-md': activeTool === 'highlight' && activeColor === 'pink'}"></button>
-                        </div>
-                        <button @click="setTool('remove_highlight')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-white rounded-lg flex items-center gap-2" :class="{'bg-white font-semibold': activeTool === 'remove_highlight'}">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Eraser (Highlights)
-                        </button>
-
-                        <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100 mt-2 mb-2">Pen Tool</div>
-                        <button @click="toggleDrawing()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-white rounded-lg flex items-center justify-between" :class="{'bg-white text-blue-700 font-semibold': isDrawingMode}">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                Draw on Screen
-                            </div>
-                            <div class="w-8 h-4 bg-gray-200 rounded-full relative transition-colors" :class="{'bg-blue-500': isDrawingMode}">
-                                <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform" :class="{'translate-x-4': isDrawingMode}"></div>
-                            </div>
-                        </button>
-                        <div x-show="isDrawingMode" class="mt-2 px-3 py-2 bg-white rounded-lg border border-gray-200">
-                             <div class="flex text-xs justify-between mb-1 text-gray-500"><span>Size</span><span x-text="penSize+'px'"></span></div>
-                             <input type="range" x-model="penSize" min="1" max="10" class="w-full accent-blue-600 block">
-                             <button @click="clearCanvas()" class="mt-2 w-full text-center text-xs text-red-600 hover:text-red-700 font-semibold py-1 border border-red-200 hover:bg-red-50 rounded transition">Clear Drawings</button>
-                        </div>
-                    </div>
-                </div>
-
-                @if(Auth::check() && Auth::user()->isAdmin())
-                <div class="relative" x-data="{ adminOpen: false }" @click.away="adminOpen = false">
-                    <button @click="adminOpen = !adminOpen" class="px-4 py-2 bg-purple-600 text-white border border-purple-700 rounded-lg hover:bg-purple-700 flex items-center gap-2 font-medium shadow-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                        Admin
-                    </button>
-                    <div x-show="adminOpen" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
-                        <button onclick="document.getElementById('uploadAnswerKeyModal').classList.remove('hidden')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white hover:text-purple-700 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                            Upload Answer Key
-                        </button>
-                    </div>
-                </div>
+                </form>
                 @endif
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => 20, 'id' => 4]) }}" class="px-4 py-2 bg-white text-gray-600 border border-gray-300 rounded-lg hover:bg-white flex items-center gap-2 font-medium transition cursor-pointer">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Exit
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
                 </a>
             </div>
         </div>
-    </header>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
+    </div>
 
-    <!-- Main Content Split Pane -->
-    <div class="flex-1 flex overflow-hidden relative">
-        <canvas id="drawingCanvas" class="drawing-canvas"></canvas>
-        <div id="highlightArea" class="absolute inset-0 z-0"></div> <!-- Marker area for highlights -->
+    {{-- Split screen --}}
+    <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
-        <!-- Left Pane: Reading Text -->
-        <div class="w-1/2 h-full bg-white border-r border-gray-300 overflow-y-auto relative z-10 custom-scrollbar reading-text shadow-[inset_-10px_0_15px_-10px_rgba(0,0,0,0.05)]"
-             id="text-pane"
-             @mousedown="startSelection"
-             x-ref="textPane">
-            
-            <div class="max-w-3xl mx-auto px-12 py-16 pb-32">
-            <div id="passage-1-section" class="mb-6 mt-4">
+        {{-- LEFT: Reading Passage --}}
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
+
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
+
+                {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
-                <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 1</h2>
-                <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
+
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
                 <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Georgia O’Keeffe</h3>
                 <p>For seven decades, Georgia O’Keeffe (1887–1986) was a major figure in American art. Remarkably, she remained independent from shifting art trends and her work stayed true to her own vision, which was based on finding the essential, abstract forms in nature. With exceptionally keen powers of observation and great finesse with a paintbrush, she recorded subtle nuances of colour, shape, and light that enlivened her paintings and attracted a wide audience.</p>
                 <p>Born in 1887 near Sun Prairie, Wisconsin to cattle breeders Francis and Ida O’Keeffe, Georgia was raised on their farm along with her six siblings. By the time she graduated from high school in 1905, she had determined to make her way as an artist. She studied the techniques of traditional painting at the Art Institute of Chicago school (1905) and the Art Students League of New York (1907–8). After attending university and then training college, she became an art teacher and taught in elementary schools, high schools, and colleges in Virginia, Texas, and South Carolina from 1911 to 1918.</p>
@@ -292,12 +150,46 @@
                 <p>O’Keeffe eventually owned two homes in New Mexico – the first, her summer retreat at Ghost Ranch, was nestled beneath 200-metre cliffs, while the second, used as her winter residence, was in the small town of Abiquiú. While both locales provided a wealth of imagery for her paintings, one feature of the Abiquiú house – the large walled patio with its black door – was particularly inspirational. In more than thirty pictures between 1946 and 1960, she reinvented the patio into an abstract arrangement of geometric shapes.</p>
                 <p>From the 1950s into the 1970s, O’Keeffe travelled widely, making trips to Asia, the Middle East, and Europe. Flying in planes inspired her last two major series – aerial views of rivers and expansive paintings of the sky viewed from just above clouds. In both series, O’Keeffe increased the size of her canvases, sometimes to mural proportions, reflecting perhaps her newly expanded view of the world. When in 1965 she successfully translated one of her cloud motifs to a monumental canvas measuring 6 metres in length (with the help of assistants), it was an enormous challenge and a special feat for an artist nearing eighty years of age.</p>
                 <p>The last two decades of the artist’s life were relatively unproductive as ill health and blindness hindered her ability to work. O’Keeffe died in 1986 at the age of ninety-eight, but her rich legacy of some 900 paintings has continued to attract subsequent generations of artists and art lovers who derive inspiration from these very American images.</p>
-            </div>
 
-            <!-- PASSAGE 2 TEXT -->
-            <div id="passage-2-section" class="mb-6 mt-10">
-                <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 2</h2>
-                <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
+                </div>
+
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
                 <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Adapting to the effects of climate change</h3>
                 <div class="flex gap-4 mb-4">
                     <p class="font-bold text-lg">A</p>
@@ -322,13 +214,46 @@
                 <div class="flex gap-4 mb-4">
                     <p class="font-bold text-lg">F</p>
                     <p class="mb-4">Greg Spotts from Los Angeles (LA) in the USA is chief sustainability officer of the city’s street services department. He leads the Cool Streets LA programme, a series of pilot projects, which include the planting of trees and the installation of a ‘cool pavement’ system, designed to help reach the city’s goal of bringing down its average temperature by 1.5°C. ‘Urban cooling is literally a matter of life and death for our future in LA,’ says Spotts. Using a Geographic Information System data mapping tool, the programme identified streets with low tree canopy cover in three of the city’s neighbourhoods and covered them with a light-grey, light-reflecting coating, which had already been shown to lower road surface temperature in Los Angeles by 6°C. Spotts says one of these streets, in the Winnetka neighbourhood of San Fernando Valley, can now be seen as a pale crescent, the only cool spot on an otherwise red thermal image, from the International Space Station.</p>
-                </div>
-            </div>
 
-            <!-- PASSAGE 3 TEXT -->
-            <div id="passage-3-section" class="mb-6 mt-10">
-                <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 3</h2>
-                <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
+                </div>
+
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
                 <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">A new role for livestock guard dogs</h3>
                 <h4 class="font-normal italic text-center mb-6">Livestock guard dogs, traditionally used to protect farm animals from predators, are now being used to protect the predators themselves</h4>
                 
@@ -359,22 +284,27 @@
                 <div class="flex gap-4 mb-4">
                     <p class="font-bold text-lg">G</p>
                     <p class="mb-4">The evidence so far, however, indicates that these consequences aren’t always negative. Guard dogs can deliver unexpected benefits by protecting vulnerable wildlife from predators. For example, their presence has been found to protect birds which build their nests on the ground in fields, where foxes would normally raid them. Indeed, Australian researchers are now using dogs to enhance biodiversity and create refuges for species threatened by predation. So if we can get this right, there may be a bright future for guard dogs in promoting harmonious coexistence between humans and wildlife.</p>
+
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
-            </div>
+
             </div>
         </div>
 
-        <!-- Right Pane: Questions -->
-        <div class="w-1/2 h-full bg-[#f8fafc] overflow-y-auto relative z-10 custom-scrollbar" id="questions-pane" x-ref="questionsPane">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
-                <!-- PASSAGE 1 QUESTIONS -->
+        {{-- RIGHT: Questions --}}
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
+
+<!-- PASSAGE 1 QUESTIONS -->
             <div class="mb-16">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 1–7</strong></p>
                     <p class="text-sm text-gray-800 mb-1">Complete the notes below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The life and work of Georgia O’Keeffe</h4>
                         <div class="space-y-4 text-gray-800 leading-loose">
                             <div class="flex items-center gap-2">
@@ -432,7 +362,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 8–13</strong></p>
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -523,7 +453,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the sentences below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm space-y-4">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm space-y-4">
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">18</span> The stormwater-management programme in Miami Beach has involved the installation of efficient <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">19</span> The construction of <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> was the first stage of a project to ensure the success of mangroves in Indonesia.</p>
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">20</span> As a response to rising floodwaters in the Mekong Delta, a not-for-profit organisation has been building houses that can <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>
@@ -536,7 +466,7 @@
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 23–26</strong></p>
                     <p class="text-sm italic text-gray-700 mb-1">Look at the following statements (Questions 23–26) and the list of people below. Match each statement with the correct person, <strong>A–E</strong>.</p>
                     
-                    <div class="border border-gray-300 rounded p-4 bg-white text-sm mb-5 inline-block">
+                    <div class="border border-gray-300 rounded p-4 bg-gray-50 text-sm mb-5 inline-block">
                         <p class="font-bold text-center mb-2">List of People</p>
                         <div class="space-y-1">
                             <div><span class="font-bold">A</span>&nbsp; Yanira Pineda</div>
@@ -550,7 +480,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -566,7 +496,7 @@
                         ];
                         @endphp
                             @foreach($q23_26 as $num => $text)
-                            <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                 <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $text }}</td>
                                 <td class="py-3 px-3 text-center">
@@ -638,7 +568,7 @@
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 32–36</strong></p>
                     <p class="text-sm italic text-gray-700 mb-1">Look at the following statements (Questions 32–36) and the list of people below. Match each statement with the correct person, <strong>A–E</strong>.</p>
 
-                    <div class="border border-gray-300 rounded p-4 bg-white text-sm mb-5 inline-block">
+                    <div class="border border-gray-300 rounded p-4 bg-gray-50 text-sm mb-5 inline-block">
                         <p class="font-bold text-center mb-2">List of People</p>
                         <div class="space-y-1">
                             <div><span class="font-bold">A</span>&nbsp; Dan Macon</div>
@@ -652,7 +582,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -666,7 +596,7 @@
                                     [35, "Livestock guard dogs are the best way of protecting farm animals, as long as the dogs are appropriately handled."],
                                     [36, "Teaching a livestock guard dog how to do its work needs a different focus from teaching a house guard dog."]
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -694,38 +624,34 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-4">Unintended ecological effects of using guard dogs</h4>
                         <p class="text-gray-800 leading-loose mb-4">In Namibia, livestock guard dogs have been used to protect domestic animals from attacks by cheetahs. This has led to a rise in the deaths of other predators, particularly <span class="font-bold text-blue-600 mr-1">37</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> . In addition, it has been suggested that the dogs could have <span class="font-bold text-blue-600 mr-1">38</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> which may affect other species, and that they may reduce the amount of <span class="font-bold text-blue-600 mr-1">39</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> available to certain wild animals.</p>
                         <p class="text-gray-800 leading-loose">On the other hand, these dogs may help birds by protecting their nests. These might otherwise be threatened by predators such as <span class="font-bold text-blue-600 mr-1">40</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>
                     </div>
+
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
                 </div>
-            </div>
-            
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
+
             </div>
         </div>
+
     </div>
+</div>
 
-    <!-- Modals -->
-    @if(Auth::check() && Auth::user()->isAdmin())
-    <div id="uploadAnswerKeyModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[9999] flex items-center justify-center p-4" onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-auto relative">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">Upload Answer Key</h3>
-            <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-answer-key', ['edition' => 20, 'id' => 4]) }}" method="POST">
-                @csrf
-                <div class="mb-6">
-                     <label class="block text-sm font-semibold text-gray-700 mb-2">Answer Key Content</label>
-                     <textarea name="answer_key" rows="6" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none placeholder-gray-400 text-sm font-mono" placeholder="1. teacher\n2. charcoal..."></textarea>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition shadow-sm">Save Key</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endif
+@include('assignments.ielts.mockup.partials.reading-annotations')
 
-
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Route;
 // Public Kokoro TTS stream route (accessible without login - just serves/generates audio)
 Route::get('/tts/stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('tts.stream');
 
+// Public legal page - also used as the "Application privacy policy link"
+// in Google Cloud Console's OAuth branding (see GoogleAuthController).
+Route::view('/kebijakan-privasi', 'legal.privacy-policy')->name('legal.privacy-policy');
+
+
 
 Route::get('/guest/quick-access/{testType}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccess'])->name('guest.quick-access');
 Route::get('/guest/quick-access-toefl/{type}/{number}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccessToeflPromo'])->name('guest.quick-access-toefl');
@@ -140,6 +145,12 @@ Route::get('/student/register-entry', function (\Illuminate\Http\Request $reques
     return redirect($registerUrl);
 })->name('student.register.entry');
 
+// Custom Class Student Registration Routes
+Route::get('/student/register-custom', [App\Http\Controllers\Auth\CustomClassRegistrationController::class, 'create'])->name('student.register-custom');
+Route::post('/student/register-custom', [App\Http\Controllers\Auth\CustomClassRegistrationController::class, 'store'])->name('student.register-custom.store');
+Route::get('/student/register-custom/success', [App\Http\Controllers\Auth\CustomClassRegistrationController::class, 'success'])->name('student.register-custom.success');
+Route::get('/custom-class/register', fn() => redirect()->route('student.register-custom'));
+
 
 
 
@@ -252,6 +263,7 @@ Route::post('/cambridge/guest-register', [App\Http\Controllers\CambridgeGuestSig
 // Public AI APIs (Used by promo pages and public tests)
 Route::get('/api/dictionary/lookup', [App\Http\Controllers\ToeflDictionaryController::class, 'lookup'])->name('api.dictionary.lookup');
 Route::get('/api/dictionary/synonyms', [App\Http\Controllers\ToeflDictionaryController::class, 'synonyms'])->name('api.dictionary.synonyms');
+Route::get('/api/dictionary/lookup-in-context', [App\Http\Controllers\ToeflDictionaryController::class, 'lookupInContext'])->name('api.dictionary.lookup-in-context');
 Route::get('/api/ollama/collocation', [App\Http\Controllers\AiController::class, 'getCollocations'])->name('api.ollama.collocation');
 Route::post('/api/ollama/topic-collocations', [App\Http\Controllers\AiController::class, 'getTopicCollocations'])->name('api.ollama.topicCollocations');
 Route::post('/api/ollama/topic-idioms', [App\Http\Controllers\AiController::class, 'getTopicIdioms'])->name('api.ollama.topicIdioms');
@@ -311,6 +323,10 @@ Route::middleware([
     Route::post('/student/payments/{payment}/proof', [App\Http\Controllers\PaymentController::class, 'uploadProof'])
         ->name('student.payments.upload-proof')
         ->middleware('role:student');
+
+    // Custom Class Student View
+    Route::get('/student/custom-class/{classPeriod}', [App\Http\Controllers\CustomClassStudentController::class, 'show'])
+        ->name('student.custom-class.show');
 
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
@@ -563,9 +579,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('mock-test');
 
     Route::get('/mock-test/toefl-itp', [App\Http\Controllers\ToeflMockupController::class, 'index'])->name('mock-test.toefl-itp');
-    Route::get('/mock-test/ielts-academic', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic');
-    Route::get('/mock-test/ielts-academic/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic.cambridge');
-    Route::get('/mock-test/ielts-academic/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-academic.cambridge.edition');
+    Route::get('/mock-test/ielts-academic', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic');
+    Route::get('/mock-test/ielts-academic/cambridge', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic.cambridge');
+    Route::get('/mock-test/ielts-academic/cambridge/{edition}', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-academic.cambridge.edition');
+    Route::get('/mock-test/ielts-academic/cambridge/{edition}/test-{id}', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'skills'])->name('mock-test.ielts-academic.cambridge.skills');
+    Route::get('/mock-test/ielts-academic/cambridge/{edition}/test-{id}/{skill}', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'test'])->name('mock-test.ielts-academic.cambridge.test');
     Route::get('/mock-test/ielts-general', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-general');
     Route::get('/mock-test/ielts-general/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-general.cambridge');
     Route::get('/mock-test/ielts-general/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-general.cambridge.edition');
@@ -601,7 +619,41 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])
         ->name('assignments.index')
         ;
-            Route::get('/assignments/final-test', function () {
+
+    Route::get('/assignments/custom-class', [App\Http\Controllers\AssignmentController::class, 'customClassHub'])
+        ->name('assignments.custom-class')
+        ;
+
+    Route::get('/assignments/custom-class/{classPeriod}', [App\Http\Controllers\AssignmentController::class, 'customClassShow'])
+        ->name('assignments.custom-class.show')
+        ;
+
+    Route::get('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingShow'])
+        ->name('assignments.custom-class.meeting.show')
+        ;
+
+    Route::get('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/grammar', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingGrammar'])
+        ->name('assignments.custom-class.meeting.grammar')
+        ;
+    Route::post('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/grammar', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingGrammarSubmit'])
+        ->name('assignments.custom-class.meeting.grammar.submit')
+        ;
+    Route::post('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/grammar/reset', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingGrammarReset'])
+        ->name('assignments.custom-class.meeting.grammar.reset')
+        ;
+    Route::get('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/speaking', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingSpeaking'])
+        ->name('assignments.custom-class.meeting.speaking')
+        ;
+        
+    Route::get('/self-study-classes', [App\Http\Controllers\SelfStudyClassController::class, 'index'])
+        ->name('self-study-classes.index')
+        ->middleware('role:admin');
+
+    Route::get('/self-study-classes/player/{course}/{module?}/{topic?}', [App\Http\Controllers\SelfStudyClassController::class, 'player'])
+        ->name('self-study-classes.player')
+        ->middleware('role:admin');
+
+    Route::get('/assignments/final-test', function () {
         return redirect()->route('final-test');
     })->name('assignments.final-test')
         ;
@@ -1302,6 +1354,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/transcribe', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'transcribeAudio'])->name('assignments.ielts-academic.mockup.cambridge.transcribe');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-srt', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadSrt'])->name('assignments.ielts-academic.mockup.cambridge.upload-srt');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-answer-key', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadAnswerKey'])->name('assignments.ielts-academic.mockup.cambridge.upload-answer-key');
+    Route::post('/assignments/ielts-academic/mockup/cambridge/toggle-submit', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'toggleSubmit'])->name('assignments.ielts-academic.mockup.cambridge.toggle-submit');
+
+    // Admin Upload Routes for the Mock Test side's independent Cambridge content
+    Route::post('/mock-test/ielts-academic/cambridge/{edition}/test-{id}/upload-audio', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'uploadAudio'])->name('mock-test.ielts-academic.cambridge.upload-audio');
+    Route::post('/mock-test/ielts-academic/cambridge/{edition}/test-{id}/transcribe', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'transcribeAudio'])->name('mock-test.ielts-academic.cambridge.transcribe');
+    Route::post('/mock-test/ielts-academic/cambridge/{edition}/test-{id}/upload-srt', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'uploadSrt'])->name('mock-test.ielts-academic.cambridge.upload-srt');
+    Route::post('/mock-test/ielts-academic/cambridge/{edition}/test-{id}/upload-answer-key', [App\Http\Controllers\MockTest\IeltsCambridgeMockupController::class, 'uploadAnswerKey'])->name('mock-test.ielts-academic.cambridge.upload-answer-key');
+
     // Reading Mockup
     Route::get('/assignments/ielts-academic/mockup/reading', [App\Http\Controllers\IeltsMockupController::class, 'reading'])->name('assignments.ielts-academic.mockup.reading');
 
@@ -1558,6 +1618,19 @@ Route::middleware(['auth'])->group(function () {
         ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
         ->whereNumber('meeting')
         ->name('assignments.speaking.meeting.draft.get');
+
+    Route::post('/assignments/speaking/{level}/meeting/{meeting}/evaluate', [App\Http\Controllers\SpeakingAdminController::class, 'submitMeetingEvaluation'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('assignments.speaking.meeting.evaluate');
+    Route::get('/assignments/speaking/{level}/meeting/{meeting}/evaluation', [App\Http\Controllers\SpeakingAdminController::class, 'meetingEvaluationResult'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('assignments.speaking.meeting.evaluation');
+
+    Route::get('/admin/speaking-meeting-evaluations', [App\Http\Controllers\Admin\SpeakingMeetingEvaluationController::class, 'index'])->name('admin.speaking-meeting-evaluations.index')->middleware('role:teacher');
+    Route::get('/admin/speaking-meeting-evaluations/{evaluation}', [App\Http\Controllers\Admin\SpeakingMeetingEvaluationController::class, 'show'])->name('admin.speaking-meeting-evaluations.show')->middleware('role:teacher');
+
     // Admin-only editing of a Speaking meeting's "AI Interview" tab
     // questions - see SpeakingAdminController::speakingMeeting()'s
     // SpeakingAiInterviewOverride lookup for how these take effect.
@@ -1712,6 +1785,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members', [App\Http\Controllers\Admin\ClassPeriodController::class, 'addGroupMember'])->name('class-periods.groups.add-member')->middleware('role:admin');
     Route::delete('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members/{user}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'removeGroupMember'])->name('class-periods.groups.remove-member')->middleware('role:admin');
     Route::resource('admin/class-periods', App\Http\Controllers\Admin\ClassPeriodController::class)->names('class-periods')->middleware('role:admin');
+    Route::get('/admin/custom-classes/create', [App\Http\Controllers\Admin\CustomClassController::class, 'create'])->name('custom-classes.create')->middleware('role:admin');
+    Route::post('/admin/custom-classes', [App\Http\Controllers\Admin\CustomClassController::class, 'store'])->name('custom-classes.store')->middleware('role:admin');
+    Route::get('/admin/custom-classes/{classPeriod}/curriculum', [App\Http\Controllers\Admin\CustomClassController::class, 'curriculum'])->name('custom-classes.curriculum')->middleware('role:admin');
+    Route::post('/admin/custom-classes/{classPeriod}/curriculum', [App\Http\Controllers\Admin\CustomClassController::class, 'saveCurriculum'])->name('custom-classes.curriculum.store')->middleware('role:admin');
+
     Route::get('/admin/class-schedules', [App\Http\Controllers\Admin\ClassScheduleController::class, 'index'])->name('admin.class-schedules.index')->middleware('role:admin');
     Route::get('/api/admin/class-schedules/events', [App\Http\Controllers\Admin\ClassScheduleController::class, 'apiEvents'])->name('admin.class-schedules.events')->middleware('role:admin');
     Route::patch('/admin/class-schedules/{meeting}', [App\Http\Controllers\Admin\ClassScheduleController::class, 'update'])->name('admin.class-schedules.update')->middleware('role:admin');
@@ -1727,6 +1805,12 @@ Route::middleware(['auth'])->group(function () {
     // Inline "Jam Kelas" (start/end time) editor on each meeting card - same
     // admin+teacher access as the recording-link route above.
     Route::post('/class-meetings/class-time', [App\Http\Controllers\Admin\ClassScheduleController::class, 'updateClassTime'])->name('class-meetings.class-time')->middleware('role:teacher');
+
+    // Recurring Zoom link on batch / class period
+    Route::post('/class-periods/zoom-link', [App\Http\Controllers\Admin\ClassScheduleController::class, 'updateRecurringZoomLink'])->name('class-periods.zoom-link')->middleware('role:teacher');
+
+    // Inline Zoom / meeting link editor on meeting card
+    Route::post('/class-meetings/meeting-link', [App\Http\Controllers\Admin\ClassScheduleController::class, 'updateMeetingLink'])->name('class-meetings.meeting-link')->middleware('role:teacher');
     
     // Admin Impersonation Routes
     Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate');

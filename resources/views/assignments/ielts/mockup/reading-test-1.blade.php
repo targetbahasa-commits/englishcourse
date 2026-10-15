@@ -14,6 +14,27 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        @media (min-width: 768px) {
+            body.has-admin-sidebar .reading-fixed-shell {
+                left: 16rem;
+            }
+            body.has-admin-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: 3.5rem;
+            }
+            body.has-student-sidebar .reading-fixed-shell,
+            body.has-teacher-sidebar .reading-fixed-shell {
+                left: 16rem;
+            }
+            body.has-student-sidebar.sidebar-collapsed .reading-fixed-shell,
+            body.has-teacher-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
+            .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--student-sidebar-offset, var(--guest-sidebar-offset, 0px))));
+                transition: left .2s ease;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
@@ -22,7 +43,7 @@
     @include('components.program-sidebar')
 
 {{-- Fixed full-screen layout --}}
-<div class="fixed inset-0 z-0 flex flex-col" style="padding-left: 0;">
+<div class="fixed inset-0 z-0 flex flex-col reading-fixed-shell">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -38,61 +59,89 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ $backUrl ?? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                {{ $backLabel ?? 'Back' }}
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ $backUrl ?? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    {{ $backLabel ?? 'Back' }}
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{
-                 highlightMode: false,
-                 pencilMode: false,
-                 eraserMode: false,
-                 highlightColor: 'yellow',
-                 canvasObj: null
-             }"
-             x-init="
-                 $watch('pencilMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('draw');
-                 });
-                 $watch('eraserMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('erase');
-                 });
-                 new ResizeObserver(() => { if (canvasObj) canvasObj.resize(); }).observe($el);
-             "
-        >
-            {{-- Drawing canvas --}}
-            <canvas x-ref="drawingCanvas"
-                    class="absolute inset-x-0 inset-y-0 w-full z-10"
-                    :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
-            </canvas>
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
 
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
 
                 {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
                 {{-- Passage 1 --}}
-                <div class="mb-6">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 1</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 1 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Why we need to protect polar bears</h3>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
 
-
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Why we need to protect polar bears</h3>
 
                         {{-- Passage text --}}
-                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
                              @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
                              @click="if(eraserMode) window.removeHighlight($event);">
 
@@ -113,118 +162,157 @@
                             <p>If climate change were to lead to their extinction, this would mean not only the loss of potential breakthroughs in human medicine, but more importantly, the disappearance of an intelligent, majestic animal.</p>
                         </div>
 
-                        {{-- Floating Annotation Toolbar --}}
-
-
+                        {{-- Floating Toolbar for Passage 1 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
 
                 {{-- Passage 2 --}}
-                <div class="mb-6 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 2</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 on pages 21 and 22.</p>
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 2 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The Step Pyramid of Djoser</h3>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 on pages 21 and 22.</p>
 
-                    <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
-                         @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
-                         @click="if(eraserMode) window.removeHighlight($event);">
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">A</span>
-                            <p>The pyramids are the most famous monuments of ancient Egypt and still hold enormous interest for people in the present day. These grand, impressive tributes to the memory of the Egyptian kings have become linked with the country even though other cultures, such as the Chinese and Mayan, also built pyramids. The evolution of the pyramid form has been written and argued about for centuries. However, there is no question that, as far as Egypt is concerned, it began with one monument to one king designed by one brilliant architect: the Step Pyramid of Djoser at Saqqara.</p>
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The Step Pyramid of Djoser</h3>
+
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
+                             @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
+                             @click="if(eraserMode) window.removeHighlight($event);">
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">A</span>
+                                <p>The pyramids are the most famous monuments of ancient Egypt and still hold enormous interest for people in the present day. These grand, impressive tributes to the memory of the Egyptian kings have become linked with the country even though other cultures, such as the Chinese and Mayan, also built pyramids. The evolution of the pyramid form has been written and argued about for centuries. However, there is no question that, as far as Egypt is concerned, it began with one monument to one king designed by one brilliant architect: the Step Pyramid of Djoser at Saqqara.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">B</span>
+                                <p>Djoser was the first king of the Third Dynasty of Egypt and the first to build in stone. Prior to Djoser's reign, tombs were rectangular monuments made of dried clay brick, which covered underground passages where the deceased person was buried. For reasons which remain unclear, Djoser's main official, whose name was Imhotep, conceived of building a taller, more impressive tomb for his king by stacking stone slabs on top of one another, progressively making them smaller, to form the shape now known as the Step Pyramid. Djoser is thought to have reigned for 19 years, but some historians and scholars attribute a much longer time for his rule, owing to the number and size of the monuments he built.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">C</span>
+                                <p>The Step Pyramid has been thoroughly examined and investigated over the last century, and it is now known that the building process went through many different stages. Historian Marc Van de Mieroop comments on this, writing 'Much experimentation was involved, which is especially clear in the construction of the pyramid in the center of the complex. It had several plans … before it became the first Step Pyramid in history, piling six levels on top of one another … The weight of the enormous mass was a challenge for the builders, who placed the stones at an inward incline in order to prevent the monument breaking up.'</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">D</span>
+                                <p>When finally completed, the Step Pyramid rose 62 meters high and was the tallest structure of its time. The complex in which it was built was the size of a city in ancient Egypt and included a temple, courtyards, shrines, and living quarters for the priests. It covered a region of 16 hectares and was surrounded by a wall 10.5 meters high. The wall had 13 false doors cut into it with only one true entrance cut into the south-east corner; the entire wall was then ringed by a trench 750 meters long and 40 meters wide. The false doors and the trench were incorporated into the complex to discourage unwanted visitors. If someone wished to enter, he or she would have needed to know in advance how to find the location of the true opening in the wall. Djoser was so proud of his accomplishment that he broke the tradition of having only his own name on the monument and had Imhotep's name carved on it as well.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">E</span>
+                                <p>The burial chamber of the tomb, where the king's body was laid to rest, was dug beneath the base of the pyramid, surrounded by a vast maze of long tunnels that had rooms off them to discourage robbers. One of the most mysterious discoveries found inside the pyramid was a large number of stone vessels. Over 40,000 of these vessels, of various forms and shapes, were discovered in storerooms off the pyramid's underground passages. They are inscribed with the names of rulers from the First and Second Dynasties of Egypt and made from different kinds of stone. There is no agreement among scholars and archaeologists on why the vessels were placed in the tomb of Djoser or what they were supposed to represent. The archaeologist Jean-Philippe Lauer, who excavated most of the pyramid and complex, believes they were originally stored and then given a 'proper burial' by Djoser in his pyramid to honor his predecessors. There are other historians, however, who claim the vessels were dumped into the shafts as yet another attempt to prevent grave robbers from getting to the king's burial chamber.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">F</span>
+                                <p>Unfortunately, all of the precautions and intricate design of the underground network did not prevent ancient robbers from finding a way in. Djoser's grave goods, and even his body, were stolen at some point in the past and all archaeologists found were a small number of his valuables overlooked by the thieves. There was enough left throughout the pyramid and its complex, however, to astonish and amaze the archaeologists who excavated it.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="font-bold w-5 flex-none">G</span>
+                                <p>Egyptologist Miroslav Verner writes, 'Few monuments hold a place in human history as significant as that of the Step Pyramid in Saqqara … It can be said without exaggeration that this pyramid complex constitutes a milestone in the evolution of monumental stone architecture in Egypt and in the world as a whole.' The Step Pyramid was a revolutionary advance in architecture and became the archetype which all the other great pyramid builders of Egypt would follow.</p>
+                            </div>
                         </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">B</span>
-                            <p>Djoser was the first king of the Third Dynasty of Egypt and the first to build in stone. Prior to Djoser's reign, tombs were rectangular monuments made of dried clay brick, which covered underground passages where the deceased person was buried. For reasons which remain unclear, Djoser's main official, whose name was Imhotep, conceived of building a taller, more impressive tomb for his king by stacking stone slabs on top of one another, progressively making them smaller, to form the shape now known as the Step Pyramid. Djoser is thought to have reigned for 19 years, but some historians and scholars attribute a much longer time for his rule, owing to the number and size of the monuments he built.</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">C</span>
-                            <p>The Step Pyramid has been thoroughly examined and investigated over the last century, and it is now known that the building process went through many different stages. Historian Marc Van de Mieroop comments on this, writing 'Much experimentation was involved, which is especially clear in the construction of the pyramid in the center of the complex. It had several plans … before it became the first Step Pyramid in history, piling six levels on top of one another … The weight of the enormous mass was a challenge for the builders, who placed the stones at an inward incline in order to prevent the monument breaking up.'</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">D</span>
-                            <p>When finally completed, the Step Pyramid rose 62 meters high and was the tallest structure of its time. The complex in which it was built was the size of a city in ancient Egypt and included a temple, courtyards, shrines, and living quarters for the priests. It covered a region of 16 hectares and was surrounded by a wall 10.5 meters high. The wall had 13 false doors cut into it with only one true entrance cut into the south-east corner; the entire wall was then ringed by a trench 750 meters long and 40 meters wide. The false doors and the trench were incorporated into the complex to discourage unwanted visitors. If someone wished to enter, he or she would have needed to know in advance how to find the location of the true opening in the wall. Djoser was so proud of his accomplishment that he broke the tradition of having only his own name on the monument and had Imhotep's name carved on it as well.</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">E</span>
-                            <p>The burial chamber of the tomb, where the king's body was laid to rest, was dug beneath the base of the pyramid, surrounded by a vast maze of long tunnels that had rooms off them to discourage robbers. One of the most mysterious discoveries found inside the pyramid was a large number of stone vessels. Over 40,000 of these vessels, of various forms and shapes, were discovered in storerooms off the pyramid's underground passages. They are inscribed with the names of rulers from the First and Second Dynasties of Egypt and made from different kinds of stone. There is no agreement among scholars and archaeologists on why the vessels were placed in the tomb of Djoser or what they were supposed to represent. The archaeologist Jean-Philippe Lauer, who excavated most of the pyramid and complex, believes they were originally stored and then given a 'proper burial' by Djoser in his pyramid to honor his predecessors. There are other historians, however, who claim the vessels were dumped into the shafts as yet another attempt to prevent grave robbers from getting to the king's burial chamber.</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">F</span>
-                            <p>Unfortunately, all of the precautions and intricate design of the underground network did not prevent ancient robbers from finding a way in. Djoser's grave goods, and even his body, were stolen at some point in the past and all archaeologists found were a small number of his valuables overlooked by the thieves. There was enough left throughout the pyramid and its complex, however, to astonish and amaze the archaeologists who excavated it.</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <span class="font-bold w-5 flex-none">G</span>
-                            <p>Egyptologist Miroslav Verner writes, 'Few monuments hold a place in human history as significant as that of the Step Pyramid in Saqqara … It can be said without exaggeration that this pyramid complex constitutes a milestone in the evolution of monumental stone architecture in Egypt and in the world as a whole.' The Step Pyramid was a revolutionary advance in architecture and became the archetype which all the other great pyramid builders of Egypt would follow.</p>
-                        </div>
+
+                        {{-- Floating Toolbar for Passage 2 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
                 {{-- Passage 3 --}}
-                <div class="mb-6 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 3</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 3 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The future of work</h3>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
 
-                    <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
-                         @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
-                         @click="if(eraserMode) window.removeHighlight($event);">
-                        <p>According to a leading business consultancy, 3–14% of the global workforce will need to switch to a different occupation within the next 10–15 years, and all workers will need to adapt as their occupations evolve alongside increasingly capable machines. Automation – or 'embodied artificial intelligence' (AI) – is one aspect of the disruptive effects of technology on the labour market. 'Disembodied AI', like the algorithms running in our smartphones, is another.</p>
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The future of work</h3>
 
-                        <p>Dr Stella Pachidi from Cambridge Judge Business School believes that some of the most fundamental changes are happening as a result of the 'algorithmication' of jobs that are dependent on data rather than on production – the so-called knowledge economy. Algorithms are capable of learning from data to undertake tasks that previously needed human judgement, such as reading legal contracts, analysing medical scans and gathering market intelligence.</p>
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
+                             @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
+                             @click="if(eraserMode) window.removeHighlight($event);">
+                            <p>According to a leading business consultancy, 3–14% of the global workforce will need to switch to a different occupation within the next 10–15 years, and all workers will need to adapt as their occupations evolve alongside increasingly capable machines. Automation – or 'embodied artificial intelligence' (AI) – is one aspect of the disruptive effects of technology on the labour market. 'Disembodied AI', like the algorithms running in our smartphones, is another.</p>
 
-                        <p>'In many cases, they can outperform humans,' says Pachidi. 'Organisations are attracted to using algorithms because they want to make choices based on what they consider is "perfect information", as well as to reduce costs and enhance productivity.'</p>
+                            <p>Dr Stella Pachidi from Cambridge Judge Business School believes that some of the most fundamental changes are happening as a result of the 'algorithmication' of jobs that are dependent on data rather than on production – the so-called knowledge economy. Algorithms are capable of learning from data to undertake tasks that previously needed human judgement, such as reading legal contracts, analysing medical scans and gathering market intelligence.</p>
 
-                        <p>'But these enhancements are not without consequences,' says Pachidi. 'If routine cognitive tasks are taken over by AI, how do professions develop their future experts?' she asks. 'One way of learning about a job is "legitimate peripheral participation" – a novice stands next to experts and learns by observation. If this isn't happening, then you need to find new ways to learn.'</p>
+                            <p>'In many cases, they can outperform humans,' says Pachidi. 'Organisations are attracted to using algorithms because they want to make choices based on what they consider is "perfect information", as well as to reduce costs and enhance productivity.'</p>
 
-                        <p>Another issue is the extent to which the technology influences or even controls the workforce. For over two years, Pachidi monitored a telecommunications company. 'The way telecoms salespeople work is through personal and frequent contact with clients, using the benefit of experience to assess a situation and reach a decision. However, the company had started using a[n] … algorithm that defined when account managers should contact certain customers about which kinds of campaigns and what to offer them.'</p>
+                            <p>'But these enhancements are not without consequences,' says Pachidi. 'If routine cognitive tasks are taken over by AI, how do professions develop their future experts?' she asks. 'One way of learning about a job is "legitimate peripheral participation" – a novice stands next to experts and learns by observation. If this isn't happening, then you need to find new ways to learn.'</p>
 
-                        <p>The algorithm – usually built by external designers – often becomes the keeper of knowledge, she explains. In cases like this, Pachidi believes, a short-sighted view begins to creep into working practices whereby workers learn through the 'algorithm's eyes' and become dependent on its instructions. Alternative explorations – where experimentation and human instinct lead to progress and new ideas – are effectively discouraged.</p>
+                            <p>Another issue is the extent to which the technology influences or even controls the workforce. For over two years, Pachidi monitored a telecommunications company. 'The way telecoms salespeople work is through personal and frequent contact with clients, using the benefit of experience to assess a situation and reach a decision. However, the company had started using a[n] … algorithm that defined when account managers should contact certain customers about which kinds of campaigns and what to offer them.'</p>
 
-                        <p>Pachidi and colleagues even observed people developing strategies to make the algorithm work to their own advantage. 'We are seeing cases where workers feed the algorithm with false data to reach their targets,' she reports.</p>
-                    </div>
-                </div>
+                            <p>The algorithm – usually built by external designers – often becomes the keeper of knowledge, she explains. In cases like this, Pachidi believes, a short-sighted view begins to creep into working practices whereby workers learn through the 'algorithm's eyes' and become dependent on its instructions. Alternative explorations – where experimentation and human instinct lead to progress and new ideas – are effectively discouraged.</p>
 
-                {{-- Floating Annotation Toolbar --}}
-                <div class="sticky bottom-6 w-full flex flex-col items-center pointer-events-none z-30 mt-4 mb-2">
-                    {{-- Colour picker (shows when highlight active) --}}
-                    <div x-show="highlightMode"
-                         class="flex gap-2 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-100 mb-3 pointer-events-auto"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         style="display:none;">
-                        <button @click.prevent.stop="highlightColor='yellow'" class="w-8 h-8 rounded-full bg-yellow-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='yellow' ? 'ring-2 ring-yellow-500 scale-110' : 'hover:ring-yellow-400'"></button>
-                        <button @click.prevent.stop="highlightColor='green'"  class="w-8 h-8 rounded-full bg-green-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='green'  ? 'ring-2 ring-green-500 scale-110'  : 'hover:ring-green-400'"></button>
-                        <button @click.prevent.stop="highlightColor='blue'"   class="w-8 h-8 rounded-full bg-blue-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='blue'   ? 'ring-2 ring-blue-500 scale-110'   : 'hover:ring-blue-400'"></button>
-                        <button @click.prevent.stop="highlightColor='pink'"   class="w-8 h-8 rounded-full bg-pink-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='pink'   ? 'ring-2 ring-pink-500 scale-110'   : 'hover:ring-pink-400'"></button>
-                    </div>
+                            <p>Pachidi and colleagues even observed people developing strategies to make the algorithm work to their own advantage. 'We are seeing cases where workers feed the algorithm with false data to reach their targets,' she reports.</p>
 
-                    <div class="flex justify-center items-center gap-3 pointer-events-auto bg-white/40 p-1.5 rounded-full backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/50">
+                            <p>It's scenarios like these that many researchers in Cambridge and beyond are working to avoid by increasing the trustworthiness and transparency of AI technologies, so that organisations and individuals understand how AI decisions are made. In the meantime, says Pachidi, in our race to reap the undoubted benefits of new technology, it's important to avoid taking a laissez-faire approach to algorithmication: 'We need to make sure we fully understand the dilemmas that this new world raises regarding expertise, occupational boundaries and control.'</p>
 
-                        {{-- Highlight --}}
-                        <button @click="highlightMode=!highlightMode; pencilMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-green-600 hover:border-green-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-green-500 !text-white !border-green-600 shadow-md !opacity-100': highlightMode }"
-                                title="Highlight Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
+                            <p>While Pachidi sees changes ahead in the nature of work, economist Professor Hamish Low believes that the future of work will involve major transitions across the whole life course for everyone: 'The traditional trajectory of full-time education followed by full-time work followed by a pensioned retirement is a thing of the past.'</p>
 
-                        {{-- Pencil --}}
-                        <button @click="pencilMode=!pencilMode; highlightMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-blue-600 hover:border-blue-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-blue-500 !text-white !border-blue-600 shadow-md !opacity-100': pencilMode }"
-                                title="Pencil Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
+                            <p>'Disruptive technologies, the rise of the ad hoc "gig economy", living longer and the fragile economics of pension provision will mean a multistage employment life: one where retraining happens across the life course, and where multiple jobs and no job happen by choice at different stages.'</p>
 
-                        {{-- Eraser --}}
-                        <button @click="eraserMode=!eraserMode; pencilMode=false; highlightMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-indigo-600 hover:border-indigo-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-indigo-500 !text-white !border-indigo-600 shadow-md !opacity-100': eraserMode }"
-                                title="Eraser Tool">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-                        </button>
+                            <p>His research examines the role of risk and the welfare system in relation to work at these various life stages. 'When we are talking about the future of work,' he says, 'we should have in mind these new frameworks for what people's lives will look like, and prepare new generations for a different perspective on employment.'</p>
+
+                            <p>On the subject of future job losses, Low believes the predictions are founded on a fallacy: 'It assumes that the number of jobs is fixed. If in 30 years, half of 100 jobs are being carried out by robots, that doesn't mean we are left with just 50 jobs for humans. The number of jobs will increase: we would expect there to be 150 jobs.'</p>
+
+                            <p>Dr Ewan McGaughey, at Cambridge's Centre for Business Research and King's College London, agrees that 'apocalyptic' views about the future of work are misguided. 'It's the laws that restrict the supply of capital to the job market, not the advent of new technologies that causes unemployment.'</p>
+
+                            <p>His recently published research answers the question of whether automation, AI and robotics will mean a 'jobless future' by looking at the causes of unemployment. 'History is clear that change can mean redundancies – after World War II, 42% of UK jobs were redundant, but social policy maintained full employment. Yes, technology can displace people. But social policies can tackle this through retraining and redeployment.'</p>
+
+                            <p>He adds: 'The big problem won't be unemployment, it will be underemployment – people who want to work but can't because they have zero-hours contracts. If there is going to be change to jobs as a result of AI and robotics, then I'd like to see governments seizing the opportunity to improve policy to enforce good job security. We can "reprogramme" the law to prepare for a fairer future of work and leisure.'</p>
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 3 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
@@ -232,8 +320,8 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
                 {{-- Questions 1–7: True/False/Not Given --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -330,13 +418,6 @@
                             </li>
                             <li class="text-gray-800">They may form relationships with other species.</li>
                         </ul>
-                    </div>
-
-                    {{-- Submit --}}
-                    <div class="mt-6 flex justify-end">
-                        <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                            Submit Answers
-                        </button>
                     </div>
                 </div>
 
@@ -648,11 +729,18 @@
 
 
                 {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
                 <div class="mt-6 flex justify-end">
                     <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
                         Submit All Answers
                     </button>
                 </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
             </div>
         </div>
@@ -661,95 +749,8 @@
     </div>
 </div>
 
-<script>
-/* ── Drawing canvas (pencil / eraser) ── */
-window.initDrawingCanvas = function(canvas) {
-    const ctx = canvas.getContext('2d');
-    let drawing = false, mode = 'draw';
-    const resize = () => {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        const dpr  = window.devicePixelRatio || 1;
-        const snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        canvas.width  = rect.width  * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        ctx.putImageData(snap, 0, 0);
-    };
-    const pos = e => {
-        const r = canvas.getBoundingClientRect();
-        if (e.touches) { return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top }; }
-        return { x: e.clientX - r.left, y: e.clientY - r.top };
-    };
-    const start = e => {
-        drawing = true;
-        const p = pos(e);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        // When erasing: also remove any <mark> highlight under the cursor
-        if (mode === 'erase') {
-            const allEls = document.elementsFromPoint(e.clientX, e.clientY);
-            const mark = allEls.find(el => el.tagName === 'MARK');
-            if (mark) {
-                const parent = mark.parentNode;
-                while (mark.firstChild) { parent.insertBefore(mark.firstChild, mark); }
-                parent.removeChild(mark);
-                parent.normalize();
-            }
-        }
-    };
-    const move  = e => {
-        if (!drawing) return;
-        const p = pos(e);
-        if (mode === 'draw') {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-        } else {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 20;
-        }
-        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    };
-    const end = () => { drawing = false; ctx.globalCompositeOperation = 'source-over'; };
-    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup',   end);   canvas.addEventListener('mouseleave', end);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, { passive: false });
-    canvas.addEventListener('touchmove',  e => { e.preventDefault(); move(e);  }, { passive: false });
-    canvas.addEventListener('touchend',   end);
-    resize();
-    return { setMode: m => { mode = m; }, resize };
-};
+@include('assignments.ielts.mockup.partials.reading-annotations')
 
-/* ── Text highlight ── */
-window.applyAnnotation = function(type, color) {
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    const mark  = document.createElement('mark');
-    const colors = { yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8' };
-    mark.style.backgroundColor = colors[color] || colors.yellow;
-    mark.style.borderRadius = '2px';
-    try { range.surroundContents(mark); } catch(e) { /* cross-node range – skip */ }
-    sel.removeAllRanges();
-};
-/* ── Remove highlight ── */
-window.removeHighlight = function(event) {
-    let el = event.target;
-    // Walk up to find a <mark> element
-    while (el && el.tagName !== 'MARK') {
-        if (el.classList && el.classList.contains('passage-content')) break;
-        el = el.parentElement;
-    }
-    if (el && el.tagName === 'MARK') {
-        // Replace the <mark> with its text content
-        const parent = el.parentNode;
-        while (el.firstChild) {
-            parent.insertBefore(el.firstChild, el);
-        }
-        parent.removeChild(el);
-        parent.normalize(); // merge adjacent text nodes
-    }
-};
-</script>
-
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

@@ -7,20 +7,42 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -33,28 +55,88 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative">
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
+
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
+
+                {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
-                
-                <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 1</h2>
-                <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
+
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
                 
                 <h3 class="text-3xl font-bold text-center mb-8">The Industrial Revolution in Britain</h3>
                 
@@ -78,12 +160,46 @@
                     <p>The first major instances of machine breaking took place in 1811 in the city of Nottingham, and the practice soon spread across the country. Machine-breaking Luddites attacked and burned factories, and in some cases they even exchanged gunfire with company guards and soldiers. The workers wanted employers to stop installing new machinery, but the British government responded to the uprisings by making machine-breaking punishable by death. The unrest finally reached its peak in April 1812, when a few Luddites were shot during an attack on a mill near Huddersfield. In the days that followed, other Luddites were arrested, and dozens were hanged or transported to Australia. By 1813, the Luddite resistance had all but vanished.</p>
 
                     <p class="text-sm text-gray-500 mt-8 pt-4 border-t border-gray-200">* agrarian: relating to the land, especially the use of land for farming</p>
+
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
 
-                {{-- Passage 2 --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300">
-                    <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 2</h2>
-                    <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
                     
                     <h3 class="text-3xl font-bold text-center mb-8">Athletes and stress</h3>
 
@@ -111,54 +227,69 @@
                         <div class="flex gap-4 items-start">
                             <span class="font-bold text-xl w-6 flex-none mt-1">F</span>
                             <p>But there are many ways athletes can ensure they respond positively under pressure. Positive stress responses can be promoted through the language that they and others – such as coaches or parents – use. Psychologists can also help athletes change how they see their physiological responses – such as helping them see a higher heart rate as excitement, rather than nerves. Developing psychological skills, such as visualisation, can also help decrease physiological responses to threat. Visualisation may involve the athlete recreating a mental picture of a time when they performed well, or picturing themselves doing well in the future. This can help create a feeling of control over the stressful event. Recreating competitive pressure during training can also help athletes learn how to deal with stress. An example of this might be scoring athletes against their peers to create a sense of competition. This would increase the demands which players experience compared to a normal training session, while still allowing them to practise coping with stress.</p>
-                        </div>
+
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 3 --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300">
-                    <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 3</h2>
-                    <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
                     
                     <h3 class="text-3xl font-bold text-center mb-8">An inquiry into the existence of the gifted child</h3>
 
-                    <div class="space-y-6 text-gray-800 text-lg leading-relaxed text-justify font-serif">
-                        <p>Let us start by looking at a modern 'genius', Maryam Mirzakhani, who died at the early age of 40. She was the only woman to win the Fields Medal – the mathematical equivalent of a Nobel prize. It would be easy to assume that someone as special as Mirzakhani must have been one of those 'gifted' children, those who have an extraordinary ability in a specific sphere of activity or knowledge. But look closer and a different story emerges. Mirzakhani was born in Tehran, Iran. She went to a highly selective girls' school but maths wasn't her interest – reading was. She loved novels and would read anything she could lay her hands on. As for maths, she did rather poorly at it for the first couple of years in her middle school, but became interested when her elder brother told her about what he'd learned. He shared a famous maths problem from a magazine that fascinated her – and she was hooked.</p>
-
-                        <p>In adult life it is clear that she was curious, excited by what she did and also resolute in the face of setbacks. One of her comments sums it up. 'Of course, the most rewarding part is the "Aha" moment, the excitement of discovery and enjoyment of understanding something new … But most of the time, doing mathematics for me is like being on a long hike with no trail and no end in sight.' That trail took her to the heights of original research into mathematics.</p>
-
-                        <p>Is her background unusual? Apparently not. Most Nobel prize winners were unexceptional in childhood. Einstein was slow to talk as a baby. He failed the general part of the entry test to Zurich Polytechnic – though they let him in because of high physics and maths scores. He struggled at work initially, but he kept plugging away and eventually rewrote the laws of Newtonian mechanics with his theory of relativity.</p>
-
-                        <p>There has been a considerable amount of research on high performance over the last century that suggests it goes way beyond tested intelligence. On top of that, research is clear that brains are flexible, new neural pathways can be created, and IQ isn't fixed. For example, just because you can read stories with hundreds of pages at the age of five doesn't mean you will still be ahead of your contemporaries in your teens.</p>
-
-                        <p>While the jury is out on giftedness being innate and other factors potentially making the difference, what is certain is that the behaviours associated with high levels of performance are replicable and most can be taught – even traits such as curiosity.</p>
-
-                        <p>According to my colleague Prof Deborah Eyre, with whom I've collaborated on the book <em>Great Minds and How to Grow Them</em>, the latest neuroscience and psychological research suggests most individuals can reach levels of performance associated in school with the gifted and talented. However, they must be taught the right attitudes and approaches to their learning and develop the attributes of high performers – curiosity, persistence and hard work, for example – an approach Eyre calls 'high performance learning'. Critically, they need the right support in developing those approaches at home as well as at school.</p>
-
-                        <p>Prof Anders Ericsson, an eminent education psychologist at Florida State University, US, is the co-author of <em>Peak: Secrets from the New Science of Expertise</em>. After research going back to 1980 into diverse achievements, from music to memory to sport, he doesn't think unique and innate talents are at the heart of performance. Deliberate practice, that stretches you every step of the way, and around 10,000 hours of it, is what produces the goods. It's not a magic number – the highest performers move on to doing a whole lot more, of course. Ericsson's memory research is particularly interesting because random students, trained in memory techniques for the study, went on to outperform others thought to have innately superior memories – those who you might call gifted.</p>
-
-                        <p>But it is perhaps the work of Benjamin Bloom, another distinguished American educationist working in the 1980s, that gives the most pause for thought. Bloom's team looked at a group of extraordinarily high achieving people in disciplines as varied as ballet, swimming, piano, tennis, maths, sculpture and neurology. He found a pattern of parents encouraging and supporting their children, often in areas they enjoyed themselves. Bloom's outstanding people had worked very hard and consistently at something they had become hooked on when at a young age, and their parents all emerged as having strong work ethics themselves.</p>
-
-                        <p>Eyre says we know how high performers learn. From that she has developed a high performing learning approach. She is working on this with a group of schools, both in Britain and abroad. Some spin-off research, which looked in detail at 24 of the 3,000 children being studied who were succeeding despite difficult circumstances, found something remarkable. Half were getting free school meals because of poverty, more than half were living with a single parent, and four in five were living in disadvantaged areas. Interviews uncovered strong evidence of an adult or adults in the child's life who valued and supported education, either in the immediate or extended family or in the child's wider community. Children talked about the need to work hard at school, to listen in class and keep trying.</p>
-
-                        <p>Let us end with Einstein, the epitome of a genius. He clearly had curiosity, character and determination. He struggled against rejection in early life but was undeterred. Did he think he was a genius or even gifted? He once wrote: 'It's not that I'm so smart, it's just that I stay with problems longer. Most people say it is the intellect which makes a great scientist. They are wrong: it is character.'</p>
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
+
             </div>
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto" x-data="{ answers: {} }">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
-                {{-- Questions 1–7: Notes completion --}}
+{{-- Questions 1–7: Notes completion --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 1–7</strong></p>
                     <p class="text-sm text-gray-800 mb-1">Complete the notes below.</p>
                     <p class="text-sm italic text-gray-700 mb-1">Choose <span class="font-bold uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–7 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-4">Britain's Industrial Revolution</h4>
                         
                         <div class="mb-4">
@@ -239,7 +370,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 8–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -250,7 +381,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -265,7 +396,7 @@
                                     12 => 'Some skilled weavers believed that the introduction of the new textile machines would lead to job losses.',
                                     13 => 'There was some sympathy among local people for the Luddites who were arrested near Huddersfield.'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -306,7 +437,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-32 text-center">Answer</th>
@@ -320,7 +451,7 @@
                                     17 => 'study results indicating links between stress responses and performance',
                                     18 => 'mention of people who can influence how athletes perceive their stress responses'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -350,7 +481,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <span class="font-bold uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 19–22 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <ul class="list-disc ml-5 space-y-4 mb-4">
                             <li class="text-gray-800 leading-relaxed">
                                 Performance stress involves many demands on the athlete, for example, coping with the possible risk of <span class="font-bold">19</span>
@@ -436,7 +567,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Complete the summary using the list of phrases, <strong>A–K</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–K</strong>, in boxes 27–32 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 p-5 rounded-lg bg-white text-sm mb-5">
+                    <div class="border border-gray-300 p-5 rounded-lg bg-gray-50 text-sm mb-5">
                         <h4 class="text-base font-bold text-center mb-4">Maryam Mirzakhani</h4>
                         <p class="text-gray-800 leading-loose mb-2">
                             Maryam Mirzakhani is regarded as 
@@ -515,7 +646,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 33–37 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -526,7 +657,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -540,7 +671,7 @@
                                     36 => 'Einstein was upset by the public\'s view of his life\'s work.',
                                     37 => 'Einstein put his success down to the speed at which he dealt with scientific questions.'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -607,14 +738,7 @@
                     </div>
                 </div>
 
-                {{-- Final Submit --}}
-                <div class="mt-8 flex justify-end">
-                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                        Submit All Answers
-                    </button>
                 </div>
-
-            </div>
         </div>
     </div>
 </div>
@@ -636,5 +760,28 @@
     </div>
 @endif
 
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
+                </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@include('assignments.ielts.mockup.partials.reading-annotations')
+
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

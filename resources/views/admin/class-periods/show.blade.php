@@ -94,6 +94,39 @@
                             </div>
                         </div>
                     </div>
+
+                    @if($classPeriod->is_custom)
+                        <div class="mt-6 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded-lg uppercase tracking-wider">
+                                        {{ $classPeriod->batch_type === 'private' ? 'Kelas Privat (1-on-1)' : 'Kelas Semi-Privat (Maks 4 Siswa)' }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-indigo-900">
+                                        {{ $classPeriod->total_meetings ?: $classPeriod->classMeetings->count() }} Pertemuan Fleksibel
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-500">Biaya Kesepakatan:</span>
+                                    <span class="ml-1 text-base font-black text-indigo-700">Rp {{ number_format($classPeriod->agreed_price, 0, ',', '.') }}</span>
+                                    @if($classPeriod->suggested_price)
+                                        <span class="text-xs text-gray-400 block">(Saran sistem: Rp {{ number_format($classPeriod->suggested_price, 0, ',', '.') }})</span>
+                                    @endif
+                                </div>
+                            </div>
+                            @if($classPeriod->custom_curriculum_notes)
+                                <div class="text-xs text-indigo-900 bg-white/80 p-3 rounded-lg border border-indigo-100">
+                                    <strong>Catatan Kurikulum Khusus:</strong> {{ $classPeriod->custom_curriculum_notes }}
+                                </div>
+                            @endif
+                            <a href="{{ route('custom-classes.curriculum', $classPeriod->id) }}"
+                               class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Kelola Kurikulum & Assignment ({{ $classPeriod->classMeetings->count() }} Pertemuan)
+                            </a>
+                        </div>
+                    @endif
+
                     <div class="mt-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -295,18 +328,27 @@
                                                 {{ $meeting->is_open_for_period ? 'OPEN' : 'LOCKED' }}
                                             </span>
 
-                                            <!-- Toggle Form -->
-                                            <form action="{{ route('class-periods.toggle-meeting', [$classPeriod, $meeting]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $meeting->is_open_for_period ? 'bg-green-600' : 'bg-gray-200' }}"
-                                                    role="switch"
-                                                    aria-checked="{{ $meeting->is_open_for_period ? 'true' : 'false' }}">
-                                                    <span
-                                                        class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out {{ $meeting->is_open_for_period ? 'translate-x-5' : 'translate-x-0' }}">
-                                                    </span>
-                                                </button>
-                                            </form>
+                                            <!-- Toggle Form - only meaningful for real, catalog-backed
+                                                 Meeting models. Custom-class curriculum entries are
+                                                 plain stdClass rows built in ManageClassPeriods::show()
+                                                 (not Eloquent models), always already is_open_for_period
+                                                 = true with no pivot to toggle, so route() has nothing
+                                                 valid to bind against and passing $meeting straight into
+                                                 it throws "Object of class stdClass could not be
+                                                 converted to string". -->
+                                            @if(empty($meeting->is_custom_meeting))
+                                                <form action="{{ route('class-periods.toggle-meeting', [$classPeriod, $meeting]) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $meeting->is_open_for_period ? 'bg-green-600' : 'bg-gray-200' }}"
+                                                        role="switch"
+                                                        aria-checked="{{ $meeting->is_open_for_period ? 'true' : 'false' }}">
+                                                        <span
+                                                            class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out {{ $meeting->is_open_for_period ? 'translate-x-5' : 'translate-x-0' }}">
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -676,7 +718,7 @@
 
                     <div class="flex justify-end gap-2">
                         <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
-                        <x-primary-button :disabled="getSelectedCount() < 2">Buat Pasangan Acak</x-primary-button>
+                        <x-primary-button x-bind:disabled="getSelectedCount() < 2">Buat Pasangan Acak</x-primary-button>
                     </div>
                 </form>
             </div>

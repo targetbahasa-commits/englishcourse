@@ -3,66 +3,140 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IELTS Reading Mock Test - {{ config('app.name', 'Target Bahasa') }}</title>
+    <title>IELTS Reading Mock Test {{ $testId }} - {{ config('app.name', 'Target Bahasa') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        .cambridge-text { font-family: "Times New Roman", Times, serif; font-size: 16px; line-height: 1.6; color: #1a1a1a; }
-        .cambridge-heading { font-family: Arial, Helvetica, sans-serif; font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; }
-        .cambridge-subheading { font-family: Arial, Helvetica, sans-serif; font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; }
-        .cambridge-paragraph { margin-bottom: 1.25rem; text-align: justify; }
-        [x-cloak] { display: none !important; }
+        .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
         <div class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="p-2.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-md">
-                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId ?? '4' }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition ?? '19' }} Reading Practice</p>
+                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '4']) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all border border-gray-200">
-                    Exit
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
                 </a>
             </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
-    {{-- Split pane layout --}}
+    {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
-        
-        {{-- LEFT PANEL: PASSAGE TEXT --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{ highlightMode: false, pencilMode: false, eraserMode: false, highlightColor: 'yellow', canvasObj: null }">
-            
-            <div class="p-10 pb-32 max-w-4xl mx-auto relative z-20">
-                
-                {{-- PASSAGE 1 TEXT --}}
-                <div class="cambridge-text max-w-3xl mx-auto">
-                    <p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
+
+        {{-- LEFT: Reading Passage --}}
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
+
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
+
+                {{-- READING header --}}
+                <div class="flex justify-center mb-8">
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
+                </div>
+
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
                     
                     <h2 class="cambridge-heading text-center mb-8">The impact of climate change on butterflies in Britain</h2>
 
@@ -83,11 +157,46 @@
                     <p class="cambridge-paragraph">All is not lost, however. Many of Britain's single-generation species show the capacity, in continental Europe, to add a second generation in years that are sufficiently warm. Therefore, as the climate continues to warm, species like the Silver-studded Blue might be able to switch to multiple generations in the UK as well, and so begin to extract benefits from the additional warmth, potentially leading to population increases.</p>
 
                     <p class="cambridge-paragraph">More immediately, conservationists can arm themselves with all this knowledge to spot the warning signs of species that may be at risk. The White Admiral of southern England, a much sought-after butterfly, experienced a significant increase in numbers from the 1920s but has shown a considerable decline in the past 20 years. This may be because the caterpillar exists solely on a diet of a plant called honeysuckle. But it is also likely to be due to climate change.</p>
+
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
 
-                {{-- PASSAGE 2 TEXT --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300 cambridge-text max-w-3xl mx-auto">
-                    <p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
                     
                     <h2 class="cambridge-heading text-center mb-4">Deep-sea mining</h2>
                     <p class="text-center italic text-lg mb-8 text-gray-800">Bacteria from the ocean floor can beat superbugs and cancer. But habitats are at risk from the hunger for marine minerals</p>
@@ -120,14 +229,47 @@
 
                         <div class="flex gap-4">
                             <div class="font-bold text-lg flex-none w-6">F</div>
-                            <div class="cambridge-paragraph m-0">The oceans occupy around 70% of the planet and are relatively unexplored, says Mike Johnston, chief executive of Nautilus, a Canadian underwater exploration company: 'It makes sense to explore this untapped potential in an environmentally sustainable way, instead of continually looking at the fast depleting land resources of the planet to meet society's rising needs.' Those leading the global rush to place giant mining machines thousands of metres below the sea surface say the environmental impacts will be far lower than on land. But critics say exotic and little-known ecosystems in the deep oceans could be destroyed and must be protected. 'Mining will be the greatest assault on deep-sea ecosystems ever inflicted by humans,' according to hydrothermal vent expert Verena Tunnicliffe, at the University of Victoria in Canada. She argues that active vents must be off-limits for mining to protect the new knowledge and biotechnology spin-offs they can deliver, and that strict controls must be in place elsewhere.</div>
-                        </div>
+                            <div class="cambridge-paragraph m-0">The oceans occupy around 70% of the planet and are relatively unexplored, says Mike Johnston, chief executive of Nautilus, a Canadian underwater exploration company: 'It makes sense to explore this untapped potential in an environmentally sustainable way, instead of continually looking at the fast depleting land resources of the planet to meet society's rising needs.' Those leading the global rush to place giant mining machines thousands of metres below the sea surface say the environmental impacts will be far lower than on land. But critics say exotic and little-known ecosystems in the deep oceans could be destroyed and must be protected. 'Mining will be the greatest assault on deep-sea ecosystems ever inflicted by humans,' according to hydrothermal vent expert Verena Tunnicliffe, at the University of Victoria in Canada. She argues that active vents must be off-limits for mining to protect the new knowledge and biotechnology spin-offs they can deliver, and that strict controls must be in place elsewhere.
+
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- PASSAGE 3 TEXT --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300 cambridge-text max-w-3xl mx-auto">
-                    <p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="italic mb-6 text-gray-600">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
                     
                     <h2 class="cambridge-heading text-center mb-4">The Unselfish Gene</h2>
                     <p class="text-center italic text-lg mb-8 text-gray-800">A psychologist gives his view on how humans became self-centred</p>
@@ -157,11 +299,20 @@
         </div>
 
         {{-- RIGHT PANEL: QUESTIONS --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar relative" x-data="{ answers: {} }">
-            
-            <div class="p-10 pb-32 max-w-4xl mx-auto relative z-20">
-                
-                {{-- PASSAGE 1 QUESTIONS --}}
+
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- RIGHT: Questions --}}
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
+
+{{-- PASSAGE 1 QUESTIONS --}}
                 <div class="max-w-4xl mx-auto text-gray-800">
                     
                     {{-- Questions 1-6 --}}
@@ -189,7 +340,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-40 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-40 shadow-sm">
                                         <option value="" disabled selected>Select Answer</option>
                                         <option value="TRUE">TRUE</option>
                                         <option value="FALSE">FALSE</option>
@@ -313,7 +464,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2 leading-tight">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-24 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-24 shadow-sm">
                                         <option value="" disabled selected>-</option>
                                         @foreach(['A','B','C','D','E','F'] as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -346,7 +497,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2 leading-tight">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-24 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-24 shadow-sm">
                                         <option value="" disabled selected>-</option>
                                         @foreach(['A','B','C','D','E'] as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -376,7 +527,7 @@
                         <p class="italic mb-6 text-[15px]">Choose <span class="font-bold text-black uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                         <p class="italic mb-6 text-[15px]">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 p-8 bg-white text-[15px] leading-relaxed">
+                        <div class="border border-gray-400 p-8 bg-gray-50 text-[15px] leading-relaxed">
                             <h3 class="text-xl font-bold text-center mb-6 text-gray-900">Mining the sea floor</h3>
                             
                             <p class="mb-4">
@@ -478,7 +629,7 @@
                         <p class="italic mb-6 text-[15px]">Choose <span class="font-bold text-black uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                         <p class="italic mb-6 text-[15px]">Write your answers in boxes 31–35 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 p-8 bg-white text-[15px] leading-relaxed">
+                        <div class="border border-gray-400 p-8 bg-gray-50 text-[15px] leading-relaxed">
                             <h3 class="text-xl font-bold text-center mb-6 text-gray-900">Contemporary hunter-gatherer societies</h3>
                             
                             <p class="mb-4">
@@ -521,7 +672,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-40 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-40 shadow-sm">
                                         <option value="" disabled selected>Select Answer</option>
                                         <option value="YES">YES</option>
                                         <option value="NO">NO</option>
@@ -533,17 +684,28 @@
                         </div>
                     </div>
 
-                    <div class="mt-10 flex justify-end">
-                        <button class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow-sm" onclick="alert('Test submitted! (Mock functionality)')">
-                            Submit All Answers
-                        </button>
-                    </div>
-
+                    {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
                 </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
             </div>
         </div>
+
     </div>
 </div>
+
+@include('assignments.ielts.mockup.partials.reading-annotations')
+
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

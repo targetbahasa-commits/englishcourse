@@ -14,6 +14,27 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
@@ -21,7 +42,7 @@
     @include('components.program-sidebar')
 
 {{-- Fixed full-screen layout --}}
-<div class="fixed inset-0 z-0 flex flex-col" style="padding-left: 0;">
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -37,60 +58,89 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{
-                 highlightMode: false,
-                 pencilMode: false,
-                 eraserMode: false,
-                 highlightColor: 'yellow',
-                 canvasObj: null
-             }"
-             x-init="
-                 $watch('pencilMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('draw');
-                 });
-                 $watch('eraserMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('erase');
-                 });
-                 new ResizeObserver(() => { if (canvasObj) canvasObj.resize(); }).observe($el);
-             "
-        >
-            {{-- Drawing canvas --}}
-            <canvas x-ref="drawingCanvas"
-                    class="absolute inset-x-0 inset-y-0 w-full z-10"
-                    :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
-            </canvas>
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
 
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
 
                 {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
                 {{-- Passage 1 --}}
-                <div class="mb-6">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 1</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 1 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Roman tunnels</h3>
-                    <p class="text-[15px] italic text-gray-700 mb-8 text-center max-w-3xl mx-auto">The Romans, who once controlled areas of Europe, North Africa and Asia Minor, adopted the construction techniques of other civilizations to build tunnels in their territories</p>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
 
-                        {{-- Passage text --}}
-                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">Roman tunnels</h3>
+                        <p class="text-[15px] italic text-gray-700 mb-8 text-center max-w-3xl mx-auto">The Romans, who once controlled areas of Europe, North Africa and Asia Minor, adopted the construction techniques of other civilizations to build tunnels in their territories</p>
+
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
                              @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
                              @click="if(eraserMode) window.removeHighlight($event);">
 
@@ -105,118 +155,138 @@
                             <p>Roman tunnel projects were carefully planned and carried out. The length of time it took to construct a tunnel depended on the method being used and the type of rock being excavated. The <em>qanat</em> construction method was usually faster than the counter-excavation method as it was more straightforward. This was because the mountain could be excavated not only from the tunnel mouths but also from shafts. The type of rock could also influence construction times. When the rock was hard, the Romans employed a technique called fire quenching which consisted of heating the rock with fire, and then suddenly cooling it with cold water so that it would crack. Progress through hard rock could be very slow, and it was not uncommon for tunnels to take years, if not decades, to be built. Construction marks left on a Roman tunnel in Bologna show that the rate of advance through solid rock was 30 centimeters per day. In contrast, the rate of advance of the Claudius tunnel can be calculated at 1.4 meters per day. Most tunnels had inscriptions showing the names of patrons who ordered construction and sometimes the name of the architect. For example, the 1.4-kilometer Çevlik tunnel in Turkey, built to divert the floodwater threatening the harbor of the ancient city of Seleuceia Pieria, had inscriptions on the entrance, still visible today, that also indicate that the tunnel was started in 69 CE and was completed in 81 CE.</p>
                         </div>
 
-                        {{-- Floating Annotation Toolbar --}}
-
-
+                        {{-- Floating Toolbar for Passage 1 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
 
                 {{-- Passage 2 --}}
-                <div class="mb-6 pt-10 border-t border-gray-200 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 2</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 2 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-4">Changes in reading habits</h3>
-                    <p class="text-[15px] italic text-gray-700 mb-8 text-center max-w-3xl mx-auto block">What are the implications of the way we read today?</p>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
 
-                    {{-- Passage text --}}
-                    <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
-                         @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
-                         @click="if(eraserMode) window.removeHighlight($event);">
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-4">Changes in reading habits</h3>
+                        <p class="text-[15px] italic text-gray-700 mb-8 text-center max-w-3xl mx-auto block">What are the implications of the way we read today?</p>
 
-                        <p>Look around on your next plane trip. The iPad is the new pacifier for babies and toddlers. Younger school-aged children read stories on smartphones; older kids don't read at all, but hunch over video games. Parents and other passengers read on tablets or skim a flotilla of email and news feeds. Unbeknown to most of us, an invisible, game-changing transformation links everyone in this picture: the neuronal circuit that underlies the brain's ability to read is subtly, rapidly changing and this has implications for everyone from the pre-reading toddler to the expert adult.</p>
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
+                             @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
+                             @click="if(eraserMode) window.removeHighlight($event);">
 
-                        <p>As work in neurosciences indicates, the acquisition of literacy necessitated a new circuit in our species' brain more than 6,000 years ago. That circuit evolved from a very simple mechanism for decoding basic information, like the number of goats in one's herd, to the present, highly elaborated reading brain. My research depicts how the present reading brain enables the development of some of our most important intellectual and affective processes: internalized knowledge, analogical reasoning, and inference; perspective-taking and empathy; critical analysis and the generation of insight. Research surfacing in many parts of the world now cautions that each of these essential 'deep reading' processes may be under threat as we move into digital-based modes of reading.</p>
-                        
-                        <p>This is not a simple, binary issue of print versus digital reading and technological innovation. As MIT scholar Sherry Turkle has written, we do not err as a society when we innovate but when we ignore what we disrupt or diminish while innovating. In this hinge moment between print and digital cultures, society needs to confront what is diminishing in the expert reading circuit, what our children and older students are not developing, and what we can do about it.</p>
+                            <p>Look around on your next plane trip. The iPad is the new pacifier for babies and toddlers. Younger school-aged children read stories on smartphones; older kids don't read at all, but hunch over video games. Parents and other passengers read on tablets or skim a flotilla of email and news feeds. Unbeknown to most of us, an invisible, game-changing transformation links everyone in this picture: the neuronal circuit that underlies the brain's ability to read is subtly, rapidly changing and this has implications for everyone from the pre-reading toddler to the expert adult.</p>
 
-                        <p>We know from research that the reading circuit is not given to human beings through a genetic blueprint like vision or language; it needs an environment to develop. Further, it will adapt to that environment's requirements – from different writing systems to the characteristics of whatever medium is used. If the dominant medium advantages processes that are fast, multi-task oriented and well-suited for large volumes of information, like the current digital medium, so will the reading circuit. As UCLA psychologist Patricia Greenfield writes, the result is that less attention and time will be allocated to slower, time-demanding deep reading processes.</p>
+                            <p>As work in neurosciences indicates, the acquisition of literacy necessitated a new circuit in our species' brain more than 6,000 years ago. That circuit evolved from a very simple mechanism for decoding basic information, like the number of goats in one's herd, to the present, highly elaborated reading brain. My research depicts how the present reading brain enables the development of some of our most important intellectual and affective processes: internalized knowledge, analogical reasoning, and inference; perspective-taking and empathy; critical analysis and the generation of insight. Research surfacing in many parts of the world now cautions that each of these essential 'deep reading' processes may be under threat as we move into digital-based modes of reading.</p>
+                            
+                            <p>This is not a simple, binary issue of print versus digital reading and technological innovation. As MIT scholar Sherry Turkle has written, we do not err as a society when we innovate but when we ignore what we disrupt or diminish while innovating. In this hinge moment between print and digital cultures, society needs to confront what is diminishing in the expert reading circuit, what our children and older students are not developing, and what we can do about it.</p>
 
-                        <p>Increasing reports from educators and from researchers in psychology and the humanities bear this out. English literature scholar and teacher Mark Edmundson describes how many college students actively avoid the classic literature of the 19th and 20th centuries in favour of something simpler as they no longer have the patience to read longer, denser, more difficult texts. We should be less concerned with students' 'cognitive impatience', however, than by what may underlie it: the potential inability of large numbers of students to read with a level of critical analysis sufficient to comprehend the complexity of thought and argument found in more demanding texts.</p>
+                            <p>We know from research that the reading circuit is not given to human beings through a genetic blueprint like vision or language; it needs an environment to develop. Further, it will adapt to that environment's requirements – from different writing systems to the characteristics of whatever medium is used. If the dominant medium advantages processes that are fast, multi-task oriented and well-suited for large volumes of information, like the current digital medium, so will the reading circuit. As UCLA psychologist Patricia Greenfield writes, the result is that less attention and time will be allocated to slower, time-demanding deep reading processes.</p>
 
-                        <p>Multiple studies show that digital screen use may be causing a variety of troubling downstream effects on reading comprehension in older high school and college students. In Stavanger, Norway, psychologist Anne Mangen and her colleagues studied how high school students comprehend the same material in different mediums. Mangen's group asked subjects questions about a short story whose plot had universal student appeal; half of the students read the story on a tablet, the other half in paperback. Results indicated that students who read on print were superior in their comprehension to screen-reading peers, particularly in their ability to sequence detail and reconstruct the plot in chronological order.</p>
+                            <p>Increasing reports from educators and from researchers in psychology and the humanities bear this out. English literature scholar and teacher Mark Edmundson describes how many college students actively avoid the classic literature of the 19th and 20th centuries in favour of something simpler as they no longer have the patience to read longer, denser, more difficult texts. We should be less concerned with students' 'cognitive impatience', however, than by what may underlie it: the potential inability of large numbers of students to read with a level of critical analysis sufficient to comprehend the complexity of thought and argument found in more demanding texts.</p>
 
-                        <p>Ziming Liu from San Jose State University has conducted a series of studies which indicate that the 'new norm' in reading is skimming, involving word-spotting and browsing through the text. Many readers now use a pattern when reading in which they sample the first line and then word-spot through the rest of the text. When the reading brain skims like this, it reduces time allocated to deep reading processes. In other words, we don't have time to grasp complexity, to understand another's feelings, to perceive beauty, and to create thoughts of the reader's own.</p>
+                            <p>Multiple studies show that digital screen use may be causing a variety of troubling downstream effects on reading comprehension in older high school and college students. In Stavanger, Norway, psychologist Anne Mangen and her colleagues studied how high school students comprehend the same material in different mediums. Mangen's group asked subjects questions about a short story whose plot had universal student appeal; half of the students read the story on a tablet, the other half in paperback. Results indicated that students who read on print were superior in their comprehension to screen-reading peers, particularly in their ability to sequence detail and reconstruct the plot in chronological order.</p>
 
-                        <p>The possibility that critical analysis, empathy and other deep reading processes could become the unintended 'collateral damage' of our digital culture is not a straightforward binary issue about print versus digital reading. It is about how we all have begun to read on various mediums and how that changes not only what we read, but also the purposes for which we read. Nor is it only about the young. The subtle atrophy of critical analysis and empathy affects us all equally. It affects our ability to navigate a constant bombardment of information. It incentivizes a retreat to the most familiar stores of unchecked information, which require and receive no analysis, leaving us susceptible to false information and irrational ideas.</p>
+                            <p>Ziming Liu from San Jose State University has conducted a series of studies which indicate that the 'new norm' in reading is skimming, involving word-spotting and browsing through the text. Many readers now use a pattern when reading in which they sample the first line and then word-spot through the rest of the text. When the reading brain skims like this, it reduces time allocated to deep reading processes. In other words, we don't have time to grasp complexity, to understand another's feelings, to perceive beauty, and to create thoughts of the reader's own.</p>
 
-                        <p>There's an old rule in neuroscience that does not alter with age: use it or lose it. It is a very hopeful principle when applied to critical thought in the reading brain because it implies choice. The story of the changing reading brain is hardly finished. We possess both the science and the technology to identify and redress the changes in how we read before they become entrenched. If we work to understand exactly what we will lose, alongside the extraordinary new capacities that the digital world has brought us, there is as much reason for excitement as caution.</p>
+                            <p>The possibility that critical analysis, empathy and other deep reading processes could become the unintended 'collateral damage' of our digital culture is not a straightforward binary issue about print versus digital reading. It is about how we all have begun to read on various mediums and how that changes not only what we read, but also the purposes for which we read. Nor is it only about the young. The subtle atrophy of critical analysis and empathy affects us all equally. It affects our ability to navigate a constant bombardment of information. It incentivizes a retreat to the most familiar stores of unchecked information, which require and receive no analysis, leaving us susceptible to false information and irrational ideas.</p>
+
+                            <p>There's an old rule in neuroscience that does not alter with age: use it or lose it. It is a very hopeful principle when applied to critical thought in the reading brain because it implies choice. The story of the changing reading brain is hardly finished. We possess both the science and the technology to identify and redress the changes in how we read before they become entrenched. If we work to understand exactly what we will lose, alongside the extraordinary new capacities that the digital world has brought us, there is as much reason for excitement as caution.</p>
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 2 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
                 {{-- Passage 3 --}}
-                <div class="mb-6 pt-10 border-t border-gray-200 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 3</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {{-- Drawing canvas for Passage 3 --}}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
 
-                    <h3 class="text-2xl font-bold text-center text-gray-900 mb-4">Attitudes towards Artificial Intelligence</h3>
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+                        <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
 
-                    {{-- Passage text --}}
-                    <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif]"
-                         @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
-                         @click="if(eraserMode) window.removeHighlight($event);">
+                        <h3 class="text-2xl font-bold text-center text-gray-900 mb-4">Attitudes towards Artificial Intelligence</h3>
 
-                        <p><span class="font-bold mr-2 text-lg">A</span>Artificial intelligence (AI) can already predict the future. Police forces are using it to map when and where crime is likely to occur. Doctors can use it to predict when a patient is most likely to have a heart attack or stroke. Researchers are even trying to give AI imagination so it can plan for unexpected consequences.</p>
-                        <p>Many decisions in our lives require a good forecast, and AI is almost always better at forecasting than we are. Yet for all these technological advances, we still seem to deeply lack confidence in AI predictions. Recent cases show that people don't like relying on AI and prefer to trust human experts, even if these experts are wrong.</p>
-                        <p>If we want AI to really benefit people, we need to find a way to get people to trust it. To do that, we need to understand why people are so reluctant to trust AI in the first place.</p>
+                        <div class="passage-content text-[15px] leading-relaxed text-gray-800 space-y-5 font-['Georgia',serif] pb-6"
+                             @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);"
+                             @click="if(eraserMode) window.removeHighlight($event);">
 
-                        <p><span class="font-bold mr-2 text-lg">B</span>Take the case of Watson for Oncology, one of technology giant IBM's supercomputer programs. Their attempt to promote this program to cancer doctors was a PR disaster. The AI promised to deliver top-quality recommendations on the treatment of 12 cancers that accounted for 80% of the world's cases. But when doctors first interacted with Watson, they found themselves in a rather difficult situation. On the one hand, if Watson provided guidance about a treatment that coincided with their own opinions, physicians did not see much point in Watson's recommendations. The supercomputer was simply telling them what they already knew, and these recommendations did not change the actual treatment.</p>
-                        <p>On the other hand, if Watson generated a recommendation that contradicted the experts' opinion, doctors would typically conclude that Watson wasn't competent. And the machine wouldn't be able to explain why its treatment was plausible because its machine-learning algorithms were simply too complex to be fully understood by humans. Consequently, this has caused even more suspicion and disbelief, leading many doctors to ignore the seemingly outlandish AI recommendations and stick to their own expertise.</p>
+                            <p><span class="font-bold mr-2 text-lg">A</span>Artificial intelligence (AI) can already predict the future. Police forces are using it to map when and where crime is likely to occur. Doctors can use it to predict when a patient is most likely to have a heart attack or stroke. Researchers are even trying to give AI imagination so it can plan for unexpected consequences.</p>
+                            <p>Many decisions in our lives require a good forecast, and AI is almost always better at forecasting than we are. Yet for all these technological advances, we still seem to deeply lack confidence in AI predictions. Recent cases show that people don't like relying on AI and prefer to trust human experts, even if these experts are wrong.</p>
+                            <p>If we want AI to really benefit people, we need to find a way to get people to trust it. To do that, we need to understand why people are so reluctant to trust AI in the first place.</p>
 
-                        <p><span class="font-bold mr-2 text-lg">C</span>This is just one example of people's lack of confidence in AI and their reluctance to accept what AI has to offer. Trust in other people is often based on our understanding of how others think and having experience of their reliability. This helps create a psychological feeling of safety. AI, on the other hand, is still fairly new and unfamiliar to most people. Even if it can be technically explained (and that's not always the case), AI's decision-making process is usually too difficult for most people to comprehend. And interacting with something we don't understand can cause anxiety and give us a sense that we're losing control.</p>
-                        <p>Many people are also simply not familiar with many instances of AI actually working, because it often happens in the background. Instead, they are acutely aware of instances where AI goes wrong. Embarrassing AI failures receive a disproportionate amount of media attention, emphasising the message that we cannot rely on technology. Machine learning is not foolproof, in part because the humans who design it aren't.</p>
+                            <p><span class="font-bold mr-2 text-lg">B</span>Take the case of Watson for Oncology, one of technology giant IBM's supercomputer programs. Their attempt to promote this program to cancer doctors was a PR disaster. The AI promised to deliver top-quality recommendations on the treatment of 12 cancers that accounted for 80% of the world's cases. But when doctors first interacted with Watson, they found themselves in a rather difficult situation. On the one hand, if Watson provided guidance about a treatment that coincided with their own opinions, physicians did not see much point in Watson's recommendations. The supercomputer was simply telling them what they already knew, and these recommendations did not change the actual treatment.</p>
+                            <p>On the other hand, if Watson generated a recommendation that contradicted the experts' opinion, doctors would typically conclude that Watson wasn't competent. And the machine wouldn't be able to explain why its treatment was plausible because its machine-learning algorithms were simply too complex to be fully understood by humans. Consequently, this has caused even more suspicion and disbelief, leading many doctors to ignore the seemingly outlandish AI recommendations and stick to their own expertise.</p>
 
-                        <p><span class="font-bold mr-2 text-lg">D</span>Feelings about AI run deep. In a recent experiment, people from a range of backgrounds were given various sci-fi films about AI to watch and then asked questions about automation in everyday life. It was found that, regardless of whether the film they watched depicted AI in a positive or negative light, simply watching a cinematic vision of our technological future polarised the participants' attitudes. Optimists became more extreme in their enthusiasm for AI and sceptics became even more guarded.</p>
-                        <p>This suggests people use relevant evidence about AI in a biased manner to support their existing attitudes, a deep-rooted human tendency known as "confirmation bias". As AI is represented more and more in media and entertainment, it could lead to a society split between those who benefit from AI and those who reject it. More pertinently, refusing to accept the advantages offered by AI could place a large group of people at a serious disadvantage.</p>
+                            <p><span class="font-bold mr-2 text-lg">C</span>This is just one example of people's lack of confidence in AI and their reluctance to accept what AI has to offer. Trust in other people is often based on our understanding of how others think and having experience of their reliability. This helps create a psychological feeling of safety. AI, on the other hand, is still fairly new and unfamiliar to most people. Even if it can be technically explained (and that's not always the case), AI's decision-making process is usually too difficult for most people to comprehend. And interacting with something we don't understand can cause anxiety and give us a sense that we're losing control.</p>
+                            <p>Many people are also simply not familiar with many instances of AI actually working, because it often happens in the background. Instead, they are acutely aware of instances where AI goes wrong. Embarrassing AI failures receive a disproportionate amount of media attention, emphasising the message that we cannot rely on technology. Machine learning is not foolproof, in part because the humans who design it aren't.</p>
 
-                        <p><span class="font-bold mr-2 text-lg">E</span>Fortunately, we already have some ideas about how to improve trust in AI. Simply having previous experience with AI can significantly improve people's opinions about the technology, as was found in the study mentioned above. Evidence also suggests the more you use other technologies such as the internet, the more you trust them.</p>
-                        <p>Another solution may be to reveal more about the algorithms which AI uses and the purposes they serve. Several high-profile social media companies and online marketplaces already release transparency reports about government requests and surveillance disclosures. A similar practice for AI could help people have a better understanding of the way algorithmic decisions are made.</p>
+                            <p><span class="font-bold mr-2 text-lg">D</span>Feelings about AI run deep. In a recent experiment, people from a range of backgrounds were given various sci-fi films about AI to watch and then asked questions about automation in everyday life. It was found that, regardless of whether the film they watched depicted AI in a positive or negative light, simply watching a cinematic vision of our technological future polarised the participants' attitudes. Optimists became more extreme in their enthusiasm for AI and sceptics became even more guarded.</p>
+                            <p>This suggests people use relevant evidence about AI in a biased manner to support their existing attitudes, a deep-rooted human tendency known as "confirmation bias". As AI is represented more and more in media and entertainment, it could lead to a society split between those who benefit from AI and those who reject it. More pertinently, refusing to accept the advantages offered by AI could place a large group of people at a serious disadvantage.</p>
 
-                        <p><span class="font-bold mr-2 text-lg">F</span>Research suggests that allowing people some control over AI decision-making could also improve trust and enable AI to learn from human experience. For example, one study showed that when people were allowed the freedom to slightly modify an algorithm, they felt more satisfied with its decisions, more likely to believe it was superior and more likely to use it in the future.</p>
-                        <p>We don't need to understand the intricate inner workings of AI systems, but if people are given a degree of responsibility for how they are implemented, they will be more willing to accept AI into their lives.</p>
-                    </div>
-                </div>
+                            <p><span class="font-bold mr-2 text-lg">E</span>Fortunately, we already have some ideas about how to improve trust in AI. Simply having previous experience with AI can significantly improve people's opinions about the technology, as was found in the study mentioned above. Evidence also suggests the more you use other technologies such as the internet, the more you trust them.</p>
+                            <p>Another solution may be to reveal more about the algorithms which AI uses and the purposes they serve. Several high-profile social media companies and online marketplaces already release transparency reports about government requests and surveillance disclosures. A similar practice for AI could help people have a better understanding of the way algorithmic decisions are made.</p>
 
+                            <p><span class="font-bold mr-2 text-lg">F</span>Research suggests that allowing people some control over AI decision-making could also improve trust and enable AI to learn from human experience. For example, one study showed that when people were allowed the freedom to slightly modify an algorithm, they felt more satisfied with its decisions, more likely to believe it was superior and more likely to use it in the future.</p>
+                            <p>We don't need to understand the intricate inner workings of AI systems, but if people are given a degree of responsibility for how they are implemented, they will be more willing to accept AI into their lives.</p>
+                        </div>
 
-                {{-- Floating Annotation Toolbar --}}
-                <div class="sticky bottom-6 w-full flex flex-col items-center pointer-events-none z-30 mt-4 mb-2">
-                    {{-- Colour picker (shows when highlight active) --}}
-                    <div x-show="highlightMode"
-                         class="flex gap-2 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-100 mb-3 pointer-events-auto"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         style="display:none;">
-                        <button @click.prevent.stop="highlightColor='yellow'" class="w-8 h-8 rounded-full bg-yellow-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='yellow' ? 'ring-2 ring-yellow-500 scale-110' : 'hover:ring-yellow-400'"></button>
-                        <button @click.prevent.stop="highlightColor='green'"  class="w-8 h-8 rounded-full bg-green-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='green'  ? 'ring-2 ring-green-500 scale-110'  : 'hover:ring-green-400'"></button>
-                        <button @click.prevent.stop="highlightColor='blue'"   class="w-8 h-8 rounded-full bg-blue-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='blue'   ? 'ring-2 ring-blue-500 scale-110'   : 'hover:ring-blue-400'"></button>
-                        <button @click.prevent.stop="highlightColor='pink'"   class="w-8 h-8 rounded-full bg-pink-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='pink'   ? 'ring-2 ring-pink-500 scale-110'   : 'hover:ring-pink-400'"></button>
-                    </div>
-
-                    <div class="flex justify-center items-center gap-3 pointer-events-auto bg-white/40 p-1.5 rounded-full backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/50">
-
-                        {{-- Highlight --}}
-                        <button @click="highlightMode=!highlightMode; pencilMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-green-600 hover:border-green-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-green-500 !text-white !border-green-600 shadow-md !opacity-100': highlightMode }"
-                                title="Highlight Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-
-                        {{-- Pencil --}}
-                        <button @click="pencilMode=!pencilMode; highlightMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-blue-600 hover:border-blue-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-blue-500 !text-white !border-blue-600 shadow-md !opacity-100': pencilMode }"
-                                title="Pencil Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-
-                        {{-- Eraser --}}
-                        <button @click="eraserMode=!eraserMode; pencilMode=false; highlightMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-indigo-600 hover:border-indigo-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-indigo-500 !text-white !border-indigo-600 shadow-md !opacity-100': eraserMode }"
-                                title="Eraser Tool">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-                        </button>
+                        {{-- Floating Toolbar for Passage 3 --}}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
@@ -224,8 +294,8 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
                 {{-- Questions 1–6: Diagram Labelling --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -374,13 +444,6 @@
                                 <input type="text" name="q13" class="border-b border-gray-500 outline-none px-2 py-1 w-64 bg-white text-sm placeholder-gray-400 focus:border-blue-500 shadow-sm rounded-t-sm" placeholder="Answer">
                             </div>
                         </div>
-                    </div>
-
-                    {{-- Submit --}}
-                    <div class="mt-6 flex justify-end">
-                        <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                            Submit Answers
-                        </button>
                     </div>
                 </div>
 
@@ -725,23 +788,22 @@
                         <div class="border-b border-gray-100 last:hidden"></div>
                         @endforeach
                     </div>
-
-                    {{-- Submit --}}
-                    <div class="mt-6 flex justify-end">
-                        <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                            Submit Answers
-                        </button>
-                    </div>
                 </div>
 
 
 
                 {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
                 <div class="mt-6 flex justify-end">
                     <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
                         Submit All Answers
                     </button>
                 </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
             </div>
         </div>
@@ -750,95 +812,8 @@
     </div>
 </div>
 
-<script>
-/* ── Drawing canvas (pencil / eraser) ── */
-window.initDrawingCanvas = function(canvas) {
-    const ctx = canvas.getContext('2d');
-    let drawing = false, mode = 'draw';
-    const resize = () => {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        const dpr  = window.devicePixelRatio || 1;
-        const snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        canvas.width  = rect.width  * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        ctx.putImageData(snap, 0, 0);
-    };
-    const pos = e => {
-        const r = canvas.getBoundingClientRect();
-        if (e.touches) { return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top }; }
-        return { x: e.clientX - r.left, y: e.clientY - r.top };
-    };
-    const start = e => {
-        drawing = true;
-        const p = pos(e);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        // When erasing: also remove any <mark> highlight under the cursor
-        if (mode === 'erase') {
-            const allEls = document.elementsFromPoint(e.clientX, e.clientY);
-            const mark = allEls.find(el => el.tagName === 'MARK');
-            if (mark) {
-                const parent = mark.parentNode;
-                while (mark.firstChild) { parent.insertBefore(mark.firstChild, mark); }
-                parent.removeChild(mark);
-                parent.normalize();
-            }
-        }
-    };
-    const move  = e => {
-        if (!drawing) return;
-        const p = pos(e);
-        if (mode === 'draw') {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-        } else {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 20;
-        }
-        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    };
-    const end = () => { drawing = false; ctx.globalCompositeOperation = 'source-over'; };
-    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup',   end);   canvas.addEventListener('mouseleave', end);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, { passive: false });
-    canvas.addEventListener('touchmove',  e => { e.preventDefault(); move(e);  }, { passive: false });
-    canvas.addEventListener('touchend',   end);
-    resize();
-    return { setMode: m => { mode = m; }, resize };
-};
+@include('assignments.ielts.mockup.partials.reading-annotations')
 
-/* ── Text highlight ── */
-window.applyAnnotation = function(type, color) {
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    const mark  = document.createElement('mark');
-    const colors = { yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8' };
-    mark.style.backgroundColor = colors[color] || colors.yellow;
-    mark.style.borderRadius = '2px';
-    try { range.surroundContents(mark); } catch(e) { /* cross-node range – skip */ }
-    sel.removeAllRanges();
-};
-/* ── Remove highlight ── */
-window.removeHighlight = function(event) {
-    let el = event.target;
-    // Walk up to find a <mark> element
-    while (el && el.tagName !== 'MARK') {
-        if (el.classList && el.classList.contains('passage-content')) break;
-        el = el.parentElement;
-    }
-    if (el && el.tagName === 'MARK') {
-        // Replace the <mark> with its text content
-        const parent = el.parentNode;
-        while (el.firstChild) {
-            parent.insertBefore(el.firstChild, el);
-        }
-        parent.removeChild(el);
-        parent.normalize(); // merge adjacent text nodes
-    }
-};
-</script>
-
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

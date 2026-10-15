@@ -7,20 +7,42 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -33,30 +55,88 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{ highlightMode: false, pencilMode: false, eraserMode: false, highlightColor: 'yellow', canvasObj: null }"
-        >
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
+
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
+
+                {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
-                
-                <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 1</h2>
-                <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
+
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 1–13</span>, which are based on Reading Passage 1 below.</p>
                 
                 <h3 class="text-3xl font-bold text-center mb-8">How tennis rackets have changed</h3>
                 
@@ -82,12 +162,46 @@
                     <p>Other changes to the frame involve the handle. Players have individual preferences for the shape of the handle and some will have the handle of one racket moulded onto the frame of a different racket. Other players make different changes. The professional Portuguese player Gonçalo Oliveira replaced the original grips of his rackets with something thinner because they had previously felt uncomfortable to hold.</p>
 
                     <p>Racket customisation and modification have pushed the standards of the game to greater levels that few could have anticipated in the days of natural strings and heavy, wooden frames, and it's exciting to see what further developments there will be in the future.</p>
+
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
                 </div>
 
-                {{-- Passage 2 --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300">
-                    <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 2</h2>
-                    <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 14–26</span>, which are based on Reading Passage 2 below.</p>
                     
                     <h3 class="text-3xl font-bold text-center mb-8">The pirates of the ancient Mediterranean</h3>
                     <p class="text-center italic text-gray-700 text-lg mb-8 max-w-2xl mx-auto">
@@ -131,51 +245,71 @@
                         </div>
 
                         <p class="text-sm text-gray-500 mt-8 pt-4 border-t border-gray-200">* caravel: a small, highly manoeuvrable sailing ship developed by the Portuguese</p>
+
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 3 --}}
-                <div class="mb-6 mt-16 pt-16 border-t-2 border-gray-300">
-                    <h2 class="text-xl font-bold mb-4 tracking-wider uppercase">READING PASSAGE 3</h2>
-                    <p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="italic mb-8">You should spend about 20 minutes on <span class="font-bold">Questions 27–40</span>, which are based on Reading Passage 3 below.</p>
                     
                     <h3 class="text-3xl font-bold text-center mb-8">The persistence and peril of misinformation</h3>
                     <p class="text-center italic text-gray-700 text-lg mb-8 max-w-2xl mx-auto">
                         Brian Southwell looks at how human brains verify information and discusses some of the challenges of battling widespread falsehoods
                     </p>
 
-                    <div class="space-y-6 text-gray-800 text-lg leading-relaxed text-justify font-serif">
-                        <p>Misinformation &ndash; both deliberately promoted and accidentally shared &ndash; is perhaps an inevitable part of the world in which we live, but it is not a new problem. People likely have lied to one another for roughly as long as verbal communication has existed. Deceiving others can offer an apparent opportunity to gain strategic advantage, to motivate others to action, or even to protect interpersonal bonds. Moreover, people inadvertently have been sharing inaccurate information with one another for thousands of years.</p>
-
-                        <p>However, we currently live in an era in which technology enables information to reach large audiences distributed across the globe, and thus the potential for immediate and widespread effects from misinformation now looms larger than in the past. Yet the means to correct misinformation might, over time, be found in those same patterns of mass communication and of the facilitated spread of information.</p>
-
-                        <p>The main worry regarding misinformation is its potential to unduly influence attitudes and behavior, leading people to think and act differently than they would if they were correctly informed, as suggested by the research teams of Stephan Lewandowsky of the University of Bristol and Elizabeth Marsh of Duke University, among others. In other words, we worry that misinformation might lead people to hold misperceptions (or false beliefs) and that these misperceptions, especially when they occur among large groups of people, may have detrimental, downstream consequences for health, social harmony, and the political climate.</p>
-
-                        <p>At least three observations related to misinformation in the contemporary mass-media environment warrant the attention of researchers, policy makers, and really everyone who watches television, listens to the radio, or reads information online. First of all, people who encounter misinformation tend to believe it, at least initially. Secondly, electronic and print media often do not block many types of misinformation before it appears in content available to large audiences. Thirdly, countering misinformation once it has enjoyed wide exposure can be a resource-intensive effort.</p>
-
-                        <p>Knowing what happens when people initially encounter misinformation holds tremendous importance for estimating the potential for subsequent problems. Although it is fairly routine for individuals to come across information that is false, the question of exactly how &ndash; and when &ndash; we mentally label information as true or false has garnered philosophical debate. The dilemma is neatly summarized by a contrast between how the 17th-century philosophers René Descartes and Baruch Spinoza described human information engagement, with conflicting predictions that only recently have been empirically tested in robust ways. Descartes argued that a person only accepts or rejects information after considering its truth or falsehood; Spinoza argued that people accept all encountered information (or misinformation) by default and then subsequently verify or reject it through a separate cognitive process. In recent decades, empirical evidence from the research teams of Erik Asp of the University of Chicago and Daniel Gilbert at Harvard University, among others, has supported Spinoza’s account: people appear to encode all new information as if it were true, even if only momentarily, and later tag the information as being either true or false, a pattern that seems consistent with the observation that mental resources for skepticism physically reside in a different part of the brain than the resources used in perceiving and encoding.</p>
-
-                        <p>What about our second observation that misinformation often can appear in electronic or print media without being preemptively blocked? In support of this, one might consider the nature of regulatory structures in the United States: regulatory agencies here tend to focus on post hoc detection of broadcast information. Organizations such as the Food and Drug Administration (FDA) offer considerable monitoring and notification functions, but these roles typically do not involve preemptive censoring. The FDA oversees direct-to-consumer prescription drug advertising, for example, and has developed mechanisms such as the ‘Bad Ad’ program, through which people can report advertising in apparent violation of FDA guidelines on drug risks. Such programs, although laudable and useful, do not keep false advertising off the airwaves. In addition, even misinformation that is successfully corrected can continue to affect attitudes.</p>
-
-                        <p>This leads us to our third observation: a campaign to correct misinformation, even if rhetorically compelling, requires resources and planning to accomplish necessary reach and frequency. For corrective campaigns to be persuasive, audiences need to be able to comprehend them, which requires either effort to frame messages in ways that are accessible or effort to educate and sensitize audiences to the possibility of misinformation. That some audiences might be unaware of the potential for misinformation also suggests the utility of media literacy efforts as early as elementary school. Even with journalists and scholars pointing to the phenomenon of ‘fake news’, people do not distinguish between demonstrably false stories and those based in fact when scanning and processing written information.</p>
-
-                        <p>We live at a time when widespread misinformation is common. Yet at this time many people also are passionately developing potential solutions and remedies. The journey forward undoubtedly will be a long and arduous one. Future remedies will require not only continued theoretical consideration but also the development and maintenance of consistent monitoring tools &ndash; and a recognition among fellow members of society that claims which find prominence in the media that are insufficiently based in scientific consensus and social reality should be countered. Misinformation arises as a result of human fallibility and human information needs. To overcome the worst effects of the phenomenon, we will need coordinated efforts over time, rather than any singular one-time panacea we could hope to offer.</p>
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
+
             </div>
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto" x-data="{ answers: {} }">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
-                {{-- Questions 1–7: True/False/Not Given --}}
+{{-- Questions 1–7: True/False/Not Given --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 1–7</strong></p>
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 1–7 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -186,7 +320,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -202,7 +336,7 @@
                                     6 => 'The weather can affect how professional players adjust the strings on their rackets.',
                                     7 => 'It was believed that the change Pete Sampras made to his rackets contributed to his strong serve.'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -232,7 +366,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <span class="font-bold uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 8–13 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The tennis racket and how it has changed</h4>
                         <ul class="list-disc ml-5 space-y-4 mb-4">
                             <li class="text-gray-800 leading-relaxed">
@@ -287,7 +421,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-32 text-center">Answer</th>
@@ -302,7 +436,7 @@
                                     18 => 'an explanation of how some people were encouraged not to return to piracy',
                                     19 => 'a mention of the need for many sailing vessels to stay relatively close to land'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -386,7 +520,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 p-5 rounded-lg bg-white text-sm mb-5">
+                    <div class="border border-gray-300 p-5 rounded-lg bg-gray-50 text-sm mb-5">
                         <h4 class="text-base font-bold text-center mb-4">Ancient Rome and piracy</h4>
                         <p class="text-gray-800 leading-loose mb-2">
                             Piracy was an issue ancient Rome had to deal with, but it also brought some benefits for Rome. For example, pirates supplied slaves that were important for Rome's industries. However, attacks on vessels transporting 
@@ -466,7 +600,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Complete the summary using the list of phrases, <strong>A–J</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–J</strong>, in boxes 31–36 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 p-5 rounded-lg bg-white text-sm mb-5">
+                    <div class="border border-gray-300 p-5 rounded-lg bg-gray-50 text-sm mb-5">
                         <h4 class="text-base font-bold text-center mb-4">What happens when people encounter misinformation?</h4>
                         <p class="text-gray-800 leading-loose mb-2">
                             Although people have 
@@ -542,7 +676,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 37–40 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -553,7 +687,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -566,7 +700,7 @@
                                     39 => 'It may be possible to overcome the problem of misinformation in a relatively short period.',
                                     40 => 'The need to keep up with new information is hugely exaggerated in today\'s world.'
                                 ] as $qNum => $statement)
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $qNum }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -590,11 +724,19 @@
                 </div>
 
                 {{-- Final Submit --}}
-                <div class="mt-8 flex justify-end">
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
                     <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
                         Submit All Answers
                     </button>
                 </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
             </div>
         </div>
@@ -602,5 +744,8 @@
     </div>
 </div>
 
+@include('assignments.ielts.mockup.partials.reading-annotations')
+
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

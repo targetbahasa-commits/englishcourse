@@ -3,11 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IELTS Reading Mock Test {{ $testId ?? 4 }} - {{ config('app.name', 'Target Bahasa') }}</title>
+    <title>IELTS Reading Mock Test {{ $testId }} - {{ config('app.name', 'Target Bahasa') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -15,15 +14,35 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
-        input[type=text].ans { border: none; border-bottom: 1px solid #6b7280; outline: none; padding: 2px 4px; width: 120px; background: transparent; }
-        input[type=text].ans:focus { border-bottom-color: #3b82f6; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col" style="padding-left: 0;">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -35,56 +54,89 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId ?? 4 }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition ?? 17 }} Reading Practice</p>
+                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 4]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{
-                 highlightMode: false,
-                 pencilMode: false,
-                 eraserMode: false,
-                 highlightColor: 'yellow',
-                 canvasObj: null
-             }"
-             x-init="
-                 $watch('pencilMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('draw');
-                 });
-                 $watch('eraserMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('erase');
-                 });
-                 new ResizeObserver(() => { if (canvasObj) canvasObj.resize(); }).observe($el);
-             "
-        >
-            {{-- Drawing canvas --}}
-            <canvas x-ref="drawingCanvas"
-                    class="absolute inset-x-0 inset-y-0 w-full z-10"
-                    :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
-            </canvas>
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
 
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
 
                 {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
-                {{-- PASSAGE 1 --}}
-                <div id="passage-1">
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+id="passage-1">
                     <p class="text-[13px] font-bold tracking-widest uppercase mb-1">READING PASSAGE 1</p>
                     <p class="text-[13px] italic mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
 
@@ -118,10 +170,47 @@
                     </div>
                 </div>
 
-                <div class="mt-16 mb-4 border-t-2 border-gray-300"></div>
+                <div
 
-                {{-- PASSAGE 2 placeholder --}}
-                <div id="passage-2" class="mt-10">
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
+                </div>
+
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+id="passage-2" class="mt-10">
                     <p class="text-[13px] font-bold tracking-widest uppercase mb-1">READING PASSAGE 2</p>
                     <p class="text-[13px] italic mb-4">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
                     <h2 class="text-2xl font-bold text-center mb-6">Does education fuel economic growth?</h2>
@@ -161,10 +250,47 @@
                     <p class="text-xs text-gray-500 mt-6 border-t pt-3">* guild: an association of artisans or merchants which oversees the practice of their craft or trade in a particular area</p>
                 </div>
 
-                <div class="mt-16 mb-4 border-t-2 border-gray-300"></div>
+                <div
 
-                {{-- PASSAGE 3 placeholder --}}
-                <div id="passage-3" class="mt-10">
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
+                    </div>
+                </div>
+
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+id="passage-3" class="mt-10">
                     <p class="text-[13px] font-bold tracking-widest uppercase mb-1">READING PASSAGE 3</p>
                     <p class="text-[13px] italic mb-4">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
                     <h2 class="text-2xl font-bold text-center mb-6">Timur Gareyev – blindfold chess champion</h2>
@@ -202,49 +328,9 @@
                             <span class="font-bold w-5 flex-none">H</span>
                             <p>For the world record attempt, Gareyev hopes to play 47 blindfold games at once in about 16 hours. He will need to win 80% to claim the title. 'I don't worry too much about the winning percentage, that's never been an issue for me,' he said. 'The most important part of blindfold chess for me is that I have found the one thing that I can fully dedicate myself to. I miss having an obsession.'</p>
                         </div>
-                    </div>
-                </div>
 
-                {{-- Floating Annotation Toolbar --}}
-                <div class="sticky bottom-6 w-full flex flex-col items-center pointer-events-none z-30 mt-4 mb-2">
-                    {{-- Colour picker (shows when highlight active) --}}
-                    <div x-show="highlightMode"
-                         class="flex gap-2 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-100 mb-3 pointer-events-auto"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         style="display:none;">
-                        <button @click.prevent.stop="highlightColor='yellow'" class="w-8 h-8 rounded-full bg-yellow-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='yellow' ? 'ring-2 ring-yellow-500 scale-110' : 'hover:ring-yellow-400'"></button>
-                        <button @click.prevent.stop="highlightColor='green'"  class="w-8 h-8 rounded-full bg-green-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='green'  ? 'ring-2 ring-green-500 scale-110'  : 'hover:ring-green-400'"></button>
-                        <button @click.prevent.stop="highlightColor='blue'"   class="w-8 h-8 rounded-full bg-blue-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='blue'   ? 'ring-2 ring-blue-500 scale-110'   : 'hover:ring-blue-400'"></button>
-                        <button @click.prevent.stop="highlightColor='pink'"   class="w-8 h-8 rounded-full bg-pink-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='pink'   ? 'ring-2 ring-pink-500 scale-110'   : 'hover:ring-pink-400'"></button>
-                    </div>
-
-                    <div class="flex justify-center items-center gap-3 pointer-events-auto bg-white/40 p-1.5 rounded-full backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/50">
-
-                        {{-- Highlight --}}
-                        <button @click="highlightMode=!highlightMode; pencilMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-green-600 hover:border-green-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-green-500 !text-white !border-green-600 shadow-md !opacity-100': highlightMode }"
-                                title="Highlight Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-
-                        {{-- Pencil --}}
-                        <button @click="pencilMode=!pencilMode; highlightMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-blue-600 hover:border-blue-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-blue-500 !text-white !border-blue-600 shadow-md !opacity-100': pencilMode }"
-                                title="Pencil Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-
-                        {{-- Eraser --}}
-                        <button @click="eraserMode=!eraserMode; pencilMode=false; highlightMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-indigo-600 hover:border-indigo-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-indigo-500 !text-white !border-indigo-600 shadow-md !opacity-100': eraserMode }"
-                                title="Eraser Tool">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-                        </button>
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
@@ -252,13 +338,10 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
-            {{-- PASSAGE 1 QUESTIONS --}}
-            <div>
-                <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
-
-                    <h3 class="text-xl font-bold text-gray-900 mb-6">Questions 1–13</h3>
+<h3 class="text-xl font-bold text-gray-900 mb-6">Questions 1–13</h3>
 
                     {{-- Q1-6: TRUE / FALSE / NOT GIVEN --}}
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -266,7 +349,7 @@
                         <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                         <p class="text-sm italic text-gray-700 mb-4">In boxes 1–6 on your answer sheet, write</p>
 
-                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                             <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                                 <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                                 <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -277,7 +360,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-white border-b border-gray-200">
+                                    <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Statement</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -292,7 +375,7 @@
                                         [5, 'The Malagasy mouse-eared bat is more common than other indigenous bat species in Madagascar.'],
                                         [6, 'Bats may feed on paddy swarming caterpillars and grass webworms.'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -322,14 +405,14 @@
                         <p class="text-sm text-gray-800 mb-2">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 7–13 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 rounded-lg text-sm bg-white overflow-hidden">
+                        <div class="border border-gray-400 rounded-lg text-sm bg-gray-50 overflow-hidden">
                             {{-- Table title --}}
                             <div class="bg-gray-200/50 border-b border-gray-400 text-center py-3 font-bold text-base text-gray-800">
                                 The study carried out by Rocha's team
                             </div>
                             {{-- Aim row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Aim</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Aim</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-1 text-gray-800">
                                         <li>to investigate the feeding habits of bats in farmland near the Ranomafana National Park</li>
@@ -338,7 +421,7 @@
                             </div>
                             {{-- Method row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Method</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Method</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-2 text-gray-800">
                                         <li>ultrasonic recording to identify favourite feeding spots</li>
@@ -348,7 +431,7 @@
                             </div>
                             {{-- Findings row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Findings</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Findings</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-2 mb-2 text-gray-800">
                                         <li>
@@ -372,7 +455,7 @@
                             </div>
                             {{-- Recommendation row --}}
                             <div class="flex">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Recommendation</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Recommendation</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-1 text-gray-800">
                                         <li>farmers should provide special <strong>13</strong> <input type="text" name="q13" class="border-b border-gray-500 outline-none px-1 w-28 bg-transparent text-sm placeholder-gray-400" placeholder="Answer"> to support the bat population</li>
@@ -399,7 +482,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-white border-b border-gray-200">
+                                    <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Information</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -413,7 +496,7 @@
                                         [17, 'a reference to a region being particularly suited to research into the link between education and economic growth'],
                                         [18, 'examples of the items included in a list of personal possessions'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -443,7 +526,7 @@
                         <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 19–22 on your answer sheet.</p>
 
-                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
+                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                             <h4 class="text-base font-bold text-center mb-4">Demographic reconstruction of two German communities</h4>
                             <p class="mb-4 text-gray-800 leading-loose">
                                 The database that Ogilvie and her team has compiled sheds light on the lives of a range of individuals, as well as those of their
@@ -476,7 +559,7 @@
                                 ['D', 'England is a good example of how high literacy rates helped a country industrialise.'],
                                 ['E', 'Economic growth can help to improve literacy rates.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-white transition-colors">
+                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors">
                                 <div class="relative flex items-center justify-center mt-0.5">
                                     <input type="checkbox" name="q23_24[]" value="{{ $letter }}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all">
                                     <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -505,7 +588,7 @@
                                 ['D', 'They opposed practices that threatened their control over a trade.'],
                                 ['E', 'They predominantly consisted of wealthy merchants.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-white transition-colors">
+                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors">
                                 <div class="relative flex items-center justify-center mt-0.5">
                                     <input type="checkbox" name="q25_26[]" value="{{ $letter }}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all">
                                     <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -536,7 +619,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-white border-b border-gray-200">
+                                    <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Information</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -551,7 +634,7 @@
                                         [31, "an outline of Gareyev's priorities"],
                                         [32, 'a reason why the last part of a game may be difficult'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -580,7 +663,7 @@
                         <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 3?</p>
                         <p class="text-sm italic text-gray-700 mb-4">In boxes 33–36 on your answer sheet, write</p>
 
-                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                             <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                                 <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                                 <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -591,7 +674,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-white border-b border-gray-200">
+                                    <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Statement</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -604,7 +687,7 @@
                                         [35, 'UCLA is the first university to carry out research into blindfold chess players.'],
                                         [36, 'Good chess players are likely to be able to play blindfold chess.'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -634,7 +717,7 @@
                         <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 37–40 on your answer sheet.</p>
 
-                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
+                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                             <h4 class="text-base font-bold text-center mb-4">How the research was carried out</h4>
                             <p class="mb-4 text-gray-800 leading-loose">
                                 The researchers started by testing Gareyev's
@@ -648,19 +731,39 @@
                             </p>
                         </div>
                     </div>
-                    {{-- Final Submit --}}
-                    <div class="mt-6 flex justify-end">
-                        <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                            Submit All Answers
-                        </button>
                     </div>
-
-                </div>
             </div>
 
         </div>
     </div>
 
 </div>
+@include('assignments.ielts.mockup.partials.reading-dictionary')
+</body>
+</html>
+
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
+                </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@include('assignments.ielts.mockup.partials.reading-annotations')
+
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

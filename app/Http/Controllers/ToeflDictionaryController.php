@@ -46,6 +46,46 @@ class ToeflDictionaryController extends Controller
         ]);
     }
 
+    /**
+     * On-demand, sentence-aware recheck - deliberately bypasses the
+     * ToeflDictionary cache in both directions (doesn't read it, doesn't
+     * write to it). That cache is one global translation per word forever;
+     * baking a sentence-specific answer into it would just move the "wrong
+     * context" bug onto the next student who looks up the same word in a
+     * different sentence. See ResolveWordTranslation::handleWithContext().
+     */
+    public function lookupInContext(Request $request)
+    {
+        $rawWord = $request->query('word');
+        $word = strtolower(trim($rawWord));
+        $cleanWord = preg_replace('/[^a-z0-9\-\']/', '', $word);
+        $sentence = trim((string) $request->query('sentence'));
+
+        if (empty($cleanWord) || empty($sentence)) {
+            return response()->json(['found' => false]);
+        }
+
+        // Guard against a runaway sentence extraction (e.g. a whole
+        // paragraph with no detected punctuation) blowing up the prompt.
+        $sentence = mb_substr($sentence, 0, 400);
+
+        $translation = $this->resolveWordTranslation->handleWithContext($cleanWord, $sentence);
+
+        if (!$translation) {
+            return response()->json([
+                'found' => false,
+                'word' => $cleanWord,
+                'message' => 'Context translation not available at the moment',
+            ]);
+        }
+
+        return response()->json([
+            'found' => true,
+            'word' => $cleanWord,
+            'translation' => $translation,
+        ]);
+    }
+
     public function synonyms(Request $request)
     {
         $rawWord = $request->query('word');

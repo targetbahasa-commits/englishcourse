@@ -7,20 +7,42 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -33,56 +55,88 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{
-                 highlightMode: false,
-                 pencilMode: false,
-                 eraserMode: false,
-                 highlightColor: 'yellow',
-                 canvasObj: null
-             }"
-             x-init="
-                 $watch('pencilMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('draw');
-                 });
-                 $watch('eraserMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('erase');
-                 });
-                 new ResizeObserver(() => { if (canvasObj) canvasObj.resize(); }).observe($el);
-             "
-        >
-            <canvas x-ref="drawingCanvas"
-                    class="absolute inset-x-0 inset-y-0 w-full z-10"
-                    :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
-            </canvas>
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
 
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
 
                 {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
-                {{-- Passage 1 --}}
-                <div class="mb-6">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 1</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
 
                     <h3 class="text-2xl font-bold text-center text-gray-900 mb-2">Materials to take us beyond concrete</h3>
                     <p class="text-center italic text-gray-600 mb-6 text-[15px]">Concrete is everywhere, but it's bad for the planet, generating large amounts of carbon dioxide – alternatives are being developed</p>
@@ -108,13 +162,46 @@
                         <p>But Anna Surgenor, of the UK's Green Building Council, notes that although these waste products can save carbon in the concrete mix, their use is not always straightforward. 'It's possible to replace the cement content in concrete with waste products to lower the overall carbon impact. But there are several calculations that need to be considered across the entire life cycle of the building – these include factoring in where these materials are being shipped from. If they are transported over long distances, using fossil fuels, the use of alternative materials might not make sense from an overall carbon reduction perspective.'</p>
 
                         <p><strong>H</strong> While these technologies are all promising ideas, they are either unproven or based on materials that are not abundant. In their overview of innovation in the concrete industry, Felix Preston and Johanna Lehne of the UK's Royal Institute of International Affairs reached the conclusion that, 'Some novel cements have been discussed for more than a decade within the research community, without breaking through. At present, these alternatives are rarely as cost-effective as conventional cement, and they face raw-material shortages and resistance from customers.'</p>
+
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 2 placeholder --}}
-                <div class="mb-6 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 2</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
 
                     <h3 class="text-2xl font-bold text-center text-gray-900 mb-2">The steam car</h3>
                     <p class="text-center italic text-gray-600 mb-6 text-[15px]">The successes and failures of the Doble brothers and their steam cars</p>
@@ -136,13 +223,46 @@
                         <p><strong>F</strong> The brothers made one final attempt to produce a viable steam automobile. In early 1924, the Doble brothers shipped a Model E to New York City to be road-tested by the Automobile Club of America. After sitting overnight in freezing temperatures, the car was pushed out into the road and left to sit for over an hour in the frosty morning air. At the turn of the key, the boiler lit and reached its operating pressure inside of forty seconds. As they drove the test vehicle further, they found that its evenly distributed weight lent it surprisingly good handling, even though it was so heavy. As the new Doble steamer was further developed and tested, its maximum speed was pushed to over a hundred miles per hour, and it achieved about fifteen miles per gallon of kerosene with negligible emissions.</p>
 
                         <p><strong>G</strong> Sadly, the Dobles' brilliant steam car never was a financial success. Priced at around $18,000 in 1924, it was popular only among the very wealthy. Plus, it is said that no two Model Es were quite the same, because Abner Doble tinkered endlessly with the design. By the time the company folded in 1931, fewer than fifty of the amazing Model E steam cars had been produced. For his whole career, until his death in 1961, Abner Doble remained adamant that steam-powered automobiles were at least equal to gasoline cars, if not superior. Given the evidence, he may have been right. Many of the Model E Dobles which have survived are still in good working condition, some having been driven over half a million miles with only normal maintenance. Astonishingly, an unmodified Doble Model E runs clean enough to pass the emissions laws in California today, and they are pretty strict. It is true that the technology poses some difficult problems, but you cannot help but wonder how efficient a steam car might be with the benefit of modern materials and computers. Under the current pressure to improve automotive performance and reduce emissions, it is not unthinkable that the steam car may rise again.</p>
+
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 3 placeholder --}}
-                <div class="mb-6 mt-10">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 3</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
 
                     <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The case for mixed-ability classes</h3>
 
@@ -171,48 +291,20 @@
                         <p>I find it amazing to watch students get over an idea to their peers in ways that I would never think of. They operate with different language tools and different social tools from teachers and, having just learnt it themselves, they possess similar cognitive structures to their struggling classmates. There is also something exciting about passing on skills and knowledge that you yourself have just mastered – a certain pride and zeal, a certain freshness to the interaction between 'teacher' and 'learner' that is often lost by the expert for whom the steps are obvious and the joy of discovery forgotten.</p>
 
                         <p>Having a variety of different abilities in a collaborative learning environment provides valuable resources for helping students meet their learning needs, not to mention improving their communication and social skills. And today, more than ever, we need the many to flourish – not suffer at the expense of a few bright stars. Once a year, I go on a hike with my class, a mixed bunch of students. It <em>is</em> challenging. The fittest students realise they need to encourage the reluctant. There are lookouts who report back, and extra items to carry for others. We make it – together.</p>
+
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
             </div>
-
-            {{-- Annotation toolbar --}}
-            <div class="sticky bottom-6 flex flex-col items-center z-30 pointer-events-none gap-3">
-                <div x-show="highlightMode" x-transition class="flex items-center gap-2 pointer-events-auto bg-white/80 p-1.5 rounded-full backdrop-blur-md shadow-lg border border-gray-200/50">
-                    <button @click.prevent.stop="highlightColor='yellow'" class="w-8 h-8 rounded-full bg-yellow-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='yellow' ? 'ring-2 ring-yellow-500 scale-110' : 'hover:ring-yellow-400'"></button>
-                    <button @click.prevent.stop="highlightColor='green'"  class="w-8 h-8 rounded-full bg-green-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='green'  ? 'ring-2 ring-green-500 scale-110'  : 'hover:ring-green-400'"></button>
-                    <button @click.prevent.stop="highlightColor='blue'"   class="w-8 h-8 rounded-full bg-blue-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='blue'   ? 'ring-2 ring-blue-500 scale-110'   : 'hover:ring-blue-400'"></button>
-                    <button @click.prevent.stop="highlightColor='pink'"   class="w-8 h-8 rounded-full bg-pink-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='pink'   ? 'ring-2 ring-pink-500 scale-110'   : 'hover:ring-pink-400'"></button>
-                </div>
-                <div class="flex justify-center items-center gap-3 pointer-events-auto bg-white/40 p-1.5 rounded-full backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/50">
-                    <button @click="highlightMode=!highlightMode; pencilMode=false; eraserMode=false;"
-                            class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-green-600 hover:border-green-400 hover:scale-105 transition-all"
-                            :class="{ '!bg-green-500 !text-white !border-green-600 shadow-md !opacity-100': highlightMode }"
-                            title="Highlight Tool">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    </button>
-                    <button @click="pencilMode=!pencilMode; highlightMode=false; eraserMode=false;"
-                            class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-blue-600 hover:border-blue-400 hover:scale-105 transition-all"
-                            :class="{ '!bg-blue-500 !text-white !border-blue-600 shadow-md !opacity-100': pencilMode }"
-                            title="Pencil Tool">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    </button>
-                    <button @click="eraserMode=!eraserMode; pencilMode=false; highlightMode=false;"
-                            class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-indigo-600 hover:border-indigo-400 hover:scale-105 transition-all"
-                            :class="{ '!bg-indigo-500 !text-white !border-indigo-600 shadow-md !opacity-100': eraserMode }"
-                            title="Eraser Tool">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-                    </button>
-                </div>
-            </div>
-
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
-                {{-- PASSAGE 1 QUESTIONS header --}}
+{{-- PASSAGE 1 QUESTIONS header --}}
                 <div class="flex justify-center mb-6">
                     <span class="text-base font-bold bg-black text-white px-5 py-1 uppercase tracking-widest">READING PASSAGE 1</span>
                 </div>
@@ -227,7 +319,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Information</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -240,7 +332,7 @@
                                     [3, 'an indication of how widely available the raw materials of concrete are'],
                                     [4, 'the belief that more high-rise wooden buildings are needed before wood can be regarded as a viable construction material'],
                                 ] as [$num, $info])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $info }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -265,7 +357,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 5–8 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-5">Making buildings with wood</h4>
 
                         <p class="leading-loose mb-3">
@@ -298,7 +390,7 @@
                     <p class="text-sm italic text-gray-700 mb-5"><strong>NB</strong> You may use any letter more than once.</p>
 
                     {{-- People list box --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <p class="font-bold text-center mb-3">List of People</p>
                         <div class="space-y-1 ml-4">
                             <div><strong>A</strong> Chris Cheeseman</div>
@@ -311,7 +403,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -325,7 +417,7 @@
                                     [12, 'Expense has been a factor in the negative response to the development of new cements.'],
                                     [13, 'The environmental damage caused by concrete is due to it being produced in large quantities.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -357,7 +449,7 @@
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct number, <strong>i–viii</strong>, in boxes 14–20 on your answer sheet.</p>
 
                     {{-- Headings list --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <p class="font-bold text-center mb-3">List of Headings</p>
                         <div class="space-y-1 ml-4">
                             <div><strong>i</strong>&nbsp;&nbsp;&nbsp;A period in cold conditions before the technology is assessed</div>
@@ -374,7 +466,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Paragraph</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -390,7 +482,7 @@
                                     [19, 'Paragraph F'],
                                     [20, 'Paragraph G'],
                                 ] as [$num, $para])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm">{{ $para }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -419,11 +511,11 @@
                         [22, 'When building their first steam car, the Doble brothers', ['A' => 'constructed all the parts themselves.', 'B' => 'made written notes at each stage of the construction.', 'C' => 'needed several attempts to achieve a competitive model.', 'D' => 'sought the advice of experienced people in the car industry.']],
                         [23, 'In order to produce the Model C, the Doble brothers', ['A' => 'moved production to a different city.', 'B' => 'raised financial capital.', 'C' => 'employed an additional worker.', 'D' => 'abandoned their earlier designs.']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {{ $question }}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded text-sm">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded text-sm">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -440,7 +532,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD AND/OR A NUMBER</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-5">The Model E</h4>
 
                         <p class="leading-loose mb-3">
@@ -478,11 +570,11 @@
                         [29, 'What idea is suggested by the reference to Mount Qomolangma in the fifth paragraph?', ['A' => 'students following unsuitable paths', 'B' => 'students attempting interesting tasks', 'C' => 'students not achieving their full potential', 'D' => 'students not being aware of their limitations']],
                         [30, "What does the word 'scaffolding' in the sixth paragraph refer to?", ['A' => 'the factors which prevent a student from learning effectively', 'B' => 'the environment where most of a student\'s learning takes place', 'C' => 'the assistance given to a student in their initial stages of learning', 'D' => 'the setting of appropriate learning targets for a student\'s aptitude']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {!! $question !!}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded text-sm">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded text-sm">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -498,7 +590,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary using the list of phrases, <strong>A–I</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–I</strong>, in boxes 31–35 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
                         <h4 class="text-base font-bold text-center mb-5">Is streaming effective?</h4>
 
                         <p class="leading-loose mb-3">
@@ -537,7 +629,7 @@
                     </div>
 
                     {{-- Phrases box --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mt-4 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mt-4 text-sm bg-gray-50">
                         <div class="grid grid-cols-3 gap-x-4 gap-y-2">
                             <div><strong>A</strong> wrong classes</div>
                             <div><strong>B</strong> lower expectations</div>
@@ -558,7 +650,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the views of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 36–40 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the views of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the views of the writer</div>
@@ -569,7 +661,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -583,7 +675,7 @@
                                     [39, 'The priority should be to ensure that the highest-achieving students attain their goals.'],
                                     [40, 'Taking part in collaborative outdoor activities with teachers and classmates can improve student outcomes in the classroom.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -611,7 +703,20 @@
                     <button class="px-10 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all hover:-translate-y-0.5">
                         Submit Answers
                     </button>
+
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
                 </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
             </div>
         </div>
@@ -619,76 +724,8 @@
     </div>
 </div>
 
-<script>
-/* ── Drawing canvas ── */
-window.initDrawingCanvas = function(canvas) {
-    const ctx = canvas.getContext('2d');
-    let drawing = false, mode = 'draw', snap;
-    const resize = () => {
-        const parent = canvas.parentElement;
-        snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        canvas.width  = parent.scrollWidth;
-        canvas.height = parent.scrollHeight;
-        ctx.putImageData(snap, 0, 0);
-    };
-    const pos = e => {
-        const r = canvas.getBoundingClientRect();
-        if (e.touches) { return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top }; }
-        return { x: e.clientX - r.left, y: e.clientY - r.top };
-    };
-    const start = e => {
-        drawing = true;
-        const p = pos(e);
-        ctx.beginPath(); ctx.moveTo(p.x, p.y);
-        if (mode === 'erase') {
-            const allEls = document.elementsFromPoint(e.clientX, e.clientY);
-            const mark = allEls.find(el => el.tagName === 'MARK');
-            if (mark) { const parent = mark.parentNode; while (mark.firstChild) { parent.insertBefore(mark.firstChild, mark); } parent.removeChild(mark); parent.normalize(); }
-        }
-    };
-    const move = e => {
-        if (!drawing) return;
-        const p = pos(e);
-        if (mode === 'draw') { ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.lineCap = 'round'; }
-        else { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 20; }
-        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    };
-    const end = () => { drawing = false; ctx.globalCompositeOperation = 'source-over'; };
-    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, { passive: false });
-    canvas.addEventListener('touchmove',  e => { e.preventDefault(); move(e);  }, { passive: false });
-    canvas.addEventListener('touchend', end);
-    resize();
-    return { setMode: m => { mode = m; }, resize };
-};
+@include('assignments.ielts.mockup.partials.reading-annotations')
 
-/* ── Text highlight ── */
-window.applyAnnotation = function(type, color) {
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    const mark  = document.createElement('mark');
-    const colors = { yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8' };
-    mark.style.backgroundColor = colors[color] || colors.yellow;
-    mark.style.borderRadius = '2px';
-    try { range.surroundContents(mark); } catch(e) { /* cross-node – skip */ }
-    sel.removeAllRanges();
-};
-window.removeHighlight = function(event) {
-    let el = event.target;
-    while (el && el.tagName !== 'MARK') {
-        if (el.classList && el.classList.contains('passage-content')) break;
-        el = el.parentElement;
-    }
-    if (el && el.tagName === 'MARK') {
-        const parent = el.parentNode;
-        while (el.firstChild) { parent.insertBefore(el.firstChild, el); }
-        parent.removeChild(el);
-        parent.normalize();
-    }
-};
-</script>
-
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

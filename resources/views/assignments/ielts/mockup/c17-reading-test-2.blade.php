@@ -3,11 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IELTS Reading Mock Test {{ $testId ?? 2 }} - {{ config('app.name', 'Target Bahasa') }}</title>
+    <title>IELTS Reading Mock Test {{ $testId }} - {{ config('app.name', 'Target Bahasa') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         html, body { height: 100%; overflow: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -15,15 +14,35 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
-        input[type=text].ans { border: none; border-bottom: 1px solid #6b7280; outline: none; padding: 2px 4px; width: 120px; background: transparent; }
-        input[type=text].ans:focus { border-bottom-color: #3b82f6; }
+
+        .reading-fixed-shell {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (min-width: 768px) {
+            body:has(#sidebar.w-64) .reading-fixed-shell,
+            body:has(aside.w-64) .reading-fixed-shell {
+                left: 16rem;
+            }
+            body:has(#sidebar.w-16) .reading-fixed-shell,
+            body:has(#sidebar.w-14) .reading-fixed-shell,
+            body:has(aside.w-16) .reading-fixed-shell,
+            body:has(aside.w-14) .reading-fixed-shell {
+                left: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
-<div class="fixed inset-0 z-0 flex flex-col" style="padding-left: 0;">
+{{-- Fixed full-screen layout --}}
+<div class="reading-fixed-shell bg-white flex flex-col font-sans z-0">
 
     {{-- Top header --}}
     <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
@@ -35,58 +54,89 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId ?? 2 }}</h1>
-                    <p class="text-sm text-gray-500">Cambridge {{ $edition ?? 17 }} Reading Practice</p>
+                    <h1 class="text-xl font-bold text-gray-800">IELTS Reading – Mock Test {{ $testId }}</h1>
+                    <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 2]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.toggle-submit') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Klik untuk mengubah status tombol submit bagi semua siswa"
+                            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition shadow-sm border {{ ($submitEnabled ?? true) ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-300' }}">
+                        <span class="w-2.5 h-2.5 rounded-full {{ ($submitEnabled ?? true) ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <span>Tombol Submit: <strong>{{ ($submitEnabled ?? true) ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                    </button>
+                </form>
+                @endif
+                <button type="button"
+                        onclick="window.openReadingDictionary ? window.openReadingDictionary() : window.dispatchEvent(new CustomEvent('open-reading-dict', { detail: { word: '' } }))"
+                        title="Buka Kamus (Dictionary & Thesaurus)"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Dictionary</span>
+                </button>
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back
+                </a>
+            </div>
         </div>
+        @if(session('success'))
+        <div class="bg-emerald-50 border-t border-emerald-200 px-6 py-2 text-xs text-emerald-700 font-semibold flex items-center justify-between">
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
     </div>
 
     {{-- Split screen --}}
     <div class="flex-1 min-h-0 grid overflow-hidden" style="grid-template-columns: 2.5fr 2fr;">
 
         {{-- LEFT: Reading Passage --}}
-        <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative"
-             x-data="{
-                 highlightMode: false,
-                 pencilMode: false,
-                 eraserMode: false,
-                 highlightColor: 'yellow',
-                 canvasObj: null
-             }"
-             x-init="
-                 $watch('pencilMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('draw');
-                 });
-                 $watch('eraserMode', value => {
-                     if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
-                     if (value && canvasObj) canvasObj.setMode('erase');
-                 });
-                 new ResizeObserver(() => { if (canvasObj) canvasObj.resize(); }).observe($el);
-             "
-        >
-            {{-- Drawing canvas --}}
-            <canvas x-ref="drawingCanvas"
-                    class="absolute inset-x-0 inset-y-0 w-full z-10"
-                    :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
-            </canvas>
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative" id="passage-pane">
 
-            <div class="px-10 py-8 pb-32 max-w-3xl mx-auto relative z-20">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-32 w-full relative">
 
                 {{-- READING header --}}
                 <div class="flex justify-center mb-8">
-                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest">READING</span>
+                    <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
-                {{-- Passage 1 --}}
-                <div class="mb-6">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 1</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
+                {-- Passage 1 Card --}
+                <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 1 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 1</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 1–13</strong>, which are based on Reading Passage 1 below.</p>
 
                     <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">The Dead Sea Scrolls</h3>
 
@@ -103,13 +153,46 @@
                         <p>The Dead Sea Scrolls include fragments from every book of the Old Testament of the Bible except for the Book of Esther. The only entire book of the Hebrew Bible preserved among the manuscripts from Qumran is Isaiah; this copy, dated to the first century BCE, is considered the earliest biblical manuscript still in existence. Along with biblical texts, the scrolls include documents about sectarian regulations and religious writings that do not appear in the Old Testament.</p>
 
                         <p class="italic text-gray-500">[Part 2 of the passage regarding the Copper Scroll and Mar Samuel would continue here...]</p>
+
+                        {-- Floating Toolbar for Passage 1 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 2 --}}
-                <div class="mb-6 mt-10" id="passage-2">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 2</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
+                {-- Passage 2 Card --}
+                <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 2 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 2</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 14–26</strong>, which are based on Reading Passage 2 below.</p>
 
                     <h3 class="text-3xl font-bold text-center text-gray-900 mb-8">A second attempt at domesticating the tomato</h3>
 
@@ -165,13 +248,46 @@
                         </div>
 
                         <p class="text-xs text-gray-500 mt-6 border-t pt-3">* mutations: changes in an organism's genetic structure that can be passed down to later generations</p>
+
+                        {-- Floating Toolbar for Passage 2 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {{-- Passage 3 --}}
-                <div class="mb-6 mt-10" id="passage-3">
-                    <h2 class="text-base font-bold text-gray-900 mb-1 uppercase tracking-wide">READING PASSAGE 3</h2>
-                    <p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
+                {-- Passage 3 Card --}
+                <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
+                     x-data="{
+                         translateMode: false,
+                         highlightMode: false,
+                         pencilMode: false,
+                         eraserMode: false,
+                         highlightColor: 'yellow',
+                         canvasObj: null
+                     }"
+                     x-init="
+                         $watch('pencilMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('draw');
+                         });
+                         $watch('eraserMode', value => {
+                             if (value && !canvasObj) { canvasObj = window.initDrawingCanvas($refs.drawingCanvas); }
+                             if (value && canvasObj) canvasObj.setMode('erase');
+                         });
+                         new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
+                     "
+                >
+                    {-- Drawing canvas for Passage 3 --}
+                    <canvas x-ref="drawingCanvas"
+                            class="absolute inset-0 w-full h-full z-10 rounded-2xl"
+                            :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
+                    </canvas>
+
+                    <div class="relative z-20" :class="pencilMode ? 'pointer-events-none' : ''">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">READING PASSAGE 3</span>
+                        </div>
+
+<p class="text-sm italic text-gray-700 mb-6">You should spend about 20 minutes on <strong>Questions 27–40</strong>, which are based on Reading Passage 3 below.</p>
 
                     <h3 class="text-3xl font-bold text-center text-gray-900 mb-4">Insight or evolution?</h3>
                     <p class="text-center italic text-gray-700 text-lg mb-8">Two scientists consider the origins of discoveries and other innovative behavior</p>
@@ -201,46 +317,9 @@
                         <p>Of course, the origin of human innovation demands much further study. In particular, the provenance of the raw material on which the Law of Effect operates is not as clearly known as that of the genetic mutations on which the Law of Natural Selection operates. The generation of novel ideas and behaviors may not be entirely random, but constrained by prior successes and failures – of the current individual (such as Bohr) or of predecessors (such as Nicholson).</p>
 
                         <p>The time seems right for abandoning the naive notions of intelligent design and genius, and for scientifically exploring the true origins of creative behavior.</p>
-                    </div>
-                </div>
 
-                {{-- Floating Annotation Toolbar --}}
-                <div class="sticky bottom-6 w-full flex flex-col items-center pointer-events-none z-30 mt-4 mb-2">
-                    {{-- Colour picker --}}
-                    <div x-show="highlightMode"
-                         class="flex gap-2 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-100 mb-3 pointer-events-auto"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         style="display:none;">
-                        <button @click.prevent.stop="highlightColor='yellow'" class="w-8 h-8 rounded-full bg-yellow-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='yellow' ? 'ring-2 ring-yellow-500 scale-110' : 'hover:ring-yellow-400'"></button>
-                        <button @click.prevent.stop="highlightColor='green'"  class="w-8 h-8 rounded-full bg-green-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='green'  ? 'ring-2 ring-green-500 scale-110'  : 'hover:ring-green-400'"></button>
-                        <button @click.prevent.stop="highlightColor='blue'"   class="w-8 h-8 rounded-full bg-blue-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='blue'   ? 'ring-2 ring-blue-500 scale-110'   : 'hover:ring-blue-400'"></button>
-                        <button @click.prevent.stop="highlightColor='pink'"   class="w-8 h-8 rounded-full bg-pink-300 hover:ring-2 ring-offset-2 focus:outline-none transition-all" :class="highlightColor==='pink'   ? 'ring-2 ring-pink-500 scale-110'   : 'hover:ring-pink-400'"></button>
-                    </div>
-
-                    <div class="flex justify-center items-center gap-3 pointer-events-auto bg-white/40 p-1.5 rounded-full backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/50">
-                        {{-- Highlight --}}
-                        <button @click="highlightMode=!highlightMode; pencilMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-green-600 hover:border-green-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-green-500 !text-white !border-green-600 shadow-md !opacity-100': highlightMode }"
-                                title="Highlight Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-                        {{-- Pencil --}}
-                        <button @click="pencilMode=!pencilMode; highlightMode=false; eraserMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-blue-600 hover:border-blue-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-blue-500 !text-white !border-blue-600 shadow-md !opacity-100': pencilMode }"
-                                title="Pencil Tool">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        {{-- Eraser --}}
-                        <button @click="eraserMode=!eraserMode; pencilMode=false; highlightMode=false;"
-                                class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 text-gray-500 hover:bg-white opacity-90 hover:opacity-100 hover:shadow-md hover:text-indigo-600 hover:border-indigo-400 hover:scale-105 transition-all"
-                                :class="{ '!bg-indigo-500 !text-white !border-indigo-600 shadow-md !opacity-100': eraserMode }"
-                                title="Eraser Tool">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-                        </button>
+                        {-- Floating Toolbar for Passage 3 --}
+                        @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
@@ -248,10 +327,10 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
-            <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
+        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+            <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
-                {{-- Passage 1 divider --}}
+{{-- Passage 1 divider --}}
                 <div class="mt-2 mb-4">
                     <div class="flex justify-center mb-4">
                         <span class="text-base font-bold bg-black text-white px-5 py-1 uppercase tracking-widest">READING PASSAGE 1</span>
@@ -310,7 +389,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 6–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -321,7 +400,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -338,7 +417,7 @@
                                     [12, 'The scroll that was pieced together in 2017 contains information about annual occasions in the Qumran area 2,000 years ago.'],
                                     [13, 'Academics at the University of Haifa are currently researching how to decipher the final scroll.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -366,7 +445,6 @@
                             Next: Passage 2
                         </button>
                     </div>
-                </div>
 
                 {{-- Passage 2 divider --}}
                 <div class="mt-8 mb-2">
@@ -434,7 +512,7 @@
                         @endforeach
                     </div>
 
-                    <div class="border border-black p-5 max-w-sm mx-auto bg-white text-[15px]">
+                    <div class="border border-black p-5 max-w-sm mx-auto bg-gray-50 text-[15px]">
                         <p class="font-bold text-center mb-4">List of Researchers</p>
                         @foreach([
                             'A' => 'Jorg Kudla',
@@ -527,7 +605,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 32–36 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -538,7 +616,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-white border-b border-gray-200">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -552,7 +630,7 @@
                                     [35, 'The Law of Effect sets out clear explanations about the sources of new ideas and behaviours.'],
                                     [36, 'Many scientists are now turning away from the notion of intelligent design and genius.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -613,7 +691,7 @@
                         </p>
                     </div>
 
-                    <div class="border border-black p-5 max-w-lg mx-auto bg-white text-[15px]">
+                    <div class="border border-black p-5 max-w-lg mx-auto bg-gray-50 text-[15px]">
                         <div class="grid grid-cols-3 gap-y-3">
                             <div><strong>A</strong>&nbsp;&nbsp;invention</div>
                             <div><strong>B</strong>&nbsp;&nbsp;goals</div>
@@ -639,83 +717,29 @@
 </div>
 
 {{-- Annotation Tool Javascript --}}
-<script>
-    window.initDrawingCanvas = function(canvasElement) {
-        if (!canvasElement) return null;
-        const ctx = canvasElement.getContext('2d');
-        let isDrawing = false;
-        let mode = 'draw'; // 'draw' or 'erase'
 
-        function resize() {
-            canvasElement.width = canvasElement.offsetWidth;
-            canvasElement.height = canvasElement.offsetHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+                {{-- Final Submit --}}
+                @if($submitEnabled ?? true)
+                <div class="mt-6 flex justify-end">
+                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
+                        Submit All Answers
+                    </button>
+                </div>
+                @else
+                <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-sm text-amber-700 font-medium">
+                    <svg class="w-5 h-5 inline-block mr-1 text-amber-500 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fitur pengumpulan jawaban (Submit) dinonaktifkan sementara oleh Admin/Guru.
+                </div>
+                @endif
 
-        function startPosition(e) {
-            isDrawing = true;
-            draw(e);
-        }
-        function endPosition() {
-            isDrawing = false;
-            ctx.beginPath();
-        }
-        function draw(e) {
-            if (!isDrawing) return;
-            const rect = canvasElement.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            </div>
+        </div>
 
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
+    </div>
+</div>
 
-            if (mode === 'draw') {
-                ctx.strokeStyle = '#3b82f6';
-                ctx.globalCompositeOperation = 'source-over';
-            } else if (mode === 'erase') {
-                ctx.lineWidth = 20;
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.strokeStyle = 'rgba(0,0,0,1)';
-            }
+@include('assignments.ielts.mockup.partials.reading-annotations')
 
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-
-        canvasElement.addEventListener('mousedown', startPosition);
-        canvasElement.addEventListener('mouseup', endPosition);
-        canvasElement.addEventListener('mousemove', draw);
-        canvasElement.addEventListener('mouseleave', endPosition);
-
-        return {
-            setMode: function(newMode) { mode = newMode; },
-            resize: resize
-        };
-    };
-
-    window.applyAnnotation = function(type, color) {
-        let selection = window.getSelection();
-        if (!selection.rangeCount || selection.isCollapsed) return;
-        
-        // Basic naive highlighting
-        try {
-            document.execCommand('hiliteColor', false, color);
-        } catch (e) {
-            console.warn('highlight fail', e);
-        }
-        window.getSelection().removeAllRanges();
-    };
-
-    window.removeHighlight = function(e) {
-        if (e.target.nodeName === 'SPAN' && e.target.style.backgroundColor) {
-            let text = document.createTextNode(e.target.textContent);
-            e.target.parentNode.replaceChild(text, e.target);
-        }
-    };
-</script>
-
+@include('assignments.ielts.mockup.partials.reading-dictionary')
 </body>
 </html>

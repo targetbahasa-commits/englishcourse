@@ -87,7 +87,12 @@ class ClassPeriodController extends Controller
     public function destroy(ClassPeriod $classPeriod)
     {
         $this->manageClassPeriods->delete($classPeriod);
-        return back()->with('success', 'Class Period deleted successfully.');
+
+        // The delete button lives on this class's own show page, so
+        // back() would normally bounce the admin right back to the URL
+        // they just deleted - a guaranteed 404 on the next load. Send
+        // them to the list instead.
+        return redirect()->route('class-periods.index')->with('success', 'Class Period deleted successfully.');
     }
 
     public function nextBatchNumber(Request $request)

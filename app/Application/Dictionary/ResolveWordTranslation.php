@@ -41,6 +41,47 @@ class ResolveWordTranslation
     }
 
     /**
+     * Context-aware single-word translation, deliberately NOT part of the
+     * handle()/ToeflDictionary caching chain above: that cache stores one
+     * translation per bare word forever, for every student, in every
+     * passage - correct for a context-free word like "elephant", actively
+     * wrong for a word whose sense depends on usage ("aid" as the verb
+     * "membantu" in "bacteria aid digestion" vs the cached noun "bantuan").
+     * Only MyMemory/Google's word-for-word lookups get skipped here - they
+     * have no mechanism to use the sentence at all - straight to the LLM,
+     * which can actually read it. Callers are expected to NOT persist this
+     * into ToeflDictionary; it's a request-scoped answer for this specific
+     * sentence, not a new global default.
+     */
+    public function handleWithContext(string $word, string $sentence): ?string
+    {
+        try {
+            $result = \App\Services\MultiProviderAiClient::chat(
+                ['groq', 'cerebras', 'sambanova', 'gemini', 'siliconflow', 'openrouter', 'deepinfra', 'openai'],
+                'You are a precise English-to-Indonesian dictionary. You will be given a sentence and one English word from that sentence. Translate the word into Indonesian exactly as it is being used in THIS sentence - matching its real grammatical role here (verb, noun, adjective, etc.), not just its most common dictionary sense. Respond with ONLY the Indonesian translation - one to three lowercase words, nothing else. No label, no quotes, no explanation.',
+                "Sentence: \"{$sentence}\"\nWord to translate (as used in this exact sentence): \"{$word}\"",
+                [
+                    'groq_feature' => 'dictionary-context',
+                    'max_tokens' => 200,
+                    'temperature' => 0.1,
+                    'json_mode' => false,
+                    'timeout' => 15,
+                ]
+            );
+
+            if (!$result || empty($result['content'])) {
+                return null;
+            }
+
+            return $this->extractTranslationFromAiResponse($result['content']);
+        } catch (\Exception $e) {
+            Log::warning('Context-aware AI translation failed: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
      * Both providers occasionally echo the input straight back (just with
      * different casing, e.g. "Festival") instead of a real failure response
      * when they have no actual translation - accepting that at face value
