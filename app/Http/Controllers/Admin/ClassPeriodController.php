@@ -23,8 +23,14 @@ class ClassPeriodController extends Controller
      */
     public function index(Request $request)
     {
-        $periods = $this->manageClassPeriods->listAll($request->only(['program_id', 'status']));
-        
+        // program_id deliberately not passed through anymore: the view's
+        // Category/Program tabs need the complete, unfiltered list to build
+        // every tab - filtering server-side by program here would silently
+        // drop other programs out of the data before the tabs ever see them
+        // (e.g. a stale ?program_id=... link would make every other
+        // program's tab vanish instead of just pre-selecting one).
+        $periods = $this->manageClassPeriods->listAll($request->only(['status']));
+
         return view('admin.class-periods.index', compact('periods'));
     }
 

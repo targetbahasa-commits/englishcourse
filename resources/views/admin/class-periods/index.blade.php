@@ -12,10 +12,16 @@
             </h2>
             <p class="text-sm text-gray-500 mt-1">Manage student batches and control meeting access per class</p>
         </div>
-        <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'create-class-period')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            New Class Period
-        </button>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('custom-classes.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                + Buat Kelas Custom (Privat / Semi)
+            </a>
+            <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'create-class-period')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                New Class Period (Reguler)
+            </button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -27,20 +33,39 @@
             </div>
         @endif
 
+        @if (session('wa_template'))
+            <div class="bg-emerald-50 border border-emerald-300 p-5 mb-6 rounded-2xl shadow-sm space-y-3" x-data="{ copied: false }">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                        <span>Template WhatsApp Siap Kirim ke Student</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if(session('invoice_url'))
+                            <a href="{{ session('invoice_url') }}" target="_blank" class="text-xs bg-white text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-50 transition">
+                                Unduh Invoice PDF
+                            </a>
+                        @endif
+                        <button type="button" @click="navigator.clipboard.writeText($refs.waText.value); copied = true; setTimeout(() => copied = false, 2000)"
+                                class="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-700 transition flex items-center gap-1">
+                            <span x-text="copied ? '✓ Berhasil Disalin!' : 'Salin Pesan WA'"></span>
+                        </button>
+                    </div>
+                </div>
+                <textarea x-ref="waText" readonly rows="7" class="w-full text-xs font-mono bg-white p-3 rounded-xl border border-emerald-200 text-gray-800 focus:ring-0 focus:outline-none">{{ session('wa_template') }}</textarea>
+            </div>
+        @endif
+
         <!-- Filters -->
+        <!-- Program selection now lives in the Category/Program tabs below,
+             which need the full unfiltered $periods list to render every
+             program's tab - a server-side "All Programs" dropdown here would
+             strip other programs out of that list before it ever reaches the
+             tabs, making them silently disappear (e.g. picking "Kelas Custom"
+             here used to make the SAT tab vanish entirely, since its periods
+             were never fetched in the first place). Status is unaffected
+             since nothing below re-derives it per-program. -->
         <form method="GET" action="{{ route('class-periods.index') }}" class="flex gap-4 mb-6">
-                 <select name="program_id" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-                    <option value="">All Programs</option>
-                    @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get()->groupBy('category') as $category => $categoryPrograms)
-                        <optgroup label="{{ $category }}">
-                            @foreach($categoryPrograms as $program)
-                                <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>
-                                    {{ $program->name }}
-                                </option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
                 <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                     <option value="">All Statuses</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -49,9 +74,9 @@
                 </select>
             </form>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-                @if(empty($periods))
-                    <!-- Empty State -->
+            @if(empty($periods))
+                <!-- Empty State -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
                     <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
                         <div class="bg-gray-50 p-4 rounded-full mb-4">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -62,102 +87,182 @@
                             + Create your first class period
                         </button>
                     </div>
-                @else
-                    <!-- Table -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Class Period Name</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Program</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teacher</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Range</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mode</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe Batch</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($periods as $period)
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($period->batch_number)
-                                                <span class="inline-flex items-center justify-center bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs font-bold mb-1">Batch {{ $period->batch_number }}</span>
-                                            @endif
-                                            <div class="text-sm font-bold text-gray-900">{{ $period->name }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                {{ $period->program ? $period->program->name : 'All Programs' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($period->teacher)
-                                                <div class="flex items-center gap-2">
-                                                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
-                                                        {{ strtoupper(substr($period->teacher->name, 0, 1)) }}
-                                                    </div>
-                                                    <span class="text-sm text-gray-800 font-medium">{{ $period->teacher->name }}</span>
-                                                </div>
-                                            @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-400 italic">Unassigned</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ $period->start_date ? $period->start_date->format('M d, Y') : 'TBD' }}</div>
-                                            <div class="text-xs text-gray-500">to {{ $period->end_date ? $period->end_date->format('M d, Y') : 'TBD' }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $period->learning_mode === 'online' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                                {{ ucfirst($period->learning_mode) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $batchTypeLabels = ['regular' => 'Reguler', 'semi_private' => 'Semi-Private', 'private' => 'Private'];
-                                                $batchTypeColors = ['regular' => 'bg-blue-100 text-blue-800', 'semi_private' => 'bg-purple-100 text-purple-800', 'private' => 'bg-amber-100 text-amber-800'];
-                                            @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $batchTypeColors[$period->batch_type] ?? 'bg-gray-100 text-gray-600' }}">
-                                                {{ $batchTypeLabels[$period->batch_type] ?? ucfirst($period->batch_type) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <div class="text-sm font-medium text-gray-900">{{ $period->users_count }}</div>
-                                            <div class="text-xs text-gray-500">enrolled</div>
-                                            @if($period->booked_count > 0)
-                                                <div class="text-xs font-bold text-blue-600 mt-0.5">{{ $period->booked_count }} booking sendiri</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="{{ route('class-periods.status', $period) }}" method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <select name="status" onchange="this.form.submit()" 
-                                                    class="text-xs font-semibold rounded-full border-0 py-1 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-xs sm:leading-6
-                                                    {{ $period->status === 'active' ? 'bg-green-100 text-green-800' : '' }}
-                                                    {{ $period->status === 'upcoming' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                    {{ $period->status === 'closed' ? 'bg-gray-100 text-gray-600' : '' }}
-                                                    ">
-                                                    <option value="active" {{ $period->status === 'active' ? 'selected' : '' }}>Active</option>
-                                                    <option value="upcoming" {{ $period->status === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                                                    <option value="closed" {{ $period->status === 'closed' ? 'selected' : '' }}>Closed</option>
-                                                </select>
-                                            </form>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('class-periods.show', $period) }}" class="inline-flex items-center px-3 py-1.5 border border-indigo-600 rounded-md text-indigo-600 hover:bg-indigo-50 font-medium text-xs transition duration-150 ease-in-out">
-                                                Manage
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                </div>
+            @else
+                @php
+                    $categoryOrder = ['IELTS Courses & Skills', 'TOEFL & PTE Courses', 'Grammar & Speaking Courses', 'Program Lainnya'];
+                    $unassignedLabel = 'Tanpa Program';
+
+                    $byCategory = collect($periods)->groupBy(function ($period) use ($unassignedLabel) {
+                        if (!$period->program) {
+                            return $unassignedLabel;
+                        }
+                        return $period->program->category ?: 'Program Lainnya';
+                    });
+
+                    // Fixed, predictable category order; anything unexpected falls in after
+                    // the known ones, "Tanpa Program" always last.
+                    $orderedCategories = collect($categoryOrder)
+                        ->filter(fn ($cat) => $byCategory->has($cat))
+                        ->concat($byCategory->keys()->diff($categoryOrder)->diff([$unassignedLabel])->sort())
+                        ->when($byCategory->has($unassignedLabel), fn ($c) => $c->push($unassignedLabel));
+
+                    // Pre-compute the full category -> program -> periods tree up
+                    // front (instead of inside the render loop) so the tab
+                    // buttons - which need every category/program name before
+                    // any panel is drawn - and the panels themselves can both
+                    // read from the same structure.
+                    $grouped = $orderedCategories->mapWithKeys(function ($categoryName) use ($byCategory, $unassignedLabel) {
+                        $byProgram = $byCategory->get($categoryName)->groupBy(
+                            fn ($period) => $period->program ? $period->program->name : $unassignedLabel
+                        )->sortKeys();
+                        return [$categoryName => $byProgram];
+                    });
+
+                    $firstCategory = $orderedCategories->first();
+                    $firstProgram = $grouped->get($firstCategory)?->keys()->first();
+                @endphp
+
+                <div x-data="{ activeCategory: {{ Js::from($firstCategory) }}, activeProgram: {{ Js::from($firstProgram) }} }">
+                    <!-- Category Tabs -->
+                    <div class="flex flex-wrap gap-2 border-b border-gray-200 mb-4">
+                        @foreach ($orderedCategories as $categoryName)
+                            @php $categoryTotal = $byCategory->get($categoryName)->count(); @endphp
+                            <button type="button"
+                                    @click="activeCategory = {{ Js::from($categoryName) }}; activeProgram = {{ Js::from($grouped->get($categoryName)->keys()->first()) }};"
+                                    :class="activeCategory === {{ Js::from($categoryName) }} ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                    class="px-1 pb-3 -mb-px border-b-2 text-sm font-bold uppercase tracking-wider transition">
+                                {{ $categoryName }}
+                                <span class="ml-1 text-xs font-normal normal-case text-gray-400">({{ $categoryTotal }})</span>
+                            </button>
+                        @endforeach
                     </div>
-                @endif
-            </div>
+
+                    @foreach ($orderedCategories as $categoryName)
+                        @php $byProgram = $grouped->get($categoryName); @endphp
+
+                        <div x-show="activeCategory === {{ Js::from($categoryName) }}" x-cloak class="mb-8">
+                            <!-- Program Sub-tabs -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                @foreach ($byProgram as $programName => $periodsInProgram)
+                                    <button type="button"
+                                            @click="activeProgram = {{ Js::from($programName) }}"
+                                            :class="activeProgram === {{ Js::from($programName) }} ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                        {{ $programName }}
+                                        <span class="inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                                              :class="activeProgram === {{ Js::from($programName) }} ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-700'">
+                                            {{ $periodsInProgram->count() }}
+                                        </span>
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            @foreach ($byProgram as $programName => $periodsInProgram)
+                                <div x-show="activeProgram === {{ Js::from($programName) }}" x-cloak class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
+                                    <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+                                        <h4 class="font-semibold text-gray-800 text-sm">{{ $programName }}</h4>
+                                        <span class="inline-flex items-center justify-center bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs font-bold">
+                                            {{ $periodsInProgram->count() }}
+                                        </span>
+                                    </div>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead>
+                                                <tr class="bg-white">
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Class Period Name</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teacher</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Range</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mode</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe Batch</th>
+                                                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach ($periodsInProgram as $period)
+                                                    <tr class="hover:bg-gray-50 transition-colors">
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                                                @if($period->is_custom)
+                                                                    <span class="inline-flex items-center justify-center bg-indigo-100 text-indigo-800 rounded px-2 py-0.5 text-xs font-bold">Custom Class ({{ $period->total_meetings ?? 'Flex' }} M)</span>
+                                                                @elseif($period->batch_number)
+                                                                    <span class="inline-flex items-center justify-center bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs font-bold">Batch {{ $period->batch_number }}</span>
+                                                                @endif
+                                                            </div>
+                                                            <div class="text-sm font-bold text-gray-900">{{ $period->name }}</div>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            @if($period->teacher)
+                                                                <div class="flex items-center gap-2">
+                                                                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                                                        {{ strtoupper(substr($period->teacher->name, 0, 1)) }}
+                                                                    </div>
+                                                                    <span class="text-sm text-gray-800 font-medium">{{ $period->teacher->name }}</span>
+                                                                </div>
+                                                            @else
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-400 italic">Unassigned</span>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="text-sm text-gray-900">{{ $period->start_date ? $period->start_date->format('M d, Y') : 'TBD' }}</div>
+                                                            <div class="text-xs text-gray-500">to {{ $period->end_date ? $period->end_date->format('M d, Y') : 'TBD' }}</div>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $period->learning_mode === 'online' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                                                {{ ucfirst($period->learning_mode) }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            @php
+                                                                $batchTypeLabels = ['regular' => 'Reguler', 'semi_private' => 'Semi-Private', 'private' => 'Private'];
+                                                                $batchTypeColors = ['regular' => 'bg-blue-100 text-blue-800', 'semi_private' => 'bg-purple-100 text-purple-800', 'private' => 'bg-amber-100 text-amber-800'];
+                                                            @endphp
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $batchTypeColors[$period->batch_type] ?? 'bg-gray-100 text-gray-600' }}">
+                                                                {{ $batchTypeLabels[$period->batch_type] ?? ucfirst($period->batch_type) }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                            <div class="text-sm font-medium text-gray-900">{{ $period->users_count }}</div>
+                                                            <div class="text-xs text-gray-500">enrolled</div>
+                                                            @if($period->booked_count > 0)
+                                                                <div class="text-xs font-bold text-blue-600 mt-0.5">{{ $period->booked_count }} booking sendiri</div>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <form action="{{ route('class-periods.status', $period) }}" method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <select name="status" onchange="this.form.submit()"
+                                                                    class="text-xs font-semibold rounded-full border-0 py-1 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-xs sm:leading-6
+                                                                    {{ $period->status === 'active' ? 'bg-green-100 text-green-800' : '' }}
+                                                                    {{ $period->status === 'upcoming' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                    {{ $period->status === 'closed' ? 'bg-gray-100 text-gray-600' : '' }}
+                                                                    ">
+                                                                    <option value="active" {{ $period->status === 'active' ? 'selected' : '' }}>Active</option>
+                                                                    <option value="upcoming" {{ $period->status === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                                                                    <option value="closed" {{ $period->status === 'closed' ? 'selected' : '' }}>Closed</option>
+                                                                </select>
+                                                            </form>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                            <a href="{{ route('class-periods.show', $period) }}" class="inline-flex items-center px-3 py-1.5 border border-indigo-600 rounded-md text-indigo-600 hover:bg-indigo-50 font-medium text-xs transition duration-150 ease-in-out">
+                                                                Manage
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            @endif
     </div>
 </div>
 @endsection
