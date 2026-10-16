@@ -24,15 +24,54 @@
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @media (min-width: 768px) {
+            .reading-fixed-shell {
+                left: var(--student-sidebar-offset, var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--program-sidebar-offset, 0px))));
+            }
+            body.has-student-sidebar .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 16rem);
+            }
+            body.has-student-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 4rem);
+            }
+            body.has-admin-sidebar .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 16rem);
+            }
+            body.has-admin-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 3.5rem);
+            }
+            body.has-teacher-sidebar .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 16rem);
+            }
+            body.has-teacher-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 4rem);
+            }
+            body.program-sidebar-open .reading-fixed-shell {
+                left: 18rem;
+            }
+            body.program-sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
+            body.sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
             body:has(#sidebar.w-64) .reading-fixed-shell,
             body:has(aside.w-64) .reading-fixed-shell {
                 left: 16rem;
+            }
+            body:has(#sidebar.w-72) .reading-fixed-shell,
+            body:has(aside.w-72) .reading-fixed-shell {
+                left: 18rem;
             }
             body:has(#sidebar.w-16) .reading-fixed-shell,
             body:has(#sidebar.w-14) .reading-fixed-shell,
             body:has(aside.w-16) .reading-fixed-shell,
             body:has(aside.w-14) .reading-fixed-shell {
                 left: 4rem;
+            }
+        }
+        @media (max-width: 767px) {
+            .reading-fixed-shell {
+                left: 0 !important;
             }
         }
     </style>
@@ -77,6 +116,11 @@
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     <span>Dictionary</span>
                 </button>
+                <div id="headerScoreBadge" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-300 rounded-xl shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-emerald-800" id="headerScoreText">Band -</span>
+                    <button type="button" onclick="openEvalResultModal()" class="text-xs font-bold text-emerald-700 underline hover:text-emerald-900 transition">Lihat Rapor</button>
+                </div>
                 <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back
@@ -103,7 +147,7 @@
                     <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
-                {-- Passage 1 Card --}
+                {{-- Passage 1 Card --}}
                 <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -125,7 +169,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 1 --}
+                    {{-- Drawing canvas for Passage 1 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -154,12 +198,14 @@
 
                         <p><strong>E</strong> As the expertise about green roofs grows, official standards have been developed to ensure that they are designed, constructed and maintained properly, and function well. Improvements in the science and technology underpinning green roof development have also led to new variations in the concept. For example, 'blue roofs' enable buildings to hold water over longer periods of time, rather than draining it away quickly – crucial in times of heavier rainfall. There are also combinations of green roofs with solar panels, and 'brown roofs' which are wilder in nature and maximise biodiversity. If the trend continues, it could create new jobs and a more vibrant and sustainable local food economy – alongside many other benefits. There are still barriers to overcome, but the evidence so far indicates that green roofs have the potential to transform cities and help them function sustainably long into the future. The success stories need to be studied and replicated elsewhere, to make green, blue, brown and food-producing roofs the norm in cities around the world.</p>
 
-                        {-- Floating Toolbar for Passage 1 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 1 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {-- Passage 2 Card --}
+                {{-- Passage 2 Card --}}
                 <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -181,7 +227,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 2 --}
+                    {{-- Drawing canvas for Passage 2 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -220,12 +266,14 @@
 
                         <p>Motivational posters and talks are often a waste of time, and might well give students a deluded notion of what success actually means. Teaching concrete skills such as how to write an effective introduction to an essay then praising students' effort in getting there is probably a far better way of improving confidence than telling them how unique they are, or indeed how capable they are of changing their own brains. Perhaps growth mindset works best as a philosophy and not an intervention.</p>
 
-                        {-- Floating Toolbar for Passage 2 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 2 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {-- Passage 3 Card --}
+                {{-- Passage 3 Card --}}
                 <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -247,7 +295,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 3 --}
+                    {{-- Drawing canvas for Passage 3 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -287,7 +335,9 @@
 
                         <p class="text-xs text-gray-500 border-t border-gray-300 pt-3 mt-3">* Paleoclimatology – The study of past climates</p>
 
-                        {-- Floating Toolbar for Passage 3 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 3 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
@@ -296,7 +346,8 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+        <div class="relative h-full min-h-0 overflow-hidden" id="questions-column-wrapper">
+            <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
             <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
 {{-- PASSAGE 1 QUESTIONS header --}}
@@ -710,17 +761,12 @@
                     @endforeach
                 </div>
 
-                {{-- Submit --}}
-                <div class="flex justify-center mt-8">
-                    <button class="px-10 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all hover:-translate-y-0.5">
-                        Submit Answers
-                    </button>
-
                 {{-- Final Submit --}}
                 @if($submitEnabled ?? true)
-                <div class="mt-6 flex justify-end">
-                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                        Submit All Answers
+                <div class="mt-6 flex justify-end" id="submitReadingBtnContainer">
+                    <button type="button" id="submitReadingAnswersBtn" onclick="evaluateReadingAnswers()" class="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-bold text-sm sm:text-base rounded-xl transition shadow-lg flex items-center gap-2 cursor-pointer border border-emerald-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Submit All Answers</span>
                     </button>
                 </div>
                 @else
@@ -734,10 +780,13 @@
         </div>
 
     </div>
+
+    </div>
 </div>
 
 @include('assignments.ielts.mockup.partials.reading-annotations')
 
 @include('assignments.ielts.mockup.partials.reading-dictionary')
+@include('assignments.ielts.mockup.partials.c18-reading-test-4-evaluator')
 </body>
 </html>

@@ -24,15 +24,54 @@
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @media (min-width: 768px) {
+            .reading-fixed-shell {
+                left: var(--student-sidebar-offset, var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--program-sidebar-offset, 0px))));
+            }
+            body.has-student-sidebar .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 16rem);
+            }
+            body.has-student-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 4rem);
+            }
+            body.has-admin-sidebar .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 16rem);
+            }
+            body.has-admin-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 3.5rem);
+            }
+            body.has-teacher-sidebar .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 16rem);
+            }
+            body.has-teacher-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 4rem);
+            }
+            body.program-sidebar-open .reading-fixed-shell {
+                left: 18rem;
+            }
+            body.program-sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
+            body.sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
             body:has(#sidebar.w-64) .reading-fixed-shell,
             body:has(aside.w-64) .reading-fixed-shell {
                 left: 16rem;
+            }
+            body:has(#sidebar.w-72) .reading-fixed-shell,
+            body:has(aside.w-72) .reading-fixed-shell {
+                left: 18rem;
             }
             body:has(#sidebar.w-16) .reading-fixed-shell,
             body:has(#sidebar.w-14) .reading-fixed-shell,
             body:has(aside.w-16) .reading-fixed-shell,
             body:has(aside.w-14) .reading-fixed-shell {
                 left: 4rem;
+            }
+        }
+        @media (max-width: 767px) {
+            .reading-fixed-shell {
+                left: 0 !important;
             }
         }
     </style>
@@ -77,6 +116,11 @@
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     <span>Dictionary</span>
                 </button>
+                <div id="headerScoreBadge" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-300 rounded-xl shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-emerald-800" id="headerScoreText">Band -</span>
+                    <button type="button" onclick="openEvalResultModal()" class="text-xs font-bold text-emerald-700 underline hover:text-emerald-900 transition">Lihat Rapor</button>
+                </div>
                 <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back
@@ -103,7 +147,7 @@
                     <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-sm">READING</span>
                 </div>
 
-                {-- Passage 1 Card --}
+                {{-- Passage 1 Card --}}
                 <div id="passage-1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -125,7 +169,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 1 --}
+                    {{-- Drawing canvas for Passage 1 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -163,12 +207,14 @@
 
                         <p><strong>H</strong> While these technologies are all promising ideas, they are either unproven or based on materials that are not abundant. In their overview of innovation in the concrete industry, Felix Preston and Johanna Lehne of the UK's Royal Institute of International Affairs reached the conclusion that, 'Some novel cements have been discussed for more than a decade within the research community, without breaking through. At present, these alternatives are rarely as cost-effective as conventional cement, and they face raw-material shortages and resistance from customers.'</p>
 
-                        {-- Floating Toolbar for Passage 1 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 1 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {-- Passage 2 Card --}
+                {{-- Passage 2 Card --}}
                 <div id="passage-2" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -190,7 +236,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 2 --}
+                    {{-- Drawing canvas for Passage 2 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -224,12 +270,14 @@
 
                         <p><strong>G</strong> Sadly, the Dobles' brilliant steam car never was a financial success. Priced at around $18,000 in 1924, it was popular only among the very wealthy. Plus, it is said that no two Model Es were quite the same, because Abner Doble tinkered endlessly with the design. By the time the company folded in 1931, fewer than fifty of the amazing Model E steam cars had been produced. For his whole career, until his death in 1961, Abner Doble remained adamant that steam-powered automobiles were at least equal to gasoline cars, if not superior. Given the evidence, he may have been right. Many of the Model E Dobles which have survived are still in good working condition, some having been driven over half a million miles with only normal maintenance. Astonishingly, an unmodified Doble Model E runs clean enough to pass the emissions laws in California today, and they are pretty strict. It is true that the technology poses some difficult problems, but you cannot help but wonder how efficient a steam car might be with the benefit of modern materials and computers. Under the current pressure to improve automotive performance and reduce emissions, it is not unthinkable that the steam car may rise again.</p>
 
-                        {-- Floating Toolbar for Passage 2 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 2 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
 
-                {-- Passage 3 Card --}
+                {{-- Passage 3 Card --}}
                 <div id="passage-3" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative group"
                      x-data="{
                          translateMode: false,
@@ -251,7 +299,7 @@
                          new ResizeObserver(() => { window.initDrawingCanvas($refs.drawingCanvas).resize(); }).observe($el);
                      "
                 >
-                    {-- Drawing canvas for Passage 3 --}
+                    {{-- Drawing canvas for Passage 3 --}}
                     <canvas x-ref="drawingCanvas"
                             class="absolute inset-0 w-full h-full z-10 rounded-2xl"
                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'">
@@ -292,7 +340,9 @@
 
                         <p>Having a variety of different abilities in a collaborative learning environment provides valuable resources for helping students meet their learning needs, not to mention improving their communication and social skills. And today, more than ever, we need the many to flourish – not suffer at the expense of a few bright stars. Once a year, I go on a hike with my class, a mixed bunch of students. It <em>is</em> challenging. The fittest students realise they need to encourage the reluctant. There are lookouts who report back, and extra items to carry for others. We make it – together.</p>
 
-                        {-- Floating Toolbar for Passage 3 --}
+                        </div>
+
+                        {{-- Floating Toolbar for Passage 3 --}}
                         @include('assignments.ielts.mockup.partials.reading-toolbar')
                     </div>
                 </div>
@@ -301,7 +351,8 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
+        <div class="relative h-full min-h-0 overflow-hidden" id="questions-column-wrapper">
+            <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar" id="questions-panel">
             <div class="px-4 sm:px-6 md:px-8 py-8 pb-24 w-full relative">
 
 {{-- PASSAGE 1 QUESTIONS header --}}
@@ -698,17 +749,12 @@
                     </div>
                 </div>
 
-                {{-- Submit --}}
-                <div class="flex justify-center mt-8">
-                    <button class="px-10 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all hover:-translate-y-0.5">
-                        Submit Answers
-                    </button>
-
                 {{-- Final Submit --}}
                 @if($submitEnabled ?? true)
-                <div class="mt-6 flex justify-end">
-                    <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
-                        Submit All Answers
+                <div class="mt-6 flex justify-end" id="submitReadingBtnContainer">
+                    <button type="button" id="submitReadingAnswersBtn" onclick="evaluateReadingAnswers()" class="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-bold text-sm sm:text-base rounded-xl transition shadow-lg flex items-center gap-2 cursor-pointer border border-emerald-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Submit All Answers</span>
                     </button>
                 </div>
                 @else
@@ -722,10 +768,13 @@
         </div>
 
     </div>
+
+    </div>
 </div>
 
 @include('assignments.ielts.mockup.partials.reading-annotations')
 
 @include('assignments.ielts.mockup.partials.reading-dictionary')
+@include('assignments.ielts.mockup.partials.c18-reading-test-3-evaluator')
 </body>
 </html>

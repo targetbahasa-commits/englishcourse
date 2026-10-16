@@ -24,15 +24,54 @@
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @media (min-width: 768px) {
+            .reading-fixed-shell {
+                left: var(--student-sidebar-offset, var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--program-sidebar-offset, 0px))));
+            }
+            body.has-student-sidebar .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 16rem);
+            }
+            body.has-student-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--student-sidebar-offset, 4rem);
+            }
+            body.has-admin-sidebar .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 16rem);
+            }
+            body.has-admin-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--admin-sidebar-offset, 3.5rem);
+            }
+            body.has-teacher-sidebar .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 16rem);
+            }
+            body.has-teacher-sidebar.sidebar-collapsed .reading-fixed-shell {
+                left: var(--teacher-sidebar-offset, 4rem);
+            }
+            body.program-sidebar-open .reading-fixed-shell {
+                left: 18rem;
+            }
+            body.program-sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
+            body.sidebar-collapsed .reading-fixed-shell {
+                left: 4rem;
+            }
             body:has(#sidebar.w-64) .reading-fixed-shell,
             body:has(aside.w-64) .reading-fixed-shell {
                 left: 16rem;
+            }
+            body:has(#sidebar.w-72) .reading-fixed-shell,
+            body:has(aside.w-72) .reading-fixed-shell {
+                left: 18rem;
             }
             body:has(#sidebar.w-16) .reading-fixed-shell,
             body:has(#sidebar.w-14) .reading-fixed-shell,
             body:has(aside.w-16) .reading-fixed-shell,
             body:has(aside.w-14) .reading-fixed-shell {
                 left: 4rem;
+            }
+        }
+        @media (max-width: 767px) {
+            .reading-fixed-shell {
+                left: 0 !important;
             }
         }
     </style>
@@ -751,13 +790,6 @@
 
 
                 {{-- Final Submit --}}
-                <div class="mt-8 flex justify-end pb-8">
-                    <button class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm text-lg flex items-center gap-2">
-                        Submit Answers
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </button>
-
-                {{-- Final Submit --}}
                 @if($submitEnabled ?? true)
                 <div class="mt-6 flex justify-end">
                     <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition shadow-sm">
@@ -780,5 +812,6 @@
 @include('assignments.ielts.mockup.partials.reading-annotations')
 
 @include('assignments.ielts.mockup.partials.reading-dictionary')
+@include('assignments.ielts.mockup.partials.c20-reading-test-2-evaluator')
 </body>
 </html>
