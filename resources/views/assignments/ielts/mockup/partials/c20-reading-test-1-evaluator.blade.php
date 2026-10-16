@@ -1,11 +1,11 @@
 @if(!defined('IELTS_C20_READING_TEST_1_EVALUATOR_INCLUDED'))
 @php define('IELTS_C20_READING_TEST_1_EVALUATOR_INCLUDED', true); @endphp
 
-{-- ===================================================================
+{{-- ===================================================================
      IELTS Reading Test Evaluator (Cambridge 20 Test 1)
      Auto-generated complete evaluator with full answer keys, quotes,
      Indonesian explanations, band score, modal rapor, and cloud sync.
-     =================================================================== --}
+     =================================================================== --}}
 
 <!-- Modal Konfirmasi Soal Belum Terjawab -->
 <div id="evalConfirmModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity">
@@ -34,7 +34,7 @@
 <div id="evalResultModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full my-8 border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
 
-        {-- Header Modal --}
+        {{-- Header Modal --}}
         <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700 p-6 sm:p-8 text-white relative">
             <button type="button" onclick="closeEvalResultModal()" class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -46,7 +46,7 @@
             <h2 class="text-2xl sm:text-3xl font-black mb-1">IELTS Reading – Mock Test 1</h2>
             <p class="text-emerald-100 text-xs sm:text-sm">Cambridge IELTS 20 Academic Practice Test 1</p>
 
-            {-- Band Score Card --}
+            {{-- Band Score Card --}}
             <div class="mt-6 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="text-center sm:text-left">
                     <span class="text-xs uppercase tracking-wider font-semibold text-emerald-100 block">Perkiraan Band Score</span>
@@ -60,10 +60,10 @@
             </div>
         </div>
 
-        {-- Body Modal --}
+        {{-- Body Modal --}}
         <div class="p-6 sm:p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
 
-            {-- Statistik 3 Kartu --}
+            {{-- Statistik 3 Kartu --}}
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-center">
                     <div class="text-2xl sm:text-3xl font-black text-emerald-600 mb-0.5" id="modalStatCorrect">0</div>
@@ -79,18 +79,18 @@
                 </div>
             </div>
 
-            {-- Grid Nomor Soal 1-40 --}
+            {{-- Grid Nomor Soal 1-40 --}}
             <div>
                 <div class="flex items-center justify-between mb-2.5">
                     <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Navigasi Nomor Soal</h4>
                     <span class="text-[11px] text-gray-500">Klik nomor untuk menuju ke soal</span>
                 </div>
                 <div class="grid grid-cols-8 sm:grid-cols-10 gap-1.5" id="modalQuestionGrid">
-                    {-- Diisi secara dinamis oleh JavaScript --}
+                    {{-- Diisi secara dinamis oleh JavaScript --}}
                 </div>
             </div>
 
-            {-- Info Petunjuk Pembahasan --}
+            {{-- Info Petunjuk Pembahasan --}}
             <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3">
                 <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        {-- Footer Modal --}
+        {{-- Footer Modal --}}
         <div class="p-6 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <button type="button" onclick="confirmResetReadingTest()" class="w-full sm:w-auto px-5 py-2.5 text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 font-bold text-xs sm:text-sm rounded-xl transition shadow-sm flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
