@@ -8,7 +8,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-white">
+<body class="font-sans antialiased bg-gray-50">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
@@ -28,16 +28,22 @@
             <div class="mb-6 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
                 <div class="flex justify-end items-center gap-2 mb-2">
                     @php
-                        $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                        $calendarClassPeriodId = Auth::user()->class_period_id
+                                ?: optional(\App\Models\Enrollment::where('user_id', Auth::id())
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->whereHas('program', fn($q) => $q->where('slug', 'pte-academic'))
+                                    ->latest()
+                                    ->first())->class_period_id
+                                ?? '';
                         $calendarBatchName = 'PTE Academic';
                     @endphp
                     @if($calendarClassPeriodId)
-                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full transition-colors duration-200 shadow-sm shrink-0">
+                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition-colors duration-200 shadow-sm shrink-0">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <span>Lihat Kalender</span>
                         </button>
                     @endif
-                    <a href="{{ route('assignments.pte-academic') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                    <a href="{{ route('assignments.pte-academic') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-gray-100 border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span>Back</span>
                     </a>

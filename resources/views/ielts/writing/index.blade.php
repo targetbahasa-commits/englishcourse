@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     @include('components.impersonation-banner')
@@ -39,7 +38,13 @@
                     </div>
                     <div class="flex items-center gap-2">
                         @php
-                            $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                            $calendarClassPeriodId = Auth::user()->class_period_id
+                                ?: optional(\App\Models\Enrollment::where('user_id', Auth::id())
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->whereHas('program', fn($q) => $q->where('slug', 'LIKE', 'ielts-academic%'))
+                                    ->latest()
+                                    ->first())->class_period_id
+                                ?? '';
                             $calendarBatchName = 'IELTS Academic';
                         @endphp
                         @if($calendarClassPeriodId)
@@ -343,6 +348,66 @@
                 </a>
                 </div>
              </div>
+
+            {{-- Cambridge Practice Tests Divider --}}
+            <div class="my-10 flex items-center gap-4">
+                <div class="h-px bg-gray-200 flex-1"></div>
+                <h2 class="text-2xl font-bold text-gray-700">Cambridge Practice Tests</h2>
+                <div class="h-px bg-gray-200 flex-1"></div>
+            </div>
+
+            {{-- Cambridge Practice Tests Grid --}}
+            @php 
+                $isGuestQuick = Auth::user()?->active_role === 'guest_quick'; 
+            @endphp
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach([16, 17, 18, 19, 20] as $edition)
+                @php 
+                    $locked = $isGuestQuick && $edition !== 16;
+                    $editionRoute = route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]);
+                @endphp
+                <div class="bg-white rounded-2xl shadow-sm border {{ $locked ? 'border-gray-200 opacity-90' : 'border-gray-200 hover:shadow-md' }} overflow-hidden transition relative">
+                    @if($locked)
+                    {{-- Lock badge --}}
+                    <div class="absolute top-4 right-4 z-10">
+                        <span class="bg-white text-gray-500 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Locked
+                        </span>
+                    </div>
+                    @endif
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 {{ $locked ? 'bg-gray-100 text-gray-400' : 'bg-purple-100 text-purple-700' }} rounded-full text-xs font-bold uppercase tracking-wide">Edition {{ $edition }}</span>
+                            <span class="text-gray-400 text-sm flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Full Exam
+                            </span>
+                        </div>
+                        <a href="{{ $editionRoute }}" 
+                           @if(!empty($isClassEnded) && Auth::user()?->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif 
+                           class="hover:text-purple-600 transition">
+                            <h3 class="text-2xl font-bold {{ $locked ? 'text-gray-400' : 'text-gray-800' }} mb-2">CAMBRIDGE {{ $edition }}</h3>
+                        </a>
+                        <p class="{{ $locked ? 'text-gray-400' : 'text-gray-600' }} text-sm mb-6">Complete listening, reading, writing, and speaking mock tests from Cambridge {{ $edition }}.</p>
+                        @if($locked)
+                            <div class="flex flex-col gap-2">
+                                <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-sm">
+                                    Lihat Brosur Program
+                                    <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                </a>
+                            </div>
+                        @else
+                            <a href="{{ $editionRoute }}" 
+                               @if(!empty($isClassEnded) && Auth::user()?->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif 
+                               class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition shadow-md hover:shadow-lg transform hover:scale-105">
+                                Start Exam
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
 
              {{-- IELTS Vocabularies Section --}}
              <div class="mt-12 mb-6" x-data="{ isVocabOpen: false, activeTab: 'A1' }">

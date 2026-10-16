@@ -12,7 +12,6 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     @include('components.impersonation-banner')
@@ -42,7 +41,13 @@
                     
                     <div class="flex items-center gap-2">
                         @php
-                            $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                            $calendarClassPeriodId = Auth::user()->class_period_id
+                                ?: optional(\App\Models\Enrollment::where('user_id', Auth::id())
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->whereHas('program', fn($q) => $q->where('slug', 'toefl-itp'))
+                                    ->latest()
+                                    ->first())->class_period_id
+                                ?? '';
                             $calendarBatchName = 'TOEFL ITP';
                         @endphp
                         @if($calendarClassPeriodId)

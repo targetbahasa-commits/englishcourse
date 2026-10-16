@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-red-50 via-rose-50 to-pink-50">
     @include('components.impersonation-banner')
@@ -39,16 +38,22 @@
                     </div>
                     <div class="flex items-center gap-2">
                         @php
-                            $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                            $calendarClassPeriodId = Auth::user()->class_period_id
+                                ?: optional(\App\Models\Enrollment::where('user_id', Auth::id())
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->whereHas('program', fn($q) => $q->where('slug', 'LIKE', 'ielts-general%'))
+                                    ->latest()
+                                    ->first())->class_period_id
+                                ?? '';
                             $calendarBatchName = 'IELTS General Training';
                         @endphp
                         @if($calendarClassPeriodId)
-                            <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-white text-gray-600 font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                            <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium rounded-lg transition-colors duration-200 shadow-sm">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 Lihat Kalender
                             </button>
                         @endif
-                        <a href="{{ route('assignments.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                        <a href="{{ route('assignments.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
                             <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
@@ -63,7 +68,7 @@
                 {{-- 1. Listening IELTS General --}}
                 <div class="relative h-full">
                     @if(!$hasListening)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -99,7 +104,7 @@
                 {{-- 2. Reading General --}}
                 <div class="relative h-full">
                     @if(!$hasReading)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -121,7 +126,7 @@
                         <div class="p-6 pt-8">
                             <div class="flex items-center gap-2 mb-2">
                                 <h3 class="text-xl font-bold text-gray-800">Reading</h3>
-                                <span class="bg-white text-emerald-700 text-xs font-extrabold px-2 py-0.5 rounded-md uppercase">General</span>
+                                <span class="bg-emerald-100 text-emerald-700 text-xs font-extrabold px-2 py-0.5 rounded-md uppercase">General</span>
                             </div>
                             <p class="text-gray-600 text-sm mb-4 leading-relaxed">Practical & everyday texts comprehension.</p>
                             <div class="block w-full text-center bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
@@ -135,7 +140,7 @@
                 {{-- 3. Writing General (Task 1 Letter & Task 2 Essay) --}}
                 <div class="relative h-full">
                     @if(!$hasWriting)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -171,7 +176,7 @@
                 {{-- 4. Speaking --}}
                 <div class="relative h-full">
                     @if(!$hasSpeaking)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -214,7 +219,7 @@
                 {{-- Practice Listening: Blue --}}
                 <div class="relative h-full">
                     @if(!$hasListening)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -250,7 +255,7 @@
                 {{-- Practice Reading (General): Green --}}
                 <div class="relative h-full">
                     @if(!$hasReading)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -273,7 +278,7 @@
                         <div class="p-6 pt-8">
                             <div class="flex items-center gap-2 mb-2">
                                 <h3 class="text-xl font-bold text-gray-800">Reading</h3>
-                                <span class="bg-white text-emerald-700 text-xs font-extrabold px-2 py-0.5 rounded-md uppercase">General</span>
+                                <span class="bg-emerald-100 text-emerald-700 text-xs font-extrabold px-2 py-0.5 rounded-md uppercase">General</span>
                             </div>
                             <p class="text-gray-600 text-sm mb-4 leading-relaxed">Practical passage practice.</p>
                             <div class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
@@ -287,7 +292,7 @@
                 {{-- Practice Writing (General): Teal --}}
                 <div class="relative h-full">
                     @if(!$hasWriting)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -324,7 +329,7 @@
                 {{-- Practice Speaking: Indigo --}}
                 <div class="relative h-full">
                     @if(!$hasSpeaking)
-                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -405,12 +410,12 @@
                         }
                     }
                     $typeColors = [
-                        'noun' => 'text-blue-700 bg-white',
+                        'noun' => 'text-blue-700 bg-blue-100',
                         'verb' => 'text-rose-700 bg-rose-100',
-                        'adjective' => 'text-emerald-700 bg-white',
-                        'adverb' => 'text-amber-700 bg-white',
-                        'conjunction' => 'text-purple-700 bg-white',
-                        'preposition' => 'text-cyan-700 bg-white',
+                        'adjective' => 'text-emerald-700 bg-emerald-100',
+                        'adverb' => 'text-amber-700 bg-amber-100',
+                        'conjunction' => 'text-purple-700 bg-purple-100',
+                        'preposition' => 'text-cyan-700 bg-cyan-100',
                         'pronoun' => 'text-fuchsia-700 bg-fuchsia-100',
                     ];
                     @endphp
@@ -419,7 +424,7 @@
                     <div x-cloak x-show="activeTab === '{{ $level }}'"
                          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: #fca5a5 #f8fafc;">
                         @foreach($allVocabs[$level] as $v)
-                        @php $colorClass = $typeColors[$v['type']] ?? 'text-gray-700 bg-white'; @endphp
+                        @php $colorClass = $typeColors[$v['type']] ?? 'text-gray-700 bg-gray-100'; @endphp
                         <div class="group bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md hover:border-red-300 transition-all duration-200 flex flex-col justify-center">
                             <div class="flex items-start justify-between gap-2 mb-1.5">
                                 <h4 class="font-extrabold text-gray-800 text-base leading-tight notranslate truncate" title="{{ $v['word'] }}" translate="no">{{ $v['word'] }}</h4>

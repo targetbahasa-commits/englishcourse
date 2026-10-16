@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
     @include('components.impersonation-banner')
@@ -30,16 +29,22 @@
             <div class="mb-6 bg-white border border-gray-100 rounded-3xl p-4 md:p-6 shadow-sm overflow-hidden">
                 <div class="flex justify-end items-center gap-2 mb-2">
                     @php
-                        $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                        $calendarClassPeriodId = Auth::user()->class_period_id
+                                ?: optional(\App\Models\Enrollment::where('user_id', Auth::id())
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->whereHas('program', fn($q) => $q->where('slug', 'pte-academic'))
+                                    ->latest()
+                                    ->first())->class_period_id
+                                ?? '';
                         $calendarBatchName = 'PTE Academic';
                     @endphp
                     @if($calendarClassPeriodId)
-                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full transition-colors duration-200 shadow-sm shrink-0">
+                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition-colors duration-200 shadow-sm shrink-0">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <span>Lihat Kalender</span>
                         </button>
                     @endif
-                    <a href="{{ route('assignments.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                    <a href="{{ route('assignments.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-gray-100 border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span>Back</span>
                     </a>
@@ -54,7 +59,7 @@
                         <p class="text-xs md:text-sm text-gray-600 mt-0.5 break-words">Comprehensive PTE Academic computer-based preparation! 🖥️</p>
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
                             <p class="text-xs mt-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-amber-700 font-semibold border border-amber-200 shadow-sm">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200 shadow-sm">
                                     <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <span>Practice Mode — Nilai tidak dilaporkan ke guru</span>
                                 </span>
@@ -145,7 +150,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             Up to date Student Average Score
                         </span>
@@ -250,7 +255,7 @@
                                 <!-- Listening Bar -->
                                 <div class="flex items-center gap-3">
                                     <span class="w-20 text-xs font-semibold text-gray-600 text-right">Listening <strong class="text-gray-900 ml-1">{{ $lScore > 0 ? $lScore : '-' }}</strong></span>
-                                    <div class="flex-1 bg-white rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
+                                    <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
                                         <div class="h-full rounded-full transition-all duration-500" style="width: {{ $lPct }}%; background-color: #1e293b;"></div>
                                     </div>
                                 </div>
@@ -258,7 +263,7 @@
                                 <!-- Reading Bar -->
                                 <div class="flex items-center gap-3">
                                     <span class="w-20 text-xs font-semibold text-gray-600 text-right">Reading <strong class="text-gray-900 ml-1">{{ $rScore > 0 ? $rScore : '-' }}</strong></span>
-                                    <div class="flex-1 bg-white rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
+                                    <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
                                         <div class="h-full rounded-full transition-all duration-500" style="width: {{ $rPct }}%; background-color: #ca8a04;"></div>
                                     </div>
                                 </div>
@@ -266,7 +271,7 @@
                                 <!-- Speaking Bar -->
                                 <div class="flex items-center gap-3">
                                     <span class="w-20 text-xs font-semibold text-gray-600 text-right">Speaking <strong class="text-gray-900 ml-1">{{ $sScore > 0 ? $sScore : '-' }}</strong></span>
-                                    <div class="flex-1 bg-white rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
+                                    <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
                                         <div class="h-full rounded-full transition-all duration-500" style="width: {{ $sPct }}%; background-color: #6b7280;"></div>
                                     </div>
                                 </div>
@@ -274,7 +279,7 @@
                                 <!-- Writing Bar -->
                                 <div class="flex items-center gap-3">
                                     <span class="w-20 text-xs font-semibold text-gray-600 text-right">Writing <strong class="text-gray-900 ml-1">{{ $wScore > 0 ? $wScore : '-' }}</strong></span>
-                                    <div class="flex-1 bg-white rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
+                                    <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden p-0.5 shadow-inner border border-gray-200">
                                         <div class="h-full rounded-full transition-all duration-500" style="width: {{ $wPct }}%; background-color: #9333ea;"></div>
                                     </div>
                                 </div>
@@ -285,7 +290,7 @@
                         <div>
                             <h4 class="text-lg font-bold text-gray-800 mb-4">Candidate & Test Information</h4>
                             
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 text-xs space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-gray-200 text-xs space-y-3">
                                 <div class="grid grid-cols-2 gap-y-2">
                                     <div>
                                         <span class="text-gray-500 block">Date of Birth:</span>
@@ -363,7 +368,7 @@
                         </thead>
                         <tbody class="text-gray-700 bg-white align-middle [&>tr>td]:border [&>tr>td]:border-gray-200 [&>tr>td]:py-2 [&>tr>td]:px-2">
                             <!-- ROW 1 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>1</td>
                                 <td class="font-semibold">RA</td>
                                 <td rowspan="9" class="font-bold shadow-inner" style="background-color: #fff7ed; color: #c2410c; border: 2px solid #fdba74;">Speaking &amp; Writing<br>(76~84mins)</td>
@@ -376,7 +381,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 2 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>2</td>
                                 <td class="font-semibold">RS</td>
                                 <td>10~12</td>
@@ -388,7 +393,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">17%</td>
                             </tr>
                             <!-- ROW 3 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>3</td>
                                 <td class="font-semibold">DI</td>
                                 <td>5~6</td>
@@ -400,7 +405,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 4 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>4</td>
                                 <td class="font-semibold">RL</td>
                                 <td>2~3</td>
@@ -412,7 +417,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">13%</td>
                             </tr>
                             <!-- ROW 5 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>5</td>
                                 <td class="font-semibold">ASQ</td>
                                 <td>5~6</td>
@@ -424,7 +429,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">4%</td>
                             </tr>
                             <!-- ROW 6 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>6</td>
                                 <td class="font-semibold">SGD</td>
                                 <td>2~3</td>
@@ -436,7 +441,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">20%</td>
                             </tr>
                             <!-- ROW 7 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>7</td>
                                 <td class="font-semibold">RTS</td>
                                 <td>2~3</td>
@@ -448,7 +453,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 8 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>8</td>
                                 <td class="font-semibold">SWT</td>
                                 <td>2</td>
@@ -460,7 +465,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 9 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>9</td>
                                 <td class="font-semibold">WE</td>
                                 <td>1</td>
@@ -472,7 +477,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 10 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>10</td>
                                 <td class="font-semibold">FIB_Dropdown</td>
                                 <td rowspan="5" class="font-bold shadow-inner" style="background-color: #eff6ff; color: #1d4ed8; border: 2px solid #93c5fd;">Reading<br>(23~30mins)</td>
@@ -485,7 +490,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 11 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>11</td>
                                 <td class="font-semibold">MCM_R</td>
                                 <td>2~3</td>
@@ -497,7 +502,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 12 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>12</td>
                                 <td class="font-semibold">RO</td>
                                 <td>2~3</td>
@@ -509,7 +514,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 13 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>13</td>
                                 <td class="font-semibold">FIB_Drag and Drop</td>
                                 <td>4~5</td>
@@ -521,7 +526,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 14 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>14</td>
                                 <td class="font-semibold">MCS_R</td>
                                 <td>2~3</td>
@@ -533,7 +538,7 @@
                                 <td></td>
                             </tr>
                             <!-- ROW 15 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>15</td>
                                 <td class="font-semibold">SST</td>
                                 <td rowspan="8" class="font-bold shadow-inner" style="background-color: #faf5ff; color: #7e22ce; border: 2px solid #d8b4fe;">Listening<br>(31~39 mins)<br><br><span class="text-xs font-normal" style="color: #6b21a8;">&bull; SST is timed individually per question</span></td>
@@ -546,7 +551,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">10%</td>
                             </tr>
                             <!-- ROW 16 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>16</td>
                                 <td class="font-semibold">MCM_L</td>
                                 <td>2~3</td>
@@ -558,7 +563,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">3%</td>
                             </tr>
                             <!-- ROW 17 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>17</td>
                                 <td class="font-semibold">FIB_L</td>
                                 <td>2~3</td>
@@ -570,7 +575,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">8%</td>
                             </tr>
                             <!-- ROW 18 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>18</td>
                                 <td class="font-semibold">HCS</td>
                                 <td>2~3</td>
@@ -582,7 +587,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">2%</td>
                             </tr>
                             <!-- ROW 19 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>19</td>
                                 <td class="font-semibold">MCS_L</td>
                                 <td>2~3</td>
@@ -594,7 +599,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">2%</td>
                             </tr>
                             <!-- ROW 20 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>20</td>
                                 <td class="font-semibold">SMW</td>
                                 <td>1-2</td>
@@ -606,7 +611,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">1%</td>
                             </tr>
                             <!-- ROW 21 -->
-                            <tr class="hover:bg-white transition-colors">
+                            <tr class="hover:bg-gray-50 transition-colors">
                                 <td>21</td>
                                 <td class="font-semibold">HIW</td>
                                 <td>2~3</td>
@@ -618,7 +623,7 @@
                                 <td class="font-medium text-purple-600" style="color: #9333ea;">8%</td>
                             </tr>
                             <!-- ROW 22 -->
-                            <tr class="hover:bg-white transition-colors" style="background-color: #f8fafc;">
+                            <tr class="hover:bg-gray-50 transition-colors" style="background-color: #f8fafc;">
                                 <td>22</td>
                                 <td class="font-semibold">WFD</td>
                                 <td>3~4</td>
