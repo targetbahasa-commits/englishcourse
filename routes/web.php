@@ -260,6 +260,12 @@ Route::get('/assignments/ielts-academic/mockup/british-council/test-{id}', funct
 // Guest sign-up via Cambridge test modal (public POST)
 Route::post('/cambridge/guest-register', [App\Http\Controllers\CambridgeGuestSignupController::class, 'register'])->name('cambridge.guest.register');
 
+// Cambridge Mockup Cloud Draft & Evaluation Sync Routes
+Route::post('/cambridge-mockup/save-draft', [App\Http\Controllers\CambridgeMockupSyncController::class, 'saveDraft'])->name('cambridge.mockup.save-draft');
+Route::get('/cambridge-mockup/load-draft', [App\Http\Controllers\CambridgeMockupSyncController::class, 'loadDraft'])->name('cambridge.mockup.load-draft');
+Route::post('/cambridge-mockup/save-result', [App\Http\Controllers\CambridgeMockupSyncController::class, 'saveResult'])->name('cambridge.mockup.save-result');
+Route::post('/cambridge-mockup/reset-test', [App\Http\Controllers\CambridgeMockupSyncController::class, 'resetTest'])->name('cambridge.mockup.reset-test');
+
 // Public AI APIs (Used by promo pages and public tests)
 Route::get('/api/dictionary/lookup', [App\Http\Controllers\ToeflDictionaryController::class, 'lookup'])->name('api.dictionary.lookup');
 Route::get('/api/dictionary/synonyms', [App\Http\Controllers\ToeflDictionaryController::class, 'synonyms'])->name('api.dictionary.synonyms');
@@ -644,13 +650,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/speaking', [App\Http\Controllers\AssignmentController::class, 'customClassMeetingSpeaking'])
         ->name('assignments.custom-class.meeting.speaking')
         ;
-        
+    Route::post('/assignments/custom-class/{classPeriod}/meeting/{meetingNumber}/speaking/ai-interview/evaluate', [App\Http\Controllers\AssignmentController::class, 'customClassSpeakingAiInterviewEvaluate'])
+        ->name('assignments.custom-class.meeting.speaking.ai-interview.evaluate')
+        ;
+
     Route::get('/self-study-classes', [App\Http\Controllers\SelfStudyClassController::class, 'index'])
         ->name('self-study-classes.index')
         ->middleware('role:admin');
 
     Route::get('/self-study-classes/player/{course}/{module?}/{topic?}', [App\Http\Controllers\SelfStudyClassController::class, 'player'])
         ->name('self-study-classes.player')
+        ->middleware('role:admin');
+
+    Route::post('/self-study-classes/draft', [App\Http\Controllers\SelfStudyClassController::class, 'saveDraft'])
+        ->name('self-study-classes.draft');
+
+    Route::post('/self-study-classes/grade-translation', [App\Http\Controllers\SelfStudyClassController::class, 'gradeTranslation'])
+        ->name('self-study-classes.grade-translation');
+
+    Route::post('/self-study-classes/video', [App\Http\Controllers\SelfStudyClassController::class, 'saveVideo'])
+        ->name('self-study-classes.video')
         ->middleware('role:admin');
 
     Route::get('/assignments/final-test', function () {
@@ -731,6 +750,18 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/ielts/academic', [App\Http\Controllers\AssignmentController::class, 'ieltsAcademic'])
         ->name('assignments.ielts-academic')
+        ;
+    Route::get('/assignments/grammar-ielts-writing', [App\Http\Controllers\AssignmentController::class, 'grammarIeltsWriting'])
+        ->name('assignments.grammar-ielts-writing')
+        ;
+    Route::get('/assignments/grammar-ielts-writing/meeting/{meetingNumber}', [App\Http\Controllers\AssignmentController::class, 'grammarIeltsWritingMeetingShow'])
+        ->name('assignments.grammar-ielts-writing.meeting.show')
+        ;
+    Route::post('/assignments/grammar-ielts-writing/meeting/{meetingNumber}/draft', [App\Http\Controllers\AssignmentController::class, 'grammarIeltsWritingSaveDraft'])
+        ->name('assignments.grammar-ielts-writing.meeting.draft')
+        ;
+    Route::post('/assignments/grammar-ielts-writing/meeting/{meetingNumber}/grammar-check', [App\Http\Controllers\AssignmentController::class, 'grammarIeltsWritingGrammarCheck'])
+        ->name('assignments.grammar-ielts-writing.meeting.grammar-check')
         ;
     Route::get('/assignments/pte-academic', [App\Http\Controllers\AssignmentController::class, 'pteAcademic'])
         ->name('assignments.pte-academic')
@@ -1692,6 +1723,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/grammar-writing/fast-track/bonus', [App\Http\Controllers\GrammarWritingBonusMeetingController::class, 'bonusMeetingSubmit'])->name('assignments.grammar-writing.fast-track.bonus.submit');
     Route::post('/assignments/grammar-writing/fast-track/bonus/reset', [App\Http\Controllers\GrammarWritingBonusMeetingController::class, 'bonusMeetingReset'])->name('assignments.grammar-writing.fast-track.bonus.reset');
     Route::get('/assignments/grammar-writing/fast-track/bonus/materi/pdf', [App\Http\Controllers\GrammarWritingBonusMeetingController::class, 'bonusMeetingMaterialPdf'])->name('assignments.grammar-writing.fast-track.bonus.material-pdf');
+    // Autosave while the student is still typing - every other grammar-writing
+    // meeting type already has an equivalent /draft route; the bonus meeting
+    // never did, so in-progress answers never reached the server at all until
+    // Submit, which is why the admin Live Preview could never show them.
+    Route::post('/assignments/grammar-writing/fast-track/bonus/draft', [App\Http\Controllers\GrammarWritingBonusMeetingController::class, 'bonusMeetingDraft'])->name('assignments.grammar-writing.fast-track.bonus.draft');
     
     
     // Grammar Writing Admin Content Routes (generic CRUD)

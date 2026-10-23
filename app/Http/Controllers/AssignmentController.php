@@ -63,7 +63,7 @@ class AssignmentController extends Controller
                     if (str_contains($routeName, '.reading.') && !in_array('ielts-academic-reading', $rawSlugs)) {
                         return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Reading.');
                     }
-                    if (str_contains($routeName, '.writing.') && !in_array('ielts-academic-writing', $rawSlugs)) {
+                    if (str_contains($routeName, '.writing.') && !in_array('ielts-academic-writing', $rawSlugs) && !in_array('grammar-and-ielts-writing-band-7', $rawSlugs)) {
                         return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Writing.');
                     }
                     if (str_contains($routeName, '.speaking.') && !in_array('ielts-academic-speaking', $rawSlugs)) {
@@ -152,6 +152,466 @@ class AssignmentController extends Controller
         return view('assignments.index', compact('programs', 'allowedAssignmentProgramSlugs'));
     }
 
+    public function customClassHub()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $customClassQuery = \App\Models\ClassPeriod::where(function ($q) {
+            $q->where('is_custom', true)
+              ->orWhereHas('program', fn($p) => $p->where('slug', 'custom-class'));
+        });
+
+        if ($user->isAdmin() || $user->isTeacher()) {
+            $customClassPeriods = $customClassQuery
+                ->with(['teacher', 'classMeetings.sourceProgram', 'users', 'enrollments.user', 'program'])
+                ->latest()
+                ->get();
+        } else {
+            // Student
+            $customClassPeriods = $customClassQuery
+                ->where(function ($q) use ($user) {
+                    $q->where('id', $user->class_period_id)
+                        ->orWhereHas('enrollments', fn($e) => $e->where('user_id', $user->id));
+                })
+                ->with(['teacher', 'classMeetings.sourceProgram', 'classMeetings.meeting', 'program'])
+                ->latest()
+                ->get();
+        }
+
+        return view('assignments.custom-class', compact('customClassPeriods', 'user'));
+    }
+
+    public function customClassShow(\App\Models\ClassPeriod $classPeriod)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Permission check
+        $isEnrolled = $user->class_period_id == $classPeriod->id 
+            || $classPeriod->enrollments()->where('user_id', $user->id)->exists();
+
+        if (!$isEnrolled && !$user->isAdmin() && !$user->isTeacher()) {
+            abort(403, 'Anda tidak memiliki akses ke kelas custom ini.');
+        }
+
+        $classPeriod->load(['program', 'teacher', 'users', 'enrollments.user']);
+
+        $meetings = $classPeriod->classMeetings()
+            ->with(['meeting', 'sourceProgram'])
+            ->orderBy('meeting_number')
+            ->get();
+
+        return view('assignments.custom-class-show', compact('classPeriod', 'meetings', 'user'));
+    }
+
+    public function customClassMeetingShow(\App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Permission check
+        $isEnrolled = $user->class_period_id == $classPeriod->id 
+            || $classPeriod->enrollments()->where('user_id', $user->id)->exists();
+
+        if (!$isEnrolled && !$user->isAdmin() && !$user->isTeacher()) {
+            abort(403, 'Anda tidak memiliki akses ke pertemuan ini.');
+        }
+
+        $classPeriod->load(['program', 'teacher', 'users', 'enrollments.user']);
+
+        $meeting = $classPeriod->classMeetings()
+            ->where('meeting_number', $meetingNumber)
+            ->with(['meeting', 'sourceProgram'])
+            ->first();
+
+        if (!$meeting) {
+            $meeting = $classPeriod->classMeetings()->where('id', $meetingNumber)->firstOrFail();
+        }
+
+        // Retrieve structured curriculum data (Grammar Card + Speaking Card)
+        $curriculumData = \App\Domain\CustomClass\CustomCurriculumHelper::getMeetingDetails((int) $meeting->meeting_number);
+
+        if (!$curriculumData) {
+            $notes = (string) $meeting->material_notes;
+            $grammarNotes = '';
+            $speakingNotes = '';
+
+            if (preg_match('/Sesi\s*1\s*\(Grammar\)\s*:(.*?)(?=Sesi\s*2|$)/is', $notes, $gm)) {
+                $grammarNotes = trim($gm[1]);
+            }
+            if (preg_match('/Sesi\s*2\s*\(Speaking\)\s*:(.*?)$/is', $notes, $sm)) {
+                $speakingNotes = trim($sm[1]);
+            }
+
+            $curriculumData = [
+                'topic' => $meeting->topic,
+                'grammar' => [
+                    'title' => 'Tata Bahasa & Struktur Kalimat (Grammar Focus)',
+                    'subtitle' => 'Materi Sesi 1',
+                    'patterns' => [],
+                    'concept' => $grammarNotes ?: 'Materi tata bahasa dan struktur kalimat yang dipelajari pada sesi ini.',
+                    'examples' => [],
+                    'practice_task' => 'Latih penggunaan struktur kalimat ini bersama pengajar.',
+                ],
+                'speaking' => [
+                    'title' => 'Praktik Percakapan & Penerapan (Speaking Practice)',
+                    'subtitle' => 'Materi Sesi 2',
+                    'target' => $speakingNotes ?: 'Praktik implementasi langsung struktur grammar dalam percakapan aktif.',
+                    'scenarios' => [],
+                    'delivery_rules' => [],
+                    'discussion_prompt' => 'Diskusikan topik ini bersama pengajar.',
+                ],
+            ];
+        }
+
+        // Next & Previous meeting helper
+        $prevMeeting = $classPeriod->classMeetings()
+            ->where('meeting_number', '<', $meeting->meeting_number)
+            ->orderByDesc('meeting_number')
+            ->first();
+
+        $nextMeeting = $classPeriod->classMeetings()
+            ->where('meeting_number', '>', $meeting->meeting_number)
+            ->orderBy('meeting_number')
+            ->first();
+
+        return view('assignments.custom-class-meeting-show', compact(
+            'classPeriod',
+            'meeting',
+            'curriculumData',
+            'prevMeeting',
+            'nextMeeting',
+            'user'
+        ));
+    }
+
+    public function customClassMeetingGrammar(\App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (!$user->isAdmin() && !$user->isTeacher()) {
+            $isEnrolled = $classPeriod->enrollments()
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->exists();
+            if (!$isEnrolled) {
+                abort(403, 'Anda tidak terdaftar dalam kelas custom ini.');
+            }
+        }
+
+        $meeting = $classPeriod->classMeetings()
+            ->where('meeting_number', $meetingNumber)
+            ->firstOrFail();
+
+        $curriculumData = \App\Domain\CustomClass\CustomCurriculumHelper::getMeetingDetails((int) $meetingNumber);
+        if (!$curriculumData) {
+            $curriculumData = [
+                'topic' => $meeting->topic,
+                'grammar' => [
+                    'title' => $meeting->topic,
+                    'subtitle' => 'Materi Sesi 1',
+                    'patterns' => [],
+                    'concept' => 'Materi tata bahasa dan struktur kalimat pada sesi ini.',
+                    'examples' => [],
+                    'practice_task' => 'Kerjakan latihan terjemahan kalimat di bawah ini.',
+                ],
+                'speaking' => [
+                    'title' => 'Speaking Practice',
+                ],
+            ];
+        }
+
+        $practiceData = \App\Domain\CustomClass\CustomCurriculumHelper::getGrammarPracticeData((int) $meetingNumber, $curriculumData);
+        $questions = $practiceData['questions'];
+        $questionHelpers = $practiceData['questionHelpers'];
+        $paragraph = $practiceData['paragraph'];
+        $cheatSheet = $practiceData['cheatSheet'];
+
+        $sessionKey = "custom_class_{$classPeriod->id}_m{$meetingNumber}_grammar";
+        $submitted = session("{$sessionKey}_submitted", false);
+        $results = session("{$sessionKey}_results", []);
+        $paragraphResult = session("{$sessionKey}_paragraph_result", null);
+        $finalScore = session("{$sessionKey}_final_score", 0);
+        $userAnswers = session("{$sessionKey}_user_answers", []);
+        $userParagraphAnswer = session("{$sessionKey}_user_paragraph", '');
+
+        return view('assignments.grammar-writing-complexity-meeting', [
+            'meetingNumber' => (int) $meetingNumber,
+            'topic' => $curriculumData['grammar']['title'] ?? $meeting->topic,
+            'trackTitle' => $classPeriod->name,
+            'questions' => $questions,
+            'questionHelpers' => $questionHelpers,
+            'paragraph' => $paragraph,
+            'backRoute' => route('assignments.custom-class.meeting.show', [$classPeriod->id, $meeting->meeting_number]),
+            'track' => 'custom-class',
+            'requireTenseAnswer' => false,
+            'draftAnswers' => $userAnswers,
+            'draftParagraph' => $userParagraphAnswer,
+            'submitted' => $submitted,
+            'results' => $results,
+            'paragraphResult' => $paragraphResult,
+            'finalScore' => $finalScore,
+            'userAnswers' => $userAnswers,
+            'userParagraphAnswer' => $userParagraphAnswer,
+            'submitRoute' => route('assignments.custom-class.meeting.grammar.submit', [$classPeriod->id, $meeting->meeting_number]),
+            'resetRoute' => route('assignments.custom-class.meeting.grammar.reset', [$classPeriod->id, $meeting->meeting_number]),
+            'cheatSheet' => $cheatSheet,
+            'guideBox' => $practiceData['guide_box'] ?? null,
+        ]);
+    }
+
+    public function customClassMeetingGrammarSubmit(\Illuminate\Http\Request $request, \App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        $curriculumData = \App\Domain\CustomClass\CustomCurriculumHelper::getMeetingDetails((int) $meetingNumber);
+        $practiceData = \App\Domain\CustomClass\CustomCurriculumHelper::getGrammarPracticeData((int) $meetingNumber, $curriculumData ?: []);
+        $questions = $practiceData['questions'];
+        $expectedAnswers = $practiceData['expectedAnswers'];
+        $paragraph = $practiceData['paragraph'];
+
+        $userAnswers = $request->input('answers', []);
+        $userParagraph = trim((string) $request->input('userParagraphAnswer', ''));
+
+        $questionResults = [];
+        $totalScore = 0;
+        $maxQuestionsScore = count($questions) * 5;
+        $maxParagraphScore = 25;
+        $totalMax = $maxQuestionsScore + ($paragraph ? $maxParagraphScore : 0);
+
+        $evaluator = new class {
+            use \App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
+            public function score($user, $correct, $max) {
+                return $this->scoreWordMatchAnswer($user, $correct, $max);
+            }
+        };
+
+        foreach ($questions as $idx => $qText) {
+            $qNum = $idx + 1;
+            $userAnswerRaw = $userAnswers[$qNum] ?? '';
+            $userTrans = is_array($userAnswerRaw) ? trim((string) ($userAnswerRaw['trans'] ?? '')) : trim((string) $userAnswerRaw);
+            $correctAns = $expectedAnswers[$qNum] ?? '';
+
+            $transRes = $evaluator->score($userTrans, $correctAns, 5);
+
+            $questionResults[$qNum] = [
+                'score' => $transRes['score'],
+                'correct_answer' => $correctAns,
+                'formatted_answer' => $transRes['formatted_answer'],
+                'trans_score' => $transRes['score'],
+            ];
+            $totalScore += $transRes['score'];
+        }
+
+        $paragraphResult = null;
+        if ($paragraph && !empty($paragraph['en'])) {
+            $paragraphResult = $evaluator->score($userParagraph, $paragraph['en'], $maxParagraphScore);
+            $totalScore += $paragraphResult['score'];
+        }
+
+        $finalScore = $totalMax > 0 ? round(($totalScore / $totalMax) * 100) : 0;
+
+        $sessionKey = "custom_class_{$classPeriod->id}_m{$meetingNumber}_grammar";
+        session([
+            "{$sessionKey}_submitted" => true,
+            "{$sessionKey}_results" => $questionResults,
+            "{$sessionKey}_paragraph_result" => $paragraphResult,
+            "{$sessionKey}_final_score" => $finalScore,
+            "{$sessionKey}_user_answers" => $userAnswers,
+            "{$sessionKey}_user_paragraph" => $userParagraph,
+        ]);
+
+        return redirect()->route('assignments.custom-class.meeting.grammar', [$classPeriod->id, $meetingNumber]);
+    }
+
+    public function customClassMeetingGrammarReset(\Illuminate\Http\Request $request, \App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        $sessionKey = "custom_class_{$classPeriod->id}_m{$meetingNumber}_grammar";
+        session()->forget([
+            "{$sessionKey}_submitted",
+            "{$sessionKey}_results",
+            "{$sessionKey}_paragraph_result",
+            "{$sessionKey}_final_score",
+            "{$sessionKey}_user_answers",
+            "{$sessionKey}_user_paragraph",
+        ]);
+
+        return redirect()->route('assignments.custom-class.meeting.grammar', [$classPeriod->id, $meetingNumber]);
+    }
+
+    public function customClassMeetingSpeaking(\App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (!$user->isAdmin() && !$user->isTeacher()) {
+            $isEnrolled = $classPeriod->enrollments()
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->exists();
+            if (!$isEnrolled) {
+                abort(403, 'Anda tidak terdaftar dalam kelas custom ini.');
+            }
+        }
+
+        $meeting = $classPeriod->classMeetings()
+            ->where('meeting_number', $meetingNumber)
+            ->firstOrFail();
+
+        $curriculumData = \App\Domain\CustomClass\CustomCurriculumHelper::getMeetingDetails((int) $meetingNumber);
+        if (!$curriculumData) {
+            $curriculumData = [
+                'topic' => $meeting->topic,
+                'grammar' => [
+                    'title' => $meeting->topic,
+                    'subtitle' => 'Materi Sesi 1',
+                ],
+                'speaking' => [
+                    'title' => 'Speaking Practice',
+                    'subtitle' => 'Executive Fluency, Debates & Delivery',
+                    'target' => 'Latih kefasihan berbicara formal level C1/C2.',
+                ],
+            ];
+        }
+
+        $speakingData = \App\Domain\CustomClass\CustomCurriculumHelper::getSpeakingPracticeData((int) $meetingNumber, $curriculumData);
+
+        $aiInterviewEvaluation = \App\Models\CustomClassSpeakingAiInterviewEvaluation::where('user_id', $user->id)
+            ->where('class_period_id', $classPeriod->id)
+            ->where('meeting_number', (int) $meetingNumber)
+            ->first();
+
+        $prevMeeting = $classPeriod->classMeetings()
+            ->where('meeting_number', '<', $meetingNumber)
+            ->orderBy('meeting_number', 'desc')
+            ->first();
+
+        $nextMeeting = $classPeriod->classMeetings()
+            ->where('meeting_number', '>', $meetingNumber)
+            ->orderBy('meeting_number', 'asc')
+            ->first();
+
+        return view('assignments.custom-class-meeting-speaking', [
+            'classPeriod' => $classPeriod,
+            'meeting' => $meeting,
+            'meetingNumber' => (int) $meetingNumber,
+            'curriculumData' => $curriculumData,
+            'speakingData' => $speakingData,
+            'aiInterviewEvaluation' => $aiInterviewEvaluation,
+            'prevMeeting' => $prevMeeting,
+            'nextMeeting' => $nextMeeting,
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Grade a completed custom-class AI voice interview session (speaking
+     * tab 5) using the same multi-provider AI grading pipeline as the
+     * standalone Speaking curriculum's AI Interview
+     * (SpeakingAdminController::submitMeetingEvaluation()), but scoped to a
+     * class_period_id + meeting_number instead of a curriculum level.
+     */
+    public function customClassSpeakingAiInterviewEvaluate(Request $request, \App\Models\ClassPeriod $classPeriod, $meetingNumber)
+    {
+        set_time_limit(300);
+
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        if (!$user->isAdmin() && !$user->isTeacher()) {
+            $isEnrolled = $classPeriod->enrollments()
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->exists();
+            if (!$isEnrolled) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak terdaftar dalam kelas custom ini.'], 403);
+            }
+        }
+
+        $meetingNumber = (int) $meetingNumber;
+        $questions = $request->input('questions', []);
+        $answers = $request->input('answers', []);
+
+        $uploadPath = public_path('uploads/custom_class_speaking_ai_interview');
+        if (!file_exists($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        $audioUrls = [];
+        $audioPaths = [];
+        if ($request->hasFile('audio_blobs')) {
+            foreach ($request->file('audio_blobs') as $index => $file) {
+                $filename = 'cc' . $classPeriod->id . '_m' . $meetingNumber . '_' . $user->id . '_' . time() . '_' . $index . '.webm';
+                $file->move($uploadPath, $filename);
+                $audioUrls[$index] = asset('uploads/custom_class_speaking_ai_interview/' . $filename);
+                $audioPaths[$index] = $uploadPath . '/' . $filename;
+            }
+        }
+
+        $transcriptsData = [];
+        foreach ($questions as $index => $questionText) {
+            $transcriptsData[] = [
+                'question' => $questionText,
+                'answer' => $answers[$index] ?? '(No answer recorded)',
+                'audio_url' => $audioUrls[$index] ?? null,
+            ];
+        }
+
+        $transcriptsForGrading = [];
+        foreach ($transcriptsData as $index => $entry) {
+            $transcriptsForGrading[] = $entry + ['audio_path' => $audioPaths[$index] ?? null];
+        }
+
+        $ai = new \App\Http\Controllers\AiController();
+        $result = $ai->gradeSpeakingMeeting($transcriptsForGrading, 'Custom Class: ' . $classPeriod->name, $meetingNumber);
+
+        if (!$result) {
+            return response()->json(['success' => false, 'message' => 'Gagal mendapatkan penilaian AI. Silakan coba lagi.'], 500);
+        }
+
+        $categories = $result['categories'] ?? [];
+        $evaluation = \App\Models\CustomClassSpeakingAiInterviewEvaluation::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'class_period_id' => $classPeriod->id,
+                'meeting_number' => $meetingNumber,
+            ],
+            [
+                'overall_score' => $result['overall_score'] ?? 0,
+                'cefr_level' => $result['cefr_level'] ?? null,
+                'fluency_score' => $categories['fluency']['score'] ?? null,
+                'vocabulary_score' => $categories['vocabulary']['score'] ?? null,
+                'grammar_score' => $categories['grammar']['score'] ?? null,
+                'pronunciation_score' => $categories['pronunciation']['score'] ?? null,
+                'scores_data' => $result,
+                'transcripts_data' => $transcriptsData,
+                'general_feedback' => $result['general_feedback'] ?? null,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'evaluation' => [
+                'overall_score' => $evaluation->overall_score,
+                'cefr_level' => $evaluation->cefr_level,
+                'categories' => $categories,
+                'general_feedback' => $evaluation->general_feedback,
+                'updated_at' => $evaluation->updated_at?->toIso8601String(),
+            ],
+        ]);
+    }
 
     public function toeflItp()
     {
@@ -169,32 +629,266 @@ class AssignmentController extends Controller
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
 
-        $rawSlugs = [];
-        if ($user && $user->isStudent()) {
-            if ($user->program) {
-                $rawSlugs[] = $user->program->slug;
-            }
-            $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
-                ->whereIn('status', ['active', 'completed'])
-                ->with('program')
-                ->get();
-            foreach ($enrollments as $enrollment) {
-                if ($enrollment->program) {
-                    $rawSlugs[] = $enrollment->program->slug;
-                }
-            }
-        }
-
-        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic-all-sections', $rawSlugs) || in_array('ielts-academic', $rawSlugs));
-
-        $hasListening = $hasFullAccess || in_array('ielts-academic-listening', $rawSlugs);
-        $hasReading = $hasFullAccess || in_array('ielts-academic-reading', $rawSlugs);
-        $hasWriting = $hasFullAccess || in_array('ielts-academic-writing', $rawSlugs);
-        $hasSpeaking = $hasFullAccess || in_array('ielts-academic-speaking', $rawSlugs);
+        $skillAccess = app(\App\Domain\IeltsShared\IeltsAcademicSkillAccess::class)->resolve($user);
+        $hasFullAccess = $skillAccess['hasFullAccess'];
+        $hasListening = $skillAccess['hasListening'];
+        $hasReading = $skillAccess['hasReading'];
+        $hasWriting = $skillAccess['hasWriting'];
+        $hasSpeaking = $skillAccess['hasSpeaking'];
 
         $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('ielts-academic') : false;
 
         return view('ielts.writing.index', compact('hasListening', 'hasReading', 'hasWriting', 'hasSpeaking', 'hasFullAccess', 'isClassEnded'));
+    }
+
+    public function grammarIeltsWriting()
+    {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'grammar-and-ielts-writing-band-7')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
+
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('grammar-and-ielts-writing-band-7') : false;
+
+        $batchProgram = \App\Models\Program::where('slug', 'grammar-and-ielts-writing-band-7')
+            ->with(['classPeriods', 'meetings'])
+            ->first();
+
+        $curriculum = \App\Domain\GrammarIeltsWriting\GrammarIeltsWritingCurriculum::getMeetings();
+
+        // Ensure 15 meetings exist in database for this program
+        if ($batchProgram && $batchProgram->meetings->count() < 15) {
+            foreach ($curriculum as $meetingNum => $currData) {
+                \App\Models\Meeting::firstOrCreate(
+                    [
+                        'program_id' => $batchProgram->id,
+                        'meeting_number' => $meetingNum,
+                    ],
+                    [
+                        'title' => $currData['full_title'] ?? "Meeting $meetingNum",
+                        'is_locked' => false,
+                    ]
+                );
+            }
+            $batchProgram->load('meetings');
+        }
+
+        $selectedClassPeriod = null;
+        if ($user && $user->isStudent()) {
+            $enrollment = $user->enrollments()->where('program_id', $batchProgram?->id)->latest()->first();
+            if ($enrollment) {
+                $selectedClassPeriod = $enrollment->classPeriod;
+            }
+        } elseif ($batchProgram?->active_class_period_id) {
+            $selectedClassPeriod = $batchProgram->classPeriods->firstWhere('id', $batchProgram->active_class_period_id);
+        }
+
+        if (!$selectedClassPeriod && $batchProgram?->classPeriods?->isNotEmpty()) {
+            $selectedClassPeriod = $batchProgram->classPeriods->where('status', 'active')->first() 
+                ?? $batchProgram->classPeriods->first();
+        }
+
+        $classMeetings = collect([]);
+        if ($selectedClassPeriod && $batchProgram) {
+            $classMeetings = $selectedClassPeriod->classMeetings()
+                ->whereIn('meeting_number', $batchProgram->meetings->pluck('meeting_number'))
+                ->get()
+                ->keyBy('meeting_number');
+        }
+
+        $periodMeetingStatus = collect([]);
+        if ($selectedClassPeriod) {
+            $periodMeetingStatus = $selectedClassPeriod->meetings()
+                ->pluck('is_open', 'meeting_id');
+        }
+
+        if ($batchProgram && $batchProgram->meetings) {
+            $batchProgram->meetings->transform(function ($meeting) use ($user, $selectedClassPeriod, $periodMeetingStatus, $classMeetings) {
+                if ($selectedClassPeriod && $periodMeetingStatus->has($meeting->id)) {
+                    $meeting->is_locked = !$periodMeetingStatus->get($meeting->id);
+                }
+                $meeting->classMeeting = $classMeetings->get($meeting->meeting_number);
+                return $meeting;
+            });
+        }
+
+        return view('assignments.grammar-ielts-writing', compact(
+            'user',
+            'isClassEnded',
+            'batchProgram',
+            'selectedClassPeriod',
+            'curriculum'
+        ));
+    }
+
+    public function grammarIeltsWritingMeetingShow(\Illuminate\Http\Request $request, int $meetingNumber)
+    {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'grammar-and-ielts-writing-band-7')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
+
+        abort_if($meetingNumber < 1 || $meetingNumber > 15, 404, 'Meeting not found');
+
+        $curriculumMeeting = \App\Domain\GrammarIeltsWriting\GrammarIeltsWritingCurriculum::getMeeting($meetingNumber);
+        abort_if(!$curriculumMeeting, 404, 'Meeting curriculum not found');
+
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('grammar-and-ielts-writing-band-7') : false;
+
+        $batchProgram = \App\Models\Program::where('slug', 'grammar-and-ielts-writing-band-7')
+            ->with(['classPeriods', 'meetings'])
+            ->first();
+
+        $dbMeeting = $batchProgram?->meetings->firstWhere('meeting_number', $meetingNumber);
+
+        // Check lock status for student
+        $isLocked = false;
+        $selectedClassPeriod = null;
+        if ($user && $user->isStudent()) {
+            $enrollment = $user->enrollments()->where('program_id', $batchProgram?->id)->latest()->first();
+            if ($enrollment) {
+                $selectedClassPeriod = $enrollment->classPeriod;
+            }
+        } elseif ($batchProgram?->active_class_period_id) {
+            $selectedClassPeriod = $batchProgram->classPeriods->firstWhere('id', $batchProgram->active_class_period_id);
+        }
+
+        if (!$selectedClassPeriod && $batchProgram?->classPeriods?->isNotEmpty()) {
+            $selectedClassPeriod = $batchProgram->classPeriods->where('status', 'active')->first() 
+                ?? $batchProgram->classPeriods->first();
+        }
+
+        $classMeeting = null;
+        if ($selectedClassPeriod && $dbMeeting) {
+            $classMeeting = $selectedClassPeriod->classMeetings()
+                ->where('meeting_number', $meetingNumber)
+                ->first();
+
+            $pivotStatus = $selectedClassPeriod->meetings()
+                ->where('meeting_id', $dbMeeting->id)
+                ->value('is_open');
+            if ($pivotStatus !== null) {
+                $isLocked = !$pivotStatus;
+            } else {
+                $isLocked = (bool) $dbMeeting->is_locked;
+            }
+        } elseif ($dbMeeting) {
+            $isLocked = (bool) $dbMeeting->is_locked;
+        }
+
+        if ($isLocked && !$user->isAdmin() && !$user->isTeacher()) {
+            return redirect()->route('assignments.grammar-ielts-writing')
+                ->with('error', 'Meeting ' . $meetingNumber . ' is currently locked.');
+        }
+
+        $allCurriculum = \App\Domain\GrammarIeltsWriting\GrammarIeltsWritingCurriculum::getMeetings();
+
+        $prevMeeting = $meetingNumber > 1 ? $meetingNumber - 1 : null;
+        $nextMeeting = $meetingNumber < 15 ? $meetingNumber + 1 : null;
+
+        // Draft and saved answers
+        $userId = Auth::id() ?? session()->getId();
+        $draftKey = "grammar_ielts_draft_{$userId}_{$meetingNumber}";
+        $savedDraft = \Illuminate\Support\Facades\Cache::get($draftKey) ?? session($draftKey, []);
+
+        // Existing IELTS writing submission
+        $existingSubmission = null;
+        if (Auth::check() && $dbMeeting) {
+            $existingSubmission = \App\Models\IeltsWritingPracticeSubmission::where('user_id', Auth::id())
+                ->where(function ($q) use ($dbMeeting) {
+                    $q->where('meeting_id', $dbMeeting->id);
+                })
+                ->whereNotNull('scores')
+                ->latest('id')
+                ->first();
+        }
+
+        return view('assignments.grammar-ielts-writing.meeting-show', compact(
+            'user',
+            'meetingNumber',
+            'curriculumMeeting',
+            'allCurriculum',
+            'prevMeeting',
+            'nextMeeting',
+            'isClassEnded',
+            'batchProgram',
+            'dbMeeting',
+            'selectedClassPeriod',
+            'classMeeting',
+            'savedDraft',
+            'existingSubmission'
+        ));
+    }
+
+    public function grammarIeltsWritingSaveDraft(\Illuminate\Http\Request $request, int $meetingNumber)
+    {
+        $userId = Auth::id() ?? session()->getId();
+        $payload = $request->input('draft', []);
+
+        $draftKey = "grammar_ielts_draft_{$userId}_{$meetingNumber}";
+        \Illuminate\Support\Facades\Cache::put($draftKey, $payload, now()->addDays(30));
+        session([$draftKey => $payload]);
+
+        return response()->json(['status' => 'success', 'saved_at' => now()->toTimeString()]);
+    }
+
+    public function grammarIeltsWritingGrammarCheck(\Illuminate\Http\Request $request, int $meetingNumber)
+    {
+        $curriculumMeeting = \App\Domain\GrammarIeltsWriting\GrammarIeltsWritingCurriculum::getMeeting($meetingNumber);
+        if (!$curriculumMeeting) {
+            return response()->json(['status' => 'error', 'message' => 'Meeting not found'], 404);
+        }
+
+        $exercises = $curriculumMeeting['grammar_data']['practice_exercises'] ?? [];
+        $userAnswers = $request->input('answers', []);
+
+        $results = [];
+        $correctCount = 0;
+
+        foreach ($exercises as $ex) {
+            $id = $ex['id'];
+            $ans = trim((string) ($userAnswers[$id] ?? ''));
+            $keywords = $ex['target_keywords'] ?? [];
+            
+            $matchedKeywords = 0;
+            $lowerAns = strtolower($ans);
+            foreach ($keywords as $kw) {
+                if (str_contains($lowerAns, strtolower($kw))) {
+                    $matchedKeywords++;
+                }
+            }
+
+            $isCorrect = false;
+            if (count($keywords) > 0) {
+                $isCorrect = ($matchedKeywords / count($keywords)) >= 0.65 && strlen($ans) >= 15;
+            } else {
+                $isCorrect = strlen($ans) >= 15;
+            }
+
+            if ($isCorrect) {
+                $correctCount++;
+            }
+
+            $results[$id] = [
+                'is_correct' => $isCorrect,
+                'user_answer' => $ans,
+                'model_answer' => $ex['model_answer'],
+                'grammar_note' => $ex['grammar_note'],
+                'matched_keywords' => $matchedKeywords,
+                'total_keywords' => count($keywords),
+            ];
+        }
+
+        $totalExercises = count($exercises);
+        $scorePercent = $totalExercises > 0 ? round(($correctCount / $totalExercises) * 100) : 0;
+
+        return response()->json([
+            'status' => 'success',
+            'score' => $scorePercent,
+            'correct_count' => $correctCount,
+            'total_exercises' => $totalExercises,
+            'results' => $results,
+        ]);
     }
 
     public function pteAcademic()
@@ -947,17 +1641,17 @@ class AssignmentController extends Controller
                 );
 
                 return (object) [
-                    'test_number' => $testNumber,
+                    'test_number' => (int) $testNumber,
                     'module1' => $module1,
                     'module2' => $module2,
-                    'title' => $module1->title ?? "Digital SAT Practice Test {$testNumber}",
+                    'title' => "Digital SAT Practice Test {$testNumber}",
                     'description' => $module1->description ?? null,
                     'is_locked' => (bool) ($module1->is_locked ?? false),
                     'rw_completed' => (bool) ($module2->completed ?? false),
                     'score_report_available' => (bool) ($module2->completed ?? false) && $mathDone,
                 ];
             })
-            ->sortKeys()
+            ->sortBy('test_number')
             ->values();
 
         $drills = $allMeetings->whereNull('test_number')->values();
@@ -1010,6 +1704,10 @@ class AssignmentController extends Controller
 
         if ($request->routeIs('assignments.sat*')) {
             return 'sat';
+        }
+
+        if ($request->routeIs('assignments.grammar-ielts-writing*')) {
+            return 'grammar-and-ielts-writing-band-7';
         }
 
         if ($request->routeIs('assignments.grammar-writing*')) {
@@ -1500,7 +2198,35 @@ class AssignmentController extends Controller
             ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
             ->all();
 
-        $allowedProgramSlugs = array_merge($allowedProgramSlugs, $enrollmentProgramSlugs, $accessProgramSlugs);
+        // Include source programs from custom class periods
+        $customClassPeriodIds = \App\Models\Enrollment::where('user_id', $user->id)
+            ->whereIn('status', ['active', 'completed'])
+            ->whereNotNull('class_period_id')
+            ->pluck('class_period_id')
+            ->when($user->class_period_id, fn($q) => $q->push($user->class_period_id))
+            ->unique();
+
+        $customSourceSlugs = [];
+        if ($customClassPeriodIds->isNotEmpty() && \Illuminate\Support\Facades\Schema::hasColumn('class_meetings', 'source_program_id')) {
+            $customSourceSlugs = \App\Models\ClassMeeting::whereIn('class_period_id', $customClassPeriodIds)
+                ->whereNotNull('source_program_id')
+                ->with('sourceProgram:id,slug')
+                ->get()
+                ->pluck('sourceProgram.slug')
+                ->filter()
+                ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
+                ->all();
+        }
+
+        $allowedProgramSlugs = array_merge($allowedProgramSlugs, $enrollmentProgramSlugs, $accessProgramSlugs, $customSourceSlugs);
+
+        if (in_array('grammar-and-ielts-writing-band-7', $allowedProgramSlugs, true)) {
+            $allowedProgramSlugs[] = 'grammar-for-writing';
+            $allowedProgramSlugs[] = 'ielts-academic';
+        }
+        if (in_array('ielts-academic', $allowedProgramSlugs, true) || in_array('ielts-academic-full-package', $allowedProgramSlugs, true) || in_array('ielts-academic-all-sections', $allowedProgramSlugs, true)) {
+            $allowedProgramSlugs[] = 'grammar-and-ielts-writing-band-7';
+        }
 
         return array_values(array_unique(array_filter($allowedProgramSlugs)));
     }
@@ -1513,6 +2239,7 @@ class AssignmentController extends Controller
             'complexity-grammar-for-writing',
             'proficiency-grammar-for-writing',
             'fast-track-grammar-for-writing' => 'grammar-for-writing',
+            'grammar-and-ielts-writing-band-7' => 'grammar-and-ielts-writing-band-7',
             'grammar-for-speaking',
             'introductory-speaking',
             'intermediate-speaking',
