@@ -214,7 +214,11 @@
     <div class="flex h-[calc(100vh-4rem)] relative overflow-hidden">
 
         <!-- Collapsible Left Sidebar (Cisco NetAcad Outline) -->
-        <aside class="h-full bg-white border-r border-gray-200 flex flex-col shrink-0 transition-all duration-300 z-20 shadow-sm"
+        {{-- Static w-80/md:w-[22rem] below matches the sidebarOpen:true default so the
+             sidebar renders at its correct width on first paint, before Alpine hydrates
+             and the :class binding below takes over - without it, the aside has no width
+             constraint at all for a brief moment and flashes to its full content width. --}}
+        <aside class="h-full bg-white border-r border-gray-200 flex flex-col shrink-0 transition-all duration-300 z-20 shadow-sm w-80 md:w-[22rem]"
                :class="{
                    'w-80 md:w-[22rem]': sidebarOpen,
                    'w-0 -translate-x-full border-r-0 overflow-hidden pointer-events-none': !sidebarOpen,

@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'google_id',
         'phone_number',
         'role',
         'password',
@@ -56,6 +57,7 @@ class User extends Authenticatable
         'camp_room_id',
         'bio',
         'last_seen_at',
+        'self_study_grammar_mode_override',
     ];
 
     /**

@@ -6,9 +6,35 @@ class SelfStudyContentService
 {
     /**
      * Get the full package containing Study Guide and Practice Questions for a given topic seed.
+     *
+     * $mode only affects Module 1 seeds (grammar-1..3, grammar-m1-t4..t12): 'A' (default) serves
+     * the everyday A1-A2-to-B1-B2 track, 'B' serves the B1-C2 advanced track. Modules 2-4 are
+     * already B1-C2 for everyone and are unaffected by $mode.
      */
-    public function getTopicPackage(string $seed, string $topicTitle = '', array $meta = []): array
+    public function getTopicPackage(string $seed, string $topicTitle = '', array $meta = [], string $mode = 'A'): array
     {
+        if ($mode === 'B') {
+            $advanced = match ($seed) {
+                'grammar-1' => $this->getPartsOfSpeechPackageAdvanced(),
+                'grammar-2' => \App\Services\SelfStudySimplePresentDataAdvanced::getPackage(),
+                'grammar-3' => \App\Services\SelfStudySimplePresentNominalPassiveDataAdvanced::getPackage(),
+                'grammar-m1-t4' => \App\Services\SelfStudyPresentNegativeInterrogativeDataAdvanced::getPackage(),
+                'grammar-m1-t5' => \App\Services\SelfStudyCorePrepositionalPhrasesDataAdvanced::getPackage(),
+                'grammar-m1-t6' => \App\Services\SelfStudyVerbalsInfinitivesGerundsDataAdvanced::getPackage(),
+                'grammar-m1-t7' => \App\Services\SelfStudyModalAuxiliariesDataAdvanced::getPackage(),
+                'grammar-m1-t8' => \App\Services\SelfStudySimplePastDataAdvanced::getPackage(),
+                'grammar-m1-t9' => \App\Services\SelfStudyPresentContinuousDataAdvanced::getPackage(),
+                'grammar-m1-t10' => \App\Services\SelfStudyPresentPerfectDataAdvanced::getPackage(),
+                'grammar-m1-t11' => \App\Services\SelfStudySimpleFutureDataAdvanced::getPackage(),
+                'grammar-m1-t12' => \App\Services\SelfStudyPastContinuousPastPerfectDataAdvanced::getPackage(),
+                default => null,
+            };
+
+            if ($advanced !== null) {
+                return $advanced;
+            }
+        }
+
         return match ($seed) {
             'grammar-1' => $this->getPartsOfSpeechPackage(),
             'grammar-2' => $this->getSimplePresentPackage(),
@@ -2728,6 +2754,2697 @@ $questionsData = [
                     'Identifikasi posisi kata terlebih dahulu: Jika diapit artikel (a/an/the) dan kata depan (of/in), kata tersebut biasanya Noun.',
                     'Kata berakhiran -ly tidak selalu adverb (misal: "friendly", "costly", "lovely" adalah Adjective). Selalu cek fungsi sintaksisnya.',
                     'Perhatikan konsistensi kelas kata dalam struktur paralel (misal: "swimming and reading", bukan "swimming and to read").',
+                    'Ingat 8 kelas kata: Noun, Pronoun, Verb, Adjective, Adverb, Preposition, Conjunction, dan Interjection.'
+                ],
+            ],
+            'questions' => $questionsData,
+        ];
+    }
+    protected function getPartsOfSpeechPackageAdvanced(): array
+    {
+$subLessonsData = [
+            [
+                'id' => 'noun',
+                'name' => 'Noun (Nomina / Kata Benda)',
+                'code' => '1.1.1',
+                'concept_title' => 'Noun (Nomina) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Noun adalah kata yang menamai entitas: orang, tempat, benda, konsep abstrak, atau fenomena. Dalam academic writing, Noun memegang peranan krusial sebagai Subjek, Objek Langsung/Tak Langsung, dan Objek Preposisi. Bahasa ilmiah sangat mengandalkan \'Nominalization\' (pengubahan kata kerja/sifat menjadi kata benda abstrak, misal: analyze -> analysis, expand -> expansion) untuk menciptakan kepadatan leksikal (lexical density) yang objektif.',
+                'formula' => 'Root + (-tion, -ment, -ance/-ence, -ity, -ness, -ism, -ology) ➔ Academic Noun',
+                'rules' => [
+                    'Noun bertindak sebagai Head of Noun Phrase pada posisi Subject atau Object kalimat.',
+                    'Gunakan Abstract Noun akhiran -tion, -ment, -ity untuk menyampaikan ide ilmiah secara ringkas.',
+                    'Perhatikan countable vs uncountable nouns (misal: research, evidence, information bersifat uncountable dan tidak menggunakan artikel \'a\' atau akhiran \'-s\').',
+                    'Nominal Compound (gabungan kata benda) sering digunakan untuk menamai konsep teknis (misal: climate change mitigation, renewable energy infrastructure).'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Pemerintah mengumumkan perluasan infrastruktur energi terbarukan di wilayah pedesaan.',
+                        'target_word' => 'expansion (Noun)',
+                        'options' => [
+                            'The government announced the expansion of renewable energy infrastructure in rural regions.',
+                            'The government announced the expand of renewable energy infrastructure in rural regions.',
+                            'The government announced the expansive of renewable energy infrastructure in rural regions.',
+                            'The government announced the expansively of renewable energy infrastructure in rural regions.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata \'expansion\' (Noun) tepat setelah artikel \'the\' dan berfungsi sebagai direct object dari kata kerja \'announced\'. Pilihan lain (\'expand\' = verb, \'expansive\' = adj, \'expansively\' = adv) salah secara kelas kata.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Keberhasilan penelitian ini bergantung pada ketelitian pengumpulan data primer.',
+                        'target_word' => 'accuracy (Noun)',
+                        'options' => [
+                            'The success of this research depends on the accuracy of primary data collection.',
+                            'The success of this research depends on the accurate of primary data collection.',
+                            'The success of this research depends on the accurately of primary data collection.',
+                            'The success of this research depends on the accuratenessly of primary data collection.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah preposisi \'on the\', kita memerlukan kata benda abstrak \'accuracy\' (Noun) sebagai inti frasa nomina sebelum preposisi \'of\'.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Analisis komparatif mengungkapkan perbedaan yang signifikan antara kedua kelompok uji.',
+                        'target_word' => 'analysis (Noun)',
+                        'options' => [
+                            'The comparative analysis revealed significant differences between the two test groups.',
+                            'The comparative analyze revealed significant differences between the two test groups.',
+                            'The comparative analytical revealed significant differences between the two test groups.',
+                            'The comparative analytically revealed significant differences between the two test groups.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Frasa subjek \'The comparative ...\' membutuhkan head noun \'analysis\'. Kata \'analyze\' adalah verb dan \'analytical\' adalah adjective.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Partisipasi aktif dari warga masyarakat sangat penting untuk keberlanjutan proyek.',
+                        'target_word' => 'participation (Noun)',
+                        'options' => [
+                            'Active participation by local residents is crucial for project sustainability.',
+                            'Active participate by local residents is crucial for project sustainability.',
+                            'Active participatory by local residents is crucial for project sustainability.',
+                            'Active participatingly by local residents is crucial for project sustainability.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Participation\' adalah Noun yang diterangkan oleh adjective \'Active\' dan berfungsi sebagai subjek kalimat.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Para peneliti mengukur konsentrasi polutan berbahaya di udara perkotaan.',
+                        'target_word' => 'concentration (Noun)',
+                        'options' => [
+                            'The researchers measured the concentration of hazardous pollutants in urban air.',
+                            'The researchers measured the concentrate of hazardous pollutants in urban air.',
+                            'The researchers measured the concentrated of hazardous pollutants in urban air.',
+                            'The researchers measured the concentratively of hazardous pollutants in urban air.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Posisi objek langsung setelah \'measured the\' membutuhkan noun \'concentration\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Penerapan metode pembelajaran baru meningkatkan pemahaman siswa secara menyeluruh.',
+                        'target_word' => 'implementation (Noun)',
+                        'options' => [
+                            'The implementation of the new teaching method improved students\' overall understanding.',
+                            'The implement of the new teaching method improved students\' overall understanding.',
+                            'The implementable of the new teaching method improved students\' overall understanding.',
+                            'The implementative of the new teaching method improved students\' overall understanding.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Implementation\' adalah bentuk noun turunan yang baku untuk \'penerapan\' dalam konteks formal akademis.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Kurangnya bukti empiris melemahkan kesimpulan dari artikel jurnal tersebut.',
+                        'target_word' => 'evidence (Noun)',
+                        'options' => [
+                            'The lack of empirical evidence weakened the conclusion of the journal article.',
+                            'The lack of empirical evident weakened the conclusion of the journal article.',
+                            'The lack of empirical evidently weakened the conclusion of the journal article.',
+                            'The lack of empirical evidential weakened the conclusion of the journal article.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Frasa \'empirical ...\' setelah preposisi \'of\' membutuhkan kata benda \'evidence\' (uncountable noun).'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Perkembangan teknologi kecerdasan buatan membuka banyak peluang kerja baru.',
+                        'target_word' => 'development (Noun)',
+                        'options' => [
+                            'The development of artificial intelligence technology creates numerous new employment opportunities.',
+                            'The develop of artificial intelligence technology creates numerous new employment opportunities.',
+                            'The developmental of artificial intelligence technology creates numerous new employment opportunities.',
+                            'The developingly of artificial intelligence technology creates numerous new employment opportunities.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Development\' adalah Noun yang bertindak sebagai subjek kalimat.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Penilaian terhadap risiko lingkungan dilakukan sebelum konstruksi dimulai.',
+                        'target_word' => 'assessment (Noun)',
+                        'options' => [
+                            'An assessment of environmental risks was conducted before construction commenced.',
+                            'An assess of environmental risks was conducted before construction commenced.',
+                            'An assessable of environmental risks was conducted before construction commenced.',
+                            'An assessively of environmental risks was conducted before construction commenced.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Artikel \'An\' mendahului noun tunggal yang berawalan vokal: \'assessment\'.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Noun',
+                        'id_sentence' => 'Stabilitas moneter sangat penting untuk mendorong pertumbuhan ekonomi nasional.',
+                        'target_word' => 'stability (Noun)',
+                        'options' => [
+                            'Monetary stability is essential to stimulate national economic growth.',
+                            'Monetary stabilize is essential to stimulate national economic growth.',
+                            'Monetary stable is essential to stimulate national economic growth.',
+                            'Monetary stably is essential to stimulate national economic growth.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Monetary\' (Adjective) menerangkan \'stability\' (Noun) yang berfungsi sebagai subjek kalimat.'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'pronoun',
+                'name' => 'Pronoun (Pronomina / Kata Ganti)',
+                'code' => '1.1.2',
+                'concept_title' => 'Pronoun (Pronomina) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Pronoun menggantikan kata benda (noun) atau frasa benda untuk menghindari repetisi kata yang monoton dan menjaga kohesi teks. Dalam bahasa ilmiah formal, pemakaian pronoun harus sangat jelas rujukannya (antecedent reference). Kesalahan umum meliputi: pronoun-antecedent agreement yang tidak selaras dalam jumlah (singular/plural), rujukan ambigu (ambiguous antecedent), atau penggunaan personal pronoun orang pertama (I, we) secara berlebihan pada teks yang semestinya objektif.',
+                'formula' => 'Personal (they, it) | Relative (which, that, who, whom) | Demonstrative (this, these) | Indefinite (each, neither)',
+                'rules' => [
+                    'Pronoun-Antecedent Agreement: Pastikan kata ganti selaras dalam jumlah dan sifat dengan kata benda yang digantikannya.',
+                    'Hindari \'Vague Pronoun Reference\': Jangan gunakan kata \'this\' atau \'it\' tanpa benda jelas yang ditunjuk jika konteksnya bisa membingungkan.',
+                    'Relative Pronouns: \'who\' untuk manusia sebagai subjek, \'whom\' untuk objek, \'which\' untuk benda pada non-defining clause, dan \'that\' untuk defining clause.',
+                    'Correlative Agreement: Pada pola \'Neither A nor B\', kata ganti mengikuti subjek terdekat B.'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Baik peneliti utama maupun para asistennya tidak menyerahkan data mereka sebelum tenggat waktu.',
+                        'target_word' => 'their (Pronoun)',
+                        'options' => [
+                            'Neither the principal investigator nor the research assistants submitted their data before the deadline.',
+                            'Neither the principal investigator nor the research assistants submitted his data before the deadline.',
+                            'Neither the principal investigator nor the research assistants submitted its data before the deadline.',
+                            'Neither the principal investigator nor the research assistants submitted them data before the deadline.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Pada pola \'Neither... nor...\', kata ganti kepemilikan menyesuaikan dengan subjek terdekat (\'research assistants\' = plural) sehingga menggunakan \'their\'.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Para mahasiswa yang menyelesaikan modul praktikum tepat waktu menerima sertifikat.',
+                        'target_word' => 'who (Relative Pronoun)',
+                        'options' => [
+                            'The students who completed the laboratory module on time received a certificate.',
+                            'The students which completed the laboratory module on time received a certificate.',
+                            'The students whom completed the laboratory module on time received a certificate.',
+                            'The students whose completed the laboratory module on time received a certificate.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Who\' adalah relative pronoun subjek yang merujuk pada manusia (\'The students\'). \'Which\' untuk benda, \'whom\' untuk objek, \'whose\' untuk kepemilikan.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Lembaga riset tersebut menerbitkan laporan tahunannya kepada publik kemarin.',
+                        'target_word' => 'its (Possessive Pronoun)',
+                        'options' => [
+                            'The research institute published its annual report to the public yesterday.',
+                            'The research institute published their annual report to the public yesterday.',
+                            'The research institute published it\'s annual report to the public yesterday.',
+                            'The research institute published hers annual report to the public yesterday.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'The research institute\' adalah entitas organisasi tunggal (singular entity), sehingga kata ganti kepemilikan yang tepat adalah \'its\' (bukan \'their\' dan bukan \'it\'s\').'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Setiap peserta harus membawa kartu identitas masing-masing ke ruang ujian.',
+                        'target_word' => 'each (Indefinite Pronoun)',
+                        'options' => [
+                            'Each of the participants must bring their identity card to the examination room.',
+                            'All of the participant must bring their identity card to the examination room.',
+                            'Both of the participant must bring their identity card to the examination room.',
+                            'Every of the participants must bring their identity card to the examination room.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Each of the participants\' adalah pola baku indefinite pronoun untuk merujuk setiap individu secara terpisah.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Eksperimen yang didanai oleh kementerian menunjukkan hasil yang menjanjikan.',
+                        'target_word' => 'which (Relative Pronoun)',
+                        'options' => [
+                            'The experiments, which were funded by the ministry, yielded promising results.',
+                            'The experiments, whom were funded by the ministry, yielded promising results.',
+                            'The experiments, who were funded by the ministry, yielded promising results.',
+                            'The experiments, what were funded by the ministry, yielded promising results.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Pada non-restrictive clause (diapit tanda koma) yang merujuk pada benda (\'The experiments\'), gunakan relative pronoun \'which\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Para profesor dan staf laboratorium bangga terhadap diri mereka sendiri atas pencapaian ini.',
+                        'target_word' => 'themselves (Reflexive Pronoun)',
+                        'options' => [
+                            'The professors and laboratory staff congratulated themselves on this achievement.',
+                            'The professors and laboratory staff congratulated theirselves on this achievement.',
+                            'The professors and laboratory staff congratulated them on this achievement.',
+                            'The professors and laboratory staff congratulated each other on this achievement.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Themselves\' adalah reflexive pronoun jamak orang ketiga. Bentuk \'theirselves\' tidak ada dalam tata bahasa baku.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Temuan-temuan ini memberikan bukti kuat yang mendukung hipotesis baru tersebut.',
+                        'target_word' => 'these (Demonstrative Pronoun)',
+                        'options' => [
+                            'These findings provide robust evidence supporting the new hypothesis.',
+                            'This findings provide robust evidence supporting the new hypothesis.',
+                            'Those finding provide robust evidence supporting the new hypothesis.',
+                            'That findings provide robust evidence supporting the new hypothesis.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata benda jamak \'findings\' yang dekat dengan pembicara/teks harus dipasangkan dengan demonstrative plural \'These\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Partisipan yang diwawancarai oleh tim peneliti memberikan wawasan yang berharga.',
+                        'target_word' => 'whom (Objective Relative Pronoun)',
+                        'options' => [
+                            'The participants whom the research team interviewed provided valuable insights.',
+                            'The participants which the research team interviewed provided valuable insights.',
+                            'The participants whose the research team interviewed provided valuable insights.',
+                            'The participants what the research team interviewed provided valuable insights.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Whom\' bertindak sebagai objek dari kata kerja \'interviewed\' dalam klausa relatif yang merujuk pada manusia.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Kedua proposal tersebut ditolak karena tidak satupun memenuhi kriteria kelayakan.',
+                        'target_word' => 'neither (Indefinite Pronoun)',
+                        'options' => [
+                            'Both proposals were rejected because neither satisfied the eligibility criteria.',
+                            'Both proposals were rejected because none satisfied the eligibility criteria.',
+                            'Both proposals were rejected because either satisfied the eligibility criteria.',
+                            'Both proposals were rejected because nothing satisfied the eligibility criteria.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Ketika merujuk pada dua hal (\'Both proposals\'), kata ganti negatif yang tepat adalah \'neither\' (bukan \'none\' yang digunakan untuk tiga hal atau lebih).'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Pronoun',
+                        'id_sentence' => 'Siapapun yang ingin mengajukan beasiswa harus menyerahkan proposal penelitian.',
+                        'target_word' => 'whoever (Indefinite Relative Pronoun)',
+                        'options' => [
+                            'Whoever wishes to apply for the scholarship must submit a research proposal.',
+                            'Whomever wishes to apply for the scholarship must submit a research proposal.',
+                            'Whichever wishes to apply for the scholarship must submit a research proposal.',
+                            'Whatever wishes to apply for the scholarship must submit a research proposal.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Whoever\' berfungsi sebagai subjek kalimat dalam noun clause (\'Whoever wishes...\').'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'verb',
+                'name' => 'Verb (Verba / Kata Kerja)',
+                'code' => '1.1.3',
+                'concept_title' => 'Verb (Verba) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Verb adalah inti predikatif dari sebuah klausa independen. Kalimat bahasa Inggris tidak dapat berdiri tanpa adanya finite verb (kata kerja berkala/bertenses). Dalam penulisan akademis, penulis wajib memilih kata kerja yang presisi (academic reporting verbs seperti: hypothesize, elucidate, corroborate, synthesize) daripada menggunakan phrasal verbs informal (seperti: look into, find out, put off). Selain itu, pastikan konsistensi tenses dan kesesuaian subjek-kata kerja (subject-verb agreement).',
+                'formula' => 'Action Verbs (corroborate, establish) | Stative/Linking Verbs (indicate, remain, signify)',
+                'rules' => [
+                    'Setiap klausa independen wajib memiliki minimal satu Finite Verb (Active atau Passive).',
+                    'Pilih Academic Reporting Verbs alih-alih phrasal verbs (misal: \'investigate\' bukan \'look into\'; \'eliminate\' bukan \'get rid of\').',
+                    'Pastikan Subject-Verb Agreement: Subjek tunggal membutuhkan kata kerja bentuk singular (V-s/es), subjek jamak menggunakan V-base.',
+                    'Perhatikan perbedaan Finite Verb (misal: \'demonstrates\') dengan Non-Finite Participle (misal: \'demonstrating\', \'demonstrated\' sebagai modifier).'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Bukti empiris yang baru dikumpulkan menguatkan hipotesis awal para ilmuwan.',
+                        'target_word' => 'corroborates (Finite Verb)',
+                        'options' => [
+                            'The newly gathered empirical evidence corroborates the scientists\' initial hypothesis.',
+                            'The newly gathered empirical evidence corroboration the scientists\' initial hypothesis.',
+                            'The newly gathered empirical evidence corroborative the scientists\' initial hypothesis.',
+                            'The newly gathered empirical evidence corroboratively the scientists\' initial hypothesis.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Corroborates\' adalah Finite Active Verb tunggal yang mempredikasi subjek \'evidence\'. Pilihan lain berupa noun (-tion), adjective (-ive), atau adverb (-ly).'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Komite investigasi memeriksa keabsahan metodologi yang digunakan dalam studi tersebut.',
+                        'target_word' => 'examined (Past Verb)',
+                        'options' => [
+                            'The investigative committee examined the validity of the methodology used in the study.',
+                            'The investigative committee examination the validity of the methodology used in the study.',
+                            'The investigative committee examinable the validity of the methodology used in the study.',
+                            'The investigative committee examiningly the validity of the methodology used in the study.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kalimat membutuhkan kata kerja utama (Verb): \'examined\'. Bentuk \'examination\' adalah noun.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Data statistik menunjukkan adanya korelasi positif antara pendidikan dan pendapatan.',
+                        'target_word' => 'indicates (Verb)',
+                        'options' => [
+                            'The statistical data indicates a positive correlation between education and income.',
+                            'The statistical data indication a positive correlation between education and income.',
+                            'The statistical data indicative a positive correlation between education and income.',
+                            'The statistical data indicatively a positive correlation between education and income.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Indicates\' adalah finite verb. \'Indication\' = noun, \'indicative\' = adjective.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Pemerintah berencana menerapkan kebijakan penghematan energi secara bertahap.',
+                        'target_word' => 'implement (Infinitive Verb)',
+                        'options' => [
+                            'The government plans to implement energy conservation policies gradually.',
+                            'The government plans to implementation energy conservation policies gradually.',
+                            'The government plans to implementable energy conservation policies gradually.',
+                            'The government plans to implementingly energy conservation policies gradually.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah partikel \'to\' (to-infinitive), gunakan bentuk kata kerja dasar (base verb): \'implement\'.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Para insinyur berhasil memodifikasi prototipe untuk meningkatkan efisiensi bahan bakar.',
+                        'target_word' => 'modified (Past Verb)',
+                        'options' => [
+                            'The engineers successfully modified the prototype to enhance fuel efficiency.',
+                            'The engineers successfully modification the prototype to enhance fuel efficiency.',
+                            'The engineers successfully modifiable the prototype to enhance fuel efficiency.',
+                            'The engineers successfully modifier the prototype to enhance fuel efficiency.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Diterangkan oleh adverb \'successfully\', predikat kalimat membutuhkan past verb \'modified\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Faktor ekonomi mempercepat laju urbanisasi di kota-kota berkembang.',
+                        'target_word' => 'accelerate (Transitive Verb)',
+                        'options' => [
+                            'Economic factors accelerate the rate of urbanization in developing cities.',
+                            'Economic factors acceleration the rate of urbanization in developing cities.',
+                            'Economic factors accelerative the rate of urbanization in developing cities.',
+                            'Economic factors acceleratory the rate of urbanization in developing cities.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Subjek jamak \'Economic factors\' membutuhkan transitive action verb \'accelerate\'.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Temuan ini menjelaskan mekanisme di balik resistensi antibiotik pada bakteri.',
+                        'target_word' => 'elucidates (Academic Reporting Verb)',
+                        'options' => [
+                            'This finding elucidates the mechanism behind antibiotic resistance in bacteria.',
+                            'This finding elucidation the mechanism behind antibiotic resistance in bacteria.',
+                            'This finding elucidative the mechanism behind antibiotic resistance in bacteria.',
+                            'This finding elucidatingly the mechanism behind antibiotic resistance in bacteria.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Elucidates\' adalah academic verb bermakna \'menjelaskan secara gamblang\' untuk subjek tunggal \'This finding\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Para ahli memprediksi bahwa permintaan energi global akan berlipat ganda pada tahun 2050.',
+                        'target_word' => 'predict (Reporting Verb)',
+                        'options' => [
+                            'Experts predict that global energy demand will double by 2050.',
+                            'Experts prediction that global energy demand will double by 2050.',
+                            'Experts predictive that global energy demand will double by 2050.',
+                            'Experts predictably that global energy demand will double by 2050.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Predict\' adalah finite verb untuk subjek \'Experts\'.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Prosedur keselamatan yang ketat meminimalkan potensi kecelakaan di tempat kerja.',
+                        'target_word' => 'minimize (Verb)',
+                        'options' => [
+                            'Strict safety protocols minimize the potential for workplace accidents.',
+                            'Strict safety protocols minimal the potential for workplace accidents.',
+                            'Strict safety protocols minimally the potential for workplace accidents.',
+                            'Strict safety protocols minimization the potential for workplace accidents.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Minimize\' adalah verb dengan akhiran -ize, mempredikasi subjek \'Strict safety protocols\'.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Verb',
+                        'id_sentence' => 'Hasil uji klinis mengkonfirmasi efektivitas vaksin dalam mencegah penularan penyakit.',
+                        'target_word' => 'confirmed (Verb)',
+                        'options' => [
+                            'The clinical trial results confirmed the effectiveness of the vaccine in preventing disease transmission.',
+                            'The clinical trial results confirmation the effectiveness of the vaccine in preventing disease transmission.',
+                            'The clinical trial results confirmative the effectiveness of the vaccine in preventing disease transmission.',
+                            'The clinical trial results confirmingly the effectiveness of the vaccine in preventing disease transmission.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Predikat kalimat harus berbentuk verb lampau: \'confirmed\'.'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'adjective',
+                'name' => 'Adjective (Adjektiva / Kata Sifat)',
+                'code' => '1.1.4',
+                'concept_title' => 'Adjective (Adjektiva) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Adjective berfungsi memberikan atribut, membatasi lingkup (restrictive), mengklasifikasikan, atau mengukur karakteristik kata benda (noun). Dalam teks akademik, adjective terbagi menjadi Attributive (terletak langsung sebelum noun, misal: \'empirical data\') dan Predicative (terletak setelah linking verb, misal: \'The findings remain inconclusive\'). Penggunaan akhiran derivasi seperti -al, -ic, -ive, -able, -ous, -ary sangat umum dalam pembentukan kosakata ilmiah.',
+                'formula' => 'Attributive: [Determiner] + ADJECTIVE + [Noun] | Predicative: [Subject] + [Linking Verb] + ADJECTIVE',
+                'rules' => [
+                    'Attributive Position: Letakkan adjective langsung sebelum kata benda yang diterangkan (misal: rigorous methodology).',
+                    'Predicative Position: Gunakan adjective setelah linking verbs seperti: be, remain, seem, appear, become.',
+                    'Bedakan Participle Adjectives: Bentuk -ing (active/causing effect, misal: convincing argument) vs -ed (passive/receiving effect, misal: convinced audience).',
+                    'Hindari penumpukan adjective subjektif yang tidak terukur; utamakan deskriptor objektif dan berbasis bukti.'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Komite merilis penilaian komprehensif mengenai kelayakan ekonomi dari proyek tersebut.',
+                        'target_word' => 'comprehensive (Adjective)',
+                        'options' => [
+                            'The committee released a comprehensive assessment regarding the economic feasibility of the project.',
+                            'The committee released a comprehend assessment regarding the economic feasibility of the project.',
+                            'The committee released a comprehensively assessment regarding the economic feasibility of the project.',
+                            'The committee released a comprehension assessment regarding the economic feasibility of the project.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Comprehensive\' adalah attributive adjective yang menerangkan kata benda \'assessment\'. \'Comprehension\' adalah noun dan \'comprehensively\' adalah adverb.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Temuan awal dari survei tersebut masih belum meyakinkan bagi para peneliti.',
+                        'target_word' => 'inconclusive (Predicative Adjective)',
+                        'options' => [
+                            'The preliminary findings of the survey remain inconclusive for the researchers.',
+                            'The preliminary findings of the survey remain inconclusively for the researchers.',
+                            'The preliminary findings of the survey remain inconclusion for the researchers.',
+                            'The preliminary findings of the survey remain inconclusiveness for the researchers.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah linking verb \'remain\', posisi komplemen subjek harus diisi oleh predicative adjective \'inconclusive\'.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Pemanasan global merupakan ancaman signifikan terhadap keanekaragaman hayati laut.',
+                        'target_word' => 'significant (Attributive Adjective)',
+                        'options' => [
+                            'Global warming poses a significant threat to marine biodiversity.',
+                            'Global warming poses a significantly threat to marine biodiversity.',
+                            'Global warming poses a significance threat to marine biodiversity.',
+                            'Global warming poses a signified threat to marine biodiversity.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Significant\' (Adjective) menerangkan kata benda \'threat\'. Posisi sebelum noun tidak boleh diisi adverb \'significantly\'.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Para ilmuwan menerapkan metodologi yang ketat untuk memastikan keandalan hasil.',
+                        'target_word' => 'rigorous (Adjective)',
+                        'options' => [
+                            'The scientists implemented a rigorous methodology to ensure the reliability of the results.',
+                            'The scientists implemented a rigor methodology to ensure the reliability of the results.',
+                            'The scientists implemented a rigorously methodology to ensure the reliability of the results.',
+                            'The scientists implemented a rigorousness methodology to ensure the reliability of the results.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Rigorous\' (berakhiran -ous) adalah adjective yang menerangkan kata benda \'methodology\'.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Solusi yang diusulkan oleh konsultan terbukti layak secara teknis dan finansial.',
+                        'target_word' => 'feasible (Predicative Adjective)',
+                        'options' => [
+                            'The proposed solution proved feasible both technically and financially.',
+                            'The proposed solution proved feasibly both technically and financially.',
+                            'The proposed solution proved feasibility both technically and financially.',
+                            'The proposed solution proved feasibleness both technically and financially.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah linking verb \'proved\', gunakan predicative adjective \'feasible\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Penelitian ini memberikan kontribusi substansial terhadap literatur akademis terkini.',
+                        'target_word' => 'substantial (Adjective)',
+                        'options' => [
+                            'This study makes a substantial contribution to the current academic literature.',
+                            'This study makes a substantially contribution to the current academic literature.',
+                            'This study makes a substance contribution to the current academic literature.',
+                            'This study makes a substantiate contribution to the current academic literature.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Substantial\' (Adjective) menerangkan noun \'contribution\'.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Bukti empiris sangat penting untuk memvalidasi hipotesis ilmiah apa pun.',
+                        'target_word' => 'empirical (Adjective)',
+                        'options' => [
+                            'Empirical evidence is essential for validating any scientific hypothesis.',
+                            'Empirically evidence is essential for validating any scientific hypothesis.',
+                            'Empiricism evidence is essential for validating any scientific hypothesis.',
+                            'Empiricist evidence is essential for validating any scientific hypothesis.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Empirical\' (akhiran -al) berfungsi sebagai adjective yang memodifikasi noun \'evidence\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Pertumbuhan ekonomi negara tersebut tampaknya stabil selama dekade terakhir.',
+                        'target_word' => 'stable (Predicative Adjective)',
+                        'options' => [
+                            'The nation\'s economic growth appears stable over the past decade.',
+                            'The nation\'s economic growth appears stably over the past decade.',
+                            'The nation\'s economic growth appears stability over the past decade.',
+                            'The nation\'s economic growth appears stabilize over the past decade.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah linking verb \'appears\', gunakan predicative adjective \'stable\'.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Penggunaan bahasa yang ambigu dapat menimbulkan kesalahpahaman dalam kontrak hukum.',
+                        'target_word' => 'ambiguous (Adjective)',
+                        'options' => [
+                            'Ambiguous language can cause misunderstandings in legal contracts.',
+                            'Ambiguously language can cause misunderstandings in legal contracts.',
+                            'Ambiguity language can cause misunderstandings in legal contracts.',
+                            'Ambiguities language can cause misunderstandings in legal contracts.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Ambiguous\' adalah adjective yang menerangkan noun \'language\'.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Adjective',
+                        'id_sentence' => 'Limbah kimia beracun menimbulkan ancaman serius bagi kesehatan masyarakat setempat.',
+                        'target_word' => 'toxic (Adjective)',
+                        'options' => [
+                            'Toxic chemical waste poses a grave hazard to local public health.',
+                            'Toxically chemical waste poses a grave hazard to local public health.',
+                            'Toxicity chemical waste poses a grave hazard to local public health.',
+                            'Toxicant chemical waste poses a grave hazard to local public health.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Toxic\' adalah adjective yang menerangkan frasa benda \'chemical waste\'.'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'adverb',
+                'name' => 'Adverb (Adverbia / Kata Keterangan)',
+                'code' => '1.1.5',
+                'concept_title' => 'Adverb (Adverbia) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Adverb menerangkan kata kerja (verb), kata sifat (adjective), adverb lain, atau keseluruhan klausa (sentence adverb/stance adverb). Dalam penulisan akademis, Adverb of degree/manner (seperti: substantially, dramatically, marginally) digunakan untuk mengukur tren kuantitatif secara presisi, sedangkan Conjunctive Adverbs (seperti: consequently, furthermore, conversely) berfungsi sebagai jembatan logika antar-kalimat. Adverb TIDAK PERNAH menerangkan kata benda secara langsung.',
+                'formula' => 'Adverb + Verb | Adverb + Adjective | Adverb + Adverb | Adverb + Clause (Stance Adverb)',
+                'rules' => [
+                    'Adverb of Degree/Manner: Menerangkan intensitas atau cara kata kerja (misal: increased substantially).',
+                    'Adverb of Modification: Menerangkan kata sifat (misal: remarkably accurate, environmentally friendly).',
+                    'Sentence/Stance Adverb: Berada di awal kalimat diikuti tanda koma untuk menunjukkan sikap akademis penulis (misal: Inevitably, ... / Notably, ...).',
+                    'Jangan tertukar: Akhiran -ly tidak selalu adverb (misal: \'costly\', \'friendly\', \'timely\' adalah Adjective).'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Algoritma terotomatisasi tersebut memproses kumpulan data dengan sangat cepat.',
+                        'target_word' => 'exceptionally (Adverb of Degree)',
+                        'options' => [
+                            'The automated algorithm processed the dataset exceptionally fast.',
+                            'The automated algorithm processed the dataset exceptional fast.',
+                            'The automated algorithm processed the dataset exception fast.',
+                            'The automated algorithm processed the dataset exceptionality fast.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Exceptionally\' (Adverb berakhiran -ly) menerangkan adverb \'fast\'. Bentuk \'exceptional\' adalah adjective.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Emisi karbon global meningkat secara dramatis selama abad kedua puluh.',
+                        'target_word' => 'dramatically (Adverb of Manner/Degree)',
+                        'options' => [
+                            'Global carbon emissions increased dramatically during the twentieth century.',
+                            'Global carbon emissions increased dramatic during the twentieth century.',
+                            'Global carbon emissions increased drama during the twentieth century.',
+                            'Global carbon emissions increased dramatize during the twentieth century.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata kerja \'increased\' diterangkan oleh adverb \'dramatically\'. Bentuk \'dramatic\' adalah adjective.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Sebagai konsekuensinya, pemerintah daerah memberlakukan pembatasan mobilitas yang lebih ketat.',
+                        'target_word' => 'Consequently (Conjunctive Adverb)',
+                        'options' => [
+                            'Consequently, the local government imposed stricter mobility restrictions.',
+                            'Consequent, the local government imposed stricter mobility restrictions.',
+                            'Consequence, the local government imposed stricter mobility restrictions.',
+                            'Consequential, the local government imposed stricter mobility restrictions.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Consequently\' adalah sentence adverb / conjunctive adverb yang menghubungkan akibat kausal antar kalimat.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Hasil survei menunjukkan preferensi konsumen yang sangat berbeda antar wilayah.',
+                        'target_word' => 'substantially (Adverb of Degree)',
+                        'options' => [
+                            'The survey results indicate substantially different consumer preferences across regions.',
+                            'The survey results indicate substantial different consumer preferences across regions.',
+                            'The survey results indicate substance different consumer preferences across regions.',
+                            'The survey results indicate substantiate different consumer preferences across regions.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Adjective \'different\' dimodifikasi oleh adverb of degree \'substantially\'.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Tingkat inflasi turun secara bertahap setelah bank sentral menaikkan suku bunga.',
+                        'target_word' => 'gradually (Adverb of Manner)',
+                        'options' => [
+                            'The inflation rate declined gradually after the central bank raised interest rates.',
+                            'The inflation rate declined gradual after the central bank raised interest rates.',
+                            'The inflation rate declined graduation after the central bank raised interest rates.',
+                            'The inflation rate declined gradient after the central bank raised interest rates.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata kerja \'declined\' diterangkan oleh adverb \'gradually\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Tidak dapat dipungkiri, kemajuan teknologi medis telah memperpanjang harapan hidup manusia.',
+                        'target_word' => 'Inevitably (Sentence Adverb)',
+                        'options' => [
+                            'Inevitably, advances in medical technology have extended human life expectancy.',
+                            'Inevitable, advances in medical technology have extended human life expectancy.',
+                            'Inevitability, advances in medical technology have extended human life expectancy.',
+                            'Inevitableness, advances in medical technology have extended human life expectancy.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Inevitably\' berfungsi sebagai sentence adverb pembuka kalimat untuk menyatakan kepastian.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Kedua variabel tersebut berhubungan secara positif dalam sebagian besar studi kasus.',
+                        'target_word' => 'positively (Adverb of Manner)',
+                        'options' => [
+                            'The two variables are positively correlated in most case studies.',
+                            'The two variables are positive correlated in most case studies.',
+                            'The two variables are positivity correlated in most case studies.',
+                            'The two variables are positivism correlated in most case studies.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Past participle adjective \'correlated\' dimodifikasi oleh adverb \'positively\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Biaya operasional perusahaan berkurang secara signifikan berkat otomatisasi sistem.',
+                        'target_word' => 'significantly (Adverb)',
+                        'options' => [
+                            'The firm\'s operational expenses decreased significantly due to system automation.',
+                            'The firm\'s operational expenses decreased significant due to system automation.',
+                            'The firm\'s operational expenses decreased significance due to system automation.',
+                            'The firm\'s operational expenses decreased significate due to system automation.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata kerja \'decreased\' membutuhkan keterangan adverb \'significantly\'.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Sebaliknya, negara-negara tetangga mencatat lonjakan defisit perdagangan yang tajam.',
+                        'target_word' => 'Conversely (Conjunctive Adverb)',
+                        'options' => [
+                            'Conversely, neighboring nations recorded a sharp surge in trade deficit.',
+                            'Converse, neighboring nations recorded a sharp surge in trade deficit.',
+                            'Conversion, neighboring nations recorded a sharp surge in trade deficit.',
+                            'Convertible, neighboring nations recorded a sharp surge in trade deficit.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Conversely\' adalah conjunctive adverb formal untuk menyatakan perbandingan kontras.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Adverb',
+                        'id_sentence' => 'Instrumen pengukuran harus dikalibrasi secara berkala untuk menjaga akurasi.',
+                        'target_word' => 'periodically (Adverb of Frequency/Time)',
+                        'options' => [
+                            'The measurement instruments must be calibrated periodically to maintain accuracy.',
+                            'The measurement instruments must be calibrated periodic to maintain accuracy.',
+                            'The measurement instruments must be calibrated periodicity to maintain accuracy.',
+                            'The measurement instruments must be calibrated periodical to maintain accuracy.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Passive verb \'calibrated\' diterangkan oleh adverb of frequency \'periodically\'.'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'preposition',
+                'name' => 'Preposition (Preposisi / Kata Depan)',
+                'code' => '1.1.6',
+                'concept_title' => 'Preposition (Preposisi) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Preposisi menghubungkan kata benda (noun), frasa benda, atau gerund dengan bagian kalimat lainnya, membentuk Prepositional Phrase yang berfungsi sebagai keterangan adverbial atau pewatas adjektival. Dalam penulisan formal dan tes seperti IELTS/SAT, penguasaan Dependent Prepositions (kolokasi preposisi tetap yang terikat pada kata kerja, nomina, atau adjektiva tertentu, misal: consistent with, adhere to, impact on) serta Complex Prepositions (misal: in accordance with, in terms of, on behalf of) sangat menentukan kealamian bahasa.',
+                'formula' => 'Preposition + Noun Phrase / Gerund ➔ Prepositional Phrase (Adverbial / Adjectival)',
+                'rules' => [
+                    'Prepositional Collocations: Hafalkan pasangan tetap (misal: consistent with, associated with, responsible for, contribute to).',
+                    'Complex Prepositions: Kuasai frasa formal multi-kata (misal: in light of, with regard to, for the purpose of).',
+                    'Preposition + Gerund: Setiap kata kerja yang diletakkan langsung setelah preposisi WAJIB berbentuk V-ing (Gerund).',
+                    'Hindari penggunaan preposisi ganda yang mubazir (misal: jangan gunakan \'despite of\'; gunakan \'despite\' atau \'in spite of\').'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Hasil eksperimen tersebut sepenuhnya konsisten dengan model teoritis sebelumnya.',
+                        'target_word' => 'consistent with (Prepositional Colocation)',
+                        'options' => [
+                            'The outcome of the experiment was completely consistent with earlier theoretical models.',
+                            'The outcome of the experiment was completely consistent to earlier theoretical models.',
+                            'The outcome of the experiment was completely consistent for earlier theoretical models.',
+                            'The outcome of the experiment was completely consistent on earlier theoretical models.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Adjective \'consistent\' memiliki pasangan preposisi tetap: \'consistent with\'.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Sesuai dengan pedoman etika riset, identitas seluruh partisipan dirahasiakan.',
+                        'target_word' => 'In accordance with (Complex Preposition)',
+                        'options' => [
+                            'In accordance with research ethics guidelines, all participants\' identities were anonymized.',
+                            'In accordance to research ethics guidelines, all participants\' identities were anonymized.',
+                            'In accordance for research ethics guidelines, all participants\' identities were anonymized.',
+                            'In accordance about research ethics guidelines, all participants\' identities were anonymized.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Frasa preposisi kompleks yang baku dalam bahasa formal adalah \'In accordance with\'.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Meskipun menghadapi ketidakpastian ekonomi, perusahaan tetap berinvestasi dalam penelitian.',
+                        'target_word' => 'Despite (Preposition of Concession)',
+                        'options' => [
+                            'Despite economic uncertainties, the corporation continued to invest in research.',
+                            'Despite of economic uncertainties, the corporation continued to invest in research.',
+                            'In despite economic uncertainties, the corporation continued to invest in research.',
+                            'Despite with economic uncertainties, the corporation continued to invest in research.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Despite\' adalah preposisi tunggal yang diikuti noun phrase tanpa kata \'of\' (berbeda dari \'in spite of\').'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Faktor lingkungan berkontribusi besar terhadap penyebaran penyakit menular tersebut.',
+                        'target_word' => 'contribute to (Dependent Preposition)',
+                        'options' => [
+                            'Environmental factors contribute substantially to the transmission of the infectious disease.',
+                            'Environmental factors contribute substantially for the transmission of the infectious disease.',
+                            'Environmental factors contribute substantially in the transmission of the infectious disease.',
+                            'Environmental factors contribute substantially with the transmission of the infectious disease.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata kerja \'contribute\' selalu berpasangan dengan preposisi \'to\' (contribute to something).'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Seluruh staf laboratorium wajib mematuhi standar keselamatan kerja yang ketat.',
+                        'target_word' => 'adhere to (Dependent Preposition)',
+                        'options' => [
+                            'All laboratory personnel are required to adhere to strict occupational safety standards.',
+                            'All laboratory personnel are required to adhere with strict occupational safety standards.',
+                            'All laboratory personnel are required to adhere in strict occupational safety standards.',
+                            'All laboratory personnel are required to adhere at strict occupational safety standards.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kolokasi kata kerja formal untuk mematuhi adalah \'adhere to\'.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Penelitian ini berfokus pada dampak jangka panjang dari polusi mikroplastik.',
+                        'target_word' => 'focuses on (Dependent Preposition)',
+                        'options' => [
+                            'This investigation focuses on the long-term impacts of microplastic pollution.',
+                            'This investigation focuses in the long-term impacts of microplastic pollution.',
+                            'This investigation focuses at the long-term impacts of microplastic pollution.',
+                            'This investigation focuses about the long-term impacts of microplastic pollution.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Kata kerja \'focus\' secara baku berkolokasi dengan preposisi \'on\'.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Sehubungan dengan temuan terbaru, hipotesis awal harus direvisi secara menyeluruh.',
+                        'target_word' => 'In light of (Complex Preposition)',
+                        'options' => [
+                            'In light of recent findings, the initial hypothesis must be thoroughly revised.',
+                            'In light to recent findings, the initial hypothesis must be thoroughly revised.',
+                            'In light with recent findings, the initial hypothesis must be thoroughly revised.',
+                            'In light for recent findings, the initial hypothesis must be thoroughly revised.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Frasa idiomatis formal yang berarti \'mengingat / sehubungan dengan\' adalah \'In light of\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Kebijakan baru tersebut berdampak signifikan terhadap daya beli masyarakat berpenghasilan rendah.',
+                        'target_word' => 'impact on (Dependent Preposition)',
+                        'options' => [
+                            'The new policy has a profound impact on the purchasing power of low-income households.',
+                            'The new policy has a profound impact in the purchasing power of low-income households.',
+                            'The new policy has a profound impact to the purchasing power of low-income households.',
+                            'The new policy has a profound impact with the purchasing power of low-income households.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Nomina \'impact\' berpasangan dengan preposisi \'on\' (an impact on something).'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Setelah menyelesaikan pengujian tahap awal, para ilmuwan melanjutkan ke tahap klinis.',
+                        'target_word' => 'Upon completing (Preposition + Gerund)',
+                        'options' => [
+                            'Upon completing the preliminary trials, the scientists proceeded to the clinical phase.',
+                            'Upon complete the preliminary trials, the scientists proceeded to the clinical phase.',
+                            'Upon completed the preliminary trials, the scientists proceeded to the clinical phase.',
+                            'Upon to complete the preliminary trials, the scientists proceeded to the clinical phase.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Setelah preposisi \'Upon\', kata kerja wajib berbentuk gerund (-ing): \'Upon completing\'.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Preposition',
+                        'id_sentence' => 'Para peneliti bertanggung jawab atas integritas dan kerahasiaan data yang dikumpulkan.',
+                        'target_word' => 'responsible for (Dependent Preposition)',
+                        'options' => [
+                            'The researchers are accountable and responsible for the integrity of the collected data.',
+                            'The researchers are accountable and responsible to the integrity of the collected data.',
+                            'The researchers are accountable and responsible with the integrity of the collected data.',
+                            'The researchers are accountable and responsible about the integrity of the collected data.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Adjective \'responsible\' berkolokasi dengan preposisi \'for\' (responsible for something).'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'conjunction',
+                'name' => 'Conjunction (Konjungsi / Kata Sambung)',
+                'code' => '1.1.7',
+                'concept_title' => 'Conjunction (Konjungsi) dalam Penulisan Kalimat Akademik',
+                'concept_description' => 'Konjungsi menyatukan kata, frasa, atau klausa serta mendefinisikan hubungan hierarki sintaksis dan logika argumen. Konjungsi dibagi menjadi 3 kategori utama: Coordinating Conjunctions (FANBOYS: for, and, nor, but, or, yet, so) untuk klausa setara; Subordinating Conjunctions (although, because, whereas, while, since) untuk anak kalimat bertingkat; dan Correlative Conjunctions (either...or, neither...nor, not only...but also) yang menuntut kesejajaran struktur gramatikal (parallelism).',
+                'formula' => 'Coordinating (FANBOYS) | Subordinating (although, whereas, since) | Correlative (not only...but also)',
+                'rules' => [
+                    'Coordinating Conjunction: Gabungkan dua independent clauses menggunakan tanda koma sebelum FANBOYS (Clause, and Clause).',
+                    'Subordinating Conjunction: Jika subordinate clause berada di depan, bubuhkan koma di akhir anak kalimat (Although ..., Main Clause).',
+                    'Correlative Parallelism: Elemen setelah \'not only\' dan \'but also\' harus memiliki kelas kata atau bentuk sintaksis yang sama persis.',
+                    'Hindari Double Conjunction: Jangan menggabungkan \'Although\' dengan \'but\' dalam satu kalimat yang sama.'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Meskipun sampel penelitian terbatas, hasil awal memberikan wawasan yang inovatif.',
+                        'target_word' => 'Although (Subordinating Conjunction)',
+                        'options' => [
+                            'Although the research sample was limited, preliminary results yielded groundbreaking insights.',
+                            'Although the research sample was limited, but preliminary results yielded groundbreaking insights.',
+                            'Despite the research sample was limited, preliminary results yielded groundbreaking insights.',
+                            'However the research sample was limited, preliminary results yielded groundbreaking insights.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Although\' adalah subordinating conjunction yang benar. Tidak boleh menambahkan \'but\' di main clause, dan \'despite\' harus diikuti frasa nomina bukan klausa lengkap.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Sementara biaya bahan bakar fosil melonjak, harga teknologi energi surya terus menurun.',
+                        'target_word' => 'Whereas (Subordinating Conjunction of Contrast)',
+                        'options' => [
+                            'Whereas fossil fuel costs soared, solar technology prices declined steadily.',
+                            'Whereas fossil fuel costs soared, but solar technology prices declined steadily.',
+                            'In contrast fossil fuel costs soared, solar technology prices declined steadily.',
+                            'However fossil fuel costs soared, solar technology prices declined steadily.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Whereas\' berfungsi sebagai subordinating conjunction untuk menunjukkan perbandingan kontras langsung antara dua klausa.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Penelitian ini tidak hanya menguji teori yang ada tetapi juga mengusulkan kerangka kerja baru.',
+                        'target_word' => 'not only... but also (Correlative Conjunction)',
+                        'options' => [
+                            'The study not only examines existing theories but also proposes a novel conceptual framework.',
+                            'The study not only examines existing theories but a novel conceptual framework proposes.',
+                            'The study examines not only existing theories but also proposed a novel conceptual framework.',
+                            'The study not only examine existing theories and also proposes a novel conceptual framework.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Parallelism: \'not only examines ... but also proposes ...\'. Kedua bagian berpasangan dengan bentuk present finite verb yang seimbang.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Karena data survei tidak lengkap, para peneliti menunda publikasi laporan akhir.',
+                        'target_word' => 'Since (Subordinating Conjunction of Cause)',
+                        'options' => [
+                            'Since the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                            'Because of the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                            'Due to the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                            'Owing to the survey dataset was incomplete, the researchers postponed the publication of the final report.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Since\' diikuti oleh klausa lengkap (Subject + Verb: \'the dataset was incomplete\'). Pilihan \'Because of\' dan \'Due to\' adalah preposisi yang hanya boleh diikuti noun phrase.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Bahan kimia tersebut harus disimpan di tempat sejuk, atau bahan itu akan terurai dengan cepat.',
+                        'target_word' => 'or (Coordinating Conjunction)',
+                        'options' => [
+                            'The chemical compound must be stored in a cool environment, or it will degrade rapidly.',
+                            'The chemical compound must be stored in a cool environment, nor it will degrade rapidly.',
+                            'The chemical compound must be stored in a cool environment, but it will degrade rapidly.',
+                            'The chemical compound must be stored in a cool environment, so it will degrade rapidly.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Konjungsi koordinatif \'or\' menyatakan konsekuensi alternatif jika kondisi sebelumnya tidak terpenuhi.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Baik direktur maupun para anggota dewan tidak menyetujui anggaran revisi tersebut.',
+                        'target_word' => 'Neither... nor (Correlative Conjunction)',
+                        'options' => [
+                            'Neither the director nor the board members approved the revised fiscal budget.',
+                            'Neither the director or the board members approved the revised fiscal budget.',
+                            'Either the director nor the board members approved the revised fiscal budget.',
+                            'Both the director nor the board members approved the revised fiscal budget.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Pasangan korelasi baku untuk penolakan ganda adalah \'Neither... nor...\'.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Pasien akan pulih lebih cepat asalkan mereka mengikuti jadwal terapi yang dianjurkan.',
+                        'target_word' => 'provided that (Subordinating Conjunction of Condition)',
+                        'options' => [
+                            'Patients will recover more swiftly provided that they adhere to the recommended therapy schedule.',
+                            'Patients will recover more swiftly provided they will adhere to the recommended therapy schedule.',
+                            'Patients will recover more swiftly in provision that they adhere to the recommended therapy schedule.',
+                            'Patients will recover more swiftly provided of they adhere to the recommended therapy schedule.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Provided that\' (atau \'providing that\') adalah konjungsi subordinatif formal yang bermakna \'asalkan / dengan syarat bahwa\'.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Eksperimen dihentikan sementara agar parameter keamanan dapat dievaluasi ulang.',
+                        'target_word' => 'so that (Subordinating Conjunction of Purpose)',
+                        'options' => [
+                            'The experiment was paused so that safety parameters could be re-evaluated.',
+                            'The experiment was paused in order for safety parameters could be re-evaluated.',
+                            'The experiment was paused so as safety parameters could be re-evaluated.',
+                            'The experiment was paused that safety parameters could be re-evaluated.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'So that\' menghubungkan klausa tujuan (purpose clause) dan diikuti oleh modal auxiliary (could / might).'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Investasi modal meningkat pesat, namun laju penciptaan lapangan kerja tetap lambat.',
+                        'target_word' => 'yet (Coordinating Conjunction of Contrast)',
+                        'options' => [
+                            'Capital investment expanded rapidly, yet the pace of job creation remained sluggish.',
+                            'Capital investment expanded rapidly, although the pace of job creation remained sluggish.',
+                            'Capital investment expanded rapidly, despite the pace of job creation remained sluggish.',
+                            'Capital investment expanded rapidly, unless the pace of job creation remained sluggish.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Yet\' adalah coordinating conjunction yang menghubungkan dua klausa independen kontras setara dengan tanda koma pemisah.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Conjunction',
+                        'id_sentence' => 'Bahkan jika kondisi pasar memburuk, proyek infrastruktur tetap akan dilanjutkan.',
+                        'target_word' => 'Even if (Subordinating Conjunction of Concession)',
+                        'options' => [
+                            'Even if market conditions deteriorate, the infrastructure project will proceed.',
+                            'Even though market conditions will deteriorate, the infrastructure project will proceed.',
+                            'Despite market conditions deteriorate, the infrastructure project will proceed.',
+                            'Regardless market conditions deteriorate, the infrastructure project will proceed.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Even if\' digunakan untuk menyatakan konsesi kondisional hipotetis (bahkan jika).'
+                    ]
+                ]
+            ],
+            [
+                'id' => 'interjection',
+                'name' => 'Interjection (Interjeksi / Kata Seru)',
+                'code' => '1.1.8',
+                'concept_title' => 'Interjection (Interjeksi) & Transformasi Formal Akademik',
+                'concept_description' => 'Interjection adalah kata seru singkat yang mengekspresikan ledakan emosi spontan, kejutan, kekecewaan, atau seruan afektif (misal: Oh!, Alas!, Wow!, Ouch!, Aha!). Dalam percakapan santai atau karya fiksi naratif, interjeksi sangat lazim. Namun, dalam PENULISAN AKADEMIS RESMI (seperti artikel jurnal, esai IELTS Academic, Digital SAT Reading/Writing, dan tesis), interjeksi WAJIB DIHINDARI (prohibited/dispreferred). Penulis akademis wajib mengubah ungkapan emosional tersebut menjadi Stance Adverbs yang objektif (seperti: Regrettably, Remarkably, Conspicuously) atau klausa objektif formal.',
+                'formula' => 'Informal Interjection (Alas! / Wow!) ➔ Academic Stance Adverb (Regrettably / Remarkably)',
+                'rules' => [
+                    'HINDARI interjeksi informal pada Academic Writing (IELTS Task 2, SAT Writing, jurnal ilmiah).',
+                    'Gantikan ekspresi penyesalan (\'Alas!\') dengan Stance Adverb formal: \'Regrettably, ...\' atau \'Unfortunately, ...\'.',
+                    'Gantikan ekspresi kekaguman (\'Wow!\') dengan adverbial evaluatif: \'Remarkably, ...\' atau \'Notably, ...\'.',
+                    'Pertahankan nada objektif dan tidak bias (neutral and detached tone) agar klaim ilmiah dapat dipertanggungjawabkan.'
+                ],
+                'exercises' => [
+                    [
+                        'id' => 1,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Sayangnya, perusahaan rintisan tersebut menghentikan operasionalnya akibat kehabisan modal.',
+                        'target_word' => 'Regrettably (Academic Stance Adverb)',
+                        'options' => [
+                            'Regrettably, the start-up venture ceased operations due to capital depletion.',
+                            'Alas, the start-up venture ceased operations due to capital depletion.',
+                            'Oh, the start-up venture ceased operations due to capital depletion.',
+                            'Ouch, the start-up venture ceased operations due to capital depletion.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Dalam register akademis formal, hindari interjeksi emosional \'Alas\' dan gunakan disjunct stance adverb \'Regrettably\'.'
+                    ],
+                    [
+                        'id' => 2,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Secara luar biasa, pasien pulih sepenuhnya dalam kurun waktu kurang dari empat puluh delapan jam.',
+                        'target_word' => 'Remarkably (Academic Stance Adverb)',
+                        'options' => [
+                            'Remarkably, the patient achieved full recovery within less than forty-eight hours.',
+                            'Wow, the patient achieved full recovery within less than forty-eight hours.',
+                            'Aha, the patient achieved full recovery within less than forty-eight hours.',
+                            'Gosh, the patient achieved full recovery within less than forty-eight hours.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Remarkably\' adalah adverb akademis yang menggantikan seruan informal \'Wow\'.'
+                    ],
+                    [
+                        'id' => 3,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Sayang sekali, spesimen biologis tersebut rusak akibat fluktuasi suhu yang tidak terkontrol.',
+                        'target_word' => 'Unfortunately (Academic Stance Adverb)',
+                        'options' => [
+                            'Unfortunately, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                            'Oh dear, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                            'Alas, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                            'Oops, the biological specimen degraded due to uncontrolled thermal fluctuations.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => 'Gunakan \'Unfortunately\' untuk menjaga nada objektif dan ilmiah dibanding seruan informal \'Oh dear\' atau \'Oops\'.'
+                    ],
+                    [
+                        'id' => 4,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Menariknya, hasil simulasi komputer justru bertentangan dengan prediksi teoritis.',
+                        'target_word' => 'Intriguingly (Academic Stance Adverb)',
+                        'options' => [
+                            'Intriguingly, the computer simulation results contradicted theoretical predictions.',
+                            'Aha, the computer simulation results contradicted theoretical predictions.',
+                            'Wow, the computer simulation results contradicted theoretical predictions.',
+                            'Hark, the computer simulation results contradicted theoretical predictions.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Intriguingly\' adalah academic stance adverb pembuka kalimat yang elegan dan bebas dari seruan emosional subjektif.'
+                    ],
+                    [
+                        'id' => 5,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Yang patut dicatat, mayoritas responden menyatakan kepuasan tinggi terhadap platform digital baru.',
+                        'target_word' => 'Notably (Academic Stance Adverb)',
+                        'options' => [
+                            'Notably, the vast majority of respondents reported high satisfaction with the digital platform.',
+                            'Yay, the vast majority of respondents reported high satisfaction with the digital platform.',
+                            'Hurrah, the vast majority of respondents reported high satisfaction with the digital platform.',
+                            'Bravo, the vast majority of respondents reported high satisfaction with the digital platform.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Notably\' menggantikan interjeksi perayaan informal seperti \'Yay\' atau \'Bravo\' untuk melaporkan data positif secara ilmiah.'
+                    ],
+                    [
+                        'id' => 6,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Tidak dapat dipungkiri, perubahan iklim merupakan tantangan paling mendesak abad ini.',
+                        'target_word' => 'Undeniably (Academic Stance Adverb)',
+                        'options' => [
+                            'Undeniably, anthropogenic climate change represents the most pressing challenge of our era.',
+                            'No kidding, anthropogenic climate change represents the most pressing challenge of our era.',
+                            'For sure, anthropogenic climate change represents the most pressing challenge of our era.',
+                            'Boy, anthropogenic climate change represents the most pressing challenge of our era.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Undeniably\' adalah stance adverb formal pengganti frasa seruan informal seperti \'No kidding\' atau \'Boy!\'.'
+                    ],
+                    [
+                        'id' => 7,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Sangat mengejutkan, senyawa kimia tersebut bereaksi spontan pada suhu kamar.',
+                        'target_word' => 'Surprisingly (Academic Stance Adverb)',
+                        'options' => [
+                            'Surprisingly, the chemical compound reacted spontaneously under ambient temperature.',
+                            'Good heavens, the chemical compound reacted spontaneously under ambient temperature.',
+                            'Holy cow, the chemical compound reacted spontaneously under ambient temperature.',
+                            'Whoa, the chemical compound reacted spontaneously under ambient temperature.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Surprisingly\' menyajikan temuan mengejutkan secara formal tanpa menggunakan idiom seruan ekspresif.'
+                    ],
+                    [
+                        'id' => 8,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Patut disayangkan, data dari uji coba tahap kedua tidak dapat diverifikasi secara independen.',
+                        'target_word' => 'Lamentably (Academic Stance Adverb)',
+                        'options' => [
+                            'Lamentably, data from the secondary trial could not be independently verified.',
+                            'Alas, data from the secondary trial could not be independently verified.',
+                            'Bummer, data from the secondary trial could not be independently verified.',
+                            'Darn, data from the secondary trial could not be independently verified.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Lamentably\' adalah kosa kata akademik berbobot tinggi untuk menyatakan penyesalan metodologis.'
+                    ],
+                    [
+                        'id' => 9,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Secara tak terduga, perlakuan panas ringan justru meningkatkan ketahanan material secara signifikan.',
+                        'target_word' => 'Unexpectedly (Academic Stance Adverb)',
+                        'options' => [
+                            'Unexpectedly, mild heat treatment significantly improved the material\'s durability.',
+                            'Look here, mild heat treatment significantly improved the material\'s durability.',
+                            'Lo and behold, mild heat treatment significantly improved the material\'s durability.',
+                            'Aha, mild heat treatment significantly improved the material\'s durability.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Unexpectedly\' adalah istilah formal objektif yang menghindari ungkapan kolokial \'Lo and behold\'.'
+                    ],
+                    [
+                        'id' => 10,
+                        'sub_lesson' => 'Interjection',
+                        'id_sentence' => 'Terbukti secara meyakinkan bahwa intervensi nutrisi dini mengurangi risiko stunting pada anak.',
+                        'target_word' => 'Conclusively (Academic Stance Adverb)',
+                        'options' => [
+                            'Conclusively, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                            'Eureka, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                            'Hooray, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                            'Aha, early nutritional intervention substantially lowers the risk of childhood stunting.'
+                        ],
+                        'correct_index' => 0,
+                        'explanation' => '\'Conclusively\' adalah adverb kesimpulan akademik formal, menggantikan seruan penemuan seperti \'Eureka\'.'
+                    ]
+                ]
+            ]
+        ];
+
+$questionsData = [
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '1',
+                'prompt' => '[Noun - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Pemerintah mengumumkan perluasan infrastruktur energi terbarukan di wilayah pedesaan." (Target: expansion (Noun))',
+                'id_sentence' => 'Pemerintah mengumumkan perluasan infrastruktur energi terbarukan di wilayah pedesaan.',
+                'target_word' => 'expansion (Noun)',
+                'options' => [
+                    'The government announced the expansion of renewable energy infrastructure in rural regions.',
+                    'The government announced the expand of renewable energy infrastructure in rural regions.',
+                    'The government announced the expansive of renewable energy infrastructure in rural regions.',
+                    'The government announced the expansively of renewable energy infrastructure in rural regions.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata \'expansion\' (Noun) tepat setelah artikel \'the\' dan berfungsi sebagai direct object dari kata kerja \'announced\'. Pilihan lain (\'expand\' = verb, \'expansive\' = adj, \'expansively\' = adv) salah secara kelas kata.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '2',
+                'prompt' => '[Noun - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Keberhasilan penelitian ini bergantung pada ketelitian pengumpulan data primer." (Target: accuracy (Noun))',
+                'id_sentence' => 'Keberhasilan penelitian ini bergantung pada ketelitian pengumpulan data primer.',
+                'target_word' => 'accuracy (Noun)',
+                'options' => [
+                    'The success of this research depends on the accuracy of primary data collection.',
+                    'The success of this research depends on the accurate of primary data collection.',
+                    'The success of this research depends on the accurately of primary data collection.',
+                    'The success of this research depends on the accuratenessly of primary data collection.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah preposisi \'on the\', kita memerlukan kata benda abstrak \'accuracy\' (Noun) sebagai inti frasa nomina sebelum preposisi \'of\'.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '3',
+                'prompt' => '[Noun - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Analisis komparatif mengungkapkan perbedaan yang signifikan antara kedua kelompok uji." (Target: analysis (Noun))',
+                'id_sentence' => 'Analisis komparatif mengungkapkan perbedaan yang signifikan antara kedua kelompok uji.',
+                'target_word' => 'analysis (Noun)',
+                'options' => [
+                    'The comparative analysis revealed significant differences between the two test groups.',
+                    'The comparative analyze revealed significant differences between the two test groups.',
+                    'The comparative analytical revealed significant differences between the two test groups.',
+                    'The comparative analytically revealed significant differences between the two test groups.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Frasa subjek \'The comparative ...\' membutuhkan head noun \'analysis\'. Kata \'analyze\' adalah verb dan \'analytical\' adalah adjective.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '4',
+                'prompt' => '[Noun - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Partisipasi aktif dari warga masyarakat sangat penting untuk keberlanjutan proyek." (Target: participation (Noun))',
+                'id_sentence' => 'Partisipasi aktif dari warga masyarakat sangat penting untuk keberlanjutan proyek.',
+                'target_word' => 'participation (Noun)',
+                'options' => [
+                    'Active participation by local residents is crucial for project sustainability.',
+                    'Active participate by local residents is crucial for project sustainability.',
+                    'Active participatory by local residents is crucial for project sustainability.',
+                    'Active participatingly by local residents is crucial for project sustainability.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Participation\' adalah Noun yang diterangkan oleh adjective \'Active\' dan berfungsi sebagai subjek kalimat.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '5',
+                'prompt' => '[Noun - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para peneliti mengukur konsentrasi polutan berbahaya di udara perkotaan." (Target: concentration (Noun))',
+                'id_sentence' => 'Para peneliti mengukur konsentrasi polutan berbahaya di udara perkotaan.',
+                'target_word' => 'concentration (Noun)',
+                'options' => [
+                    'The researchers measured the concentration of hazardous pollutants in urban air.',
+                    'The researchers measured the concentrate of hazardous pollutants in urban air.',
+                    'The researchers measured the concentrated of hazardous pollutants in urban air.',
+                    'The researchers measured the concentratively of hazardous pollutants in urban air.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Posisi objek langsung setelah \'measured the\' membutuhkan noun \'concentration\'.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '6',
+                'prompt' => '[Noun - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penerapan metode pembelajaran baru meningkatkan pemahaman siswa secara menyeluruh." (Target: implementation (Noun))',
+                'id_sentence' => 'Penerapan metode pembelajaran baru meningkatkan pemahaman siswa secara menyeluruh.',
+                'target_word' => 'implementation (Noun)',
+                'options' => [
+                    'The implementation of the new teaching method improved students\' overall understanding.',
+                    'The implement of the new teaching method improved students\' overall understanding.',
+                    'The implementable of the new teaching method improved students\' overall understanding.',
+                    'The implementative of the new teaching method improved students\' overall understanding.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Implementation\' adalah bentuk noun turunan yang baku untuk \'penerapan\' dalam konteks formal akademis.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '7',
+                'prompt' => '[Noun - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Kurangnya bukti empiris melemahkan kesimpulan dari artikel jurnal tersebut." (Target: evidence (Noun))',
+                'id_sentence' => 'Kurangnya bukti empiris melemahkan kesimpulan dari artikel jurnal tersebut.',
+                'target_word' => 'evidence (Noun)',
+                'options' => [
+                    'The lack of empirical evidence weakened the conclusion of the journal article.',
+                    'The lack of empirical evident weakened the conclusion of the journal article.',
+                    'The lack of empirical evidently weakened the conclusion of the journal article.',
+                    'The lack of empirical evidential weakened the conclusion of the journal article.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Frasa \'empirical ...\' setelah preposisi \'of\' membutuhkan kata benda \'evidence\' (uncountable noun).'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '8',
+                'prompt' => '[Noun - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Perkembangan teknologi kecerdasan buatan membuka banyak peluang kerja baru." (Target: development (Noun))',
+                'id_sentence' => 'Perkembangan teknologi kecerdasan buatan membuka banyak peluang kerja baru.',
+                'target_word' => 'development (Noun)',
+                'options' => [
+                    'The development of artificial intelligence technology creates numerous new employment opportunities.',
+                    'The develop of artificial intelligence technology creates numerous new employment opportunities.',
+                    'The developmental of artificial intelligence technology creates numerous new employment opportunities.',
+                    'The developingly of artificial intelligence technology creates numerous new employment opportunities.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Development\' adalah Noun yang bertindak sebagai subjek kalimat.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '9',
+                'prompt' => '[Noun - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penilaian terhadap risiko lingkungan dilakukan sebelum konstruksi dimulai." (Target: assessment (Noun))',
+                'id_sentence' => 'Penilaian terhadap risiko lingkungan dilakukan sebelum konstruksi dimulai.',
+                'target_word' => 'assessment (Noun)',
+                'options' => [
+                    'An assessment of environmental risks was conducted before construction commenced.',
+                    'An assess of environmental risks was conducted before construction commenced.',
+                    'An assessable of environmental risks was conducted before construction commenced.',
+                    'An assessively of environmental risks was conducted before construction commenced.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Artikel \'An\' mendahului noun tunggal yang berawalan vokal: \'assessment\'.'
+            ],
+            [
+                'sub_lesson' => 'Noun',
+                'sub_lesson_slug' => 'noun',
+                'number' => '10',
+                'prompt' => '[Noun - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Stabilitas moneter sangat penting untuk mendorong pertumbuhan ekonomi nasional." (Target: stability (Noun))',
+                'id_sentence' => 'Stabilitas moneter sangat penting untuk mendorong pertumbuhan ekonomi nasional.',
+                'target_word' => 'stability (Noun)',
+                'options' => [
+                    'Monetary stability is essential to stimulate national economic growth.',
+                    'Monetary stabilize is essential to stimulate national economic growth.',
+                    'Monetary stable is essential to stimulate national economic growth.',
+                    'Monetary stably is essential to stimulate national economic growth.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Monetary\' (Adjective) menerangkan \'stability\' (Noun) yang berfungsi sebagai subjek kalimat.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '1',
+                'prompt' => '[Pronoun - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Baik peneliti utama maupun para asistennya tidak menyerahkan data mereka sebelum tenggat waktu." (Target: their (Pronoun))',
+                'id_sentence' => 'Baik peneliti utama maupun para asistennya tidak menyerahkan data mereka sebelum tenggat waktu.',
+                'target_word' => 'their (Pronoun)',
+                'options' => [
+                    'Neither the principal investigator nor the research assistants submitted their data before the deadline.',
+                    'Neither the principal investigator nor the research assistants submitted his data before the deadline.',
+                    'Neither the principal investigator nor the research assistants submitted its data before the deadline.',
+                    'Neither the principal investigator nor the research assistants submitted them data before the deadline.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Pada pola \'Neither... nor...\', kata ganti kepemilikan menyesuaikan dengan subjek terdekat (\'research assistants\' = plural) sehingga menggunakan \'their\'.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '2',
+                'prompt' => '[Pronoun - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para mahasiswa yang menyelesaikan modul praktikum tepat waktu menerima sertifikat." (Target: who (Relative Pronoun))',
+                'id_sentence' => 'Para mahasiswa yang menyelesaikan modul praktikum tepat waktu menerima sertifikat.',
+                'target_word' => 'who (Relative Pronoun)',
+                'options' => [
+                    'The students who completed the laboratory module on time received a certificate.',
+                    'The students which completed the laboratory module on time received a certificate.',
+                    'The students whom completed the laboratory module on time received a certificate.',
+                    'The students whose completed the laboratory module on time received a certificate.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Who\' adalah relative pronoun subjek yang merujuk pada manusia (\'The students\'). \'Which\' untuk benda, \'whom\' untuk objek, \'whose\' untuk kepemilikan.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '3',
+                'prompt' => '[Pronoun - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Lembaga riset tersebut menerbitkan laporan tahunannya kepada publik kemarin." (Target: its (Possessive Pronoun))',
+                'id_sentence' => 'Lembaga riset tersebut menerbitkan laporan tahunannya kepada publik kemarin.',
+                'target_word' => 'its (Possessive Pronoun)',
+                'options' => [
+                    'The research institute published its annual report to the public yesterday.',
+                    'The research institute published their annual report to the public yesterday.',
+                    'The research institute published it\'s annual report to the public yesterday.',
+                    'The research institute published hers annual report to the public yesterday.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'The research institute\' adalah entitas organisasi tunggal (singular entity), sehingga kata ganti kepemilikan yang tepat adalah \'its\' (bukan \'their\' dan bukan \'it\'s\').'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '4',
+                'prompt' => '[Pronoun - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Setiap peserta harus membawa kartu identitas masing-masing ke ruang ujian." (Target: each (Indefinite Pronoun))',
+                'id_sentence' => 'Setiap peserta harus membawa kartu identitas masing-masing ke ruang ujian.',
+                'target_word' => 'each (Indefinite Pronoun)',
+                'options' => [
+                    'Each of the participants must bring their identity card to the examination room.',
+                    'All of the participant must bring their identity card to the examination room.',
+                    'Both of the participant must bring their identity card to the examination room.',
+                    'Every of the participants must bring their identity card to the examination room.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Each of the participants\' adalah pola baku indefinite pronoun untuk merujuk setiap individu secara terpisah.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '5',
+                'prompt' => '[Pronoun - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Eksperimen yang didanai oleh kementerian menunjukkan hasil yang menjanjikan." (Target: which (Relative Pronoun))',
+                'id_sentence' => 'Eksperimen yang didanai oleh kementerian menunjukkan hasil yang menjanjikan.',
+                'target_word' => 'which (Relative Pronoun)',
+                'options' => [
+                    'The experiments, which were funded by the ministry, yielded promising results.',
+                    'The experiments, whom were funded by the ministry, yielded promising results.',
+                    'The experiments, who were funded by the ministry, yielded promising results.',
+                    'The experiments, what were funded by the ministry, yielded promising results.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Pada non-restrictive clause (diapit tanda koma) yang merujuk pada benda (\'The experiments\'), gunakan relative pronoun \'which\'.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '6',
+                'prompt' => '[Pronoun - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para profesor dan staf laboratorium bangga terhadap diri mereka sendiri atas pencapaian ini." (Target: themselves (Reflexive Pronoun))',
+                'id_sentence' => 'Para profesor dan staf laboratorium bangga terhadap diri mereka sendiri atas pencapaian ini.',
+                'target_word' => 'themselves (Reflexive Pronoun)',
+                'options' => [
+                    'The professors and laboratory staff congratulated themselves on this achievement.',
+                    'The professors and laboratory staff congratulated theirselves on this achievement.',
+                    'The professors and laboratory staff congratulated them on this achievement.',
+                    'The professors and laboratory staff congratulated each other on this achievement.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Themselves\' adalah reflexive pronoun jamak orang ketiga. Bentuk \'theirselves\' tidak ada dalam tata bahasa baku.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '7',
+                'prompt' => '[Pronoun - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Temuan-temuan ini memberikan bukti kuat yang mendukung hipotesis baru tersebut." (Target: these (Demonstrative Pronoun))',
+                'id_sentence' => 'Temuan-temuan ini memberikan bukti kuat yang mendukung hipotesis baru tersebut.',
+                'target_word' => 'these (Demonstrative Pronoun)',
+                'options' => [
+                    'These findings provide robust evidence supporting the new hypothesis.',
+                    'This findings provide robust evidence supporting the new hypothesis.',
+                    'Those finding provide robust evidence supporting the new hypothesis.',
+                    'That findings provide robust evidence supporting the new hypothesis.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata benda jamak \'findings\' yang dekat dengan pembicara/teks harus dipasangkan dengan demonstrative plural \'These\'.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '8',
+                'prompt' => '[Pronoun - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Partisipan yang diwawancarai oleh tim peneliti memberikan wawasan yang berharga." (Target: whom (Objective Relative Pronoun))',
+                'id_sentence' => 'Partisipan yang diwawancarai oleh tim peneliti memberikan wawasan yang berharga.',
+                'target_word' => 'whom (Objective Relative Pronoun)',
+                'options' => [
+                    'The participants whom the research team interviewed provided valuable insights.',
+                    'The participants which the research team interviewed provided valuable insights.',
+                    'The participants whose the research team interviewed provided valuable insights.',
+                    'The participants what the research team interviewed provided valuable insights.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Whom\' bertindak sebagai objek dari kata kerja \'interviewed\' dalam klausa relatif yang merujuk pada manusia.'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '9',
+                'prompt' => '[Pronoun - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Kedua proposal tersebut ditolak karena tidak satupun memenuhi kriteria kelayakan." (Target: neither (Indefinite Pronoun))',
+                'id_sentence' => 'Kedua proposal tersebut ditolak karena tidak satupun memenuhi kriteria kelayakan.',
+                'target_word' => 'neither (Indefinite Pronoun)',
+                'options' => [
+                    'Both proposals were rejected because neither satisfied the eligibility criteria.',
+                    'Both proposals were rejected because none satisfied the eligibility criteria.',
+                    'Both proposals were rejected because either satisfied the eligibility criteria.',
+                    'Both proposals were rejected because nothing satisfied the eligibility criteria.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Ketika merujuk pada dua hal (\'Both proposals\'), kata ganti negatif yang tepat adalah \'neither\' (bukan \'none\' yang digunakan untuk tiga hal atau lebih).'
+            ],
+            [
+                'sub_lesson' => 'Pronoun',
+                'sub_lesson_slug' => 'pronoun',
+                'number' => '10',
+                'prompt' => '[Pronoun - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Siapapun yang ingin mengajukan beasiswa harus menyerahkan proposal penelitian." (Target: whoever (Indefinite Relative Pronoun))',
+                'id_sentence' => 'Siapapun yang ingin mengajukan beasiswa harus menyerahkan proposal penelitian.',
+                'target_word' => 'whoever (Indefinite Relative Pronoun)',
+                'options' => [
+                    'Whoever wishes to apply for the scholarship must submit a research proposal.',
+                    'Whomever wishes to apply for the scholarship must submit a research proposal.',
+                    'Whichever wishes to apply for the scholarship must submit a research proposal.',
+                    'Whatever wishes to apply for the scholarship must submit a research proposal.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Whoever\' berfungsi sebagai subjek kalimat dalam noun clause (\'Whoever wishes...\').'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '1',
+                'prompt' => '[Verb - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Bukti empiris yang baru dikumpulkan menguatkan hipotesis awal para ilmuwan." (Target: corroborates (Finite Verb))',
+                'id_sentence' => 'Bukti empiris yang baru dikumpulkan menguatkan hipotesis awal para ilmuwan.',
+                'target_word' => 'corroborates (Finite Verb)',
+                'options' => [
+                    'The newly gathered empirical evidence corroborates the scientists\' initial hypothesis.',
+                    'The newly gathered empirical evidence corroboration the scientists\' initial hypothesis.',
+                    'The newly gathered empirical evidence corroborative the scientists\' initial hypothesis.',
+                    'The newly gathered empirical evidence corroboratively the scientists\' initial hypothesis.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Corroborates\' adalah Finite Active Verb tunggal yang mempredikasi subjek \'evidence\'. Pilihan lain berupa noun (-tion), adjective (-ive), atau adverb (-ly).'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '2',
+                'prompt' => '[Verb - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Komite investigasi memeriksa keabsahan metodologi yang digunakan dalam studi tersebut." (Target: examined (Past Verb))',
+                'id_sentence' => 'Komite investigasi memeriksa keabsahan metodologi yang digunakan dalam studi tersebut.',
+                'target_word' => 'examined (Past Verb)',
+                'options' => [
+                    'The investigative committee examined the validity of the methodology used in the study.',
+                    'The investigative committee examination the validity of the methodology used in the study.',
+                    'The investigative committee examinable the validity of the methodology used in the study.',
+                    'The investigative committee examiningly the validity of the methodology used in the study.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kalimat membutuhkan kata kerja utama (Verb): \'examined\'. Bentuk \'examination\' adalah noun.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '3',
+                'prompt' => '[Verb - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Data statistik menunjukkan adanya korelasi positif antara pendidikan dan pendapatan." (Target: indicates (Verb))',
+                'id_sentence' => 'Data statistik menunjukkan adanya korelasi positif antara pendidikan dan pendapatan.',
+                'target_word' => 'indicates (Verb)',
+                'options' => [
+                    'The statistical data indicates a positive correlation between education and income.',
+                    'The statistical data indication a positive correlation between education and income.',
+                    'The statistical data indicative a positive correlation between education and income.',
+                    'The statistical data indicatively a positive correlation between education and income.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Indicates\' adalah finite verb. \'Indication\' = noun, \'indicative\' = adjective.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '4',
+                'prompt' => '[Verb - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Pemerintah berencana menerapkan kebijakan penghematan energi secara bertahap." (Target: implement (Infinitive Verb))',
+                'id_sentence' => 'Pemerintah berencana menerapkan kebijakan penghematan energi secara bertahap.',
+                'target_word' => 'implement (Infinitive Verb)',
+                'options' => [
+                    'The government plans to implement energy conservation policies gradually.',
+                    'The government plans to implementation energy conservation policies gradually.',
+                    'The government plans to implementable energy conservation policies gradually.',
+                    'The government plans to implementingly energy conservation policies gradually.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah partikel \'to\' (to-infinitive), gunakan bentuk kata kerja dasar (base verb): \'implement\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '5',
+                'prompt' => '[Verb - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para insinyur berhasil memodifikasi prototipe untuk meningkatkan efisiensi bahan bakar." (Target: modified (Past Verb))',
+                'id_sentence' => 'Para insinyur berhasil memodifikasi prototipe untuk meningkatkan efisiensi bahan bakar.',
+                'target_word' => 'modified (Past Verb)',
+                'options' => [
+                    'The engineers successfully modified the prototype to enhance fuel efficiency.',
+                    'The engineers successfully modification the prototype to enhance fuel efficiency.',
+                    'The engineers successfully modifiable the prototype to enhance fuel efficiency.',
+                    'The engineers successfully modifier the prototype to enhance fuel efficiency.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Diterangkan oleh adverb \'successfully\', predikat kalimat membutuhkan past verb \'modified\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '6',
+                'prompt' => '[Verb - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Faktor ekonomi mempercepat laju urbanisasi di kota-kota berkembang." (Target: accelerate (Transitive Verb))',
+                'id_sentence' => 'Faktor ekonomi mempercepat laju urbanisasi di kota-kota berkembang.',
+                'target_word' => 'accelerate (Transitive Verb)',
+                'options' => [
+                    'Economic factors accelerate the rate of urbanization in developing cities.',
+                    'Economic factors acceleration the rate of urbanization in developing cities.',
+                    'Economic factors accelerative the rate of urbanization in developing cities.',
+                    'Economic factors acceleratory the rate of urbanization in developing cities.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Subjek jamak \'Economic factors\' membutuhkan transitive action verb \'accelerate\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '7',
+                'prompt' => '[Verb - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Temuan ini menjelaskan mekanisme di balik resistensi antibiotik pada bakteri." (Target: elucidates (Academic Reporting Verb))',
+                'id_sentence' => 'Temuan ini menjelaskan mekanisme di balik resistensi antibiotik pada bakteri.',
+                'target_word' => 'elucidates (Academic Reporting Verb)',
+                'options' => [
+                    'This finding elucidates the mechanism behind antibiotic resistance in bacteria.',
+                    'This finding elucidation the mechanism behind antibiotic resistance in bacteria.',
+                    'This finding elucidative the mechanism behind antibiotic resistance in bacteria.',
+                    'This finding elucidatingly the mechanism behind antibiotic resistance in bacteria.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Elucidates\' adalah academic verb bermakna \'menjelaskan secara gamblang\' untuk subjek tunggal \'This finding\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '8',
+                'prompt' => '[Verb - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para ahli memprediksi bahwa permintaan energi global akan berlipat ganda pada tahun 2050." (Target: predict (Reporting Verb))',
+                'id_sentence' => 'Para ahli memprediksi bahwa permintaan energi global akan berlipat ganda pada tahun 2050.',
+                'target_word' => 'predict (Reporting Verb)',
+                'options' => [
+                    'Experts predict that global energy demand will double by 2050.',
+                    'Experts prediction that global energy demand will double by 2050.',
+                    'Experts predictive that global energy demand will double by 2050.',
+                    'Experts predictably that global energy demand will double by 2050.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Predict\' adalah finite verb untuk subjek \'Experts\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '9',
+                'prompt' => '[Verb - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Prosedur keselamatan yang ketat meminimalkan potensi kecelakaan di tempat kerja." (Target: minimize (Verb))',
+                'id_sentence' => 'Prosedur keselamatan yang ketat meminimalkan potensi kecelakaan di tempat kerja.',
+                'target_word' => 'minimize (Verb)',
+                'options' => [
+                    'Strict safety protocols minimize the potential for workplace accidents.',
+                    'Strict safety protocols minimal the potential for workplace accidents.',
+                    'Strict safety protocols minimally the potential for workplace accidents.',
+                    'Strict safety protocols minimization the potential for workplace accidents.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Minimize\' adalah verb dengan akhiran -ize, mempredikasi subjek \'Strict safety protocols\'.'
+            ],
+            [
+                'sub_lesson' => 'Verb',
+                'sub_lesson_slug' => 'verb',
+                'number' => '10',
+                'prompt' => '[Verb - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Hasil uji klinis mengkonfirmasi efektivitas vaksin dalam mencegah penularan penyakit." (Target: confirmed (Verb))',
+                'id_sentence' => 'Hasil uji klinis mengkonfirmasi efektivitas vaksin dalam mencegah penularan penyakit.',
+                'target_word' => 'confirmed (Verb)',
+                'options' => [
+                    'The clinical trial results confirmed the effectiveness of the vaccine in preventing disease transmission.',
+                    'The clinical trial results confirmation the effectiveness of the vaccine in preventing disease transmission.',
+                    'The clinical trial results confirmative the effectiveness of the vaccine in preventing disease transmission.',
+                    'The clinical trial results confirmingly the effectiveness of the vaccine in preventing disease transmission.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Predikat kalimat harus berbentuk verb lampau: \'confirmed\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '1',
+                'prompt' => '[Adjective - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Komite merilis penilaian komprehensif mengenai kelayakan ekonomi dari proyek tersebut." (Target: comprehensive (Adjective))',
+                'id_sentence' => 'Komite merilis penilaian komprehensif mengenai kelayakan ekonomi dari proyek tersebut.',
+                'target_word' => 'comprehensive (Adjective)',
+                'options' => [
+                    'The committee released a comprehensive assessment regarding the economic feasibility of the project.',
+                    'The committee released a comprehend assessment regarding the economic feasibility of the project.',
+                    'The committee released a comprehensively assessment regarding the economic feasibility of the project.',
+                    'The committee released a comprehension assessment regarding the economic feasibility of the project.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Comprehensive\' adalah attributive adjective yang menerangkan kata benda \'assessment\'. \'Comprehension\' adalah noun dan \'comprehensively\' adalah adverb.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '2',
+                'prompt' => '[Adjective - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Temuan awal dari survei tersebut masih belum meyakinkan bagi para peneliti." (Target: inconclusive (Predicative Adjective))',
+                'id_sentence' => 'Temuan awal dari survei tersebut masih belum meyakinkan bagi para peneliti.',
+                'target_word' => 'inconclusive (Predicative Adjective)',
+                'options' => [
+                    'The preliminary findings of the survey remain inconclusive for the researchers.',
+                    'The preliminary findings of the survey remain inconclusively for the researchers.',
+                    'The preliminary findings of the survey remain inconclusion for the researchers.',
+                    'The preliminary findings of the survey remain inconclusiveness for the researchers.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah linking verb \'remain\', posisi komplemen subjek harus diisi oleh predicative adjective \'inconclusive\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '3',
+                'prompt' => '[Adjective - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Pemanasan global merupakan ancaman signifikan terhadap keanekaragaman hayati laut." (Target: significant (Attributive Adjective))',
+                'id_sentence' => 'Pemanasan global merupakan ancaman signifikan terhadap keanekaragaman hayati laut.',
+                'target_word' => 'significant (Attributive Adjective)',
+                'options' => [
+                    'Global warming poses a significant threat to marine biodiversity.',
+                    'Global warming poses a significantly threat to marine biodiversity.',
+                    'Global warming poses a significance threat to marine biodiversity.',
+                    'Global warming poses a signified threat to marine biodiversity.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Significant\' (Adjective) menerangkan kata benda \'threat\'. Posisi sebelum noun tidak boleh diisi adverb \'significantly\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '4',
+                'prompt' => '[Adjective - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para ilmuwan menerapkan metodologi yang ketat untuk memastikan keandalan hasil." (Target: rigorous (Adjective))',
+                'id_sentence' => 'Para ilmuwan menerapkan metodologi yang ketat untuk memastikan keandalan hasil.',
+                'target_word' => 'rigorous (Adjective)',
+                'options' => [
+                    'The scientists implemented a rigorous methodology to ensure the reliability of the results.',
+                    'The scientists implemented a rigor methodology to ensure the reliability of the results.',
+                    'The scientists implemented a rigorously methodology to ensure the reliability of the results.',
+                    'The scientists implemented a rigorousness methodology to ensure the reliability of the results.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Rigorous\' (berakhiran -ous) adalah adjective yang menerangkan kata benda \'methodology\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '5',
+                'prompt' => '[Adjective - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Solusi yang diusulkan oleh konsultan terbukti layak secara teknis dan finansial." (Target: feasible (Predicative Adjective))',
+                'id_sentence' => 'Solusi yang diusulkan oleh konsultan terbukti layak secara teknis dan finansial.',
+                'target_word' => 'feasible (Predicative Adjective)',
+                'options' => [
+                    'The proposed solution proved feasible both technically and financially.',
+                    'The proposed solution proved feasibly both technically and financially.',
+                    'The proposed solution proved feasibility both technically and financially.',
+                    'The proposed solution proved feasibleness both technically and financially.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah linking verb \'proved\', gunakan predicative adjective \'feasible\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '6',
+                'prompt' => '[Adjective - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penelitian ini memberikan kontribusi substansial terhadap literatur akademis terkini." (Target: substantial (Adjective))',
+                'id_sentence' => 'Penelitian ini memberikan kontribusi substansial terhadap literatur akademis terkini.',
+                'target_word' => 'substantial (Adjective)',
+                'options' => [
+                    'This study makes a substantial contribution to the current academic literature.',
+                    'This study makes a substantially contribution to the current academic literature.',
+                    'This study makes a substance contribution to the current academic literature.',
+                    'This study makes a substantiate contribution to the current academic literature.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Substantial\' (Adjective) menerangkan noun \'contribution\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '7',
+                'prompt' => '[Adjective - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Bukti empiris sangat penting untuk memvalidasi hipotesis ilmiah apa pun." (Target: empirical (Adjective))',
+                'id_sentence' => 'Bukti empiris sangat penting untuk memvalidasi hipotesis ilmiah apa pun.',
+                'target_word' => 'empirical (Adjective)',
+                'options' => [
+                    'Empirical evidence is essential for validating any scientific hypothesis.',
+                    'Empirically evidence is essential for validating any scientific hypothesis.',
+                    'Empiricism evidence is essential for validating any scientific hypothesis.',
+                    'Empiricist evidence is essential for validating any scientific hypothesis.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Empirical\' (akhiran -al) berfungsi sebagai adjective yang memodifikasi noun \'evidence\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '8',
+                'prompt' => '[Adjective - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Pertumbuhan ekonomi negara tersebut tampaknya stabil selama dekade terakhir." (Target: stable (Predicative Adjective))',
+                'id_sentence' => 'Pertumbuhan ekonomi negara tersebut tampaknya stabil selama dekade terakhir.',
+                'target_word' => 'stable (Predicative Adjective)',
+                'options' => [
+                    'The nation\'s economic growth appears stable over the past decade.',
+                    'The nation\'s economic growth appears stably over the past decade.',
+                    'The nation\'s economic growth appears stability over the past decade.',
+                    'The nation\'s economic growth appears stabilize over the past decade.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah linking verb \'appears\', gunakan predicative adjective \'stable\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '9',
+                'prompt' => '[Adjective - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penggunaan bahasa yang ambigu dapat menimbulkan kesalahpahaman dalam kontrak hukum." (Target: ambiguous (Adjective))',
+                'id_sentence' => 'Penggunaan bahasa yang ambigu dapat menimbulkan kesalahpahaman dalam kontrak hukum.',
+                'target_word' => 'ambiguous (Adjective)',
+                'options' => [
+                    'Ambiguous language can cause misunderstandings in legal contracts.',
+                    'Ambiguously language can cause misunderstandings in legal contracts.',
+                    'Ambiguity language can cause misunderstandings in legal contracts.',
+                    'Ambiguities language can cause misunderstandings in legal contracts.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Ambiguous\' adalah adjective yang menerangkan noun \'language\'.'
+            ],
+            [
+                'sub_lesson' => 'Adjective',
+                'sub_lesson_slug' => 'adjective',
+                'number' => '10',
+                'prompt' => '[Adjective - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Limbah kimia beracun menimbulkan ancaman serius bagi kesehatan masyarakat setempat." (Target: toxic (Adjective))',
+                'id_sentence' => 'Limbah kimia beracun menimbulkan ancaman serius bagi kesehatan masyarakat setempat.',
+                'target_word' => 'toxic (Adjective)',
+                'options' => [
+                    'Toxic chemical waste poses a grave hazard to local public health.',
+                    'Toxically chemical waste poses a grave hazard to local public health.',
+                    'Toxicity chemical waste poses a grave hazard to local public health.',
+                    'Toxicant chemical waste poses a grave hazard to local public health.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Toxic\' adalah adjective yang menerangkan frasa benda \'chemical waste\'.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '1',
+                'prompt' => '[Adverb - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Algoritma terotomatisasi tersebut memproses kumpulan data dengan sangat cepat." (Target: exceptionally (Adverb of Degree))',
+                'id_sentence' => 'Algoritma terotomatisasi tersebut memproses kumpulan data dengan sangat cepat.',
+                'target_word' => 'exceptionally (Adverb of Degree)',
+                'options' => [
+                    'The automated algorithm processed the dataset exceptionally fast.',
+                    'The automated algorithm processed the dataset exceptional fast.',
+                    'The automated algorithm processed the dataset exception fast.',
+                    'The automated algorithm processed the dataset exceptionality fast.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Exceptionally\' (Adverb berakhiran -ly) menerangkan adverb \'fast\'. Bentuk \'exceptional\' adalah adjective.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '2',
+                'prompt' => '[Adverb - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Emisi karbon global meningkat secara dramatis selama abad kedua puluh." (Target: dramatically (Adverb of Manner/Degree))',
+                'id_sentence' => 'Emisi karbon global meningkat secara dramatis selama abad kedua puluh.',
+                'target_word' => 'dramatically (Adverb of Manner/Degree)',
+                'options' => [
+                    'Global carbon emissions increased dramatically during the twentieth century.',
+                    'Global carbon emissions increased dramatic during the twentieth century.',
+                    'Global carbon emissions increased drama during the twentieth century.',
+                    'Global carbon emissions increased dramatize during the twentieth century.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata kerja \'increased\' diterangkan oleh adverb \'dramatically\'. Bentuk \'dramatic\' adalah adjective.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '3',
+                'prompt' => '[Adverb - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sebagai konsekuensinya, pemerintah daerah memberlakukan pembatasan mobilitas yang lebih ketat." (Target: Consequently (Conjunctive Adverb))',
+                'id_sentence' => 'Sebagai konsekuensinya, pemerintah daerah memberlakukan pembatasan mobilitas yang lebih ketat.',
+                'target_word' => 'Consequently (Conjunctive Adverb)',
+                'options' => [
+                    'Consequently, the local government imposed stricter mobility restrictions.',
+                    'Consequent, the local government imposed stricter mobility restrictions.',
+                    'Consequence, the local government imposed stricter mobility restrictions.',
+                    'Consequential, the local government imposed stricter mobility restrictions.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Consequently\' adalah sentence adverb / conjunctive adverb yang menghubungkan akibat kausal antar kalimat.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '4',
+                'prompt' => '[Adverb - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Hasil survei menunjukkan preferensi konsumen yang sangat berbeda antar wilayah." (Target: substantially (Adverb of Degree))',
+                'id_sentence' => 'Hasil survei menunjukkan preferensi konsumen yang sangat berbeda antar wilayah.',
+                'target_word' => 'substantially (Adverb of Degree)',
+                'options' => [
+                    'The survey results indicate substantially different consumer preferences across regions.',
+                    'The survey results indicate substantial different consumer preferences across regions.',
+                    'The survey results indicate substance different consumer preferences across regions.',
+                    'The survey results indicate substantiate different consumer preferences across regions.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Adjective \'different\' dimodifikasi oleh adverb of degree \'substantially\'.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '5',
+                'prompt' => '[Adverb - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Tingkat inflasi turun secara bertahap setelah bank sentral menaikkan suku bunga." (Target: gradually (Adverb of Manner))',
+                'id_sentence' => 'Tingkat inflasi turun secara bertahap setelah bank sentral menaikkan suku bunga.',
+                'target_word' => 'gradually (Adverb of Manner)',
+                'options' => [
+                    'The inflation rate declined gradually after the central bank raised interest rates.',
+                    'The inflation rate declined gradual after the central bank raised interest rates.',
+                    'The inflation rate declined graduation after the central bank raised interest rates.',
+                    'The inflation rate declined gradient after the central bank raised interest rates.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata kerja \'declined\' diterangkan oleh adverb \'gradually\'.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '6',
+                'prompt' => '[Adverb - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Tidak dapat dipungkiri, kemajuan teknologi medis telah memperpanjang harapan hidup manusia." (Target: Inevitably (Sentence Adverb))',
+                'id_sentence' => 'Tidak dapat dipungkiri, kemajuan teknologi medis telah memperpanjang harapan hidup manusia.',
+                'target_word' => 'Inevitably (Sentence Adverb)',
+                'options' => [
+                    'Inevitably, advances in medical technology have extended human life expectancy.',
+                    'Inevitable, advances in medical technology have extended human life expectancy.',
+                    'Inevitability, advances in medical technology have extended human life expectancy.',
+                    'Inevitableness, advances in medical technology have extended human life expectancy.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Inevitably\' berfungsi sebagai sentence adverb pembuka kalimat untuk menyatakan kepastian.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '7',
+                'prompt' => '[Adverb - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Kedua variabel tersebut berhubungan secara positif dalam sebagian besar studi kasus." (Target: positively (Adverb of Manner))',
+                'id_sentence' => 'Kedua variabel tersebut berhubungan secara positif dalam sebagian besar studi kasus.',
+                'target_word' => 'positively (Adverb of Manner)',
+                'options' => [
+                    'The two variables are positively correlated in most case studies.',
+                    'The two variables are positive correlated in most case studies.',
+                    'The two variables are positivity correlated in most case studies.',
+                    'The two variables are positivism correlated in most case studies.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Past participle adjective \'correlated\' dimodifikasi oleh adverb \'positively\'.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '8',
+                'prompt' => '[Adverb - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Biaya operasional perusahaan berkurang secara signifikan berkat otomatisasi sistem." (Target: significantly (Adverb))',
+                'id_sentence' => 'Biaya operasional perusahaan berkurang secara signifikan berkat otomatisasi sistem.',
+                'target_word' => 'significantly (Adverb)',
+                'options' => [
+                    'The firm\'s operational expenses decreased significantly due to system automation.',
+                    'The firm\'s operational expenses decreased significant due to system automation.',
+                    'The firm\'s operational expenses decreased significance due to system automation.',
+                    'The firm\'s operational expenses decreased significate due to system automation.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata kerja \'decreased\' membutuhkan keterangan adverb \'significantly\'.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '9',
+                'prompt' => '[Adverb - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sebaliknya, negara-negara tetangga mencatat lonjakan defisit perdagangan yang tajam." (Target: Conversely (Conjunctive Adverb))',
+                'id_sentence' => 'Sebaliknya, negara-negara tetangga mencatat lonjakan defisit perdagangan yang tajam.',
+                'target_word' => 'Conversely (Conjunctive Adverb)',
+                'options' => [
+                    'Conversely, neighboring nations recorded a sharp surge in trade deficit.',
+                    'Converse, neighboring nations recorded a sharp surge in trade deficit.',
+                    'Conversion, neighboring nations recorded a sharp surge in trade deficit.',
+                    'Convertible, neighboring nations recorded a sharp surge in trade deficit.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Conversely\' adalah conjunctive adverb formal untuk menyatakan perbandingan kontras.'
+            ],
+            [
+                'sub_lesson' => 'Adverb',
+                'sub_lesson_slug' => 'adverb',
+                'number' => '10',
+                'prompt' => '[Adverb - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Instrumen pengukuran harus dikalibrasi secara berkala untuk menjaga akurasi." (Target: periodically (Adverb of Frequency/Time))',
+                'id_sentence' => 'Instrumen pengukuran harus dikalibrasi secara berkala untuk menjaga akurasi.',
+                'target_word' => 'periodically (Adverb of Frequency/Time)',
+                'options' => [
+                    'The measurement instruments must be calibrated periodically to maintain accuracy.',
+                    'The measurement instruments must be calibrated periodic to maintain accuracy.',
+                    'The measurement instruments must be calibrated periodicity to maintain accuracy.',
+                    'The measurement instruments must be calibrated periodical to maintain accuracy.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Passive verb \'calibrated\' diterangkan oleh adverb of frequency \'periodically\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '1',
+                'prompt' => '[Preposition - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Hasil eksperimen tersebut sepenuhnya konsisten dengan model teoritis sebelumnya." (Target: consistent with (Prepositional Colocation))',
+                'id_sentence' => 'Hasil eksperimen tersebut sepenuhnya konsisten dengan model teoritis sebelumnya.',
+                'target_word' => 'consistent with (Prepositional Colocation)',
+                'options' => [
+                    'The outcome of the experiment was completely consistent with earlier theoretical models.',
+                    'The outcome of the experiment was completely consistent to earlier theoretical models.',
+                    'The outcome of the experiment was completely consistent for earlier theoretical models.',
+                    'The outcome of the experiment was completely consistent on earlier theoretical models.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Adjective \'consistent\' memiliki pasangan preposisi tetap: \'consistent with\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '2',
+                'prompt' => '[Preposition - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sesuai dengan pedoman etika riset, identitas seluruh partisipan dirahasiakan." (Target: In accordance with (Complex Preposition))',
+                'id_sentence' => 'Sesuai dengan pedoman etika riset, identitas seluruh partisipan dirahasiakan.',
+                'target_word' => 'In accordance with (Complex Preposition)',
+                'options' => [
+                    'In accordance with research ethics guidelines, all participants\' identities were anonymized.',
+                    'In accordance to research ethics guidelines, all participants\' identities were anonymized.',
+                    'In accordance for research ethics guidelines, all participants\' identities were anonymized.',
+                    'In accordance about research ethics guidelines, all participants\' identities were anonymized.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Frasa preposisi kompleks yang baku dalam bahasa formal adalah \'In accordance with\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '3',
+                'prompt' => '[Preposition - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Meskipun menghadapi ketidakpastian ekonomi, perusahaan tetap berinvestasi dalam penelitian." (Target: Despite (Preposition of Concession))',
+                'id_sentence' => 'Meskipun menghadapi ketidakpastian ekonomi, perusahaan tetap berinvestasi dalam penelitian.',
+                'target_word' => 'Despite (Preposition of Concession)',
+                'options' => [
+                    'Despite economic uncertainties, the corporation continued to invest in research.',
+                    'Despite of economic uncertainties, the corporation continued to invest in research.',
+                    'In despite economic uncertainties, the corporation continued to invest in research.',
+                    'Despite with economic uncertainties, the corporation continued to invest in research.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Despite\' adalah preposisi tunggal yang diikuti noun phrase tanpa kata \'of\' (berbeda dari \'in spite of\').'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '4',
+                'prompt' => '[Preposition - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Faktor lingkungan berkontribusi besar terhadap penyebaran penyakit menular tersebut." (Target: contribute to (Dependent Preposition))',
+                'id_sentence' => 'Faktor lingkungan berkontribusi besar terhadap penyebaran penyakit menular tersebut.',
+                'target_word' => 'contribute to (Dependent Preposition)',
+                'options' => [
+                    'Environmental factors contribute substantially to the transmission of the infectious disease.',
+                    'Environmental factors contribute substantially for the transmission of the infectious disease.',
+                    'Environmental factors contribute substantially in the transmission of the infectious disease.',
+                    'Environmental factors contribute substantially with the transmission of the infectious disease.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata kerja \'contribute\' selalu berpasangan dengan preposisi \'to\' (contribute to something).'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '5',
+                'prompt' => '[Preposition - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Seluruh staf laboratorium wajib mematuhi standar keselamatan kerja yang ketat." (Target: adhere to (Dependent Preposition))',
+                'id_sentence' => 'Seluruh staf laboratorium wajib mematuhi standar keselamatan kerja yang ketat.',
+                'target_word' => 'adhere to (Dependent Preposition)',
+                'options' => [
+                    'All laboratory personnel are required to adhere to strict occupational safety standards.',
+                    'All laboratory personnel are required to adhere with strict occupational safety standards.',
+                    'All laboratory personnel are required to adhere in strict occupational safety standards.',
+                    'All laboratory personnel are required to adhere at strict occupational safety standards.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kolokasi kata kerja formal untuk mematuhi adalah \'adhere to\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '6',
+                'prompt' => '[Preposition - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penelitian ini berfokus pada dampak jangka panjang dari polusi mikroplastik." (Target: focuses on (Dependent Preposition))',
+                'id_sentence' => 'Penelitian ini berfokus pada dampak jangka panjang dari polusi mikroplastik.',
+                'target_word' => 'focuses on (Dependent Preposition)',
+                'options' => [
+                    'This investigation focuses on the long-term impacts of microplastic pollution.',
+                    'This investigation focuses in the long-term impacts of microplastic pollution.',
+                    'This investigation focuses at the long-term impacts of microplastic pollution.',
+                    'This investigation focuses about the long-term impacts of microplastic pollution.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Kata kerja \'focus\' secara baku berkolokasi dengan preposisi \'on\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '7',
+                'prompt' => '[Preposition - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sehubungan dengan temuan terbaru, hipotesis awal harus direvisi secara menyeluruh." (Target: In light of (Complex Preposition))',
+                'id_sentence' => 'Sehubungan dengan temuan terbaru, hipotesis awal harus direvisi secara menyeluruh.',
+                'target_word' => 'In light of (Complex Preposition)',
+                'options' => [
+                    'In light of recent findings, the initial hypothesis must be thoroughly revised.',
+                    'In light to recent findings, the initial hypothesis must be thoroughly revised.',
+                    'In light with recent findings, the initial hypothesis must be thoroughly revised.',
+                    'In light for recent findings, the initial hypothesis must be thoroughly revised.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Frasa idiomatis formal yang berarti \'mengingat / sehubungan dengan\' adalah \'In light of\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '8',
+                'prompt' => '[Preposition - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Kebijakan baru tersebut berdampak signifikan terhadap daya beli masyarakat berpenghasilan rendah." (Target: impact on (Dependent Preposition))',
+                'id_sentence' => 'Kebijakan baru tersebut berdampak signifikan terhadap daya beli masyarakat berpenghasilan rendah.',
+                'target_word' => 'impact on (Dependent Preposition)',
+                'options' => [
+                    'The new policy has a profound impact on the purchasing power of low-income households.',
+                    'The new policy has a profound impact in the purchasing power of low-income households.',
+                    'The new policy has a profound impact to the purchasing power of low-income households.',
+                    'The new policy has a profound impact with the purchasing power of low-income households.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Nomina \'impact\' berpasangan dengan preposisi \'on\' (an impact on something).'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '9',
+                'prompt' => '[Preposition - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Setelah menyelesaikan pengujian tahap awal, para ilmuwan melanjutkan ke tahap klinis." (Target: Upon completing (Preposition + Gerund))',
+                'id_sentence' => 'Setelah menyelesaikan pengujian tahap awal, para ilmuwan melanjutkan ke tahap klinis.',
+                'target_word' => 'Upon completing (Preposition + Gerund)',
+                'options' => [
+                    'Upon completing the preliminary trials, the scientists proceeded to the clinical phase.',
+                    'Upon complete the preliminary trials, the scientists proceeded to the clinical phase.',
+                    'Upon completed the preliminary trials, the scientists proceeded to the clinical phase.',
+                    'Upon to complete the preliminary trials, the scientists proceeded to the clinical phase.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Setelah preposisi \'Upon\', kata kerja wajib berbentuk gerund (-ing): \'Upon completing\'.'
+            ],
+            [
+                'sub_lesson' => 'Preposition',
+                'sub_lesson_slug' => 'preposition',
+                'number' => '10',
+                'prompt' => '[Preposition - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Para peneliti bertanggung jawab atas integritas dan kerahasiaan data yang dikumpulkan." (Target: responsible for (Dependent Preposition))',
+                'id_sentence' => 'Para peneliti bertanggung jawab atas integritas dan kerahasiaan data yang dikumpulkan.',
+                'target_word' => 'responsible for (Dependent Preposition)',
+                'options' => [
+                    'The researchers are accountable and responsible for the integrity of the collected data.',
+                    'The researchers are accountable and responsible to the integrity of the collected data.',
+                    'The researchers are accountable and responsible with the integrity of the collected data.',
+                    'The researchers are accountable and responsible about the integrity of the collected data.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Adjective \'responsible\' berkolokasi dengan preposisi \'for\' (responsible for something).'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '1',
+                'prompt' => '[Conjunction - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Meskipun sampel penelitian terbatas, hasil awal memberikan wawasan yang inovatif." (Target: Although (Subordinating Conjunction))',
+                'id_sentence' => 'Meskipun sampel penelitian terbatas, hasil awal memberikan wawasan yang inovatif.',
+                'target_word' => 'Although (Subordinating Conjunction)',
+                'options' => [
+                    'Although the research sample was limited, preliminary results yielded groundbreaking insights.',
+                    'Although the research sample was limited, but preliminary results yielded groundbreaking insights.',
+                    'Despite the research sample was limited, preliminary results yielded groundbreaking insights.',
+                    'However the research sample was limited, preliminary results yielded groundbreaking insights.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Although\' adalah subordinating conjunction yang benar. Tidak boleh menambahkan \'but\' di main clause, dan \'despite\' harus diikuti frasa nomina bukan klausa lengkap.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '2',
+                'prompt' => '[Conjunction - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sementara biaya bahan bakar fosil melonjak, harga teknologi energi surya terus menurun." (Target: Whereas (Subordinating Conjunction of Contrast))',
+                'id_sentence' => 'Sementara biaya bahan bakar fosil melonjak, harga teknologi energi surya terus menurun.',
+                'target_word' => 'Whereas (Subordinating Conjunction of Contrast)',
+                'options' => [
+                    'Whereas fossil fuel costs soared, solar technology prices declined steadily.',
+                    'Whereas fossil fuel costs soared, but solar technology prices declined steadily.',
+                    'In contrast fossil fuel costs soared, solar technology prices declined steadily.',
+                    'However fossil fuel costs soared, solar technology prices declined steadily.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Whereas\' berfungsi sebagai subordinating conjunction untuk menunjukkan perbandingan kontras langsung antara dua klausa.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '3',
+                'prompt' => '[Conjunction - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Penelitian ini tidak hanya menguji teori yang ada tetapi juga mengusulkan kerangka kerja baru." (Target: not only... but also (Correlative Conjunction))',
+                'id_sentence' => 'Penelitian ini tidak hanya menguji teori yang ada tetapi juga mengusulkan kerangka kerja baru.',
+                'target_word' => 'not only... but also (Correlative Conjunction)',
+                'options' => [
+                    'The study not only examines existing theories but also proposes a novel conceptual framework.',
+                    'The study not only examines existing theories but a novel conceptual framework proposes.',
+                    'The study examines not only existing theories but also proposed a novel conceptual framework.',
+                    'The study not only examine existing theories and also proposes a novel conceptual framework.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Parallelism: \'not only examines ... but also proposes ...\'. Kedua bagian berpasangan dengan bentuk present finite verb yang seimbang.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '4',
+                'prompt' => '[Conjunction - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Karena data survei tidak lengkap, para peneliti menunda publikasi laporan akhir." (Target: Since (Subordinating Conjunction of Cause))',
+                'id_sentence' => 'Karena data survei tidak lengkap, para peneliti menunda publikasi laporan akhir.',
+                'target_word' => 'Since (Subordinating Conjunction of Cause)',
+                'options' => [
+                    'Since the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                    'Because of the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                    'Due to the survey dataset was incomplete, the researchers postponed the publication of the final report.',
+                    'Owing to the survey dataset was incomplete, the researchers postponed the publication of the final report.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Since\' diikuti oleh klausa lengkap (Subject + Verb: \'the dataset was incomplete\'). Pilihan \'Because of\' dan \'Due to\' adalah preposisi yang hanya boleh diikuti noun phrase.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '5',
+                'prompt' => '[Conjunction - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Bahan kimia tersebut harus disimpan di tempat sejuk, atau bahan itu akan terurai dengan cepat." (Target: or (Coordinating Conjunction))',
+                'id_sentence' => 'Bahan kimia tersebut harus disimpan di tempat sejuk, atau bahan itu akan terurai dengan cepat.',
+                'target_word' => 'or (Coordinating Conjunction)',
+                'options' => [
+                    'The chemical compound must be stored in a cool environment, or it will degrade rapidly.',
+                    'The chemical compound must be stored in a cool environment, nor it will degrade rapidly.',
+                    'The chemical compound must be stored in a cool environment, but it will degrade rapidly.',
+                    'The chemical compound must be stored in a cool environment, so it will degrade rapidly.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Konjungsi koordinatif \'or\' menyatakan konsekuensi alternatif jika kondisi sebelumnya tidak terpenuhi.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '6',
+                'prompt' => '[Conjunction - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Baik direktur maupun para anggota dewan tidak menyetujui anggaran revisi tersebut." (Target: Neither... nor (Correlative Conjunction))',
+                'id_sentence' => 'Baik direktur maupun para anggota dewan tidak menyetujui anggaran revisi tersebut.',
+                'target_word' => 'Neither... nor (Correlative Conjunction)',
+                'options' => [
+                    'Neither the director nor the board members approved the revised fiscal budget.',
+                    'Neither the director or the board members approved the revised fiscal budget.',
+                    'Either the director nor the board members approved the revised fiscal budget.',
+                    'Both the director nor the board members approved the revised fiscal budget.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Pasangan korelasi baku untuk penolakan ganda adalah \'Neither... nor...\'.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '7',
+                'prompt' => '[Conjunction - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Pasien akan pulih lebih cepat asalkan mereka mengikuti jadwal terapi yang dianjurkan." (Target: provided that (Subordinating Conjunction of Condition))',
+                'id_sentence' => 'Pasien akan pulih lebih cepat asalkan mereka mengikuti jadwal terapi yang dianjurkan.',
+                'target_word' => 'provided that (Subordinating Conjunction of Condition)',
+                'options' => [
+                    'Patients will recover more swiftly provided that they adhere to the recommended therapy schedule.',
+                    'Patients will recover more swiftly provided they will adhere to the recommended therapy schedule.',
+                    'Patients will recover more swiftly in provision that they adhere to the recommended therapy schedule.',
+                    'Patients will recover more swiftly provided of they adhere to the recommended therapy schedule.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Provided that\' (atau \'providing that\') adalah konjungsi subordinatif formal yang bermakna \'asalkan / dengan syarat bahwa\'.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '8',
+                'prompt' => '[Conjunction - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Eksperimen dihentikan sementara agar parameter keamanan dapat dievaluasi ulang." (Target: so that (Subordinating Conjunction of Purpose))',
+                'id_sentence' => 'Eksperimen dihentikan sementara agar parameter keamanan dapat dievaluasi ulang.',
+                'target_word' => 'so that (Subordinating Conjunction of Purpose)',
+                'options' => [
+                    'The experiment was paused so that safety parameters could be re-evaluated.',
+                    'The experiment was paused in order for safety parameters could be re-evaluated.',
+                    'The experiment was paused so as safety parameters could be re-evaluated.',
+                    'The experiment was paused that safety parameters could be re-evaluated.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'So that\' menghubungkan klausa tujuan (purpose clause) dan diikuti oleh modal auxiliary (could / might).'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '9',
+                'prompt' => '[Conjunction - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Investasi modal meningkat pesat, namun laju penciptaan lapangan kerja tetap lambat." (Target: yet (Coordinating Conjunction of Contrast))',
+                'id_sentence' => 'Investasi modal meningkat pesat, namun laju penciptaan lapangan kerja tetap lambat.',
+                'target_word' => 'yet (Coordinating Conjunction of Contrast)',
+                'options' => [
+                    'Capital investment expanded rapidly, yet the pace of job creation remained sluggish.',
+                    'Capital investment expanded rapidly, although the pace of job creation remained sluggish.',
+                    'Capital investment expanded rapidly, despite the pace of job creation remained sluggish.',
+                    'Capital investment expanded rapidly, unless the pace of job creation remained sluggish.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Yet\' adalah coordinating conjunction yang menghubungkan dua klausa independen kontras setara dengan tanda koma pemisah.'
+            ],
+            [
+                'sub_lesson' => 'Conjunction',
+                'sub_lesson_slug' => 'conjunction',
+                'number' => '10',
+                'prompt' => '[Conjunction - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Bahkan jika kondisi pasar memburuk, proyek infrastruktur tetap akan dilanjutkan." (Target: Even if (Subordinating Conjunction of Concession))',
+                'id_sentence' => 'Bahkan jika kondisi pasar memburuk, proyek infrastruktur tetap akan dilanjutkan.',
+                'target_word' => 'Even if (Subordinating Conjunction of Concession)',
+                'options' => [
+                    'Even if market conditions deteriorate, the infrastructure project will proceed.',
+                    'Even though market conditions will deteriorate, the infrastructure project will proceed.',
+                    'Despite market conditions deteriorate, the infrastructure project will proceed.',
+                    'Regardless market conditions deteriorate, the infrastructure project will proceed.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Even if\' digunakan untuk menyatakan konsesi kondisional hipotetis (bahkan jika).'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '1',
+                'prompt' => '[Interjection - Latihan #1] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sayangnya, perusahaan rintisan tersebut menghentikan operasionalnya akibat kehabisan modal." (Target: Regrettably (Academic Stance Adverb))',
+                'id_sentence' => 'Sayangnya, perusahaan rintisan tersebut menghentikan operasionalnya akibat kehabisan modal.',
+                'target_word' => 'Regrettably (Academic Stance Adverb)',
+                'options' => [
+                    'Regrettably, the start-up venture ceased operations due to capital depletion.',
+                    'Alas, the start-up venture ceased operations due to capital depletion.',
+                    'Oh, the start-up venture ceased operations due to capital depletion.',
+                    'Ouch, the start-up venture ceased operations due to capital depletion.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Dalam register akademis formal, hindari interjeksi emosional \'Alas\' dan gunakan disjunct stance adverb \'Regrettably\'.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '2',
+                'prompt' => '[Interjection - Latihan #2] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Secara luar biasa, pasien pulih sepenuhnya dalam kurun waktu kurang dari empat puluh delapan jam." (Target: Remarkably (Academic Stance Adverb))',
+                'id_sentence' => 'Secara luar biasa, pasien pulih sepenuhnya dalam kurun waktu kurang dari empat puluh delapan jam.',
+                'target_word' => 'Remarkably (Academic Stance Adverb)',
+                'options' => [
+                    'Remarkably, the patient achieved full recovery within less than forty-eight hours.',
+                    'Wow, the patient achieved full recovery within less than forty-eight hours.',
+                    'Aha, the patient achieved full recovery within less than forty-eight hours.',
+                    'Gosh, the patient achieved full recovery within less than forty-eight hours.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Remarkably\' adalah adverb akademis yang menggantikan seruan informal \'Wow\'.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '3',
+                'prompt' => '[Interjection - Latihan #3] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sayang sekali, spesimen biologis tersebut rusak akibat fluktuasi suhu yang tidak terkontrol." (Target: Unfortunately (Academic Stance Adverb))',
+                'id_sentence' => 'Sayang sekali, spesimen biologis tersebut rusak akibat fluktuasi suhu yang tidak terkontrol.',
+                'target_word' => 'Unfortunately (Academic Stance Adverb)',
+                'options' => [
+                    'Unfortunately, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                    'Oh dear, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                    'Alas, the biological specimen degraded due to uncontrolled thermal fluctuations.',
+                    'Oops, the biological specimen degraded due to uncontrolled thermal fluctuations.'
+                ],
+                'correct_index' => 0,
+                'explanation' => 'Gunakan \'Unfortunately\' untuk menjaga nada objektif dan ilmiah dibanding seruan informal \'Oh dear\' atau \'Oops\'.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '4',
+                'prompt' => '[Interjection - Latihan #4] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Menariknya, hasil simulasi komputer justru bertentangan dengan prediksi teoritis." (Target: Intriguingly (Academic Stance Adverb))',
+                'id_sentence' => 'Menariknya, hasil simulasi komputer justru bertentangan dengan prediksi teoritis.',
+                'target_word' => 'Intriguingly (Academic Stance Adverb)',
+                'options' => [
+                    'Intriguingly, the computer simulation results contradicted theoretical predictions.',
+                    'Aha, the computer simulation results contradicted theoretical predictions.',
+                    'Wow, the computer simulation results contradicted theoretical predictions.',
+                    'Hark, the computer simulation results contradicted theoretical predictions.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Intriguingly\' adalah academic stance adverb pembuka kalimat yang elegan dan bebas dari seruan emosional subjektif.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '5',
+                'prompt' => '[Interjection - Latihan #5] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Yang patut dicatat, mayoritas responden menyatakan kepuasan tinggi terhadap platform digital baru." (Target: Notably (Academic Stance Adverb))',
+                'id_sentence' => 'Yang patut dicatat, mayoritas responden menyatakan kepuasan tinggi terhadap platform digital baru.',
+                'target_word' => 'Notably (Academic Stance Adverb)',
+                'options' => [
+                    'Notably, the vast majority of respondents reported high satisfaction with the digital platform.',
+                    'Yay, the vast majority of respondents reported high satisfaction with the digital platform.',
+                    'Hurrah, the vast majority of respondents reported high satisfaction with the digital platform.',
+                    'Bravo, the vast majority of respondents reported high satisfaction with the digital platform.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Notably\' menggantikan interjeksi perayaan informal seperti \'Yay\' atau \'Bravo\' untuk melaporkan data positif secara ilmiah.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '6',
+                'prompt' => '[Interjection - Latihan #6] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Tidak dapat dipungkiri, perubahan iklim merupakan tantangan paling mendesak abad ini." (Target: Undeniably (Academic Stance Adverb))',
+                'id_sentence' => 'Tidak dapat dipungkiri, perubahan iklim merupakan tantangan paling mendesak abad ini.',
+                'target_word' => 'Undeniably (Academic Stance Adverb)',
+                'options' => [
+                    'Undeniably, anthropogenic climate change represents the most pressing challenge of our era.',
+                    'No kidding, anthropogenic climate change represents the most pressing challenge of our era.',
+                    'For sure, anthropogenic climate change represents the most pressing challenge of our era.',
+                    'Boy, anthropogenic climate change represents the most pressing challenge of our era.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Undeniably\' adalah stance adverb formal pengganti frasa seruan informal seperti \'No kidding\' atau \'Boy!\'.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '7',
+                'prompt' => '[Interjection - Latihan #7] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Sangat mengejutkan, senyawa kimia tersebut bereaksi spontan pada suhu kamar." (Target: Surprisingly (Academic Stance Adverb))',
+                'id_sentence' => 'Sangat mengejutkan, senyawa kimia tersebut bereaksi spontan pada suhu kamar.',
+                'target_word' => 'Surprisingly (Academic Stance Adverb)',
+                'options' => [
+                    'Surprisingly, the chemical compound reacted spontaneously under ambient temperature.',
+                    'Good heavens, the chemical compound reacted spontaneously under ambient temperature.',
+                    'Holy cow, the chemical compound reacted spontaneously under ambient temperature.',
+                    'Whoa, the chemical compound reacted spontaneously under ambient temperature.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Surprisingly\' menyajikan temuan mengejutkan secara formal tanpa menggunakan idiom seruan ekspresif.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '8',
+                'prompt' => '[Interjection - Latihan #8] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Patut disayangkan, data dari uji coba tahap kedua tidak dapat diverifikasi secara independen." (Target: Lamentably (Academic Stance Adverb))',
+                'id_sentence' => 'Patut disayangkan, data dari uji coba tahap kedua tidak dapat diverifikasi secara independen.',
+                'target_word' => 'Lamentably (Academic Stance Adverb)',
+                'options' => [
+                    'Lamentably, data from the secondary trial could not be independently verified.',
+                    'Alas, data from the secondary trial could not be independently verified.',
+                    'Bummer, data from the secondary trial could not be independently verified.',
+                    'Darn, data from the secondary trial could not be independently verified.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Lamentably\' adalah kosa kata akademik berbobot tinggi untuk menyatakan penyesalan metodologis.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '9',
+                'prompt' => '[Interjection - Latihan #9] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Secara tak terduga, perlakuan panas ringan justru meningkatkan ketahanan material secara signifikan." (Target: Unexpectedly (Academic Stance Adverb))',
+                'id_sentence' => 'Secara tak terduga, perlakuan panas ringan justru meningkatkan ketahanan material secara signifikan.',
+                'target_word' => 'Unexpectedly (Academic Stance Adverb)',
+                'options' => [
+                    'Unexpectedly, mild heat treatment significantly improved the material\'s durability.',
+                    'Look here, mild heat treatment significantly improved the material\'s durability.',
+                    'Lo and behold, mild heat treatment significantly improved the material\'s durability.',
+                    'Aha, mild heat treatment significantly improved the material\'s durability.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Unexpectedly\' adalah istilah formal objektif yang menghindari ungkapan kolokial \'Lo and behold\'.'
+            ],
+            [
+                'sub_lesson' => 'Interjection',
+                'sub_lesson_slug' => 'interjection',
+                'number' => '10',
+                'prompt' => '[Interjection - Latihan #10] Terjemahkan kalimat bahasa Indonesia berikut ke bahasa Inggris akademik yang akurat: "Terbukti secara meyakinkan bahwa intervensi nutrisi dini mengurangi risiko stunting pada anak." (Target: Conclusively (Academic Stance Adverb))',
+                'id_sentence' => 'Terbukti secara meyakinkan bahwa intervensi nutrisi dini mengurangi risiko stunting pada anak.',
+                'target_word' => 'Conclusively (Academic Stance Adverb)',
+                'options' => [
+                    'Conclusively, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                    'Eureka, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                    'Hooray, early nutritional intervention substantially lowers the risk of childhood stunting.',
+                    'Aha, early nutritional intervention substantially lowers the risk of childhood stunting.'
+                ],
+                'correct_index' => 0,
+                'explanation' => '\'Conclusively\' adalah adverb kesimpulan akademik formal, menggantikan seruan penemuan seperti \'Eureka\'.'
+            ]
+        ];
+
+        if (class_exists(\App\Services\SelfStudyPartsOfSpeechHelpers::class)) {
+            $subLessonsData = \App\Services\SelfStudyPartsOfSpeechHelpers::attachHelpers($subLessonsData);
+        }
+
+        return [
+            'banner_title' => 'Parts of Speech & Word Class Identification',
+            'banner_subtitle' => 'Identifikasi kelas kata (word classes), fungsi sintaksis, dan kaidah derivasi morfemis dalam kalimat akademik formal dengan 8 sub-lesson interaktif.',
+            'banner_badge' => 'MODULE 1.1 FOUNDATIONS',
+            'sub_lessons' => $subLessonsData,
+            'study_guide' => [
+                'concept_title' => 'Konsep Dasar: Parts of Speech dalam Penulisan Akademis',
+                'concept_summary' => 'Dalam penulisan formal dan akademik (seperti IELTS, TOEFL, SAT, dan jurnal ilmiah), ketepatan pemilihan kelas kata (Parts of Speech) menentukan kejelasan argumen. Kesalahan umum sering terjadi pada pemilihan bentuk kata turunan (word family derivation) seperti tertukarnya Noun, Adjective, Verb, atau Adverb.',
+                'rules' => [
+                    [
+                        'rule_title' => '1. Noun (Nomina / Kata Benda)',
+                        'rule_formula' => 'Root + (-tion, -ment, -ity, -ance/-ence, -ness, -ism, -ology) ➔ Academic Noun',
+                        'rule_description' => 'Noun bertindak sebagai Subjek, Objek Langsung/Tak Langsung, atau Objek Preposisi. Dalam penulisan akademis, Noun sering kali berbentuk Abstract Noun atau Nominal Compound untuk memadatkan informasi (syntactic density).',
+                        'examples' => [
+                            [
+                                'en' => 'The implementation of rigorous methodology ensures experimental validity.',
+                                'id' => 'Penerapan metodologi yang ketat menjamin validitas eksperimental.',
+                                'note' => '"implementation" = Subject (Noun), "validity" = Direct Object (Noun).'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '2. Pronoun (Pronomina / Kata Ganti)',
+                        'rule_formula' => 'Personal (they, it) | Relative (which, that, who) | Demonstrative (this, these) | Indefinite (each, neither)',
+                        'rule_description' => 'Pronoun menggantikan Noun untuk mencegah repetisi berlebih. Dalam penulisan formal, pastikan Pronoun-Antecedent Agreement selaras dalam hal gender, jumlah (singular/plural), dan jarak acuan yang jelas (unambiguous referent).',
+                        'examples' => [
+                            [
+                                'en' => 'Neither the principal investigator nor the assistants relinquished their data.',
+                                'id' => 'Baik peneliti utama maupun para asisten tidak menyerahkan data mereka.',
+                                'note' => '"their" merujuk secara akurat ke anteseden jamak terdekat "assistants".'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '3. Verb (Verba / Kata Kerja)',
+                        'rule_formula' => 'Action Verbs (examine, establish) | Stative/Linking Verbs (seem, remain, indicate)',
+                        'rule_description' => 'Verb adalah inti fungsional dari setiap klausa independen (Finite Predicate). Penulisan akademis menuntut pemilihan kata kerja berdaya ungkapan kuat (reporting verbs seperti: hypothesize, elucidate, corroborate) ketimbang phrasal verbs informal.',
+                        'examples' => [
+                            [
+                                'en' => 'The empirical evidence corroborates the initial hypothesis.',
+                                'id' => 'Bukti empiris menguatkan hipotesis awal.',
+                                'note' => '"corroborates" = Active Finite Verb tunggal yang mempredikasi subjek "evidence".'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '4. Adjective (Adjektiva / Kata Sifat)',
+                        'rule_formula' => 'Attributive: [Determiner] + ADJECTIVE + [Noun] | Predicative: [Subject] + [Linking Verb] + ADJECTIVE',
+                        'rule_description' => 'Adjective memberikan atribut, membatasi lingkup, atau mengukur karakteristik kata benda. Akhiran umum mencakup -al, -ic, -ive, -able, -ous, -ary.',
+                        'examples' => [
+                            [
+                                'en' => 'The preliminary findings remain inconclusive.',
+                                'id' => 'Temuan awal masih belum meyakinkan.',
+                                'note' => '"preliminary" = Attributive Adjective; "inconclusive" = Predicative Adjective setelah linking verb "remain".'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '5. Adverb (Adverbia / Kata Keterangan)',
+                        'rule_formula' => 'Adverb + Adjective | Adverb + Verb | Adverb + Clause (Sentence Adverb)',
+                        'rule_description' => 'Adverb menerangkan kata kerja, kata sifat, atau seluruh kalimat (stance adverbs seperti: inevitably, substantially, conversely). Adverb TIDAK PERNAH menerangkan kata benda secara langsung.',
+                        'examples' => [
+                            [
+                                'en' => 'The algorithm performed exceptionally well under constrained bandwidth.',
+                                'id' => 'Algoritma tersebut berkinerja luar biasa baik di bawah bandwidth terbatas.',
+                                'note' => '"exceptionally" (Adv of degree) menerangkan adverb "well", yang menerangkan kata kerja "performed".'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '6. Preposition (Preposisi / Kata Depan)',
+                        'rule_formula' => 'Preposition + Noun Phrase / Gerund ➔ Prepositional Phrase (Adverbial / Adjectival)',
+                        'rule_description' => 'Preposisi (in, on, at, with, through, despite, according to) menghubungkan nomina dengan elemen kalimat lain guna menunjukkan relasi ruang, waktu, kausalitas, atau instrumen.',
+                        'examples' => [
+                            [
+                                'en' => 'In accordance with ethical guidelines, participants were anonymized.',
+                                'id' => 'Sesuai dengan pedoman etika, identitas partisipan dianonimkan.',
+                                'note' => '"In accordance with" = Complex Preposition yang membuka frase adverbial.'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '7. Conjunction (Konjungsi / Kata Sambung)',
+                        'rule_formula' => 'Coordinating (and, but, or) | Subordinating (because, although) | Correlative (both...and)',
+                        'rule_description' => 'Konjungsi menyatukan kata, frasa, atau klausa. Dalam kalimat tunggal, konjungsi koordinatif seperti "and" menggabungkan dua unsur gramatikal yang setara tanpa membentuk klausa majemuk baru.',
+                        'examples' => [
+                            [
+                                'en' => 'The government and private corporations fund medical research.',
+                                'id' => 'Pemerintah dan perusahaan swasta mendanai riset medis.',
+                                'note' => '"and" = Coordinating Conjunction yang menghubungkan dua kata benda subjek dalam satu kalimat tunggal.'
+                            ],
+                        ],
+                    ],
+                    [
+                        'rule_title' => '8. Interjection (Interjeksi / Kata Seru)',
+                        'rule_formula' => 'Exclamatory markers (e.g., Oh, Alas, Wow, Hark!) ➔ Menunjukkan luapan emosi spontan',
+                        'rule_description' => 'Interjection digunakan dalam percakapan informal, sastra, atau drama untuk mengekspresikan keterkejutan atau emosi sesaat. Dalam penulisan akademis (IELTS, TOEFL, SAT, tesis), interjeksi WAJIB DIHINDARI agar argumen mempertahankan nada objektif dan terukur.',
+                        'examples' => [
+                            [
+                                'en' => 'Informal: "Alas, the venture collapsed." ➔ Academic: "Regrettably, the venture ceased operations."',
+                                'id' => 'Alihkan interjeksi emosional ke adverbial stance yang formal seperti "Regrettably" atau "Unfortunately".',
+                                'note' => 'Academic writing mengutamakan register formal bebas kata seru.'
+                            ],
+                        ],
+                    ],
+                ],
+                'contrast_table' => [
+                    'headers' => ['Kelas Kata (Part of Speech)', 'Fungsi Sintaksis Utama', 'Ciri & Contoh Derivasi', 'Contoh Penggunaan Akademik'],
+                    'rows' => [
+                        ['1. Noun', 'Subjek / Objek kalimat', 'Suffix: -tion, -ment, -ity, -ance', 'The validation was successful.'],
+                        ['2. Pronoun', 'Pengganti Noun (antecedent)', 'Personal, Relative, Demonstrative', 'Participants submitted their consent.'],
+                        ['3. Verb', 'Inti predikat (aksi/kondisi)', 'Suffix: -ize, -ate, -ify, -en', 'The data corroborates the claim.'],
+                        ['4. Adjective', 'Penerang Nomina / Pelengkap', 'Suffix: -ive, -al, -ic, -able', 'A comprehensive literature review.'],
+                        ['5. Adverb', 'Penerang Verb / Adj / Klausa', 'Suffix: -ly, -ward, -wise', 'Results fluctuated unpredictably.'],
+                        ['6. Preposition', 'Menghubungkan frasa nomina', 'in, on, under, despite, through', 'Consistent with prior findings.'],
+                        ['7. Conjunction', 'Menghubungkan klausa / kata', 'and, but, although, whereas', 'Whereas the cost rose, quality fell.'],
+                        ['8. Interjection', 'Ekspresi emosi spontan', 'Ouch, Alas, Wow (Hindari di esai)', 'Digantikan formal stance adverb.'],
+                    ],
+                ],
+                'common_pitfalls' => [
+                    [
+                        'incorrect' => 'The economy growth was dramatic fast.',
+                        'correct' => 'The economic growth was dramatically fast.',
+                        'explanation' => 'Gunakan "economic" (Adjective) untuk menerangkan "growth" (Noun), dan "dramatically" (Adverb) untuk menerangkan "fast" (Adjective).'
+                    ],
+                    [
+                        'incorrect' => 'The committee reached an agree after deliberation.',
+                        'correct' => 'The committee reached an agreement after deliberation.',
+                        'explanation' => 'Setelah artikel "an", posisi objek membutuhkan Noun ("agreement"), bukan Verb dasar ("agree").'
+                    ],
+                    [
+                        'incorrect' => 'Alas, the test specimen deteriorated due to heat.',
+                        'correct' => 'Regrettably, the test specimen deteriorated due to thermal exposure.',
+                        'explanation' => 'Hindari interjeksi "Alas" dalam esai ilmiah; ganti dengan formal disjunct adverb seperti "Regrettably".'
+                    ],
+                    [
+                        'incorrect' => 'The scientist who they discovered the vaccine won an award.',
+                        'correct' => 'The scientists who discovered the vaccine were awarded recognition.',
+                        'explanation' => 'Double pronoun subject: jangan memasukkan "they" setelah relative pronoun "who".'
+                    ],
+                ],
+                'exam_tips' => [
+                    'Identifikasi posisi kata terlebih dahulu: Jika diapit artikel (a/an/the) dan kata depan (of/in), kata tersebut 95% adalah Noun.',
+                    'Kata berakhiran -ly tidak selalu adverb (misal: "friendly", "costly", "orderly" adalah Adjective). Selalu cek fungsi sintaksisnya.',
+                    'Pada Academic Task 2 dan SAT Reading, perhatikan konsistensi kelas kata dalam struktur paralel (Parallelism).',
                     'Ingat 8 kelas kata: Noun, Pronoun, Verb, Adjective, Adverb, Preposition, Conjunction, dan Interjection.'
                 ],
             ],

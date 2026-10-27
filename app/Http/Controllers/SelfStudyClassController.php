@@ -13,6 +13,15 @@ use Illuminate\Support\Str;
 class SelfStudyClassController extends Controller
 {
     /**
+     * 'A' (everyday A1-A2-to-B1-B2) or 'B' (B1-C2 advanced), resolved once in
+     * player() from the student's self-study grammar placement result and
+     * read by getSampleScenarios()/getNetAcadScenarios() for every topic in
+     * the curriculum, so it doesn't need threading through buildCurriculum()'s
+     * many per-topic calls.
+     */
+    protected string $selfStudyMode = 'A';
+
+    /**
      * Display a listing of Self-Study Classes.
      */
     public function index(Request $request)
@@ -99,6 +108,32 @@ class SelfStudyClassController extends Controller
      */
     public function player(Request $request, string $course, $module = null, $topic = null)
     {
+        if ($course === 'grammar-for-writing') {
+            $modeOverride = auth()->user()?->self_study_grammar_mode_override;
+
+            if ($modeOverride) {
+                // Admin-forced mode (see Admin > Mode Self-Study Grammar) skips the
+                // placement test entirely - the student goes straight into the course.
+                $this->selfStudyMode = $modeOverride;
+            } else {
+                $packageId = \App\Models\Setting::where('key', 'self_study_grammar_placement_package_id')->value('value');
+
+                $placementResult = $packageId
+                    ? \App\Models\GrammarPlacementResult::where('user_id', auth()->id())
+                        ->where('grammar_placement_package_id', $packageId)
+                        ->latest('id')
+                        ->first()
+                    : null;
+
+                if (!$placementResult) {
+                    return redirect()->route('self-study-classes.placement.show');
+                }
+
+                $this->selfStudyMode = app(\App\Application\GrammarPlacement\ResolveSelfStudyGrammarMode::class)
+                    ->resolve((float) $placementResult->percentage);
+            }
+        }
+
         $curriculum = $this->buildCurriculum($course);
 
         // Determine active module and topic
@@ -139,9 +174,19 @@ class SelfStudyClassController extends Controller
         $prevTopic = $currentIndex > 0 ? $flatTopics[$currentIndex - 1] : null;
         $nextTopic = $currentIndex < count($flatTopics) - 1 ? $flatTopics[$currentIndex + 1] : null;
 
-        $sessionKey = "self_study_draft_{$course}_{$activeModuleKey}_{$activeTopicKey}";
-        $draftAnswers = session("{$sessionKey}_answers", []);
-        $draftSubmitted = session("{$sessionKey}_submitted", []);
+        // Persisted in the database (not the PHP session) so progress survives
+        // session expiry and is available consistently across browsers/devices
+        // for the same account, instead of silently reverting to stale/blank
+        // content whenever the session lapses.
+        $draft = auth()->check()
+            ? \App\Models\SelfStudyDraft::where('user_id', auth()->id())
+                ->where('course', $course)
+                ->where('module', $activeModuleKey)
+                ->where('topic', $activeTopicKey)
+                ->first()
+            : null;
+        $draftAnswers = $draft->answers ?? [];
+        $draftSubmitted = $draft->submitted ?? [];
 
         $isAdmin = auth()->check() && (
             (method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin()) ||
@@ -409,18 +454,28 @@ class SelfStudyClassController extends Controller
      */
     public function saveDraft(Request $request): \Illuminate\Http\JsonResponse
     {
+        if (!auth()->check()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
         $course = $request->input('course', 'grammar-for-writing');
         $module = $request->input('module', 'm1');
         $topic = $request->input('topic', 't1');
         $answers = $request->input('answers', []);
         $submitted = $request->input('submitted', []);
 
-        $sessionKey = "self_study_draft_{$course}_{$module}_{$topic}";
-        session([
-            "{$sessionKey}_answers" => is_array($answers) ? $answers : [],
-            "{$sessionKey}_submitted" => is_array($submitted) ? $submitted : [],
-        ]);
-        session()->save();
+        \App\Models\SelfStudyDraft::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'course' => $course,
+                'module' => $module,
+                'topic' => $topic,
+            ],
+            [
+                'answers' => is_array($answers) ? $answers : [],
+                'submitted' => is_array($submitted) ? $submitted : [],
+            ]
+        );
 
         return response()->json(['success' => true]);
     }
@@ -1080,7 +1135,7 @@ PROMPT;
      */
     protected function getNetAcadScenarios(string $topicTitle): array
     {
-        return app(\App\Services\SelfStudyContentService::class)->getTopicPackage($topicTitle, $topicTitle);
+        return app(\App\Services\SelfStudyContentService::class)->getTopicPackage($topicTitle, $topicTitle, [], $this->selfStudyMode);
     }
 
     /**
@@ -1088,6 +1143,6 @@ PROMPT;
      */
     protected function getSampleScenarios(string $seed, string $topicTitle = '', array $meta = []): array
     {
-        return app(\App\Services\SelfStudyContentService::class)->getTopicPackage($seed, $topicTitle, $meta);
+        return app(\App\Services\SelfStudyContentService::class)->getTopicPackage($seed, $topicTitle, $meta, $this->selfStudyMode);
     }
 }

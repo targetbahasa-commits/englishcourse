@@ -30,7 +30,7 @@ class SelfStudyPresentContinuousData
 
         return [
             'banner_title' => 'Present Continuous Tense (Verbal & Passive)',
-            'banner_subtitle' => 'Kuasai cara menyatakan hal yang sedang terjadi sekarang (is/are + V-ing), hal yang sedang dikerjakan orang lain (is/are being + V3), perbedaan kebiasaan rutin vs kejadian sementara, serta kata kerja yang tidak boleh memakai bentuk -ing.',
+            'banner_subtitle' => 'Kuasai cara menyatakan hal yang sedang berlangsung saat ini (is/are + V-ing), proses yang sedang dikerjakan pihak lain (is/are being + V3), kontras rutinitas vs situasi sementara, serta kata kerja yang tidak boleh memakai bentuk -ing.',
             'banner_badge' => 'MODULE 1.9 PRESENT CONTINUOUS TENSE',
             'sub_lessons' => $subLessons,
             'study_guide' => self::getStudyGuide(),
@@ -45,17 +45,17 @@ class SelfStudyPresentContinuousData
     {
         return [
             'concept_title' => 'Panduan Lengkap Present Continuous Tense: Bentuk Verbal & Pasif',
-            'concept_summary' => 'Present Continuous Tense dipakai untuk menyatakan hal yang sedang terjadi sekarang, tepat pada saat kita berbicara, atau hal sementara yang sedang berlangsung dalam periode belakangan ini. Dua pola utamanya adalah Bentuk Verbal Aktif (is/am/are + V-ing), untuk subjek yang melakukan sesuatu, dan Bentuk Pasif (is/am/are + being + V3), untuk sesuatu yang sedang dikerjakan oleh orang lain.',
+            'concept_summary' => 'Present Continuous Tense dipakai untuk menyatakan hal yang sedang berlangsung saat ini, tepat pada saat kita berbicara, atau situasi sementara yang sedang berjalan dalam periode belakangan ini. Dua pola utamanya adalah Bentuk Verbal Aktif (is/am/are + V-ing), untuk subjek yang sedang melakukan sesuatu, dan Bentuk Pasif (is/am/are + being + V3), untuk sesuatu yang sedang dikerjakan oleh pihak lain.',
             'rules' => [
                 [
-                    'rule_title' => '1. Bentuk Verbal Aktif: Hal yang Sedang Terjadi Sekarang',
+                    'rule_title' => '1. Bentuk Verbal Aktif: Hal yang Sedang Berlangsung Sekarang',
                     'rule_formula' => 'Subject + am/is/are + Verb-ing + Pelengkap',
-                    'rule_description' => 'Digunakan ketika subjek sedang melakukan sesuatu tepat saat ini. "is" untuk subjek tunggal (he, she, it, nama benda tunggal), "are" untuk subjek jamak (they, we, nama benda jamak), dan "am" untuk subjek I.',
+                    'rule_description' => 'Digunakan ketika subjek sedang melakukan sesuatu tepat saat ini. "is" untuk subjek tunggal, "are" untuk subjek jamak, dan "am" untuk subjek I.',
                     'examples' => [
                         [
-                            'en' => 'My sister is washing the dishes in the kitchen.',
-                            'id' => 'Kakak perempuan saya sedang mencuci piring di dapur.',
-                            'note' => 'Subjek tunggal "My sister" menggunakan to be "is" + V-ing "washing".'
+                            'en' => 'The technician is currently repairing the printer in the office.',
+                            'id' => 'Teknisi itu sedang memperbaiki printer di kantor.',
+                            'note' => 'Subjek tunggal "The technician" menggunakan to be "is" + V-ing "repairing".'
                         ]
                     ]
                 ],
@@ -65,8 +65,8 @@ class SelfStudyPresentContinuousData
                     'rule_description' => 'Kata kerja perubahan seperti get, grow, change, improve, increase, dan decrease dipadukan dengan continuous tense untuk menggambarkan sesuatu yang sedang berlangsung dan belum selesai.',
                     'examples' => [
                         [
-                            'en' => 'The weather is getting colder this week.',
-                            'id' => 'Cuaca sedang menjadi lebih dingin minggu ini.',
+                            'en' => 'Sales are steadily increasing this month.',
+                            'id' => 'Penjualan terus meningkat secara stabil bulan ini.',
                             'note' => 'Menunjukkan perubahan yang sedang berlangsung, belum berakhir.'
                         ]
                     ]
@@ -74,24 +74,24 @@ class SelfStudyPresentContinuousData
                 [
                     'rule_title' => '3. Bentuk Pasif: Sesuatu yang Sedang Dikerjakan (is/are + being + V3)',
                     'rule_formula' => 'Subject (penerima) + am/is/are + being + Verb 3 (Past Participle)',
-                    'rule_description' => 'Dipakai saat fokus kalimat adalah benda atau orang yang SEDANG dikerjakan/diurus, bukan siapa yang mengerjakannya. Kata "being" wajib ada di antara to be dan V3.',
+                    'rule_description' => 'Dipakai saat fokus kalimat adalah benda atau proses yang SEDANG dikerjakan/diurus, bukan siapa yang mengerjakannya. Kata "being" wajib ada di antara to be dan V3.',
                     'examples' => [
                         [
-                            'en' => 'Dinner is being cooked right now.',
-                            'id' => 'Makan malam sedang dimasak sekarang.',
-                            'note' => 'Bandingkan: "is cooked" (fakta biasa) vs "is being cooked" (sedang berlangsung sekarang).'
+                            'en' => 'The new policy is being reviewed by the management team right now.',
+                            'id' => 'Kebijakan baru itu sedang ditinjau oleh tim manajemen sekarang.',
+                            'note' => 'Bandingkan: "is reviewed" (fakta biasa) vs "is being reviewed" (sedang berlangsung sekarang).'
                         ]
                     ]
                 ],
                 [
-                    'rule_title' => '4. Kebiasaan Rutin (Simple Present) vs Kejadian Sementara (Continuous)',
+                    'rule_title' => '4. Kebiasaan Rutin (Simple Present) vs Situasi Sementara (Continuous)',
                     'rule_formula' => 'Rutin: Subject + V1/V-s | Sementara: Subject + is/are + V-ing',
-                    'rule_description' => 'Gunakan Simple Present untuk kebiasaan atau fakta sehari-hari. Gunakan Present Continuous bila hal itu hanya terjadi sekarang/hari ini/minggu ini, biasanya ditandai kata seperti "today, right now, this week, at the moment".',
+                    'rule_description' => 'Gunakan Simple Present untuk kebiasaan atau fakta sehari-hari. Gunakan Present Continuous bila hal itu hanya berlaku sekarang/hari ini/minggu ini, biasanya ditandai kata seperti "today, right now, this week, at the moment".',
                     'examples' => [
                         [
-                            'en' => 'She usually walks to school, but today she is taking the bus.',
-                            'id' => 'Dia biasanya berjalan kaki ke sekolah, tapi hari ini dia naik bus.',
-                            'note' => '"usually walks" = kebiasaan, "is taking" = kejadian khusus hari ini.'
+                            'en' => 'She usually commutes by train, but this week she is driving to work.',
+                            'id' => 'Dia biasanya naik kereta, tapi minggu ini dia berkendara ke kantor.',
+                            'note' => '"usually commutes" = kebiasaan, "is driving" = situasi khusus minggu ini.'
                         ]
                     ]
                 ],
@@ -101,8 +101,8 @@ class SelfStudyPresentContinuousData
                     'rule_description' => 'Kata kerja yang menyatakan perasaan, pikiran, kepemilikan, atau isi (misalnya: understand, believe, have, like, want, need, know, contain, belong) TIDAK memakai bentuk -ing, walaupun maknanya tentang "sekarang".',
                     'examples' => [
                         [
-                            'en' => 'I understand the lesson now. (BUKAN: I am understanding the lesson now.)',
-                            'id' => 'Saya mengerti pelajaran ini sekarang.',
+                            'en' => 'I understand the proposal now. (BUKAN: I am understanding the proposal now.)',
+                            'id' => 'Saya memahami proposal itu sekarang.',
                             'note' => '"understand" adalah kata kerja perasaan/pikiran, tidak punya bentuk -ing.'
                         ]
                     ]
@@ -113,8 +113,8 @@ class SelfStudyPresentContinuousData
                     'rule_description' => 'Untuk kalimat negatif, letakkan "not" tepat setelah to be (is not / are not). Untuk kalimat tanya, pindahkan to be ke depan kalimat, sebelum subjek.',
                     'examples' => [
                         [
-                            'en' => 'The children are not sleeping yet.',
-                            'id' => 'Anak-anak belum sedang tidur.',
+                            'en' => 'The vendors are not responding to the new regulation yet.',
+                            'id' => 'Para pedagang belum menanggapi peraturan baru itu.',
                             'note' => 'Bentuk negatif: are + not + V-ing.'
                         ]
                     ]
@@ -122,11 +122,11 @@ class SelfStudyPresentContinuousData
                 [
                     'rule_title' => '7. Kata Keterangan Waktu Bersama Continuous Tense',
                     'rule_formula' => 'right now, at the moment, today, currently, these days',
-                    'rule_description' => 'Kata keterangan waktu ini biasa diletakkan di antara to be dan kata kerja utama (misalnya: "is currently reading") atau di awal kalimat ("Right now, she is cooking...") untuk memperjelas bahwa hal itu terjadi saat ini.',
+                    'rule_description' => 'Kata keterangan waktu ini biasa diletakkan di antara to be dan kata kerja utama (misalnya: "is currently reviewing") atau di awal kalimat ("Right now, the team is...") untuk memperjelas bahwa hal itu berlaku saat ini.',
                     'examples' => [
                         [
-                            'en' => 'Right now, Dad is fixing the bicycle in the garage.',
-                            'id' => 'Sekarang, Ayah sedang memperbaiki sepeda di garasi.',
+                            'en' => 'Right now, the maintenance crew is inspecting the elevator.',
+                            'id' => 'Sekarang, tim perawatan sedang memeriksa lift.',
                             'note' => '"Right now" diletakkan di awal kalimat untuk menegaskan waktu kejadian.'
                         ]
                     ]
@@ -134,12 +134,12 @@ class SelfStudyPresentContinuousData
                 [
                     'rule_title' => '8. Menggabungkan Dua Kejadian yang Sedang Berlangsung Bersamaan',
                     'rule_formula' => 'While/Because/As + Klausa 1 (Continuous) + Koma + Klausa 2 (Continuous)',
-                    'rule_description' => 'Gunakan kata sambung seperti "while" (sementara/selagi) atau "because"/"as" (karena) untuk menghubungkan dua hal yang sedang terjadi pada waktu yang sama.',
+                    'rule_description' => 'Gunakan kata sambung seperti "while" (sementara/selagi) atau "because"/"as" (karena) untuk menghubungkan dua hal yang sedang berlangsung pada waktu yang sama.',
                     'examples' => [
                         [
-                            'en' => 'While Mom is cooking, Dad is setting the table.',
-                            'id' => 'Sementara Ibu sedang memasak, Ayah sedang menyiapkan meja makan.',
-                            'note' => 'Dua klausa continuous digabung dengan "while" karena terjadi bersamaan.'
+                            'en' => 'While the contractor is renovating the lobby, the staff are working from the second floor.',
+                            'id' => 'Sementara kontraktor sedang merenovasi lobi, staf sedang bekerja di lantai dua.',
+                            'note' => 'Dua klausa continuous digabung dengan "while" karena berlangsung bersamaan.'
                         ]
                     ]
                 ]
@@ -156,9 +156,9 @@ class SelfStudyPresentContinuousData
             // Sub-Lesson 1.9.1
             [
                 'id' => 'present-continuous-verbal',
-                'name' => '1.9.1 Present Continuous Verbal: Hal yang Sedang Terjadi Sekarang',
+                'name' => '1.9.1 Present Continuous Verbal: Hal yang Sedang Berlangsung Sekarang',
                 'code' => '1.9.1',
-                'concept_title' => 'Present Continuous Verbal: Hal yang Sedang Terjadi Sekarang',
+                'concept_title' => 'Present Continuous Verbal: Hal yang Sedang Berlangsung Sekarang',
                 'concept_description' => 'Present Continuous Verbal digunakan untuk menyatakan sesuatu yang sedang aktif dilakukan subjek tepat saat ini. Bentuknya adalah to be (am/is/are) yang sesuai dengan subjek, diikuti kata kerja berakhiran -ing.',
                 'description' => 'Present Continuous Verbal digunakan untuk menyatakan sesuatu yang sedang aktif dilakukan subjek tepat saat ini. Bentuknya adalah to be (am/is/are) yang sesuai dengan subjek, diikuti kata kerja berakhiran -ing.',
                 'formula' => 'Subject + am/is/are + Verb-ing + Objek / Keterangan',
@@ -171,118 +171,118 @@ class SelfStudyPresentContinuousData
                 'exercises' => [
                     [
                         'id' => 1,
-                        'id_sentence' => 'Kakak laki-laki saya sedang mencuci mobil di halaman depan.',
-                        'target_word' => 'is washing (Present Continuous Verbal)',
+                        'id_sentence' => 'Teknisi itu sedang memperbaiki printer kantor yang macet sejak pagi.',
+                        'target_word' => 'is repairing (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'older brother', 'id' => 'kakak laki-laki'],
-                            ['en' => 'front yard', 'id' => 'halaman depan'],
-                            ['en' => 'washing the car', 'id' => 'mencuci mobil']
+                            ['en' => 'technician', 'id' => 'teknisi'],
+                            ['en' => 'office printer', 'id' => 'printer kantor'],
+                            ['en' => 'repairing', 'id' => 'memperbaiki']
                         ],
                         'options' => [
-                            'My older brother is washing the car in the front yard.',
-                            'My older brother are washing the car in the front yard.',
-                            'My older brother is wash the car in the front yard.',
-                            'My older brother washing the car in the front yard.'
+                            'The technician is repairing the office printer that has been jammed since morning.',
+                            'The technician are repairing the office printer that has been jammed since morning.',
+                            'The technician is repair the office printer that has been jammed since morning.',
+                            'The technician repairing the office printer that has been jammed since morning.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "My older brother" membutuhkan to be "is" diikuti V-ing "washing".'
+                        'explanation' => 'Subjek tunggal "The technician" membutuhkan to be "is" diikuti V-ing "repairing".'
                     ],
                     [
                         'id' => 2,
-                        'id_sentence' => 'Ibu saya sedang memasak nasi goreng untuk sarapan.',
-                        'target_word' => 'is cooking (Present Continuous Verbal)',
+                        'id_sentence' => 'Manajer proyek sedang menyusun anggaran untuk kuartal berikutnya.',
+                        'target_word' => 'is preparing (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'my mother', 'id' => 'ibu saya'],
-                            ['en' => 'fried rice', 'id' => 'nasi goreng'],
-                            ['en' => 'breakfast', 'id' => 'sarapan']
+                            ['en' => 'project manager', 'id' => 'manajer proyek'],
+                            ['en' => 'budget', 'id' => 'anggaran'],
+                            ['en' => 'next quarter', 'id' => 'kuartal berikutnya']
                         ],
                         'options' => [
-                            'My mother is cooking fried rice for breakfast.',
-                            'My mother are cooking fried rice for breakfast.',
-                            'My mother is cook fried rice for breakfast.',
-                            'My mother cooking fried rice for breakfast.'
+                            'The project manager is preparing the budget for next quarter.',
+                            'The project manager are preparing the budget for next quarter.',
+                            'The project manager is prepare the budget for next quarter.',
+                            'The project manager preparing the budget for next quarter.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "My mother" berpasangan dengan "is cooking".'
+                        'explanation' => 'Subjek tunggal "The project manager" berpasangan dengan "is preparing".'
                     ],
                     [
                         'id' => 3,
-                        'id_sentence' => 'Guru itu sedang menjelaskan pelajaran matematika kepada murid-muridnya.',
+                        'id_sentence' => 'Instruktur itu sedang menjelaskan prosedur keselamatan kepada karyawan baru.',
                         'target_word' => 'is explaining (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'teacher', 'id' => 'guru'],
-                            ['en' => 'math lesson', 'id' => 'pelajaran matematika'],
-                            ['en' => 'students', 'id' => 'murid-murid']
+                            ['en' => 'instructor', 'id' => 'instruktur'],
+                            ['en' => 'safety procedure', 'id' => 'prosedur keselamatan'],
+                            ['en' => 'new employees', 'id' => 'karyawan baru']
                         ],
                         'options' => [
-                            'The teacher is explaining the math lesson to her students.',
-                            'The teacher are explaining the math lesson to her students.',
-                            'The teacher is explained the math lesson to her students.',
-                            'The teacher explaining the math lesson to her students.'
+                            'The instructor is explaining the safety procedure to the new employees.',
+                            'The instructor are explaining the safety procedure to the new employees.',
+                            'The instructor is explained the safety procedure to the new employees.',
+                            'The instructor explaining the safety procedure to the new employees.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "The teacher" berpasangan dengan "is" + V-ing "explaining".'
+                        'explanation' => 'Subjek tunggal "The instructor" berpasangan dengan "is" + V-ing "explaining".'
                     ],
                     [
                         'id' => 4,
-                        'id_sentence' => 'Anak-anak sedang bermain bola di taman dekat rumah.',
-                        'target_word' => 'are playing (Present Continuous Verbal)',
+                        'id_sentence' => 'Para relawan sedang mendistribusikan bantuan di daerah yang terdampak banjir.',
+                        'target_word' => 'are distributing (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'children', 'id' => 'anak-anak'],
-                            ['en' => 'playing ball', 'id' => 'bermain bola'],
-                            ['en' => 'park', 'id' => 'taman']
+                            ['en' => 'volunteers', 'id' => 'relawan'],
+                            ['en' => 'distributing aid', 'id' => 'mendistribusikan bantuan'],
+                            ['en' => 'flood-affected area', 'id' => 'daerah terdampak banjir']
                         ],
                         'options' => [
-                            'The children are playing ball at the park near the house.',
-                            'The children is playing ball at the park near the house.',
-                            'The children are play ball at the park near the house.',
-                            'The children playing ball at the park near the house.'
+                            'The volunteers are distributing aid in the flood-affected area.',
+                            'The volunteers is distributing aid in the flood-affected area.',
+                            'The volunteers are distribute aid in the flood-affected area.',
+                            'The volunteers distributing aid in the flood-affected area.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "The children" membutuhkan to be jamak "are" sebelum "playing".'
+                        'explanation' => 'Subjek jamak "The volunteers" membutuhkan to be jamak "are" sebelum "distributing".'
                     ],
                     [
                         'id' => 5,
-                        'id_sentence' => 'Dokter itu sedang memeriksa seorang pasien di ruang praktiknya.',
+                        'id_sentence' => 'Dokter itu sedang memeriksa seorang pasien di klinik rawat jalan.',
                         'target_word' => 'is examining (Present Continuous Verbal)',
                         'vocab' => [
                             ['en' => 'doctor', 'id' => 'dokter'],
-                            ['en' => 'patient', 'id' => 'pasien'],
+                            ['en' => 'outpatient clinic', 'id' => 'klinik rawat jalan'],
                             ['en' => 'examining', 'id' => 'memeriksa']
                         ],
                         'options' => [
-                            'The doctor is examining a patient in her office.',
-                            'The doctor are examining a patient in her office.',
-                            'The doctor is examine a patient in her office.',
-                            'The doctor has examining a patient in her office.'
+                            'The doctor is examining a patient at the outpatient clinic.',
+                            'The doctor are examining a patient at the outpatient clinic.',
+                            'The doctor is examine a patient at the outpatient clinic.',
+                            'The doctor has examining a patient at the outpatient clinic.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"The doctor" adalah subjek tunggal, maka bentuk yang tepat adalah "is examining".'
                     ],
                     [
                         'id' => 6,
-                        'id_sentence' => 'Teman-teman saya sedang mengerjakan tugas kelompok di perpustakaan.',
-                        'target_word' => 'are doing (Present Continuous Verbal)',
+                        'id_sentence' => 'Tim pemasaran sedang mengerjakan proposal untuk klien baru.',
+                        'target_word' => 'is working (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'my friends', 'id' => 'teman-teman saya'],
-                            ['en' => 'group assignment', 'id' => 'tugas kelompok'],
-                            ['en' => 'library', 'id' => 'perpustakaan']
+                            ['en' => 'marketing team', 'id' => 'tim pemasaran'],
+                            ['en' => 'proposal', 'id' => 'proposal'],
+                            ['en' => 'new client', 'id' => 'klien baru']
                         ],
                         'options' => [
-                            'My friends are doing a group assignment at the library.',
-                            'My friends is doing a group assignment at the library.',
-                            'My friends are does a group assignment at the library.',
-                            'My friends were doing a group assignment at the library.'
+                            'The marketing team is working on a proposal for a new client.',
+                            'The marketing team are working on a proposal for a new client.',
+                            'The marketing team are works on a proposal for a new client.',
+                            'The marketing team were working on a proposal for a new client.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "My friends" berpasangan dengan "are doing". Pilihan "were" salah karena merujuk masa lampau.'
+                        'explanation' => '"Team" diperlakukan sebagai subjek tunggal dalam konteks ini, sehingga menggunakan "is working". Pilihan "were" salah karena merujuk masa lampau.'
                     ],
                     [
                         'id' => 7,
-                        'id_sentence' => 'Pak RT sedang mengatur jadwal kerja bakti untuk warga.',
+                        'id_sentence' => 'Ketua RW sedang mengatur jadwal kerja bakti untuk warga kompleks.',
                         'target_word' => 'is arranging (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'neighborhood head', 'id' => 'pak RT'],
+                            ['en' => 'neighborhood head', 'id' => 'ketua RW'],
                             ['en' => 'community clean-up', 'id' => 'kerja bakti'],
                             ['en' => 'residents', 'id' => 'warga']
                         ],
@@ -297,54 +297,54 @@ class SelfStudyPresentContinuousData
                     ],
                     [
                         'id' => 8,
-                        'id_sentence' => 'Nenek sedang menanam bunga di belakang rumah.',
-                        'target_word' => 'is planting (Present Continuous Verbal)',
+                        'id_sentence' => 'Arsitek itu sedang merancang tata letak baru untuk ruang kantor.',
+                        'target_word' => 'is designing (Present Continuous Verbal)',
                         'vocab' => [
-                            ['en' => 'grandmother', 'id' => 'nenek'],
-                            ['en' => 'planting flowers', 'id' => 'menanam bunga'],
-                            ['en' => 'backyard', 'id' => 'belakang rumah']
+                            ['en' => 'architect', 'id' => 'arsitek'],
+                            ['en' => 'designing', 'id' => 'merancang'],
+                            ['en' => 'office layout', 'id' => 'tata letak kantor']
                         ],
                         'options' => [
-                            'Grandmother is planting flowers in the backyard.',
-                            'Grandmother are planting flowers in the backyard.',
-                            'Grandmother is plant flowers in the backyard.',
-                            'Grandmother being planting flowers in the backyard.'
+                            'The architect is designing a new layout for the office space.',
+                            'The architect are designing a new layout for the office space.',
+                            'The architect is design a new layout for the office space.',
+                            'The architect being designing a new layout for the office space.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "Grandmother" menggunakan "is" + V-ing "planting".'
+                        'explanation' => 'Subjek tunggal "The architect" menggunakan "is" + V-ing "designing".'
                     ],
                     [
                         'id' => 9,
-                        'id_sentence' => 'Beberapa nelayan sedang mencatat hasil tangkapan ikan hari ini.',
+                        'id_sentence' => 'Beberapa nelayan sedang mencatat hasil tangkapan untuk laporan koperasi.',
                         'target_word' => 'are recording (Present Continuous Verbal)',
                         'vocab' => [
                             ['en' => 'fishermen', 'id' => 'nelayan'],
-                            ['en' => 'catch of the day', 'id' => 'hasil tangkapan'],
-                            ['en' => 'recording', 'id' => 'mencatat']
+                            ['en' => 'catch', 'id' => 'hasil tangkapan'],
+                            ['en' => 'cooperative report', 'id' => 'laporan koperasi']
                         ],
                         'options' => [
-                            'Some fishermen are recording today\'s catch.',
-                            'Some fishermen is recording today\'s catch.',
-                            'Some fishermen are recorded today\'s catch.',
-                            'Some fishermen recording today\'s catch.'
+                            'Some fishermen are recording the catch for the cooperative report.',
+                            'Some fishermen is recording the catch for the cooperative report.',
+                            'Some fishermen are recorded the catch for the cooperative report.',
+                            'Some fishermen recording the catch for the cooperative report.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Fishermen" (jamak) berpasangan dengan "are recording".'
                     ],
                     [
                         'id' => 10,
-                        'id_sentence' => 'Petugas perpustakaan sedang menata buku-buku baru di rak.',
+                        'id_sentence' => 'Petugas perpustakaan sedang menata koleksi buku terbaru di rak referensi.',
                         'target_word' => 'is arranging (Present Continuous Verbal)',
                         'vocab' => [
                             ['en' => 'librarian', 'id' => 'petugas perpustakaan'],
-                            ['en' => 'new books', 'id' => 'buku-buku baru'],
-                            ['en' => 'shelf', 'id' => 'rak']
+                            ['en' => 'latest collection', 'id' => 'koleksi terbaru'],
+                            ['en' => 'reference shelf', 'id' => 'rak referensi']
                         ],
                         'options' => [
-                            'The librarian is arranging the new books on the shelf.',
-                            'The librarian are arranging the new books on the shelf.',
-                            'The librarian is arrange the new books on the shelf.',
-                            'The librarian arranging the new books on the shelf.'
+                            'The librarian is arranging the latest collection on the reference shelf.',
+                            'The librarian are arranging the latest collection on the reference shelf.',
+                            'The librarian is arrange the latest collection on the reference shelf.',
+                            'The librarian arranging the latest collection on the reference shelf.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Subjek tunggal "The librarian" mengambil to be "is" + V-ing "arranging".'
@@ -358,194 +358,194 @@ class SelfStudyPresentContinuousData
                 'name' => '1.9.2 Menjelaskan Sesuatu yang Sedang Berubah',
                 'code' => '1.9.2',
                 'concept_title' => 'Menjelaskan Sesuatu yang Sedang Berubah',
-                'concept_description' => 'Present Continuous juga dipakai dengan kata kerja perubahan untuk menggambarkan sesuatu yang sedang berlangsung dan belum selesai, misalnya cuaca, harga, atau pertumbuhan.',
-                'description' => 'Present Continuous juga dipakai dengan kata kerja perubahan untuk menggambarkan sesuatu yang sedang berlangsung dan belum selesai, misalnya cuaca, harga, atau pertumbuhan.',
+                'concept_description' => 'Present Continuous juga dipakai dengan kata kerja perubahan untuk menggambarkan sesuatu yang sedang berlangsung dan belum selesai, misalnya tren pasar, biaya, atau pertumbuhan suatu usaha.',
+                'description' => 'Present Continuous juga dipakai dengan kata kerja perubahan untuk menggambarkan sesuatu yang sedang berlangsung dan belum selesai, misalnya tren pasar, biaya, atau pertumbuhan suatu usaha.',
                 'formula' => 'Subject + is/are + kata kerja perubahan (-ing) + Keterangan',
                 'rules' => [
-                    'Kata kerja perubahan yang umum: get, grow, change, improve, increase, decrease, rise, fall.',
+                    'Kata kerja perubahan yang umum: get, grow, change, improve, increase, decrease, rise, fall, expand.',
                     'Perhatikan inti subjek untuk menentukan to be yang tepat.',
-                    'Bisa dipadukan dengan kata seperti "slowly, quickly, more and more" untuk memperjelas.'
+                    'Bisa dipadukan dengan kata seperti "steadily, gradually, more and more" untuk memperjelas.'
                 ],
                 'exercises' => [
                     [
                         'id' => 11,
-                        'id_sentence' => 'Harga sayuran di pasar sedang naik akhir-akhir ini.',
+                        'id_sentence' => 'Harga bahan bangunan sedang naik akhir-akhir ini karena permintaan tinggi.',
                         'target_word' => 'is rising (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'vegetable prices', 'id' => 'harga sayuran'],
-                            ['en' => 'market', 'id' => 'pasar'],
-                            ['en' => 'rising', 'id' => 'naik']
+                            ['en' => 'construction materials', 'id' => 'bahan bangunan'],
+                            ['en' => 'rising', 'id' => 'naik'],
+                            ['en' => 'high demand', 'id' => 'permintaan tinggi']
                         ],
                         'options' => [
-                            'Vegetable prices at the market are rising these days.',
-                            'Vegetable prices at the market is rising these days.',
-                            'Vegetable prices at the market are rise these days.',
-                            'Vegetable prices at the market rising these days.'
+                            'The price of construction materials is rising these days due to high demand.',
+                            'The price of construction materials are rising these days due to high demand.',
+                            'The price of construction materials is rise these days due to high demand.',
+                            'The price of construction materials rising these days due to high demand.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek "prices" berbentuk jamak, sehingga memerlukan "are rising".'
+                        'explanation' => 'Inti subjek "price" (tunggal), sehingga memerlukan "is rising".'
                     ],
                     [
                         'id' => 12,
-                        'id_sentence' => 'Adik saya sedang tumbuh semakin tinggi setiap bulan.',
+                        'id_sentence' => 'Perusahaan itu sedang berkembang pesat setelah membuka cabang baru.',
                         'target_word' => 'is growing (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'younger sibling', 'id' => 'adik'],
-                            ['en' => 'growing taller', 'id' => 'tumbuh semakin tinggi'],
-                            ['en' => 'every month', 'id' => 'setiap bulan']
+                            ['en' => 'company', 'id' => 'perusahaan'],
+                            ['en' => 'growing rapidly', 'id' => 'berkembang pesat'],
+                            ['en' => 'new branch', 'id' => 'cabang baru']
                         ],
                         'options' => [
-                            'My younger sibling is growing taller every month.',
-                            'My younger sibling are growing taller every month.',
-                            'My younger sibling is grow taller every month.',
-                            'My younger sibling growing taller every month.'
+                            'The company is growing rapidly after opening a new branch.',
+                            'The company are growing rapidly after opening a new branch.',
+                            'The company is grow rapidly after opening a new branch.',
+                            'The company growing rapidly after opening a new branch.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "My younger sibling" berpasangan dengan "is growing".'
+                        'explanation' => 'Subjek tunggal "The company" berpasangan dengan "is growing".'
                     ],
                     [
                         'id' => 13,
-                        'id_sentence' => 'Nilai bahasa Inggris Rani sedang membaik setelah ia rajin belajar.',
+                        'id_sentence' => 'Kinerja tim penjualan sedang membaik setelah pelatihan intensif bulan lalu.',
                         'target_word' => 'is improving (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'English grade', 'id' => 'nilai bahasa Inggris'],
+                            ['en' => 'sales team performance', 'id' => 'kinerja tim penjualan'],
                             ['en' => 'improving', 'id' => 'membaik'],
-                            ['en' => 'studying diligently', 'id' => 'rajin belajar']
+                            ['en' => 'intensive training', 'id' => 'pelatihan intensif']
                         ],
                         'options' => [
-                            'Rani\'s English grade is improving because she studies diligently.',
-                            'Rani\'s English grade are improving because she studies diligently.',
-                            'Rani\'s English grade is improve because she studies diligently.',
-                            'Rani\'s English grade improving because she studies diligently.'
+                            'The sales team\'s performance is improving after the intensive training last month.',
+                            'The sales team\'s performance are improving after the intensive training last month.',
+                            'The sales team\'s performance is improve after the intensive training last month.',
+                            'The sales team\'s performance improving after the intensive training last month.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Rani\'s English grade" adalah subjek tunggal, sehingga menggunakan "is improving".'
+                        'explanation' => '"The sales team\'s performance" adalah subjek tunggal, sehingga menggunakan "is improving".'
                     ],
                     [
                         'id' => 14,
-                        'id_sentence' => 'Cuaca di kota kami sedang menjadi lebih dingin minggu ini.',
+                        'id_sentence' => 'Suhu di gudang penyimpanan sedang menjadi lebih stabil setelah perbaikan AC.',
                         'target_word' => 'is getting (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'weather', 'id' => 'cuaca'],
-                            ['en' => 'getting colder', 'id' => 'menjadi lebih dingin'],
-                            ['en' => 'this week', 'id' => 'minggu ini']
+                            ['en' => 'storage warehouse', 'id' => 'gudang penyimpanan'],
+                            ['en' => 'getting more stable', 'id' => 'menjadi lebih stabil'],
+                            ['en' => 'air conditioner repair', 'id' => 'perbaikan AC']
                         ],
                         'options' => [
-                            'The weather in our city is getting colder this week.',
-                            'The weather in our city are getting colder this week.',
-                            'The weather in our city is get colder this week.',
-                            'The weather in our city getting colder this week.'
+                            'The temperature in the storage warehouse is getting more stable after the air conditioner repair.',
+                            'The temperature in the storage warehouse are getting more stable after the air conditioner repair.',
+                            'The temperature in the storage warehouse is get more stable after the air conditioner repair.',
+                            'The temperature in the storage warehouse getting more stable after the air conditioner repair.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"The weather" adalah subjek tunggal, maka bentuknya "is getting colder".'
+                        'explanation' => '"The temperature" adalah subjek tunggal, maka bentuknya "is getting more stable".'
                     ],
                     [
                         'id' => 15,
-                        'id_sentence' => 'Jalan di depan rumah kami sedang semakin ramai setiap sore.',
+                        'id_sentence' => 'Lalu lintas di sekitar kawasan industri sedang semakin padat setiap sore.',
                         'target_word' => 'is getting (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'street', 'id' => 'jalan'],
-                            ['en' => 'getting busier', 'id' => 'semakin ramai'],
-                            ['en' => 'every afternoon', 'id' => 'setiap sore']
+                            ['en' => 'traffic', 'id' => 'lalu lintas'],
+                            ['en' => 'getting busier', 'id' => 'semakin padat'],
+                            ['en' => 'industrial area', 'id' => 'kawasan industri']
                         ],
                         'options' => [
-                            'The street in front of our house is getting busier every afternoon.',
-                            'The street in front of our house are getting busier every afternoon.',
-                            'The street in front of our house is get busier every afternoon.',
-                            'The street in front of our house getting busier every afternoon.'
+                            'Traffic around the industrial area is getting busier every afternoon.',
+                            'Traffic around the industrial area are getting busier every afternoon.',
+                            'Traffic around the industrial area is get busier every afternoon.',
+                            'Traffic around the industrial area getting busier every afternoon.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"The street" tunggal, sehingga menggunakan "is getting busier".'
+                        'explanation' => '"Traffic" tunggal (uncountable), sehingga menggunakan "is getting busier".'
                     ],
                     [
                         'id' => 16,
-                        'id_sentence' => 'Minat anak-anak terhadap sepak bola sedang meningkat di sekolah kami.',
+                        'id_sentence' => 'Minat masyarakat terhadap produk lokal sedang meningkat tahun ini.',
                         'target_word' => 'is increasing (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'interest', 'id' => 'minat'],
-                            ['en' => 'football', 'id' => 'sepak bola'],
+                            ['en' => 'public interest', 'id' => 'minat masyarakat'],
+                            ['en' => 'local products', 'id' => 'produk lokal'],
                             ['en' => 'increasing', 'id' => 'meningkat']
                         ],
                         'options' => [
-                            'Children\'s interest in football is increasing at our school.',
-                            'Children\'s interest in football are increasing at our school.',
-                            'Children\'s interest in football is increase at our school.',
-                            'Children\'s interest in football increasing at our school.'
+                            'Public interest in local products is increasing this year.',
+                            'Public interest in local products are increasing this year.',
+                            'Public interest in local products is increase this year.',
+                            'Public interest in local products increasing this year.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Inti subjek adalah "interest" (tunggal), bukan "football", maka bentuknya "is increasing".'
+                        'explanation' => 'Inti subjek adalah "interest" (tunggal), bukan "products", maka bentuknya "is increasing".'
                     ],
                     [
                         'id' => 17,
-                        'id_sentence' => 'Pohon mangga di kebun kami sedang bertambah besar setiap tahun.',
-                        'target_word' => 'is growing (Trend of Change)',
+                        'id_sentence' => 'Jaringan distribusi perusahaan itu sedang bertambah luas setiap tahun.',
+                        'target_word' => 'is expanding (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'mango tree', 'id' => 'pohon mangga'],
-                            ['en' => 'garden', 'id' => 'kebun'],
+                            ['en' => 'distribution network', 'id' => 'jaringan distribusi'],
+                            ['en' => 'expanding', 'id' => 'bertambah luas'],
                             ['en' => 'every year', 'id' => 'setiap tahun']
                         ],
                         'options' => [
-                            'The mango tree in our garden is growing bigger every year.',
-                            'The mango tree in our garden are growing bigger every year.',
-                            'The mango tree in our garden is grow bigger every year.',
-                            'The mango tree in our garden growing bigger every year.'
+                            'The company\'s distribution network is expanding every year.',
+                            'The company\'s distribution network are expanding every year.',
+                            'The company\'s distribution network is expand every year.',
+                            'The company\'s distribution network expanding every year.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"The mango tree" (tunggal) berpasangan dengan "is growing".'
+                        'explanation' => '"The distribution network" (tunggal) berpasangan dengan "is expanding".'
                     ],
                     [
                         'id' => 18,
-                        'id_sentence' => 'Jumlah murid di kelas kami sedang berkurang setelah liburan.',
+                        'id_sentence' => 'Jumlah pelanggan di cabang kami sedang berkurang sejak penutupan jalan utama.',
                         'target_word' => 'is decreasing (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'number of students', 'id' => 'jumlah murid'],
+                            ['en' => 'number of customers', 'id' => 'jumlah pelanggan'],
                             ['en' => 'decreasing', 'id' => 'berkurang'],
-                            ['en' => 'after the holiday', 'id' => 'setelah liburan']
+                            ['en' => 'main road closure', 'id' => 'penutupan jalan utama']
                         ],
                         'options' => [
-                            'The number of students in our class is decreasing after the holiday.',
-                            'The number of students in our class are decreasing after the holiday.',
-                            'The number of students in our class is decrease after the holiday.',
-                            'The number of students in our class decreasing after the holiday.'
+                            'The number of customers at our branch is decreasing since the main road closure.',
+                            'The number of customers at our branch are decreasing since the main road closure.',
+                            'The number of customers at our branch is decrease since the main road closure.',
+                            'The number of customers at our branch decreasing since the main road closure.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"The number" adalah inti subjek tunggal, maka "is decreasing".'
                     ],
                     [
                         'id' => 19,
-                        'id_sentence' => 'Kemampuan memasak Budi sedang berkembang setelah mengikuti kelas kuliner.',
-                        'target_word' => 'is developing (Trend of Change)',
+                        'id_sentence' => 'Kemampuan negosiasi Budi sedang berkembang setelah mengikuti pelatihan kepemimpinan.',
+                        'target_word' => 'are developing (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'cooking skills', 'id' => 'kemampuan memasak'],
+                            ['en' => 'negotiation skills', 'id' => 'kemampuan negosiasi'],
                             ['en' => 'developing', 'id' => 'berkembang'],
-                            ['en' => 'cooking class', 'id' => 'kelas kuliner']
+                            ['en' => 'leadership training', 'id' => 'pelatihan kepemimpinan']
                         ],
                         'options' => [
-                            'Budi\'s cooking skills are developing after joining a cooking class.',
-                            'Budi\'s cooking skills is developing after joining a cooking class.',
-                            'Budi\'s cooking skills are develop after joining a cooking class.',
-                            'Budi\'s cooking skills developing after joining a cooking class.'
+                            'Budi\'s negotiation skills are developing after joining the leadership training.',
+                            'Budi\'s negotiation skills is developing after joining the leadership training.',
+                            'Budi\'s negotiation skills are develop after joining the leadership training.',
+                            'Budi\'s negotiation skills developing after joining the leadership training.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Skills" berbentuk jamak, sehingga "are developing".'
                     ],
                     [
                         'id' => 20,
-                        'id_sentence' => 'Lalu lintas di sekitar sekolah sedang berkurang sejak ada jalur sepeda baru.',
-                        'target_word' => 'is decreasing (Trend of Change)',
+                        'id_sentence' => 'Keluhan pelanggan sedang berkurang sejak sistem layanan daring diperbarui.',
+                        'target_word' => 'are decreasing (Trend of Change)',
                         'vocab' => [
-                            ['en' => 'traffic', 'id' => 'lalu lintas'],
+                            ['en' => 'customer complaints', 'id' => 'keluhan pelanggan'],
                             ['en' => 'decreasing', 'id' => 'berkurang'],
-                            ['en' => 'new bike lane', 'id' => 'jalur sepeda baru']
+                            ['en' => 'online service system', 'id' => 'sistem layanan daring']
                         ],
                         'options' => [
-                            'Traffic around the school is decreasing since the new bike lane opened.',
-                            'Traffic around the school are decreasing since the new bike lane opened.',
-                            'Traffic around the school is decrease since the new bike lane opened.',
-                            'Traffic around the school decreasing since the new bike lane opened.'
+                            'Customer complaints are decreasing since the online service system was updated.',
+                            'Customer complaints is decreasing since the online service system was updated.',
+                            'Customer complaints is decrease since the online service system was updated.',
+                            'Customer complaints decreasing since the online service system was updated.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Traffic" adalah kata benda tak terhitung tunggal, sehingga "is decreasing".'
+                        'explanation' => '"Complaints" adalah kata benda jamak, sehingga "are decreasing".'
                     ],
                 ]
             ],
@@ -556,8 +556,8 @@ class SelfStudyPresentContinuousData
                 'name' => '1.9.3 Present Continuous Passive: Sesuatu yang Sedang Dikerjakan',
                 'code' => '1.9.3',
                 'concept_title' => 'Present Continuous Passive: Sesuatu yang Sedang Dikerjakan',
-                'concept_description' => 'Bentuk pasif continuous dipakai saat fokus kalimat adalah benda yang sedang dikerjakan atau diurus, tanpa perlu menyebut siapa pelakunya. Kata "being" wajib ada di antara to be dan V3.',
-                'description' => 'Bentuk pasif continuous dipakai saat fokus kalimat adalah benda yang sedang dikerjakan atau diurus, tanpa perlu menyebut siapa pelakunya. Kata "being" wajib ada di antara to be dan V3.',
+                'concept_description' => 'Bentuk pasif continuous dipakai saat fokus kalimat adalah hal yang sedang dikerjakan atau diurus, tanpa perlu menyebut siapa pelakunya di awal. Kata "being" wajib ada di antara to be dan V3.',
+                'description' => 'Bentuk pasif continuous dipakai saat fokus kalimat adalah hal yang sedang dikerjakan atau diurus, tanpa perlu menyebut siapa pelakunya di awal. Kata "being" wajib ada di antara to be dan V3.',
                 'formula' => 'Subject (penerima) + am/is/are + being + Verb 3 (Past Participle) + (by Pelaku)',
                 'rules' => [
                     'Rumus wajib: to be (am/is/are) + being + Past Participle (V3).',
@@ -567,183 +567,183 @@ class SelfStudyPresentContinuousData
                 'exercises' => [
                     [
                         'id' => 21,
-                        'id_sentence' => 'Makan malam sedang dimasak di dapur sekarang.',
-                        'target_word' => 'is being cooked (Present Continuous Passive)',
+                        'id_sentence' => 'Laporan keuangan tahunan sedang disusun oleh tim akuntansi sekarang.',
+                        'target_word' => 'is being prepared (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'dinner', 'id' => 'makan malam'],
-                            ['en' => 'cooked', 'id' => 'dimasak'],
-                            ['en' => 'kitchen', 'id' => 'dapur']
+                            ['en' => 'annual financial report', 'id' => 'laporan keuangan tahunan'],
+                            ['en' => 'prepared', 'id' => 'disusun'],
+                            ['en' => 'accounting team', 'id' => 'tim akuntansi']
                         ],
                         'options' => [
-                            'Dinner is being cooked in the kitchen right now.',
-                            'Dinner is cooking in the kitchen right now.',
-                            'Dinner are being cooked in the kitchen right now.',
-                            'Dinner is been cooked in the kitchen right now.'
+                            'The annual financial report is being prepared by the accounting team right now.',
+                            'The annual financial report is preparing by the accounting team right now.',
+                            'The annual financial report are being prepared by the accounting team right now.',
+                            'The annual financial report is been prepared by the accounting team right now.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek pasif tunggal "Dinner" membutuhkan "is" + "being" + V3 "cooked". Bentuk "been" hanya untuk perfect tense.'
+                        'explanation' => 'Subjek pasif tunggal "The annual financial report" membutuhkan "is" + "being" + V3 "prepared". Bentuk "been" hanya untuk perfect tense.'
                     ],
                     [
                         'id' => 22,
-                        'id_sentence' => 'Mobil ayah sedang dicuci oleh tukang cuci mobil langganan.',
-                        'target_word' => 'is being washed (Present Continuous Passive)',
+                        'id_sentence' => 'Kendaraan operasional kantor sedang diservis oleh bengkel rekanan.',
+                        'target_word' => 'is being serviced (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'father\'s car', 'id' => 'mobil ayah'],
-                            ['en' => 'washed', 'id' => 'dicuci'],
-                            ['en' => 'regular car washer', 'id' => 'tukang cuci mobil langganan']
+                            ['en' => 'office operational vehicle', 'id' => 'kendaraan operasional kantor'],
+                            ['en' => 'serviced', 'id' => 'diservis'],
+                            ['en' => 'partner workshop', 'id' => 'bengkel rekanan']
                         ],
                         'options' => [
-                            'Father\'s car is being washed by the regular car washer.',
-                            'Father\'s car are being washed by the regular car washer.',
-                            'Father\'s car is washing by the regular car washer.',
-                            'Father\'s car is been washed by the regular car washer.'
+                            'The office\'s operational vehicle is being serviced by the partner workshop.',
+                            'The office\'s operational vehicle are being serviced by the partner workshop.',
+                            'The office\'s operational vehicle is servicing by the partner workshop.',
+                            'The office\'s operational vehicle is been serviced by the partner workshop.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "Father\'s car" memerlukan "is being washed".'
+                        'explanation' => 'Subjek tunggal "The operational vehicle" memerlukan "is being serviced".'
                     ],
                     [
                         'id' => 23,
-                        'id_sentence' => 'Kue ulang tahun sedang dihias oleh kakak di dapur.',
-                        'target_word' => 'is being decorated (Present Continuous Passive)',
+                        'id_sentence' => 'Dekorasi acara perusahaan sedang dipasang oleh tim event organizer.',
+                        'target_word' => 'is being set up (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'birthday cake', 'id' => 'kue ulang tahun'],
-                            ['en' => 'decorated', 'id' => 'dihias'],
-                            ['en' => 'kitchen', 'id' => 'dapur']
+                            ['en' => 'company event decoration', 'id' => 'dekorasi acara perusahaan'],
+                            ['en' => 'set up', 'id' => 'dipasang'],
+                            ['en' => 'event organizer team', 'id' => 'tim event organizer']
                         ],
                         'options' => [
-                            'The birthday cake is being decorated by my sister in the kitchen.',
-                            'The birthday cake are being decorate by my sister in the kitchen.',
-                            'The birthday cake is decorating by my sister in the kitchen.',
-                            'The birthday cake being decorated by my sister in the kitchen.'
+                            'The decoration for the company event is being set up by the event organizer team.',
+                            'The decoration for the company event are being set up by the event organizer team.',
+                            'The decoration for the company event is setting up by the event organizer team.',
+                            'The decoration for the company event being set up by the event organizer team.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "The birthday cake" membutuhkan "is being decorated".'
+                        'explanation' => 'Subjek tunggal "The decoration" membutuhkan "is being set up".'
                     ],
                     [
                         'id' => 24,
-                        'id_sentence' => 'Sepeda yang rusak sedang diperbaiki di bengkel dekat rumah.',
+                        'id_sentence' => 'Jalur sepeda yang rusak sedang diperbaiki oleh dinas pekerjaan umum.',
                         'target_word' => 'is being repaired (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'broken bicycle', 'id' => 'sepeda yang rusak'],
+                            ['en' => 'damaged bike lane', 'id' => 'jalur sepeda yang rusak'],
                             ['en' => 'repaired', 'id' => 'diperbaiki'],
-                            ['en' => 'repair shop', 'id' => 'bengkel']
+                            ['en' => 'public works department', 'id' => 'dinas pekerjaan umum']
                         ],
                         'options' => [
-                            'The broken bicycle is being repaired at the shop near the house.',
-                            'The broken bicycle are being repaired at the shop near the house.',
-                            'The broken bicycle is repairing at the shop near the house.',
-                            'The broken bicycle has being repaired at the shop near the house.'
+                            'The damaged bike lane is being repaired by the public works department.',
+                            'The damaged bike lane are being repaired by the public works department.',
+                            'The damaged bike lane is repairing by the public works department.',
+                            'The damaged bike lane has being repaired by the public works department.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek "bicycle" adalah tunggal dan menerima tindakan, sehingga memerlukan "is being repaired".'
+                        'explanation' => 'Subjek "bike lane" adalah tunggal dan menerima tindakan, sehingga memerlukan "is being repaired".'
                     ],
                     [
                         'id' => 25,
-                        'id_sentence' => 'Ruang tamu sedang dibersihkan sebelum tamu datang.',
-                        'target_word' => 'is being cleaned (Present Continuous Passive)',
+                        'id_sentence' => 'Ruang pertemuan sedang dirapikan sebelum rapat pemegang saham dimulai.',
+                        'target_word' => 'is being tidied (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'living room', 'id' => 'ruang tamu'],
-                            ['en' => 'cleaned', 'id' => 'dibersihkan'],
-                            ['en' => 'guests', 'id' => 'tamu']
+                            ['en' => 'meeting room', 'id' => 'ruang pertemuan'],
+                            ['en' => 'tidied', 'id' => 'dirapikan'],
+                            ['en' => 'shareholders meeting', 'id' => 'rapat pemegang saham']
                         ],
                         'options' => [
-                            'The living room is being cleaned before the guests arrive.',
-                            'The living room are being cleaned before the guests arrive.',
-                            'The living room is cleaning before the guests arrive.',
-                            'The living room being cleaned before the guests arrive.'
+                            'The meeting room is being tidied before the shareholders meeting begins.',
+                            'The meeting room are being tidied before the shareholders meeting begins.',
+                            'The meeting room is tidying before the shareholders meeting begins.',
+                            'The meeting room being tidied before the shareholders meeting begins.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"The living room" tunggal, sehingga rumusnya adalah "is being cleaned".'
+                        'explanation' => '"The meeting room" tunggal, sehingga rumusnya adalah "is being tidied".'
                     ],
                     [
                         'id' => 26,
-                        'id_sentence' => 'Pekerjaan rumah matematika sedang diperiksa oleh guru kelas.',
-                        'target_word' => 'is being checked (Present Continuous Passive)',
+                        'id_sentence' => 'Berkas lamaran kerja sedang diperiksa oleh tim sumber daya manusia.',
+                        'target_word' => 'are being reviewed (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'math homework', 'id' => 'pekerjaan rumah matematika'],
-                            ['en' => 'checked', 'id' => 'diperiksa'],
-                            ['en' => 'classroom teacher', 'id' => 'guru kelas']
+                            ['en' => 'job application documents', 'id' => 'berkas lamaran kerja'],
+                            ['en' => 'reviewed', 'id' => 'diperiksa'],
+                            ['en' => 'human resources team', 'id' => 'tim sumber daya manusia']
                         ],
                         'options' => [
-                            'The math homework is being checked by the classroom teacher.',
-                            'The math homework are being checked by the classroom teacher.',
-                            'The math homework is checking by the classroom teacher.',
-                            'The math homework has been check by the classroom teacher.'
+                            'The job application documents are being reviewed by the human resources team.',
+                            'The job application documents is being reviewed by the human resources team.',
+                            'The job application documents are reviewing by the human resources team.',
+                            'The job application documents has been review by the human resources team.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "The math homework" berpasangan dengan "is being checked".'
+                        'explanation' => 'Subjek jamak "The documents" berpasangan dengan "are being reviewed".'
                     ],
                     [
                         'id' => 27,
-                        'id_sentence' => 'Tanaman di balkon sedang disiram oleh Bibi setiap pagi.',
+                        'id_sentence' => 'Tanaman di area resepsionis sedang disiram oleh petugas kebersihan setiap pagi.',
                         'target_word' => 'are being watered (Present Continuous Passive)',
                         'vocab' => [
                             ['en' => 'plants', 'id' => 'tanaman'],
-                            ['en' => 'balcony', 'id' => 'balkon'],
+                            ['en' => 'reception area', 'id' => 'area resepsionis'],
                             ['en' => 'watered', 'id' => 'disiram']
                         ],
                         'options' => [
-                            'The plants on the balcony are being watered by Aunt every morning.',
-                            'The plants on the balcony is being watered by Aunt every morning.',
-                            'The plants on the balcony are watering by Aunt every morning.',
-                            'The plants on the balcony being watered by Aunt every morning.'
+                            'The plants in the reception area are being watered by the cleaning staff every morning.',
+                            'The plants in the reception area is being watered by the cleaning staff every morning.',
+                            'The plants in the reception area are watering by the cleaning staff every morning.',
+                            'The plants in the reception area being watered by the cleaning staff every morning.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Subjek "plants" (jamak) dipadukan dengan pola pasif continuous "are being watered".'
                     ],
                     [
                         'id' => 28,
-                        'id_sentence' => 'Masalah pada komputer sekolah sedang diselidiki oleh teknisi.',
-                        'target_word' => 'is being checked (Present Continuous Passive)',
+                        'id_sentence' => 'Gangguan pada server perusahaan sedang ditangani oleh tim IT.',
+                        'target_word' => 'is being handled (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'problem', 'id' => 'masalah'],
-                            ['en' => 'school computer', 'id' => 'komputer sekolah'],
-                            ['en' => 'technician', 'id' => 'teknisi']
+                            ['en' => 'problem', 'id' => 'gangguan'],
+                            ['en' => 'company server', 'id' => 'server perusahaan'],
+                            ['en' => 'IT team', 'id' => 'tim IT']
                         ],
                         'options' => [
-                            'The problem with the school computer is being checked by the technician.',
-                            'The problem with the school computer are being checked by the technician.',
-                            'The problem with the school computer is checking by the technician.',
-                            'The problem with the school computer being checked by the technician.'
+                            'The problem with the company server is being handled by the IT team.',
+                            'The problem with the company server are being handled by the IT team.',
+                            'The problem with the company server is handling by the IT team.',
+                            'The problem with the company server being handled by the IT team.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek utama "The problem" adalah tunggal, sehingga memerlukan "is being checked".'
+                        'explanation' => 'Subjek utama "The problem" adalah tunggal, sehingga memerlukan "is being handled".'
                     ],
                     [
                         'id' => 29,
-                        'id_sentence' => 'Buku cerita baru sedang dibaca keras-keras oleh guru untuk murid kelas satu.',
-                        'target_word' => 'is being read (Present Continuous Passive)',
+                        'id_sentence' => 'Materi pelatihan baru sedang disampaikan secara daring kepada seluruh staf.',
+                        'target_word' => 'is being delivered (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'new storybook', 'id' => 'buku cerita baru'],
-                            ['en' => 'read aloud', 'id' => 'dibaca keras-keras'],
-                            ['en' => 'first-grade students', 'id' => 'murid kelas satu']
+                            ['en' => 'new training material', 'id' => 'materi pelatihan baru'],
+                            ['en' => 'delivered', 'id' => 'disampaikan'],
+                            ['en' => 'all staff', 'id' => 'seluruh staf']
                         ],
                         'options' => [
-                            'The new storybook is being read aloud to the first-grade students.',
-                            'The new storybook are being read aloud to the first-grade students.',
-                            'The new storybook is reading aloud to the first-grade students.',
-                            'The new storybook being read aloud to the first-grade students.'
+                            'The new training material is being delivered online to all staff.',
+                            'The new training material are being delivered online to all staff.',
+                            'The new training material is delivering online to all staff.',
+                            'The new training material being delivered online to all staff.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek "storybook" (tunggal) membutuhkan "is being read".'
+                        'explanation' => 'Subjek "material" (tunggal) membutuhkan "is being delivered".'
                     ],
                     [
                         'id' => 30,
-                        'id_sentence' => 'Jendela kamar sedang diperbaiki karena engselnya patah.',
+                        'id_sentence' => 'Atap gudang sedang diperbaiki karena kerusakan akibat badai minggu lalu.',
                         'target_word' => 'is being fixed (Present Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'bedroom window', 'id' => 'jendela kamar'],
+                            ['en' => 'warehouse roof', 'id' => 'atap gudang'],
                             ['en' => 'fixed', 'id' => 'diperbaiki'],
-                            ['en' => 'broken hinge', 'id' => 'engsel yang patah']
+                            ['en' => 'storm damage', 'id' => 'kerusakan akibat badai']
                         ],
                         'options' => [
-                            'The bedroom window is being fixed because the hinge is broken.',
-                            'The bedroom window are being fixed because the hinge is broken.',
-                            'The bedroom window is fixing because the hinge is broken.',
-                            'The bedroom window has being fixed because the hinge is broken.'
+                            'The warehouse roof is being fixed because of the storm damage last week.',
+                            'The warehouse roof are being fixed because of the storm damage last week.',
+                            'The warehouse roof is fixing because of the storm damage last week.',
+                            'The warehouse roof has being fixed because of the storm damage last week.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek "window" (tunggal) membutuhkan "is being fixed".'
+                        'explanation' => 'Subjek "roof" (tunggal) membutuhkan "is being fixed".'
                     ],
                 ]
             ],
@@ -751,165 +751,165 @@ class SelfStudyPresentContinuousData
             // Sub-Lesson 1.9.4
             [
                 'id' => 'temporary-vs-permanent',
-                'name' => '1.9.4 Kebiasaan Rutin vs Kejadian Sementara',
+                'name' => '1.9.4 Kebiasaan Rutin vs Situasi Sementara',
                 'code' => '1.9.4',
-                'concept_title' => 'Kebiasaan Rutin vs Kejadian Sementara (Continuous vs Simple Present)',
-                'concept_description' => 'Membedakan kebiasaan sehari-hari (Simple Present) dengan hal yang hanya terjadi sekarang/hari ini saja (Present Continuous).',
-                'description' => 'Membedakan kebiasaan sehari-hari (Simple Present) dengan hal yang hanya terjadi sekarang/hari ini saja (Present Continuous).',
+                'concept_title' => 'Kebiasaan Rutin vs Situasi Sementara (Continuous vs Simple Present)',
+                'concept_description' => 'Membedakan kebiasaan sehari-hari (Simple Present) dengan hal yang hanya berlaku sekarang/hari ini saja (Present Continuous).',
+                'description' => 'Membedakan kebiasaan sehari-hari (Simple Present) dengan hal yang hanya berlaku sekarang/hari ini saja (Present Continuous).',
                 'formula' => 'Rutin: S + V1/V-s | Sementara: S + is/are + V-ing',
                 'rules' => [
                     'Gunakan Simple Present untuk kebiasaan rutin (usually, every day, every week).',
-                    'Gunakan Present Continuous untuk kejadian khusus sekarang (today, right now, this week).',
+                    'Gunakan Present Continuous untuk situasi khusus sekarang (today, right now, this week).',
                     'Penanda waktu transisional: currently, at the moment, for now, this time.'
                 ],
                 'exercises' => [
                     [
                         'id' => 31,
-                        'id_sentence' => 'Ayah biasanya berangkat kerja naik motor, tetapi hari ini ia sedang menyetir mobil.',
-                        'target_word' => 'usually rides ... is driving (Aspect Contrast)',
+                        'id_sentence' => 'Manajer biasanya berangkat kerja naik mobil pribadi, tetapi hari ini ia sedang menggunakan transportasi umum.',
+                        'target_word' => 'usually drives ... is using (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'father', 'id' => 'ayah'],
-                            ['en' => 'usually rides a motorbike', 'id' => 'biasanya naik motor'],
-                            ['en' => 'driving a car', 'id' => 'menyetir mobil']
+                            ['en' => 'manager', 'id' => 'manajer'],
+                            ['en' => 'usually drives', 'id' => 'biasanya berkendara'],
+                            ['en' => 'public transport', 'id' => 'transportasi umum']
                         ],
                         'options' => [
-                            'Father usually rides a motorbike to work, but today he is driving a car.',
-                            'Father is usually riding a motorbike to work, but today he drives a car.',
-                            'Father usually ride a motorbike to work, but today he is driving a car.',
-                            'Father usually rides a motorbike to work, but today he driving a car.'
+                            'The manager usually drives to work, but today he is using public transport.',
+                            'The manager is usually driving to work, but today he uses public transport.',
+                            'The manager usually drive to work, but today he is using public transport.',
+                            'The manager usually drives to work, but today he using public transport.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kebiasaan rutin memakai Simple Present ("usually rides"), sedangkan kejadian khusus hari ini memakai Present Continuous ("is driving").'
+                        'explanation' => 'Kebiasaan rutin memakai Simple Present ("usually drives"), sedangkan situasi khusus hari ini memakai Present Continuous ("is using").'
                     ],
                     [
                         'id' => 32,
-                        'id_sentence' => 'Guru itu biasanya mengajar dua kelas setiap hari, tetapi minggu ini ia sedang membimbing lomba sains.',
-                        'target_word' => 'teaches ... is coaching (Aspect Contrast)',
+                        'id_sentence' => 'Pelatih itu biasanya melatih dua kelompok setiap hari, tetapi minggu ini ia sedang membimbing tim untuk kejuaraan daerah.',
+                        'target_word' => 'trains ... is coaching (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'teacher', 'id' => 'guru'],
-                            ['en' => 'two classes', 'id' => 'dua kelas'],
-                            ['en' => 'science competition', 'id' => 'lomba sains']
+                            ['en' => 'coach', 'id' => 'pelatih'],
+                            ['en' => 'two groups', 'id' => 'dua kelompok'],
+                            ['en' => 'regional championship', 'id' => 'kejuaraan daerah']
                         ],
                         'options' => [
-                            'The teacher teaches two classes every day, but this week she is coaching a science competition.',
-                            'The teacher is teaching two classes every day, but this week she coaches a science competition.',
-                            'The teacher teach two classes every day, but this week she is coaching a science competition.',
-                            'The teacher teaches two classes every day, but this week she coaching a science competition.'
+                            'The coach trains two groups every day, but this week he is coaching the team for the regional championship.',
+                            'The coach is training two groups every day, but this week he coaches the team for the regional championship.',
+                            'The coach train two groups every day, but this week he is coaching the team for the regional championship.',
+                            'The coach trains two groups every day, but this week he coaching the team for the regional championship.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kebiasaan harian ("every day") memakai "teaches", sedangkan kegiatan khusus minggu ini ("this week") memakai "is coaching".'
+                        'explanation' => 'Kebiasaan harian ("every day") memakai "trains", sedangkan kegiatan khusus minggu ini ("this week") memakai "is coaching".'
                     ],
                     [
                         'id' => 33,
-                        'id_sentence' => 'Sungai itu biasanya mengalir dengan tenang, tapi sekarang sedang meluap karena hujan deras.',
-                        'target_word' => 'flows ... is overflowing (Aspect Contrast)',
+                        'id_sentence' => 'Jalur produksi itu biasanya berjalan lancar, tapi sekarang sedang terhambat karena masalah pasokan bahan baku.',
+                        'target_word' => 'runs ... is facing (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'flows calmly', 'id' => 'mengalir dengan tenang'],
-                            ['en' => 'overflowing', 'id' => 'meluap'],
-                            ['en' => 'heavy rain', 'id' => 'hujan deras']
+                            ['en' => 'runs smoothly', 'id' => 'berjalan lancar'],
+                            ['en' => 'facing', 'id' => 'menghadapi'],
+                            ['en' => 'raw material supply', 'id' => 'pasokan bahan baku']
                         ],
                         'options' => [
-                            'The river usually flows calmly, but now it is overflowing because of heavy rain.',
-                            'The river is usually flowing calmly, but now it overflows because of heavy rain.',
-                            'The river usually flow calmly, but now it is overflowing because of heavy rain.',
-                            'The river usually flows calmly, but now it overflowing because of heavy rain.'
+                            'The production line usually runs smoothly, but now it is facing a problem with the raw material supply.',
+                            'The production line is usually running smoothly, but now it faces a problem with the raw material supply.',
+                            'The production line usually run smoothly, but now it is facing a problem with the raw material supply.',
+                            'The production line usually runs smoothly, but now it facing a problem with the raw material supply.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Keadaan biasa dinyatakan dengan "usually flows", sedangkan keadaan sesaat memakai "is overflowing".'
+                        'explanation' => 'Keadaan biasa dinyatakan dengan "usually runs", sedangkan keadaan sesaat memakai "is facing".'
                     ],
                     [
                         'id' => 34,
-                        'id_sentence' => 'Toko itu biasanya menjual roti dan kue, tapi minggu ini mereka sedang menjual pernak-pernik lebaran.',
+                        'id_sentence' => 'Toko itu biasanya menjual perlengkapan kantor, tapi minggu ini mereka sedang menjual peralatan musim hujan.',
                         'target_word' => 'sells ... is selling (Aspect Contrast)',
                         'vocab' => [
                             ['en' => 'shop', 'id' => 'toko'],
-                            ['en' => 'bread and cakes', 'id' => 'roti dan kue'],
-                            ['en' => 'Eid decorations', 'id' => 'pernak-pernik lebaran']
+                            ['en' => 'office supplies', 'id' => 'perlengkapan kantor'],
+                            ['en' => 'rainy-season gear', 'id' => 'peralatan musim hujan']
                         ],
                         'options' => [
-                            'The shop usually sells bread and cakes, but this week it is selling Eid decorations.',
-                            'The shop is usually selling bread and cakes, but this week it sells Eid decorations.',
-                            'The shop usually sell bread and cakes, but this week it is selling Eid decorations.',
-                            'The shop usually sells bread and cakes, but this week it selling Eid decorations.'
+                            'The shop usually sells office supplies, but this week it is selling rainy-season gear.',
+                            'The shop is usually selling office supplies, but this week it sells rainy-season gear.',
+                            'The shop usually sell office supplies, but this week it is selling rainy-season gear.',
+                            'The shop usually sells office supplies, but this week it selling rainy-season gear.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Rutinitas toko ("usually sells") dikontraskan dengan penjualan khusus minggu ini ("is selling").'
                     ],
                     [
                         'id' => 35,
-                        'id_sentence' => 'Perpustakaan sekolah biasanya tutup pukul empat sore, tapi hari ini mereka sedang buka sampai malam untuk ujian.',
+                        'id_sentence' => 'Kantor cabang biasanya tutup pukul lima sore, tapi hari ini mereka sedang tetap buka untuk audit tahunan.',
                         'target_word' => 'closes ... is staying (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'school library', 'id' => 'perpustakaan sekolah'],
+                            ['en' => 'branch office', 'id' => 'kantor cabang'],
                             ['en' => 'closes', 'id' => 'tutup'],
-                            ['en' => 'staying open', 'id' => 'tetap buka']
+                            ['en' => 'annual audit', 'id' => 'audit tahunan']
                         ],
                         'options' => [
-                            'The school library usually closes at four, but today it is staying open until night for exams.',
-                            'The school library is usually closing at four, but today it stays open until night for exams.',
-                            'The school library usually close at four, but today it is staying open until night for exams.',
-                            'The school library usually closes at four, but today it staying open until night for exams.'
+                            'The branch office usually closes at five, but today it is staying open for the annual audit.',
+                            'The branch office is usually closing at five, but today it stays open for the annual audit.',
+                            'The branch office usually close at five, but today it is staying open for the annual audit.',
+                            'The branch office usually closes at five, but today it staying open for the annual audit.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Jadwal rutin ("usually closes") memakai Simple Present, sedangkan penyesuaian khusus hari ini ("today") memakai "is staying".'
                     ],
                     [
                         'id' => 36,
-                        'id_sentence' => 'Kebanyakan anak di kelas kami biasanya membawa bekal, tetapi hari ini mereka sedang mencoba kantin baru.',
-                        'target_word' => 'bring ... are trying (Aspect Contrast)',
+                        'id_sentence' => 'Sebagian besar staf biasanya makan siang di kantin, tetapi hari ini mereka sedang mencoba restoran baru di seberang jalan.',
+                        'target_word' => 'eat ... are trying (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'most children', 'id' => 'kebanyakan anak'],
-                            ['en' => 'bring lunch boxes', 'id' => 'membawa bekal'],
-                            ['en' => 'new canteen', 'id' => 'kantin baru']
+                            ['en' => 'most staff', 'id' => 'sebagian besar staf'],
+                            ['en' => 'eat at the canteen', 'id' => 'makan di kantin'],
+                            ['en' => 'new restaurant', 'id' => 'restoran baru']
                         ],
                         'options' => [
-                            'Most children in our class usually bring lunch boxes, but today they are trying the new canteen.',
-                            'Most children in our class are usually bringing lunch boxes, but today they try the new canteen.',
-                            'Most children in our class usually brings lunch boxes, but today they are trying the new canteen.',
-                            'Most children in our class usually bring lunch boxes, but today they trying the new canteen.'
+                            'Most staff usually eat at the canteen, but today they are trying the new restaurant across the street.',
+                            'Most staff are usually eating at the canteen, but today they try the new restaurant across the street.',
+                            'Most staff usually eats at the canteen, but today they are trying the new restaurant across the street.',
+                            'Most staff usually eat at the canteen, but today they trying the new restaurant across the street.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kebiasaan umum memakai Simple Present "bring", sedangkan percobaan khusus hari ini memakai Present Continuous "are trying".'
+                        'explanation' => 'Kebiasaan umum memakai Simple Present "eat", sedangkan percobaan khusus hari ini memakai Present Continuous "are trying".'
                     ],
                     [
                         'id' => 37,
-                        'id_sentence' => 'Kipas angin di ruang kelas biasanya bekerja otomatis, tetapi sekarang penjaga sekolah sedang menyalakannya secara manual.',
-                        'target_word' => 'works ... is turning (Aspect Contrast)',
+                        'id_sentence' => 'Sistem pendingin ruang server biasanya bekerja otomatis, tetapi sekarang petugas sedang menyesuaikannya secara manual.',
+                        'target_word' => 'works ... is adjusting (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'classroom fan', 'id' => 'kipas angin kelas'],
+                            ['en' => 'server room cooling system', 'id' => 'sistem pendingin ruang server'],
                             ['en' => 'works automatically', 'id' => 'bekerja otomatis'],
-                            ['en' => 'school caretaker', 'id' => 'penjaga sekolah']
+                            ['en' => 'technician', 'id' => 'petugas']
                         ],
                         'options' => [
-                            'The classroom fan usually works automatically, but now the caretaker is turning it on manually.',
-                            'The classroom fan is usually working automatically, but now the caretaker turns it on manually.',
-                            'The classroom fan usually work automatically, but now the caretaker is turning it on manually.',
-                            'The classroom fan usually works automatically, but now the caretaker turning it on manually.'
+                            'The server room cooling system usually works automatically, but now the technician is adjusting it manually.',
+                            'The server room cooling system is usually working automatically, but now the technician adjusts it manually.',
+                            'The server room cooling system usually work automatically, but now the technician is adjusting it manually.',
+                            'The server room cooling system usually works automatically, but now the technician adjusting it manually.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Usually works" menunjukkan cara kerja biasa, sedangkan "is turning" mendeskripsikan tindakan manual sekarang.'
+                        'explanation' => '"Usually works" menunjukkan cara kerja biasa, sedangkan "is adjusting" mendeskripsikan tindakan manual sekarang.'
                     ],
                     [
                         'id' => 38,
-                        'id_sentence' => 'Burung-burung itu biasanya bersarang di pohon besar, tetapi musim ini mereka sedang singgah di taman kami.',
-                        'target_word' => 'nest ... are staying (Aspect Contrast)',
+                        'id_sentence' => 'Pengiriman barang biasanya tiba tepat waktu, tetapi minggu ini mereka sedang mengalami keterlambatan akibat cuaca buruk.',
+                        'target_word' => 'arrives ... is experiencing (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'birds', 'id' => 'burung-burung'],
-                            ['en' => 'nest', 'id' => 'bersarang'],
-                            ['en' => 'our garden', 'id' => 'taman kami']
+                            ['en' => 'shipment', 'id' => 'pengiriman barang'],
+                            ['en' => 'arrives on time', 'id' => 'tiba tepat waktu'],
+                            ['en' => 'experiencing delays', 'id' => 'mengalami keterlambatan']
                         ],
                         'options' => [
-                            'The birds usually nest in the big tree, but this season they are staying in our garden.',
-                            'The birds are usually nesting in the big tree, but this season they stay in our garden.',
-                            'The birds usually nests in the big tree, but this season they are staying in our garden.',
-                            'The birds usually nest in the big tree, but this season they staying in our garden.'
+                            'The shipment usually arrives on time, but this week it is experiencing delays due to bad weather.',
+                            'The shipment is usually arriving on time, but this week it experiences delays due to bad weather.',
+                            'The shipment usually arrive on time, but this week it is experiencing delays due to bad weather.',
+                            'The shipment usually arrives on time, but this week it experiencing delays due to bad weather.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kebiasaan musiman memakai "nest", sedangkan persinggahan sementara memakai "are staying".'
+                        'explanation' => 'Kebiasaan pengiriman memakai "arrives", sedangkan hambatan sementara memakai "is experiencing".'
                     ],
                     [
                         'id' => 39,
-                        'id_sentence' => 'Warung itu biasanya menyediakan menu lokal saja, tetapi saat ini mereka sedang mencoba menu baru dari luar daerah.',
+                        'id_sentence' => 'Warung itu biasanya hanya menyediakan menu lokal, tetapi saat ini mereka sedang mencoba menu baru untuk menarik pelanggan.',
                         'target_word' => 'offers ... is trying (Aspect Contrast)',
                         'vocab' => [
                             ['en' => 'food stall', 'id' => 'warung'],
@@ -917,28 +917,28 @@ class SelfStudyPresentContinuousData
                             ['en' => 'new menu', 'id' => 'menu baru']
                         ],
                         'options' => [
-                            'The food stall usually offers only local dishes, but it is currently trying a new menu from out of town.',
-                            'The food stall is usually offering only local dishes, but it currently tries a new menu from out of town.',
-                            'The food stall usually offer only local dishes, but it is currently trying a new menu from out of town.',
-                            'The food stall usually offers only local dishes, but it currently trying a new menu from out of town.'
+                            'The food stall usually offers only local dishes, but it is currently trying a new menu to attract customers.',
+                            'The food stall is usually offering only local dishes, but it currently tries a new menu to attract customers.',
+                            'The food stall usually offer only local dishes, but it is currently trying a new menu to attract customers.',
+                            'The food stall usually offers only local dishes, but it currently trying a new menu to attract customers.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Usually offers" (kebiasaan) dikontraskan dengan "is currently trying" (percobaan sementara).'
                     ],
                     [
                         'id' => 40,
-                        'id_sentence' => 'Jadwal les renang biasanya berlangsung dua jam, tapi pelatih sedang memperbarui jadwal untuk bulan depan.',
+                        'id_sentence' => 'Jadwal pelatihan biasanya berlangsung dua jam, tapi fasilitator sedang memperbarui jadwal untuk bulan depan.',
                         'target_word' => 'lasts ... is updating (Aspect Contrast)',
                         'vocab' => [
-                            ['en' => 'swimming lesson schedule', 'id' => 'jadwal les renang'],
+                            ['en' => 'training schedule', 'id' => 'jadwal pelatihan'],
                             ['en' => 'lasts', 'id' => 'berlangsung'],
-                            ['en' => 'coach', 'id' => 'pelatih']
+                            ['en' => 'facilitator', 'id' => 'fasilitator']
                         ],
                         'options' => [
-                            'The swimming lesson schedule usually lasts two hours, but the coach is updating it for next month.',
-                            'The swimming lesson schedule is usually lasting two hours, but the coach updates it for next month.',
-                            'The swimming lesson schedule usually last two hours, but the coach is updating it for next month.',
-                            'The swimming lesson schedule usually lasts two hours, but the coach updating it for next month.'
+                            'The training schedule usually lasts two hours, but the facilitator is updating it for next month.',
+                            'The training schedule is usually lasting two hours, but the facilitator updates it for next month.',
+                            'The training schedule usually last two hours, but the facilitator is updating it for next month.',
+                            'The training schedule usually lasts two hours, but the facilitator updating it for next month.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Jadwal rutin memakai Simple Present "lasts", sementara proses pembaruan saat ini memakai "is updating".'
@@ -963,180 +963,180 @@ class SelfStudyPresentContinuousData
                 'exercises' => [
                     [
                         'id' => 41,
-                        'id_sentence' => 'Saya mengerti penjelasan guru tentang pecahan sekarang.',
+                        'id_sentence' => 'Saya memahami penjelasan manajer tentang target penjualan sekarang.',
                         'target_word' => 'understand (Stative Verb: Cognition)',
                         'vocab' => [
-                            ['en' => 'understand', 'id' => 'mengerti'],
-                            ['en' => 'teacher\'s explanation', 'id' => 'penjelasan guru'],
-                            ['en' => 'fractions', 'id' => 'pecahan']
+                            ['en' => 'understand', 'id' => 'memahami'],
+                            ['en' => 'manager\'s explanation', 'id' => 'penjelasan manajer'],
+                            ['en' => 'sales target', 'id' => 'target penjualan']
                         ],
                         'options' => [
-                            'I understand the teacher\'s explanation about fractions now.',
-                            'I am understanding the teacher\'s explanation about fractions now.',
-                            'I understands the teacher\'s explanation about fractions now.',
-                            'I am understand the teacher\'s explanation about fractions now.'
+                            'I understand the manager\'s explanation about the sales target now.',
+                            'I am understanding the manager\'s explanation about the sales target now.',
+                            'I understands the manager\'s explanation about the sales target now.',
+                            'I am understand the manager\'s explanation about the sales target now.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Understand" adalah kata kerja pikiran dan tidak memakai bentuk -ing.'
                     ],
                     [
                         'id' => 42,
-                        'id_sentence' => 'Kotak ini berisi mainan lama milik kakak saya.',
+                        'id_sentence' => 'Paket ini berisi dokumen penting untuk klien baru.',
                         'target_word' => 'contains (Stative Verb: Content)',
                         'vocab' => [
-                            ['en' => 'box', 'id' => 'kotak'],
+                            ['en' => 'package', 'id' => 'paket'],
                             ['en' => 'contains', 'id' => 'berisi'],
-                            ['en' => 'old toys', 'id' => 'mainan lama']
+                            ['en' => 'important documents', 'id' => 'dokumen penting']
                         ],
                         'options' => [
-                            'This box contains my older sibling\'s old toys.',
-                            'This box is containing my older sibling\'s old toys.',
-                            'This box contain my older sibling\'s old toys.',
-                            'This box is contained my older sibling\'s old toys.'
+                            'This package contains important documents for the new client.',
+                            'This package is containing important documents for the new client.',
+                            'This package contain important documents for the new client.',
+                            'This package is contained important documents for the new client.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Contain" adalah stative verb yang menyatakan isi; bentuk "is containing" salah.'
                     ],
                     [
                         'id' => 43,
-                        'id_sentence' => 'Kami membutuhkan lebih banyak waktu untuk menyelesaikan proyek ini.',
+                        'id_sentence' => 'Kami membutuhkan persetujuan tambahan untuk menyelesaikan kontrak ini.',
                         'target_word' => 'need (Stative Verb: Need)',
                         'vocab' => [
                             ['en' => 'need', 'id' => 'membutuhkan'],
-                            ['en' => 'more time', 'id' => 'lebih banyak waktu'],
-                            ['en' => 'finish the project', 'id' => 'menyelesaikan proyek']
+                            ['en' => 'additional approval', 'id' => 'persetujuan tambahan'],
+                            ['en' => 'finalize the contract', 'id' => 'menyelesaikan kontrak']
                         ],
                         'options' => [
-                            'We need more time to finish this project.',
-                            'We are needing more time to finish this project.',
-                            'We needs more time to finish this project.',
-                            'We are need more time to finish this project.'
+                            'We need additional approval to finalize this contract.',
+                            'We are needing additional approval to finalize this contract.',
+                            'We needs additional approval to finalize this contract.',
+                            'We are need additional approval to finalize this contract.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Need" adalah stative verb yang tidak berbentuk continuous (*are needing).'
                     ],
                     [
                         'id' => 44,
-                        'id_sentence' => 'Rencana piknik itu kelihatannya bagus, tetapi kami sedang mempertimbangkan apakah cuaca akan mendukung.',
+                        'id_sentence' => 'Rencana ekspansi itu kelihatannya menjanjikan, tetapi kami sedang mempertimbangkan apakah anggaran mencukupi.',
                         'target_word' => 'seems ... are considering (Stative vs Dynamic Meaning)',
                         'vocab' => [
-                            ['en' => 'picnic plan', 'id' => 'rencana piknik'],
-                            ['en' => 'seems good', 'id' => 'kelihatannya bagus'],
+                            ['en' => 'expansion plan', 'id' => 'rencana ekspansi'],
+                            ['en' => 'seems promising', 'id' => 'kelihatannya menjanjikan'],
                             ['en' => 'considering', 'id' => 'mempertimbangkan']
                         ],
                         'options' => [
-                            'The picnic plan seems good, but we are considering whether the weather will cooperate.',
-                            'The picnic plan is seeming good, but we consider whether the weather will cooperate.',
-                            'The picnic plan seems good, but we consider currently whether the weather will cooperate.',
-                            'The picnic plan is seeming good, but we are considering whether the weather will cooperate.'
+                            'The expansion plan seems promising, but we are considering whether the budget is sufficient.',
+                            'The expansion plan is seeming promising, but we consider whether the budget is sufficient.',
+                            'The expansion plan seems promising, but we consider currently whether the budget is sufficient.',
+                            'The expansion plan is seeming promising, but we are considering whether the budget is sufficient.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Seem" adalah stative verb murni (tidak boleh *is seeming), sedangkan "consider" dalam arti sedang menimbang boleh memakai continuous ("are considering").'
                     ],
                     [
                         'id' => 45,
-                        'id_sentence' => 'Keluarga itu belum memiliki kulkas baru sejak yang lama rusak.',
+                        'id_sentence' => 'Departemen itu belum memiliki anggaran tambahan sejak proyek sebelumnya ditutup.',
                         'target_word' => 'does not have (Stative Verb: Possession)',
                         'vocab' => [
-                            ['en' => 'family', 'id' => 'keluarga'],
+                            ['en' => 'department', 'id' => 'departemen'],
                             ['en' => 'does not have', 'id' => 'belum memiliki'],
-                            ['en' => 'new refrigerator', 'id' => 'kulkas baru']
+                            ['en' => 'additional budget', 'id' => 'anggaran tambahan']
                         ],
                         'options' => [
-                            'The family does not have a new refrigerator since the old one broke.',
-                            'The family is not having a new refrigerator since the old one broke.',
-                            'The family do not have a new refrigerator since the old one broke.',
-                            'The family are not having a new refrigerator since the old one broke.'
+                            'The department does not have an additional budget since the previous project closed.',
+                            'The department is not having an additional budget since the previous project closed.',
+                            'The department do not have an additional budget since the previous project closed.',
+                            'The department are not having an additional budget since the previous project closed.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Have" yang bermakna memiliki adalah stative verb ("does not have", bukan *is not having).'
                     ],
                     [
                         'id' => 46,
-                        'id_sentence' => 'Sepupu saya memiliki sepeda baru berwarna biru.',
+                        'id_sentence' => 'Klien kami memiliki beberapa persyaratan khusus untuk proyek ini.',
                         'target_word' => 'has (Stative Verb: Possession)',
                         'vocab' => [
-                            ['en' => 'cousin', 'id' => 'sepupu'],
+                            ['en' => 'client', 'id' => 'klien'],
                             ['en' => 'has', 'id' => 'memiliki'],
-                            ['en' => 'blue bicycle', 'id' => 'sepeda biru']
+                            ['en' => 'special requirements', 'id' => 'persyaratan khusus']
                         ],
                         'options' => [
-                            'My cousin has a new blue bicycle.',
-                            'My cousin is having a new blue bicycle.',
-                            'My cousin have a new blue bicycle.',
-                            'My cousin is have a new blue bicycle.'
+                            'Our client has several special requirements for this project.',
+                            'Our client is having several special requirements for this project.',
+                            'Our client have several special requirements for this project.',
+                            'Our client is have several special requirements for this project.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Have" bermakna memiliki adalah stative verb, memakai bentuk Simple Present "has", bukan *is having.'
                     ],
                     [
                         'id' => 47,
-                        'id_sentence' => 'Resep kue ini terdiri dari lima bahan sederhana.',
+                        'id_sentence' => 'Paket layanan ini terdiri dari tiga tahap utama.',
                         'target_word' => 'consists of (Stative Verb: Composition)',
                         'vocab' => [
-                            ['en' => 'cake recipe', 'id' => 'resep kue'],
+                            ['en' => 'service package', 'id' => 'paket layanan'],
                             ['en' => 'consists of', 'id' => 'terdiri dari'],
-                            ['en' => 'simple ingredients', 'id' => 'bahan sederhana']
+                            ['en' => 'three main phases', 'id' => 'tiga tahap utama']
                         ],
                         'options' => [
-                            'This cake recipe consists of five simple ingredients.',
-                            'This cake recipe is consisting of five simple ingredients.',
-                            'This cake recipe consist of five simple ingredients.',
-                            'This cake recipe is consisted of five simple ingredients.'
+                            'This service package consists of three main phases.',
+                            'This service package is consisting of three main phases.',
+                            'This service package consist of three main phases.',
+                            'This service package is consisted of three main phases.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Frasa "consist of" selalu stative (*is consisting of dan *is consisted of adalah kesalahan).'
                     ],
                     [
                         'id' => 48,
-                        'id_sentence' => 'Kakak percaya bahwa adik bisa memenangkan lomba menggambar itu.',
+                        'id_sentence' => 'Direktur percaya bahwa tim pemasaran bisa mencapai target tahun ini.',
                         'target_word' => 'believes (Stative Verb: Belief)',
                         'vocab' => [
-                            ['en' => 'older sibling', 'id' => 'kakak'],
+                            ['en' => 'director', 'id' => 'direktur'],
                             ['en' => 'believes', 'id' => 'percaya'],
-                            ['en' => 'drawing competition', 'id' => 'lomba menggambar']
+                            ['en' => 'marketing team', 'id' => 'tim pemasaran']
                         ],
                         'options' => [
-                            'My older sibling believes that my younger sibling can win the drawing competition.',
-                            'My older sibling is believing that my younger sibling can win the drawing competition.',
-                            'My older sibling believe that my younger sibling can win the drawing competition.',
-                            'My older sibling are believing that my younger sibling can win the drawing competition.'
+                            'The director believes that the marketing team can reach the target this year.',
+                            'The director is believing that the marketing team can reach the target this year.',
+                            'The director believe that the marketing team can reach the target this year.',
+                            'The director are believing that the marketing team can reach the target this year.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Believe" adalah stative verb dan tidak berbentuk continuous (*is believing).'
                     ],
                     [
                         'id' => 49,
-                        'id_sentence' => 'Buku itu memiliki sampul berwarna merah cerah.',
+                        'id_sentence' => 'Gedung baru itu memiliki fasilitas parkir yang luas.',
                         'target_word' => 'has (Stative Verb: Attribute)',
                         'vocab' => [
-                            ['en' => 'book', 'id' => 'buku'],
+                            ['en' => 'new building', 'id' => 'gedung baru'],
                             ['en' => 'has', 'id' => 'memiliki'],
-                            ['en' => 'bright red cover', 'id' => 'sampul merah cerah']
+                            ['en' => 'spacious parking facility', 'id' => 'fasilitas parkir yang luas']
                         ],
                         'options' => [
-                            'The book has a bright red cover.',
-                            'The book is having a bright red cover.',
-                            'The book have a bright red cover.',
-                            'The book is have a bright red cover.'
+                            'The new building has a spacious parking facility.',
+                            'The new building is having a spacious parking facility.',
+                            'The new building have a spacious parking facility.',
+                            'The new building is have a spacious parking facility.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Have" bermakna ciri fisik adalah stative verb ("has", bukan *is having).'
                     ],
                     [
                         'id' => 50,
-                        'id_sentence' => 'Saya ragu apakah hujan akan berhenti sebelum sore.',
+                        'id_sentence' => 'Saya ragu apakah vendor itu akan mengirimkan barang sebelum tenggat waktu.',
                         'target_word' => 'doubt (Stative Verb: Mental State)',
                         'vocab' => [
                             ['en' => 'doubt', 'id' => 'ragu'],
-                            ['en' => 'stop', 'id' => 'berhenti'],
-                            ['en' => 'before afternoon', 'id' => 'sebelum sore']
+                            ['en' => 'vendor', 'id' => 'vendor'],
+                            ['en' => 'before the deadline', 'id' => 'sebelum tenggat waktu']
                         ],
                         'options' => [
-                            'I doubt the rain will stop before afternoon.',
-                            'I am doubting the rain will stop before afternoon.',
-                            'I doubts the rain will stop before afternoon.',
-                            'I am doubt the rain will stop before afternoon.'
+                            'I doubt the vendor will deliver the goods before the deadline.',
+                            'I am doubting the vendor will deliver the goods before the deadline.',
+                            'I doubts the vendor will deliver the goods before the deadline.',
+                            'I am doubt the vendor will deliver the goods before the deadline.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Doubt" adalah stative verb yang menyatakan keraguan, memakai bentuk Simple Present, bukan *am doubting.'
@@ -1150,194 +1150,193 @@ class SelfStudyPresentContinuousData
                 'name' => '1.9.6 Bentuk Negatif & Pertanyaan Present Continuous',
                 'code' => '1.9.6',
                 'concept_title' => 'Bentuk Negatif & Pertanyaan Present Continuous',
-                'concept_description' => 'Dipakai untuk menyatakan bahwa sesuatu TIDAK sedang terjadi sekarang, atau untuk menanyakan apakah sesuatu sedang terjadi.',
-                'description' => 'Dipakai untuk menyatakan bahwa sesuatu TIDAK sedang terjadi sekarang, atau untuk menanyakan apakah sesuatu sedang terjadi.',
+                'concept_description' => 'Dipakai untuk menyatakan bahwa sesuatu TIDAK sedang berlangsung sekarang, atau untuk menanyakan apakah sesuatu sedang berlangsung.',
+                'description' => 'Dipakai untuk menyatakan bahwa sesuatu TIDAK sedang berlangsung sekarang, atau untuk menanyakan apakah sesuatu sedang berlangsung.',
                 'formula' => 'Negatif: S + is/are + NOT + V-ing / being V3 | Tanya: Is/Are + S + V-ing?',
                 'rules' => [
                     'Pada kalimat verbal negatif, sisipkan "not" tepat setelah to be (is not cooking, are not playing).',
-                    'Pada kalimat pasif negatif, letakkan "not" sebelum "being" (is not being washed).',
-                    'Pada kalimat tanya, pindahkan to be ke posisi paling depan sebelum subjek (Is she cooking...?).'
+                    'Pada kalimat pasif negatif, letakkan "not" sebelum "being" (is not being processed).',
+                    'Pada kalimat tanya, pindahkan to be ke posisi paling depan sebelum subjek (Is she preparing...?).'
                 ],
                 'exercises' => [
                     [
                         'id' => 51,
-                        'id_sentence' => 'Anak-anak belum sedang tidur meskipun sudah jam sembilan malam.',
-                        'target_word' => 'are not sleeping (Negative Verbal)',
+                        'id_sentence' => 'Vendor itu belum sedang merespons permintaan penawaran kami sejak kemarin.',
+                        'target_word' => 'is not responding (Negative Verbal)',
                         'vocab' => [
-                            ['en' => 'children', 'id' => 'anak-anak'],
-                            ['en' => 'sleeping', 'id' => 'tidur'],
-                            ['en' => 'nine at night', 'id' => 'jam sembilan malam']
+                            ['en' => 'vendor', 'id' => 'vendor'],
+                            ['en' => 'responding', 'id' => 'merespons'],
+                            ['en' => 'price quotation request', 'id' => 'permintaan penawaran']
                         ],
                         'options' => [
-                            'The children are not sleeping even though it is already nine at night.',
-                            'The children does not sleeping even though it is already nine at night.',
-                            'The children is not sleeping even though it is already nine at night.',
-                            'The children not sleeping even though it is already nine at night.'
+                            'The vendor is not responding to our price quotation request since yesterday.',
+                            'The vendor does not responding to our price quotation request since yesterday.',
+                            'The vendor are not responding to our price quotation request since yesterday.',
+                            'The vendor not responding to our price quotation request since yesterday.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Bentuk negatif Present Continuous dibentuk dengan meletakkan "not" setelah auxiliary: "are not sleeping".'
+                        'explanation' => 'Bentuk negatif Present Continuous dibentuk dengan meletakkan "not" setelah auxiliary: "is not responding".'
                     ],
                     [
                         'id' => 52,
-                        'id_sentence' => 'Baju-baju itu tidak sedang dicuci hari ini karena mesin cuci rusak.',
-                        'target_word' => 'are not being washed (Negative Passive)',
+                        'id_sentence' => 'Pesanan itu tidak sedang diproses hari ini karena sistem sedang pemeliharaan.',
+                        'target_word' => 'is not being processed (Negative Passive)',
                         'vocab' => [
-                            ['en' => 'clothes', 'id' => 'baju-baju'],
-                            ['en' => 'washed', 'id' => 'dicuci'],
-                            ['en' => 'washing machine', 'id' => 'mesin cuci']
+                            ['en' => 'order', 'id' => 'pesanan'],
+                            ['en' => 'processed', 'id' => 'diproses'],
+                            ['en' => 'system maintenance', 'id' => 'pemeliharaan sistem']
                         ],
                         'options' => [
-                            'The clothes are not being washed today because the washing machine is broken.',
-                            'The clothes are not washing today because the washing machine is broken.',
-                            'The clothes does not being washed today because the washing machine is broken.',
-                            'The clothes are not been washed today because the washing machine is broken.'
+                            'The order is not being processed today because the system is under maintenance.',
+                            'The order is not processing today because the system is under maintenance.',
+                            'The order does not being processed today because the system is under maintenance.',
+                            'The order is not been processed today because the system is under maintenance.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Pola negatif pasif continuous adalah "are not being" + V3 "washed".'
+                        'explanation' => 'Pola negatif pasif continuous adalah "is not being" + V3 "processed".'
                     ],
                     [
                         'id' => 53,
-                        'id_sentence' => 'Murid-murid tidak sedang mengerjakan ulangan selama jam istirahat.',
-                        'target_word' => 'are not doing (Negative Verbal)',
+                        'id_sentence' => 'Para peserta tidak sedang mengisi survei kepuasan selama sesi istirahat.',
+                        'target_word' => 'are not filling (Negative Verbal)',
                         'vocab' => [
-                            ['en' => 'students', 'id' => 'murid-murid'],
-                            ['en' => 'test', 'id' => 'ulangan'],
-                            ['en' => 'break time', 'id' => 'jam istirahat']
+                            ['en' => 'participants', 'id' => 'peserta'],
+                            ['en' => 'satisfaction survey', 'id' => 'survei kepuasan'],
+                            ['en' => 'break session', 'id' => 'sesi istirahat']
                         ],
                         'options' => [
-                            'The students are not doing a test during break time.',
-                            'The students is not doing a test during break time.',
-                            'The students do not doing a test during break time.',
-                            'The students are not do a test during break time.'
+                            'The participants are not filling out the satisfaction survey during the break session.',
+                            'The participants is not filling out the satisfaction survey during the break session.',
+                            'The participants do not filling out the satisfaction survey during the break session.',
+                            'The participants are not fill out the satisfaction survey during the break session.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "The students" mengambil "are not doing".'
+                        'explanation' => 'Subjek jamak "The participants" mengambil "are not filling".'
                     ],
                     [
                         'id' => 54,
-                        'id_sentence' => 'Apakah Ibu sedang memasak sup ayam untuk makan malam?',
-                        'target_word' => 'Is ... cooking (Interrogative Verbal)',
+                        'id_sentence' => 'Apakah supervisor sedang meninjau laporan kinerja bulanan?',
+                        'target_word' => 'Is ... reviewing (Interrogative Verbal)',
                         'vocab' => [
-                            ['en' => 'cooking', 'id' => 'memasak'],
-                            ['en' => 'chicken soup', 'id' => 'sup ayam'],
-                            ['en' => 'dinner', 'id' => 'makan malam']
+                            ['en' => 'reviewing', 'id' => 'meninjau'],
+                            ['en' => 'monthly performance report', 'id' => 'laporan kinerja bulanan']
                         ],
                         'options' => [
-                            'Is Mom cooking chicken soup for dinner?',
-                            'Does Mom cooking chicken soup for dinner?',
-                            'Are Mom cooking chicken soup for dinner?',
-                            'Is Mom cook chicken soup for dinner?'
+                            'Is the supervisor reviewing the monthly performance report?',
+                            'Does the supervisor reviewing the monthly performance report?',
+                            'Are the supervisor reviewing the monthly performance report?',
+                            'Is the supervisor review the monthly performance report?'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "Mom" diawali auxiliary "Is" + V-ing "cooking".'
+                        'explanation' => 'Subjek tunggal "the supervisor" diawali auxiliary "Is" + V-ing "reviewing".'
                     ],
                     [
                         'id' => 55,
-                        'id_sentence' => 'Toko itu tidak sedang buka hari Minggu ini.',
-                        'target_word' => 'is not opening (Negative Verbal)',
+                        'id_sentence' => 'Cabang itu tidak sedang beroperasi penuh akhir pekan ini karena renovasi.',
+                        'target_word' => 'is not operating (Negative Verbal)',
                         'vocab' => [
-                            ['en' => 'shop', 'id' => 'toko'],
-                            ['en' => 'opening', 'id' => 'buka'],
-                            ['en' => 'this Sunday', 'id' => 'hari Minggu ini']
+                            ['en' => 'branch', 'id' => 'cabang'],
+                            ['en' => 'operating', 'id' => 'beroperasi'],
+                            ['en' => 'renovation', 'id' => 'renovasi']
                         ],
                         'options' => [
-                            'The shop is not opening this Sunday.',
-                            'The shop are not opening this Sunday.',
-                            'The shop does not opening this Sunday.',
-                            'The shop not is opening this Sunday.'
+                            'The branch is not operating at full capacity this weekend because of renovation.',
+                            'The branch are not operating at full capacity this weekend because of renovation.',
+                            'The branch does not operating at full capacity this weekend because of renovation.',
+                            'The branch not is operating at full capacity this weekend because of renovation.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "The shop" membutuhkan "is not opening".'
+                        'explanation' => 'Subjek tunggal "The branch" membutuhkan "is not operating".'
                     ],
                     [
                         'id' => 56,
-                        'id_sentence' => 'Mainan-mainan itu tidak sedang dipajang di toko karena sedang dibersihkan.',
-                        'target_word' => 'are not being displayed (Negative Passive)',
+                        'id_sentence' => 'Produk baru itu tidak sedang dipajang di etalase karena masih menunggu persetujuan desain.',
+                        'target_word' => 'is not being displayed (Negative Passive)',
                         'vocab' => [
-                            ['en' => 'toys', 'id' => 'mainan-mainan'],
+                            ['en' => 'new product', 'id' => 'produk baru'],
                             ['en' => 'displayed', 'id' => 'dipajang'],
-                            ['en' => 'cleaned', 'id' => 'dibersihkan']
+                            ['en' => 'design approval', 'id' => 'persetujuan desain']
                         ],
                         'options' => [
-                            'The toys are not being displayed in the shop because they are being cleaned.',
-                            'The toys is not being displayed in the shop because they are being cleaned.',
-                            'The toys are not displaying in the shop because they are being cleaned.',
-                            'The toys do not being displayed in the shop because they are being cleaned.'
+                            'The new product is not being displayed in the showcase because it is still awaiting design approval.',
+                            'The new product are not being displayed in the showcase because it is still awaiting design approval.',
+                            'The new product is not displaying in the showcase because it is still awaiting design approval.',
+                            'The new product does not being displayed in the showcase because it is still awaiting design approval.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "The toys" memerlukan bentuk pasif negatif: "are not being displayed".'
+                        'explanation' => 'Subjek tunggal "The new product" memerlukan bentuk pasif negatif: "is not being displayed".'
                     ],
                     [
                         'id' => 57,
-                        'id_sentence' => 'Apakah anak-anak sedang mengganti baju untuk pergi ke sekolah?',
-                        'target_word' => 'Are ... changing (Interrogative Verbal)',
+                        'id_sentence' => 'Apakah tim pengembang sedang menguji fitur pembayaran yang baru?',
+                        'target_word' => 'Is ... testing (Interrogative Verbal)',
                         'vocab' => [
-                            ['en' => 'children', 'id' => 'anak-anak'],
-                            ['en' => 'changing clothes', 'id' => 'mengganti baju'],
-                            ['en' => 'school', 'id' => 'sekolah']
+                            ['en' => 'development team', 'id' => 'tim pengembang'],
+                            ['en' => 'testing', 'id' => 'menguji'],
+                            ['en' => 'new payment feature', 'id' => 'fitur pembayaran baru']
                         ],
                         'options' => [
-                            'Are the children changing clothes to go to school?',
-                            'Is the children changing clothes to go to school?',
-                            'Do the children changing clothes to go to school?',
-                            'Are the children change clothes to go to school?'
+                            'Is the development team testing the new payment feature?',
+                            'Does the development team testing the new payment feature?',
+                            'Are the development team testing the new payment feature?',
+                            'Is the development team test the new payment feature?'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "the children" diawali oleh auxiliary "Are" + V-ing "changing".'
+                        'explanation' => 'Subjek tunggal "the development team" diawali oleh auxiliary "Is" + V-ing "testing".'
                     ],
                     [
                         'id' => 58,
-                        'id_sentence' => 'Hujan belum berhenti meskipun sudah sore.',
-                        'target_word' => 'is not stopping (Negative Verbal)',
+                        'id_sentence' => 'Masalah konektivitas internet belum teratasi meskipun teknisi sudah dipanggil.',
+                        'target_word' => 'is not resolving (Negative Verbal)',
                         'vocab' => [
-                            ['en' => 'rain', 'id' => 'hujan'],
-                            ['en' => 'stopping', 'id' => 'berhenti'],
-                            ['en' => 'afternoon', 'id' => 'sore']
+                            ['en' => 'internet connectivity issue', 'id' => 'masalah konektivitas internet'],
+                            ['en' => 'resolving', 'id' => 'teratasi'],
+                            ['en' => 'technician', 'id' => 'teknisi']
                         ],
                         'options' => [
-                            'The rain is not stopping even though it is already afternoon.',
-                            'The rain are not stopping even though it is already afternoon.',
-                            'The rain does not stopping even though it is already afternoon.',
-                            'The rain is not stop even though it is already afternoon.'
+                            'The internet connectivity issue is not resolving even though a technician has been called.',
+                            'The internet connectivity issue are not resolving even though a technician has been called.',
+                            'The internet connectivity issue does not resolving even though a technician has been called.',
+                            'The internet connectivity issue is not resolve even though a technician has been called.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek "The rain" tunggal, sehingga bentuk negatif continuous yang tepat adalah "is not stopping".'
+                        'explanation' => 'Subjek "The issue" tunggal, sehingga bentuk negatif continuous yang tepat adalah "is not resolving".'
                     ],
                     [
                         'id' => 59,
-                        'id_sentence' => 'Pesan itu tidak sedang dikirim karena sinyal internet lemah.',
+                        'id_sentence' => 'Invoice itu tidak sedang dikirim karena menunggu persetujuan akhir dari manajer keuangan.',
                         'target_word' => 'is not being sent (Negative Passive)',
                         'vocab' => [
-                            ['en' => 'message', 'id' => 'pesan'],
+                            ['en' => 'invoice', 'id' => 'invoice'],
                             ['en' => 'sent', 'id' => 'dikirim'],
-                            ['en' => 'weak internet signal', 'id' => 'sinyal internet lemah']
+                            ['en' => 'finance manager', 'id' => 'manajer keuangan']
                         ],
                         'options' => [
-                            'The message is not being sent because the internet signal is weak.',
-                            'The message are not being sent because the internet signal is weak.',
-                            'The message is not sending because the internet signal is weak.',
-                            'The message does not being sent because the internet signal is weak.'
+                            'The invoice is not being sent because it is waiting for final approval from the finance manager.',
+                            'The invoice are not being sent because it is waiting for final approval from the finance manager.',
+                            'The invoice is not sending because it is waiting for final approval from the finance manager.',
+                            'The invoice does not being sent because it is waiting for final approval from the finance manager.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "message" dalam bentuk pasif negatif continuous membutuhkan "is not being sent".'
+                        'explanation' => 'Subjek tunggal "invoice" dalam bentuk pasif negatif continuous membutuhkan "is not being sent".'
                     ],
                     [
                         'id' => 60,
-                        'id_sentence' => 'Apakah latihan menari yang baru menunjukkan hasil yang bagus untuk tim sekolah?',
+                        'id_sentence' => 'Apakah strategi pemasaran yang baru menunjukkan hasil yang bagus untuk kuartal ini?',
                         'target_word' => 'Is ... showing (Interrogative Verbal)',
                         'vocab' => [
-                            ['en' => 'new dance practice', 'id' => 'latihan menari yang baru'],
+                            ['en' => 'new marketing strategy', 'id' => 'strategi pemasaran baru'],
                             ['en' => 'good results', 'id' => 'hasil yang bagus'],
-                            ['en' => 'school team', 'id' => 'tim sekolah']
+                            ['en' => 'this quarter', 'id' => 'kuartal ini']
                         ],
                         'options' => [
-                            'Is the new dance practice showing good results for the school team?',
-                            'Does the new dance practice showing good results for the school team?',
-                            'Are the new dance practice showing good results for the school team?',
-                            'Is the new dance practice show good results for the school team?'
+                            'Is the new marketing strategy showing good results this quarter?',
+                            'Does the new marketing strategy showing good results this quarter?',
+                            'Are the new marketing strategy showing good results this quarter?',
+                            'Is the new marketing strategy show good results this quarter?'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek tunggal "the new dance practice" diawali to be "Is" + V-ing "showing".'
+                        'explanation' => 'Subjek tunggal "the new marketing strategy" diawali to be "Is" + V-ing "showing".'
                     ],
                 ]
             ],
@@ -1348,194 +1347,194 @@ class SelfStudyPresentContinuousData
                 'name' => '1.9.7 Kata Keterangan Waktu Bersama Continuous Tense',
                 'code' => '1.9.7',
                 'concept_title' => 'Kata Keterangan Waktu Bersama Continuous Tense',
-                'concept_description' => 'Memperkaya kalimat continuous dengan kata keterangan waktu seperti right now, at the moment, today, currently, untuk memperjelas bahwa sesuatu sedang terjadi saat ini.',
-                'description' => 'Memperkaya kalimat continuous dengan kata keterangan waktu seperti right now, at the moment, today, currently, untuk memperjelas bahwa sesuatu sedang terjadi saat ini.',
+                'concept_description' => 'Memperkaya kalimat continuous dengan kata keterangan waktu seperti right now, at the moment, today, currently, untuk memperjelas bahwa sesuatu sedang berlangsung saat ini.',
+                'description' => 'Memperkaya kalimat continuous dengan kata keterangan waktu seperti right now, at the moment, today, currently, untuk memperjelas bahwa sesuatu sedang berlangsung saat ini.',
                 'formula' => 'Keterangan Waktu + Koma + Subject + is/are + V-ing',
                 'rules' => [
-                    'Kata keterangan waktu sering disisipkan di antara to be dan kata kerja utama (misalnya: "is currently reading").',
-                    'Kata keterangan waktu juga bisa diletakkan di depan kalimat, diikuti tanda koma ("Right now, she is...").',
-                    'Pastikan kata keterangan waktu sesuai dengan maksud "sedang terjadi sekarang" (right now, at the moment, today).'
+                    'Kata keterangan waktu sering disisipkan di antara to be dan kata kerja utama (misalnya: "is currently reviewing").',
+                    'Kata keterangan waktu juga bisa diletakkan di depan kalimat, diikuti tanda koma ("Right now, the team is...").',
+                    'Pastikan kata keterangan waktu sesuai dengan maksud "sedang berlangsung sekarang" (right now, at the moment, today).'
                 ],
                 'exercises' => [
                     [
                         'id' => 61,
-                        'id_sentence' => 'Sekarang, Ayah sedang memperbaiki sepeda di garasi.',
-                        'target_word' => 'Right now, ... is fixing (Adverbial Placement)',
+                        'id_sentence' => 'Sekarang, tim perawatan sedang memeriksa lift gedung utama.',
+                        'target_word' => 'Right now, ... is inspecting (Adverbial Placement)',
                         'vocab' => [
                             ['en' => 'right now', 'id' => 'sekarang'],
-                            ['en' => 'fixing', 'id' => 'memperbaiki'],
-                            ['en' => 'garage', 'id' => 'garasi']
+                            ['en' => 'inspecting', 'id' => 'memeriksa'],
+                            ['en' => 'main building elevator', 'id' => 'lift gedung utama']
                         ],
                         'options' => [
-                            'Right now, Dad is fixing the bicycle in the garage.',
-                            'Right now, Dad is fixing the bicycle in the garage is.',
-                            'Right now, Dad are fixing the bicycle in the garage.',
-                            'Right now, Dad fixing the bicycle in the garage.'
+                            'Right now, the maintenance team is inspecting the main building elevator.',
+                            'Right now, the maintenance team is inspecting the main building elevator is.',
+                            'Right now, the maintenance team are inspecting the main building elevator.',
+                            'Right now, the maintenance team inspecting the main building elevator.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Right now" di awal kalimat dipadukan dengan klausa Present Continuous tunggal "Dad is fixing".'
+                        'explanation' => '"Right now" di awal kalimat dipadukan dengan klausa Present Continuous tunggal "the team is inspecting".'
                     ],
                     [
                         'id' => 62,
-                        'id_sentence' => 'Saat ini, murid-murid sedang berlatih menyanyi untuk pentas seni.',
+                        'id_sentence' => 'Saat ini, para peserta sedang berlatih presentasi untuk sesi penutupan.',
                         'target_word' => 'At the moment, ... are practicing (Adverbial Phrase)',
                         'vocab' => [
                             ['en' => 'at the moment', 'id' => 'saat ini'],
-                            ['en' => 'practicing singing', 'id' => 'berlatih menyanyi'],
-                            ['en' => 'art performance', 'id' => 'pentas seni']
+                            ['en' => 'practicing', 'id' => 'berlatih'],
+                            ['en' => 'closing session', 'id' => 'sesi penutupan']
                         ],
                         'options' => [
-                            'At the moment, the students are practicing singing for the art performance.',
-                            'At the moment, the students is practicing singing for the art performance.',
-                            'At the moment, the students are practice singing for the art performance.',
-                            'At the moment, the students practicing singing for the art performance.'
+                            'At the moment, the participants are practicing their presentations for the closing session.',
+                            'At the moment, the participants is practicing their presentations for the closing session.',
+                            'At the moment, the participants are practice their presentations for the closing session.',
+                            'At the moment, the participants practicing their presentations for the closing session.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Frasa "At the moment" mengawali kalimat, diikuti subjek jamak "the students are practicing".'
+                        'explanation' => 'Frasa "At the moment" mengawali kalimat, diikuti subjek jamak "the participants are practicing".'
                     ],
                     [
                         'id' => 63,
-                        'id_sentence' => 'Hari ini, kami sedang membersihkan seluruh rumah untuk menyambut tamu.',
-                        'target_word' => 'Today, ... are cleaning (Adverbial Placement)',
+                        'id_sentence' => 'Hari ini, kami sedang mempersiapkan seluruh ruangan untuk kunjungan investor.',
+                        'target_word' => 'Today, ... are preparing (Adverbial Placement)',
                         'vocab' => [
                             ['en' => 'today', 'id' => 'hari ini'],
-                            ['en' => 'cleaning', 'id' => 'membersihkan'],
-                            ['en' => 'welcoming guests', 'id' => 'menyambut tamu']
+                            ['en' => 'preparing', 'id' => 'mempersiapkan'],
+                            ['en' => 'investor visit', 'id' => 'kunjungan investor']
                         ],
                         'options' => [
-                            'Today, we are cleaning the whole house to welcome guests.',
-                            'Today, we is cleaning the whole house to welcome guests.',
-                            'Today, we are clean the whole house to welcome guests.',
-                            'Today, we cleaning the whole house to welcome guests.'
+                            'Today, we are preparing the whole room for the investor visit.',
+                            'Today, we is preparing the whole room for the investor visit.',
+                            'Today, we are prepare the whole room for the investor visit.',
+                            'Today, we preparing the whole room for the investor visit.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Today" di awal kalimat diikuti subjek jamak "we are cleaning".'
+                        'explanation' => '"Today" di awal kalimat diikuti subjek jamak "we are preparing".'
                     ],
                     [
                         'id' => 64,
-                        'id_sentence' => 'Sekarang ini, harga buah-buahan sedang turun di pasar tradisional.',
+                        'id_sentence' => 'Sekarang ini, biaya pengiriman internasional sedang turun karena promosi musiman.',
                         'target_word' => 'These days, ... is dropping (Adverbial Placement)',
                         'vocab' => [
                             ['en' => 'these days', 'id' => 'sekarang ini'],
                             ['en' => 'dropping', 'id' => 'turun'],
-                            ['en' => 'traditional market', 'id' => 'pasar tradisional']
+                            ['en' => 'seasonal promotion', 'id' => 'promosi musiman']
                         ],
                         'options' => [
-                            'These days, the price of fruit is dropping at the traditional market.',
-                            'These days, the price of fruit are dropping at the traditional market.',
-                            'These days, the price of fruit is drop at the traditional market.',
-                            'These days, the price of fruit dropping at the traditional market.'
+                            'These days, the cost of international shipping is dropping because of a seasonal promotion.',
+                            'These days, the cost of international shipping are dropping because of a seasonal promotion.',
+                            'These days, the cost of international shipping is drop because of a seasonal promotion.',
+                            'These days, the cost of international shipping dropping because of a seasonal promotion.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Inti subjek "the price" (tunggal) berpasangan dengan "is dropping".'
+                        'explanation' => 'Inti subjek "the cost" (tunggal) berpasangan dengan "is dropping".'
                     ],
                     [
                         'id' => 65,
-                        'id_sentence' => 'Pak Guru saat ini sedang menandai hasil ulangan di ruang guru.',
+                        'id_sentence' => 'Supervisor saat ini sedang menandai hasil evaluasi di ruang rapat.',
                         'target_word' => 'is currently marking (Adverbial Between Auxiliary & Verb)',
                         'vocab' => [
                             ['en' => 'currently', 'id' => 'saat ini'],
                             ['en' => 'marking', 'id' => 'menandai'],
-                            ['en' => 'teachers\' room', 'id' => 'ruang guru']
+                            ['en' => 'meeting room', 'id' => 'ruang rapat']
                         ],
                         'options' => [
-                            'The teacher is currently marking the test results in the teachers\' room.',
-                            'The teacher currently is marking the test results in the teachers\' room.',
-                            'The teacher is currently mark the test results in the teachers\' room.',
-                            'The teacher currently marking the test results in the teachers\' room.'
+                            'The supervisor is currently marking the evaluation results in the meeting room.',
+                            'The supervisor currently is marking the evaluation results in the meeting room.',
+                            'The supervisor is currently mark the evaluation results in the meeting room.',
+                            'The supervisor currently marking the evaluation results in the meeting room.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Kata keterangan "currently" diletakkan di antara to be "is" dan kata kerja utama "marking".'
                     ],
                     [
                         'id' => 66,
-                        'id_sentence' => 'Pada waktu seperti ini, keluarga-keluarga biasanya sedang berkumpul untuk makan malam.',
-                        'target_word' => 'At this time, ... are gathering (Adverbial Phrase)',
+                        'id_sentence' => 'Pada waktu seperti ini, divisi operasional biasanya sedang menyusun laporan mingguan.',
+                        'target_word' => 'At this time, ... is compiling (Adverbial Phrase)',
                         'vocab' => [
                             ['en' => 'at this time', 'id' => 'pada waktu seperti ini'],
-                            ['en' => 'gathering', 'id' => 'berkumpul'],
-                            ['en' => 'dinner', 'id' => 'makan malam']
+                            ['en' => 'compiling', 'id' => 'menyusun'],
+                            ['en' => 'weekly report', 'id' => 'laporan mingguan']
                         ],
                         'options' => [
-                            'At this time, families are usually gathering for dinner.',
-                            'At this time, families is usually gathering for dinner.',
-                            'At this time, families are usually gather for dinner.',
-                            'At this time, families usually gathering for dinner.'
+                            'At this time, the operations division is usually compiling the weekly report.',
+                            'At this time, the operations division are usually compiling the weekly report.',
+                            'At this time, the operations division is usually compile the weekly report.',
+                            'At this time, the operations division usually compiling the weekly report.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Frasa "At this time" mengawali kalimat, diikuti subjek jamak "families are gathering".'
+                        'explanation' => 'Frasa "At this time" mengawali kalimat, diikuti subjek tunggal "the operations division is compiling".'
                     ],
                     [
                         'id' => 67,
-                        'id_sentence' => 'Tetangga kami sekarang sedang mengecat pagar rumahnya warna hijau.',
-                        'target_word' => 'is now painting (Adverbial Between Auxiliary & Verb)',
+                        'id_sentence' => 'Vendor kami sekarang sedang menguji kualitas sampel produk terbaru.',
+                        'target_word' => 'is now testing (Adverbial Between Auxiliary & Verb)',
                         'vocab' => [
                             ['en' => 'now', 'id' => 'sekarang'],
-                            ['en' => 'painting', 'id' => 'mengecat'],
-                            ['en' => 'fence', 'id' => 'pagar']
+                            ['en' => 'testing', 'id' => 'menguji'],
+                            ['en' => 'latest product sample', 'id' => 'sampel produk terbaru']
                         ],
                         'options' => [
-                            'Our neighbor is now painting their fence green.',
-                            'Our neighbor now is painting their fence green.',
-                            'Our neighbor is now paint their fence green.',
-                            'Our neighbor now painting their fence green.'
+                            'Our vendor is now testing the quality of the latest product sample.',
+                            'Our vendor now is testing the quality of the latest product sample.',
+                            'Our vendor is now test the quality of the latest product sample.',
+                            'Our vendor now testing the quality of the latest product sample.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kata "now" diletakkan setelah to be "is", sebelum kata kerja utama "painting".'
+                        'explanation' => 'Kata "now" diletakkan setelah to be "is", sebelum kata kerja utama "testing".'
                     ],
                     [
                         'id' => 68,
-                        'id_sentence' => 'Minggu ini, para pedagang sedang menjual lebih banyak payung karena musim hujan.',
-                        'target_word' => 'This week, ... are selling (Adverbial Placement)',
+                        'id_sentence' => 'Minggu ini, para pemasok sedang mengirim lebih banyak stok karena permintaan meningkat.',
+                        'target_word' => 'This week, ... are sending (Adverbial Placement)',
                         'vocab' => [
                             ['en' => 'this week', 'id' => 'minggu ini'],
-                            ['en' => 'selling', 'id' => 'menjual'],
-                            ['en' => 'rainy season', 'id' => 'musim hujan']
+                            ['en' => 'sending', 'id' => 'mengirim'],
+                            ['en' => 'increased demand', 'id' => 'permintaan meningkat']
                         ],
                         'options' => [
-                            'This week, the vendors are selling more umbrellas because of the rainy season.',
-                            'This week, the vendors is selling more umbrellas because of the rainy season.',
-                            'This week, the vendors are sell more umbrellas because of the rainy season.',
-                            'This week, the vendors selling more umbrellas because of the rainy season.'
+                            'This week, the suppliers are sending more stock because of increased demand.',
+                            'This week, the suppliers is sending more stock because of increased demand.',
+                            'This week, the suppliers are send more stock because of increased demand.',
+                            'This week, the suppliers sending more stock because of increased demand.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"This week" di awal kalimat diikuti subjek jamak "the vendors are selling".'
+                        'explanation' => '"This week" di awal kalimat diikuti subjek jamak "the suppliers are sending".'
                     ],
                     [
                         'id' => 69,
-                        'id_sentence' => 'Saat ini, kakek sedang beristirahat setelah berjalan pagi.',
+                        'id_sentence' => 'Saat ini, konsultan sedang beristirahat sebelum sesi presentasi berikutnya.',
                         'target_word' => 'is currently resting (Adverbial Between Auxiliary & Verb)',
                         'vocab' => [
                             ['en' => 'currently', 'id' => 'saat ini'],
                             ['en' => 'resting', 'id' => 'beristirahat'],
-                            ['en' => 'morning walk', 'id' => 'berjalan pagi']
+                            ['en' => 'next presentation session', 'id' => 'sesi presentasi berikutnya']
                         ],
                         'options' => [
-                            'Grandfather is currently resting after his morning walk.',
-                            'Grandfather currently is resting after his morning walk.',
-                            'Grandfather is currently rest after his morning walk.',
-                            'Grandfather currently resting after his morning walk.'
+                            'The consultant is currently resting before the next presentation session.',
+                            'The consultant currently is resting before the next presentation session.',
+                            'The consultant is currently rest before the next presentation session.',
+                            'The consultant currently resting before the next presentation session.'
                         ],
                         'correct_index' => 0,
                         'explanation' => '"Currently" diletakkan di antara "is" dan "resting".'
                     ],
                     [
                         'id' => 70,
-                        'id_sentence' => 'Bulan ini, sekolah kami sedang mengumpulkan donasi buku untuk perpustakaan desa.',
+                        'id_sentence' => 'Bulan ini, perusahaan kami sedang mengumpulkan umpan balik pelanggan untuk evaluasi tahunan.',
                         'target_word' => 'This month, ... is collecting (Adverbial Placement)',
                         'vocab' => [
                             ['en' => 'this month', 'id' => 'bulan ini'],
                             ['en' => 'collecting', 'id' => 'mengumpulkan'],
-                            ['en' => 'village library', 'id' => 'perpustakaan desa']
+                            ['en' => 'annual evaluation', 'id' => 'evaluasi tahunan']
                         ],
                         'options' => [
-                            'This month, our school is collecting book donations for the village library.',
-                            'This month, our school are collecting book donations for the village library.',
-                            'This month, our school is collect book donations for the village library.',
-                            'This month, our school collecting book donations for the village library.'
+                            'This month, our company is collecting customer feedback for the annual evaluation.',
+                            'This month, our company are collecting customer feedback for the annual evaluation.',
+                            'This month, our company is collect customer feedback for the annual evaluation.',
+                            'This month, our company collecting customer feedback for the annual evaluation.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"This month" di awal kalimat diikuti subjek tunggal "our school is collecting".'
+                        'explanation' => '"This month" di awal kalimat diikuti subjek tunggal "our company is collecting".'
                     ],
                 ]
             ],
@@ -1543,194 +1542,194 @@ class SelfStudyPresentContinuousData
             // Sub-Lesson 1.9.8
             [
                 'id' => 'continuous-synthesis',
-                'name' => '1.9.8 Menggabungkan Dua Kejadian yang Terjadi Bersamaan',
+                'name' => '1.9.8 Menggabungkan Dua Kejadian yang Berlangsung Bersamaan',
                 'code' => '1.9.8',
-                'concept_title' => 'Menggabungkan Dua Kejadian yang Terjadi Bersamaan',
-                'concept_description' => 'Menggabungkan dua klausa Present Continuous dengan kata sambung seperti while, because, as, dan although untuk menjelaskan dua hal yang sedang terjadi pada waktu yang sama.',
-                'description' => 'Menggabungkan dua klausa Present Continuous dengan kata sambung seperti while, because, as, dan although untuk menjelaskan dua hal yang sedang terjadi pada waktu yang sama.',
+                'concept_title' => 'Menggabungkan Dua Kejadian yang Berlangsung Bersamaan',
+                'concept_description' => 'Menggabungkan dua klausa Present Continuous dengan kata sambung seperti while, because, as, dan although untuk menjelaskan dua hal yang sedang berlangsung pada waktu yang sama.',
+                'description' => 'Menggabungkan dua klausa Present Continuous dengan kata sambung seperti while, because, as, dan although untuk menjelaskan dua hal yang sedang berlangsung pada waktu yang sama.',
                 'formula' => 'Kata Sambung (While/Because/As) + Klausa 1 (Continuous) + Koma + Klausa 2 (Continuous)',
                 'rules' => [
-                    'Gunakan "while" atau "although" untuk membandingkan dua hal yang terjadi bersamaan.',
+                    'Gunakan "while" atau "although" untuk membandingkan dua hal yang berlangsung bersamaan.',
                     'Gunakan "because" atau "as" untuk menghubungkan sebab-akibat yang sedang berlangsung.',
                     'Jaga agar subjek dan to be tetap sesuai (cocok/agreement) di setiap klausa.'
                 ],
                 'exercises' => [
                     [
                         'id' => 71,
-                        'id_sentence' => 'Sementara Ibu sedang memasak, Ayah sedang menyiapkan meja makan.',
-                        'target_word' => 'is cooking ... is setting (Simultaneous Actions)',
+                        'id_sentence' => 'Sementara tim desain sedang merancang kemasan baru, tim produksi sedang menyiapkan lini perakitan.',
+                        'target_word' => 'is designing ... is preparing (Simultaneous Actions)',
                         'vocab' => [
-                            ['en' => 'cooking', 'id' => 'memasak'],
-                            ['en' => 'setting the table', 'id' => 'menyiapkan meja makan']
+                            ['en' => 'designing', 'id' => 'merancang'],
+                            ['en' => 'preparing the assembly line', 'id' => 'menyiapkan lini perakitan']
                         ],
                         'options' => [
-                            'While Mom is cooking, Dad is setting the table.',
-                            'While Mom cooks, Dad sets the table.',
-                            'While Mom are cooking, Dad are setting the table.',
-                            'While Mom is cooking, Dad setting the table.'
+                            'While the design team is designing the new packaging, the production team is preparing the assembly line.',
+                            'While the design team designs the new packaging, the production team prepares the assembly line.',
+                            'While the design team are designing the new packaging, the production team are preparing the assembly line.',
+                            'While the design team is designing the new packaging, the production team preparing the assembly line.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Dua kejadian yang berlangsung bersamaan dinyatakan dengan klausa kontras Present Continuous: "is cooking" dan "is setting".'
+                        'explanation' => 'Dua kejadian yang berlangsung bersamaan dinyatakan dengan klausa kontras Present Continuous: "is designing" dan "is preparing".'
                     ],
                     [
                         'id' => 72,
-                        'id_sentence' => 'Kue sedang dipanggang di oven, sementara susu cokelat sedang dibuat di dapur.',
-                        'target_word' => 'is being baked ... is being made (Dual Continuous Passive)',
+                        'id_sentence' => 'Kontrak sedang ditinjau oleh bagian hukum, sementara faktur sedang disiapkan oleh bagian keuangan.',
+                        'target_word' => 'is being reviewed ... is being prepared (Dual Continuous Passive)',
                         'vocab' => [
-                            ['en' => 'cake', 'id' => 'kue'],
-                            ['en' => 'baked', 'id' => 'dipanggang'],
-                            ['en' => 'chocolate milk', 'id' => 'susu cokelat']
+                            ['en' => 'contract', 'id' => 'kontrak'],
+                            ['en' => 'reviewed', 'id' => 'ditinjau'],
+                            ['en' => 'invoice', 'id' => 'faktur']
                         ],
                         'options' => [
-                            'The cake is being baked in the oven, while the chocolate milk is being made in the kitchen.',
-                            'The cake is baking in the oven, while the chocolate milk is making in the kitchen.',
-                            'The cake are being baked in the oven, while the chocolate milk are being made in the kitchen.',
-                            'The cake is being bake in the oven, while the chocolate milk is being make in the kitchen.'
+                            'The contract is being reviewed by the legal department, while the invoice is being prepared by the finance department.',
+                            'The contract is reviewing by the legal department, while the invoice is preparing by the finance department.',
+                            'The contract are being reviewed by the legal department, while the invoice are being prepared by the finance department.',
+                            'The contract is being review by the legal department, while the invoice is being prepare by the finance department.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kedua klausa memerlukan pasif continuous tunggal: "is being baked" dan "is being made".'
+                        'explanation' => 'Kedua klausa memerlukan pasif continuous tunggal: "is being reviewed" dan "is being prepared".'
                     ],
                     [
                         'id' => 73,
-                        'id_sentence' => 'Karena hujan sedang turun deras, anak-anak sedang bermain di dalam rumah.',
-                        'target_word' => 'is pouring ... are playing (Causal Continuous)',
+                        'id_sentence' => 'Karena permintaan sedang melonjak, pabrik sedang menambah jam operasional produksi.',
+                        'target_word' => 'is surging ... is extending (Causal Continuous)',
                         'vocab' => [
-                            ['en' => 'pouring rain', 'id' => 'hujan turun deras'],
-                            ['en' => 'playing indoors', 'id' => 'bermain di dalam rumah']
+                            ['en' => 'surging demand', 'id' => 'permintaan melonjak'],
+                            ['en' => 'extending production hours', 'id' => 'menambah jam operasional produksi']
                         ],
                         'options' => [
-                            'Because it is pouring rain, the children are playing indoors.',
-                            'Because it are pouring rain, the children are playing indoors.',
-                            'Because it is pour rain, the children is playing indoors.',
-                            'Because it pouring rain, the children playing indoors.'
+                            'Because demand is surging, the factory is extending its production hours.',
+                            'Because demand are surging, the factory are extending its production hours.',
+                            'Because demand is surge, the factory is extending its production hours.',
+                            'Because demand surging, the factory extending its production hours.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Klausa sebab "it is pouring" dan klausa akibat "the children are playing" keduanya memakai Present Continuous.'
+                        'explanation' => 'Klausa sebab "demand is surging" dan klausa akibat "the factory is extending" keduanya memakai Present Continuous.'
                     ],
                     [
                         'id' => 74,
-                        'id_sentence' => 'Sementara kakak sedang mengerjakan PR, adik sedang menonton kartun di ruang tamu.',
-                        'target_word' => 'is doing ... is watching (Simultaneous Actions)',
+                        'id_sentence' => 'Sementara satu tim sedang menangani keluhan pelanggan, tim lain sedang menyiapkan kampanye promosi baru.',
+                        'target_word' => 'is handling ... is preparing (Simultaneous Actions)',
                         'vocab' => [
-                            ['en' => 'doing homework', 'id' => 'mengerjakan PR'],
-                            ['en' => 'watching cartoons', 'id' => 'menonton kartun']
+                            ['en' => 'handling complaints', 'id' => 'menangani keluhan'],
+                            ['en' => 'preparing a promotional campaign', 'id' => 'menyiapkan kampanye promosi']
                         ],
                         'options' => [
-                            'While the older sibling is doing homework, the younger sibling is watching cartoons in the living room.',
-                            'While the older sibling does homework, the younger sibling watches cartoons in the living room.',
-                            'While the older sibling are doing homework, the younger sibling are watching cartoons in the living room.',
-                            'While the older sibling is doing homework, the younger sibling watching cartoons in the living room.'
+                            'While one team is handling customer complaints, the other team is preparing a new promotional campaign.',
+                            'While one team handles customer complaints, the other team prepares a new promotional campaign.',
+                            'While one team are handling customer complaints, the other team are preparing a new promotional campaign.',
+                            'While one team is handling customer complaints, the other team preparing a new promotional campaign.'
                         ],
                         'correct_index' => 0,
                         'explanation' => 'Klausa pertama dan kedua sama-sama memakai bentuk Present Continuous tunggal.'
                     ],
                     [
                         'id' => 75,
-                        'id_sentence' => 'Pohon-pohon di halaman sekolah sedang tumbuh subur karena para siswa rajin menyiramnya setiap pagi.',
-                        'target_word' => 'are growing ... are watering (Causal Continuous)',
+                        'id_sentence' => 'Penjualan daring sedang tumbuh pesat karena tim pemasaran rutin memperbarui konten media sosial.',
+                        'target_word' => 'are growing ... is updating (Causal Continuous)',
                         'vocab' => [
-                            ['en' => 'trees', 'id' => 'pohon-pohon'],
-                            ['en' => 'growing well', 'id' => 'tumbuh subur'],
-                            ['en' => 'watering', 'id' => 'menyiram']
+                            ['en' => 'online sales', 'id' => 'penjualan daring'],
+                            ['en' => 'growing rapidly', 'id' => 'tumbuh pesat'],
+                            ['en' => 'updating content', 'id' => 'memperbarui konten']
                         ],
                         'options' => [
-                            'The trees in the schoolyard are growing well because the students are watering them every morning.',
-                            'The trees in the schoolyard is growing well because the students is watering them every morning.',
-                            'The trees in the schoolyard are grown well because the students are watered them every morning.',
-                            'The trees in the schoolyard growing well because the students watering them every morning.'
+                            'Online sales are growing rapidly because the marketing team is regularly updating the social media content.',
+                            'Online sales is growing rapidly because the marketing team are regularly updating the social media content.',
+                            'Online sales are grown rapidly because the marketing team are updated the social media content.',
+                            'Online sales growing rapidly because the marketing team updating the social media content.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "trees" berpasangan dengan "are growing", dan subjek jamak "students" berpasangan dengan "are watering".'
+                        'explanation' => 'Subjek jamak "sales" berpasangan dengan "are growing", dan subjek tunggal "the marketing team" berpasangan dengan "is updating".'
                     ],
                     [
                         'id' => 76,
-                        'id_sentence' => 'Lampu jalan baru sedang dipasang, sehingga keamanan di gang kami sedang membaik.',
-                        'target_word' => 'are being installed ... is improving (Passive to Active Result)',
+                        'id_sentence' => 'Sistem keamanan baru sedang dipasang, sehingga risiko kebocoran data sedang menurun.',
+                        'target_word' => 'is being installed ... is decreasing (Passive to Active Result)',
                         'vocab' => [
-                            ['en' => 'new streetlights', 'id' => 'lampu jalan baru'],
+                            ['en' => 'new security system', 'id' => 'sistem keamanan baru'],
                             ['en' => 'installed', 'id' => 'dipasang'],
-                            ['en' => 'alley safety', 'id' => 'keamanan di gang']
+                            ['en' => 'risk of data leaks', 'id' => 'risiko kebocoran data']
                         ],
                         'options' => [
-                            'New streetlights are being installed, so safety in our alley is improving.',
-                            'New streetlights is being installed, so safety in our alley are improving.',
-                            'New streetlights are installing, so safety in our alley is improving.',
-                            'New streetlights are being installed, so safety in our alley improving.'
+                            'The new security system is being installed, so the risk of data leaks is decreasing.',
+                            'The new security system is being installed, so the risk of data leaks are decreasing.',
+                            'The new security system is installing, so the risk of data leaks is decreasing.',
+                            'The new security system is being installed, so the risk of data leaks decreasing.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Klausa pertama memakai pasif continuous jamak "are being installed", klausa kedua memakai aktif tunggal "is improving".'
+                        'explanation' => 'Klausa pertama memakai pasif continuous tunggal "is being installed", klausa kedua memakai aktif tunggal "is decreasing".'
                     ],
                     [
                         'id' => 77,
-                        'id_sentence' => 'Seiring banyak keluarga pindah ke kota, desa kami sedang menjadi semakin sepi.',
-                        'target_word' => 'are moving ... is becoming (Socioeconomic-style but Everyday Transition)',
+                        'id_sentence' => 'Seiring semakin banyak perusahaan beralih ke kerja jarak jauh, kebutuhan ruang kantor fisik sedang menurun.',
+                        'target_word' => 'are shifting ... is declining (Business Transition)',
                         'vocab' => [
-                            ['en' => 'families', 'id' => 'keluarga-keluarga'],
-                            ['en' => 'moving', 'id' => 'pindah'],
-                            ['en' => 'becoming quieter', 'id' => 'menjadi semakin sepi']
+                            ['en' => 'companies', 'id' => 'perusahaan'],
+                            ['en' => 'shifting to remote work', 'id' => 'beralih ke kerja jarak jauh'],
+                            ['en' => 'declining', 'id' => 'menurun']
                         ],
                         'options' => [
-                            'As many families are moving to the city, our village is becoming quieter.',
-                            'As many families is moving to the city, our village are becoming quieter.',
-                            'As many families are moved to the city, our village are become quieter.',
-                            'As many families moving to the city, our village becoming quieter.'
+                            'As more companies are shifting to remote work, the demand for physical office space is declining.',
+                            'As more companies is shifting to remote work, the demand for physical office space are declining.',
+                            'As more companies are shifted to remote work, the demand for physical office space are declined.',
+                            'As more companies shifting to remote work, the demand for physical office space declining.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Subjek jamak "families" memakai "are moving", subjek tunggal "village" memakai "is becoming".'
+                        'explanation' => 'Subjek jamak "companies" memakai "are shifting", subjek tunggal "demand" memakai "is declining".'
                     ],
                     [
                         'id' => 78,
-                        'id_sentence' => 'Jalan di depan rumah sedang diperbaiki pemerintah daerah, sementara warga sedang memasang rambu sementara.',
-                        'target_word' => 'is being repaired ... are putting',
+                        'id_sentence' => 'Jalan akses gudang sedang diperbaiki oleh kontraktor, sementara staf gudang sedang memasang rute sementara.',
+                        'target_word' => 'is being repaired ... are setting up',
                         'vocab' => [
-                            ['en' => 'road', 'id' => 'jalan'],
+                            ['en' => 'warehouse access road', 'id' => 'jalan akses gudang'],
                             ['en' => 'repaired', 'id' => 'diperbaiki'],
-                            ['en' => 'temporary signs', 'id' => 'rambu sementara']
+                            ['en' => 'temporary route', 'id' => 'rute sementara']
                         ],
                         'options' => [
-                            'The road in front of the house is being repaired by the local government, while residents are putting up temporary signs.',
-                            'The road in front of the house is repairing by the local government, while residents are putting up temporary signs.',
-                            'The road in front of the house are being repaired by the local government, while residents is putting up temporary signs.',
-                            'The road in front of the house is being repaired by the local government, while residents putting up temporary signs.'
+                            'The warehouse access road is being repaired by the contractor, while the warehouse staff are setting up a temporary route.',
+                            'The warehouse access road is repairing by the contractor, while the warehouse staff are setting up a temporary route.',
+                            'The warehouse access road are being repaired by the contractor, while the warehouse staff is setting up a temporary route.',
+                            'The warehouse access road is being repaired by the contractor, while the warehouse staff setting up a temporary route.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Klausa pertama memakai pasif tunggal "is being repaired", klausa kedua memakai aktif jamak "are putting".'
+                        'explanation' => 'Klausa pertama memakai pasif tunggal "is being repaired", klausa kedua memakai aktif jamak "are setting up".'
                     ],
                     [
                         'id' => 79,
-                        'id_sentence' => 'Kebiasaan belanja keluarga kami sedang berubah karena kami sedang mencoba berhemat.',
-                        'target_word' => 'is changing ... are trying (Everyday Cause and Effect)',
+                        'id_sentence' => 'Kebiasaan belanja pelanggan kami sedang berubah karena mereka sedang beralih ke pembayaran digital.',
+                        'target_word' => 'are changing ... are switching (Everyday Cause and Effect)',
                         'vocab' => [
-                            ['en' => 'shopping habits', 'id' => 'kebiasaan belanja'],
+                            ['en' => 'customer shopping habits', 'id' => 'kebiasaan belanja pelanggan'],
                             ['en' => 'changing', 'id' => 'berubah'],
-                            ['en' => 'saving money', 'id' => 'berhemat']
+                            ['en' => 'switching to digital payments', 'id' => 'beralih ke pembayaran digital']
                         ],
                         'options' => [
-                            'Our family\'s shopping habits are changing because we are trying to save money.',
-                            'Our family\'s shopping habits is changing because we is trying to save money.',
-                            'Our family\'s shopping habits are changed because we are tried to save money.',
-                            'Our family\'s shopping habits changing because we trying to save money.'
+                            'Our customers\' shopping habits are changing because they are switching to digital payments.',
+                            'Our customers\' shopping habits is changing because they is switching to digital payments.',
+                            'Our customers\' shopping habits are changed because they are switched to digital payments.',
+                            'Our customers\' shopping habits changing because they switching to digital payments.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => '"Habits" (jamak) dan "we" (jamak) keduanya memakai subjek jamak: "are changing" dan "are trying".'
+                        'explanation' => '"Habits" (jamak) dan "they" (jamak) keduanya memakai subjek jamak: "are changing" dan "are switching".'
                     ],
                     [
                         'id' => 80,
-                        'id_sentence' => 'Meskipun paman sedang sibuk bekerja, ia tetap sedang membantu adik belajar lewat telepon.',
-                        'target_word' => 'is working ... is helping (Contrast with Although)',
+                        'id_sentence' => 'Meskipun manajer sedang sibuk dengan rapat, ia tetap sedang membalas pesan mendesak dari klien.',
+                        'target_word' => 'is working ... is replying (Contrast with Although)',
                         'vocab' => [
-                            ['en' => 'working', 'id' => 'bekerja'],
-                            ['en' => 'helping', 'id' => 'membantu'],
-                            ['en' => 'over the phone', 'id' => 'lewat telepon']
+                            ['en' => 'busy with meetings', 'id' => 'sibuk dengan rapat'],
+                            ['en' => 'replying', 'id' => 'membalas'],
+                            ['en' => 'urgent message', 'id' => 'pesan mendesak']
                         ],
                         'options' => [
-                            'Although Uncle is busy working, he is still helping my younger sibling study over the phone.',
-                            'Although Uncle is busy working, he still helps my younger sibling study over the phone.',
-                            'Although Uncle are busy working, he are still helping my younger sibling study over the phone.',
-                            'Although Uncle is busy work, he is still help my younger sibling study over the phone.'
+                            'Although the manager is busy with meetings, he is still replying to an urgent message from a client.',
+                            'Although the manager is busy with meetings, he still replies to an urgent message from a client.',
+                            'Although the manager are busy with meetings, he are still replying to an urgent message from a client.',
+                            'Although the manager is busy meetings, he is still reply to an urgent message from a client.'
                         ],
                         'correct_index' => 0,
-                        'explanation' => 'Kedua klausa memakai Present Continuous tunggal: "is working" dan "is helping".'
+                        'explanation' => 'Kedua klausa memakai Present Continuous tunggal: "is working/is busy" dan "is replying".'
                     ],
                 ]
             ],
