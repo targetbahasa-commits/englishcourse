@@ -149,12 +149,18 @@
             font-weight: 800 !important;
         }
         .formula-card-code {
-            color: #ffffff !important; /* pure brilliant white for max contrast */
-            font-weight: 900 !important;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-            letter-spacing: 0.03em !important;
-            line-height: 1.6 !important;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+            color: #ffffff;
+            letter-spacing: 0.015em;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+        }
+        .formula-card-code strong,
+        .formula-card-code b {
+            font-weight: 800;
+        }
+        .formula-card-code em,
+        .formula-card-code i {
+            font-style: italic;
         }
     </style>
 </head>
@@ -1206,7 +1212,12 @@
                                                             <div class="flex items-center gap-2">
                                                                 <!-- Copy Button -->
                                                                 <button type="button"
-                                                                        @click.stop="if (navigator && navigator.clipboard) { navigator.clipboard.writeText('{{ addslashes($sl['formula']) }}').then(() => { copied = true; setTimeout(() => copied = false, 2000); }); }"
+                                                                        @click.stop="if (navigator && navigator.clipboard) {
+                                                                            const cardBack = $el.closest('.flip-card-back');
+                                                                            const codeEl = cardBack ? cardBack.querySelector('.formula-card-code') : null;
+                                                                            const textToCopy = codeEl ? codeEl.innerText.trim() : '{{ addslashes(strip_tags($sl['formula'])) }}';
+                                                                            navigator.clipboard.writeText(textToCopy).then(() => { copied = true; setTimeout(() => copied = false, 2000); });
+                                                                        }"
                                                                         class="px-3 py-1 rounded-lg text-xs font-black bg-white hover:bg-emerald-300 text-slate-950 transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
                                                                         title="Salin Rumus ke Clipboard">
                                                                     <svg class="w-3.5 h-3.5" :class="{ 'text-emerald-700': copied, 'text-slate-900': !copied }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1229,15 +1240,15 @@
                                                         </div>
 
                                                         <!-- Formula Center Slate: 100% Solid Obsidian Black + Pure Crisp White Text -->
-                                                        <div class="formula-card-box relative z-10 my-2 p-4 sm:p-5 rounded-2xl flex flex-col justify-center text-center sm:text-left">
-                                                            <div class="formula-card-title text-xs uppercase tracking-wider mb-1.5 flex items-center gap-1.5 justify-center sm:justify-start">
-                                                                <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <div class="formula-card-box relative z-10 my-2 p-4 sm:p-5 rounded-2xl flex flex-col justify-center text-left">
+                                                            <div class="formula-card-title text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5 justify-start">
+                                                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                                                 </svg>
                                                                 <span>RUMUS SINTAKSIS:</span>
                                                             </div>
-                                                            <div class="formula-card-code text-sm sm:text-base select-all overflow-x-auto">
-                                                                {{ $sl['formula'] }}
+                                                            <div class="formula-card-code text-sm select-all overflow-x-auto text-left" style="white-space: normal !important;">
+                                                                {!! \App\Services\SelfStudyFormulaRenderer::render($sl) !!}
                                                             </div>
                                                         </div>
 
@@ -2799,5 +2810,165 @@
             }));
         });
     </script>
+
+    @if($isAdmin && $course === 'grammar-for-writing')
+        <!-- Kendali Admin (floating, bottom-left) - mirrors the one on the placement
+             test page (self-study-class.placement-show), scoped to what's useful while
+             reading actual lesson content: quick A/B mode switch for the page you're on,
+             a link to results/history, and the same manual mode-override form. -->
+        <div x-data="{
+                open: localStorage.getItem('admin_player_panel_open') === 'true',
+                toggle() {
+                    this.open = !this.open;
+                    localStorage.setItem('admin_player_panel_open', this.open ? 'true' : 'false');
+                }
+             }"
+             id="admin-floating-panel"
+             style="position: fixed !important; bottom: 24px !important; left: 24px !important; z-index: 99999 !important;"
+             class="font-sans print:hidden">
+
+            <!-- Minimized Pill Button -->
+            <div x-show="!open">
+                <button type="button"
+                        @click="toggle()"
+                        style="box-shadow: 0 10px 25px -5px rgba(180, 83, 9, 0.45); display: inline-flex; align-items: center;"
+                        class="group flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-2xl border-2 border-amber-300 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-300"></span>
+                    </span>
+                    <svg class="w-4 h-4 text-amber-200 group-hover:rotate-45 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-xs font-black tracking-wide uppercase">Kendali Admin</span>
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs">
+                        {{ $selfStudyMode === 'B' ? 'Advanced (B2-C2)' : 'Beginner (A1-B2)' }}
+                    </span>
+                    <svg class="w-3.5 h-3.5 text-amber-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Expanded Floating Container -->
+            <div x-show="open"
+                 x-cloak
+                 style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); max-height: 82vh;"
+                 class="w-[calc(100vw-2rem)] sm:w-[420px] bg-white/95 backdrop-blur-xl border-2 border-amber-400 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+
+                <!-- Header Bar -->
+                <div class="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-amber-600 via-amber-700 to-orange-600 text-white flex items-center justify-between shrink-0 shadow-xs">
+                    <div class="flex items-center gap-2.5">
+                        <span class="p-1.5 rounded-lg bg-white/20 text-white shadow-2xs shrink-0">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h3 class="text-xs font-black uppercase tracking-wider">Kendali Admin &bull; Materi Kursus</h3>
+                            <p class="text-[11px] text-amber-100">Sedang melihat: Mode {{ $selfStudyMode === 'B' ? 'Advanced (B2-C2)' : 'Beginner (A1-B2)' }}</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="toggle()" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer" title="Perkecil Panel">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Scrollable Content Body -->
+                <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-slate-800 text-xs">
+                    <!-- Quick Mode Switch -->
+                    <div class="bg-amber-50/60 rounded-2xl p-3.5 border border-amber-200">
+                        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                            Ganti Mode Pratinjau
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="{{ route('self-study-classes.player', ['course' => $course, 'module' => $activeModuleKey, 'topic' => $activeTopicKey, 'preview_mode' => 'A']) }}"
+                               class="text-center py-2 px-2 rounded-xl text-[11px] font-bold transition {{ $selfStudyMode === 'A' ? 'bg-amber-600 text-white' : 'bg-white text-amber-900 border border-amber-300 hover:bg-amber-100' }}">
+                                Beginner (A1-B2)
+                            </a>
+                            <a href="{{ route('self-study-classes.player', ['course' => $course, 'module' => $activeModuleKey, 'topic' => $activeTopicKey, 'preview_mode' => 'B']) }}"
+                               class="text-center py-2 px-2 rounded-xl text-[11px] font-bold transition {{ $selfStudyMode === 'B' ? 'bg-amber-600 text-white' : 'bg-white text-amber-900 border border-amber-300 hover:bg-amber-100' }}">
+                                Advanced (B2-C2)
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Links -->
+                    <div class="bg-amber-50/60 rounded-2xl p-3.5 border border-amber-200 space-y-2">
+                        <a href="{{ route('self-study-classes.placement.show') }}" target="_blank"
+                           class="w-full flex items-center justify-between px-3 py-2 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-[11px] transition">
+                            <span>Buka Tes Penempatan</span>
+                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                        <a href="{{ route('admin.self-study-placement.index') }}" target="_blank"
+                           class="w-full flex items-center justify-between px-3 py-2 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-[11px] transition">
+                            <span>Riwayat Hasil Siswa</span>
+                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Override Mode Siswa (Collapsible) -->
+                    <div x-data="{ formOpen: false }" class="bg-amber-50/60 rounded-2xl p-3.5 border border-amber-200">
+                        <button type="button" @click="formOpen = !formOpen" class="w-full flex items-center justify-between text-left text-xs font-bold text-amber-900 hover:text-amber-950 cursor-pointer">
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Atur Mode Siswa Secara Manual</span>
+                            </span>
+                            <span class="text-amber-700 text-[11px]" x-text="formOpen ? '▲ Tutup' : '▼ Buka'"></span>
+                        </button>
+
+                        <div x-show="formOpen" x-cloak class="mt-3 pt-3 border-t border-amber-200">
+                            <form method="POST" action="{{ route('admin.self-study-placement.override') }}" class="space-y-2.5">
+                                @csrf
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-amber-800 mb-1">Pilih Siswa</label>
+                                    <select name="user_id" required class="block w-full border border-amber-200 rounded-xl px-3 py-1.5 text-xs focus:ring-amber-500 focus:border-amber-500 bg-white">
+                                        <option value="">Pilih siswa...</option>
+                                        @foreach($students as $s)
+                                            <option value="{{ $s->id }}">
+                                                {{ $s->name }} ({{ $s->email }})@if($s->self_study_grammar_mode_override) &mdash; saat ini: Mode {{ $s->self_study_grammar_mode_override }} @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-amber-800 mb-1">Tetapkan Mode</label>
+                                    <select name="mode" class="block w-full border border-amber-200 rounded-xl px-3 py-1.5 text-xs focus:ring-amber-500 focus:border-amber-500 bg-white">
+                                        <option value="">Otomatis (ikuti hasil tes)</option>
+                                        <option value="A">Mode A &mdash; A1-A2 bertahap ke B1-B2</option>
+                                        <option value="B">Mode B &mdash; B1-C2 lanjutan</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
+                                    Simpan Override Mode
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Bar -->
+                <div class="px-5 py-2.5 bg-amber-100/70 border-t border-amber-200 flex items-center justify-between text-[11px] text-amber-900 shrink-0">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Panel Mengambang di Kiri Bawah
+                    </span>
+                    <button type="button" @click="toggle()" class="font-bold text-amber-900 hover:text-amber-950 underline cursor-pointer">
+                        Perkecil &times;
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </body>
 </html>

@@ -298,7 +298,27 @@ class SelfStudySimplePresentData
                 'code' => '1.2.1',
                 'concept_title' => 'Kalimat Verbal dengan Subjek I, You, We, They, dan Kata Benda Jamak',
                 'concept_description' => 'Subjek orang pertama (I, We), orang kedua (You), orang ketiga jamak (They), serta seluruh kata benda jamak (misalnya: kids, friends, dogs, students) menggunakan bentuk dasar kata kerja (Verb 1) tanpa akhiran -s atau -es. Dilarang menyisipkan to be (am/are) sebelum Verb 1.',
-                'formula' => 'S (I / You / We / They / Plural Nouns) + Verb 1 (Base Form) + Object / Complement',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono">SUBJEK JAMAK / I, YOU, WE, THEY</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Verb 1 Murni (Tanpa -s / -es)</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">Rumus Dasar:</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">S (I / You / We / They / Plural) + V1 (Base Form) + O/C</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">My classmates like playing badminton.</span>
+        </div>
+        <div class="text-xs text-white pl-3 border-l-2 border-emerald-400">
+            <span class="text-emerald-300 font-bold">✓ Benar:</span> <span class="text-white">like</span> &nbsp;|&nbsp; <span class="text-rose-300 font-bold">✗ Salah:</span> <span class="text-white line-through">likes</span> / <span class="text-white line-through">are like</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Gunakan Verb 1 dasar murni tanpa tambahan -s atau -es.',
                     'Dilarang melakukan double predicate seperti "We are play" ➔ wajib "We play".',
@@ -558,7 +578,27 @@ class SelfStudySimplePresentData
                 'code' => '1.2.2',
                 'concept_title' => 'Kalimat Verbal dengan Subjek He, She, It, dan Kata Benda Tunggal',
                 'concept_description' => 'Subjek orang ketiga tunggal (He, She, It), nama orang tunggal, kata benda tunggal (the teacher, the dog, the bus), serta kata benda tak dapat dihitung (misalnya: water, money, homework) menambahkan akhiran -s, -es, atau -ies pada kata kerja utama (Verb 1). Aturan ini penting dalam tata bahasa Inggris sehari-hari.',
-                'formula' => 'S (He / She / It / Singular & Uncountable Nouns) + Verb 1(-s / -es / -ies) + Object / Complement',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono">SUBJEK TUNGGAL / HE, SHE, IT</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Verb 1 + Akhiran (-s / -es / -ies)</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">Rumus Dasar:</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">S (He / She / It / Singular / Uncountable) + V1(-s / -es / -ies) + O/C</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">The teacher explains the lesson clearly.</span>
+        </div>
+        <div class="text-xs text-white pl-3 border-l-2 border-emerald-400">
+            <span class="text-emerald-300 font-bold">✓ Benar:</span> <span class="text-white">explains</span> &nbsp;|&nbsp; <span class="text-rose-300 font-bold">✗ Salah:</span> <span class="text-white line-through">explain</span> / <span class="text-white line-through">is explains</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Wajib menambahkan akhiran -s/-es pada kata kerja jika subjeknya tunggal atau uncountable.',
                     'Kata kerja berakhiran -ch, -sh, -s, -x, -z, dan -o ditambah -es (misal: watches, fixes, goes).',
@@ -819,7 +859,42 @@ class SelfStudySimplePresentData
                 'code' => '1.2.3',
                 'concept_title' => 'Pembentukan Kalimat Negatif Verbal dengan Auxiliary Do not & Does not',
                 'concept_description' => 'Kalimat verbal tidak dapat dinegatifkan hanya dengan menyisipkan kata "not" langsung pada kata kerja. Wajib menggunakan kata kerja bantu (auxiliary verb): "do not" (don\'t) untuk subjek I, You, We, They, dan Benda Jamak; serta "does not" (doesn\'t) untuk subjek He, She, It, dan Benda Tunggal. Yang paling krusial: setelah "does not", kata kerja utama SELALU kembali ke bentuk dasar V1 tanpa akhiran -s/-es.',
-                'formula' => 'Plural / I, You, We, They + DO NOT + Verb 1 | Singular / He, She, It + DOES NOT + Verb 1 (tanpa -s/-es)',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-rose-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/50 font-mono">BENTUK NEGATIF VERBAL</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Wajib Menggunakan <em>Do not / Does not</em></span>
+    </div>
+
+    <div class="px-3 py-1.5 rounded-lg bg-amber-950/70 border border-amber-400 text-xs text-white flex items-center gap-2">
+        <span class="font-black text-amber-300 uppercase tracking-wider">[PERHATIAN]</span>
+        <span>Setelah <strong>does not</strong>, kata kerja SELALU kembali ke bentuk dasar <strong>V1 murni</strong> (tanpa -s/-es).</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-1.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">[1] Subjek Jamak / I, You, We, They</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">Subject + DO NOT (don't) + V1 + O/C</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">They do not understand the instructions.</span>
+        </div>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-1.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-sky-300 uppercase tracking-wide">[2] Subjek Tunggal / He, She, It</span>
+            <code class="text-xs font-mono font-bold text-sky-300 bg-slate-950 px-2.5 py-1 rounded border border-sky-500/40">Subject + DOES NOT (doesn't) + V1 (Murni) + O/C</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-sky-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">She does not like spicy food.</span>
+        </div>
+        <div class="text-xs text-white pl-3 border-l-2 border-sky-400">
+            <span class="text-emerald-300 font-bold">✓ Benar:</span> <span class="text-white">does not like</span> &nbsp;|&nbsp; <span class="text-rose-300 font-bold">✗ Salah:</span> <span class="text-white line-through">does not likes</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Gunakan "do not" untuk subjek I, you, we, they, dan benda jamak.',
                     'Gunakan "does not" untuk subjek he, she, it, dan benda tunggal / uncountable.',
@@ -1076,7 +1151,35 @@ class SelfStudySimplePresentData
                 'code' => '1.2.4',
                 'concept_title' => 'Pembentukan Kalimat Tanya Verbal dalam Simple Present Tense',
                 'concept_description' => 'Kalimat tanya verbal Simple Present dibentuk dengan menempatkan kata kerja bantu (auxiliary verb) Do atau Does di depan subjek. Untuk subjek I, You, We, They, dan Benda Jamak, gunakan DO. Untuk subjek He, She, It, dan Benda Tunggal, gunakan DOES. Setelah subjek, kata kerja utama WAJIB berbentuk Verb 1 dasar (infinitive tanpa to dan tanpa -s/-es). Formula yang sama berlaku untuk pertanyaan informasi dengan kata tanya WH (What, Why, How, Which).',
-                'formula' => 'Do + (I/You/We/They/Plural) + Verb 1 + ... ? | Does + (He/She/It/Singular) + Verb 1 + ... ?',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono">BENTUK TANYA VERBAL</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Inversi Kata Bantu <em>Do / Does</em> di Awal</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-1.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">[1] Yes / No Question</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">DO / DOES + Subject + V1 (Murni) + ... ?</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5 space-y-1">
+            <div><span class="text-emerald-400 font-bold not-italic">Jamak:</span> <span class="italic text-white">Do you live near the station?</span></div>
+            <div><span class="text-sky-400 font-bold not-italic">Tunggal:</span> <span class="italic text-white">Does he speak English fluently?</span> <span class="text-yellow-300 font-bold">(V1 murni tanpa -s)</span></div>
+        </div>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-1.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-sky-300 uppercase tracking-wide">[2] WH- Question (Informasi)</span>
+            <code class="text-xs font-mono font-bold text-sky-300 bg-slate-950 px-2.5 py-1 rounded border border-sky-500/40">WH-Word + DO / DOES + Subject + V1 (Murni) + ... ?</code>
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-sky-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Where does she work during weekdays?</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Gunakan Do untuk subjek jamak dan I/You/We/They.',
                     'Gunakan Does untuk subjek tunggal dan He/She/It.',
@@ -1334,7 +1437,45 @@ class SelfStudySimplePresentData
                 'code' => '1.2.5',
                 'concept_title' => 'Aturan Ejaan Penambahan Akhiran -s, -es, dan -ies pada Kata Kerja',
                 'concept_description' => 'Penambahan akhiran pada kata kerja orang ketiga tunggal (He, She, It, Singular Nouns) mengikuti aturan ejaan dasar bahasa Inggris: (1) Kata kerja berakhiran desis (-ch, -sh, -ss, -x, -z) dan vokal -o ditambah -es (watch ➔ watches, wash ➔ washes, go ➔ goes); (2) Kata kerja berakhiran konsonan + y berubah menjadi -ies (carry ➔ carries, study ➔ studies); (3) Kata kerja berakhiran vokal + y cukup ditambah -s saja (play ➔ plays, stay ➔ stays); (4) Kata kerja tak beraturan khusus: have ➔ has.',
-                'formula' => 'Consonant + y ➔ -ies | Desis (-ch/-sh/-ss/-x/-o) ➔ -es | Vowel + y ➔ -s | Other Verbs ➔ -s',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-indigo-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-indigo-500/25 text-indigo-300 border border-indigo-500/50 font-mono">KAIDAH EJAAN VERBA</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Penambahan Akhiran pada Subjek Orang Ketiga Tunggal</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600">
+            <div class="text-xs font-bold text-amber-300 mb-1">1. Akhiran Desis &amp; -o ➔ +es</div>
+            <code class="text-xs font-mono text-white block bg-slate-950 p-2 rounded border border-slate-700">
+                -ch, -sh, -ss, -x, -z, -o<br>
+                watch ➔ <strong class="text-amber-300">watches</strong> | go ➔ <strong class="text-amber-300">goes</strong>
+            </code>
+        </div>
+        <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600">
+            <div class="text-xs font-bold text-sky-300 mb-1">2. Konsonan + y ➔ -ies</div>
+            <code class="text-xs font-mono text-white block bg-slate-950 p-2 rounded border border-slate-700">
+                study ➔ <strong class="text-sky-300">studies</strong><br>
+                carry ➔ <strong class="text-sky-300">carries</strong>
+            </code>
+        </div>
+        <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600">
+            <div class="text-xs font-bold text-emerald-300 mb-1">3. Vokal + y ➔ +s saja</div>
+            <code class="text-xs font-mono text-white block bg-slate-950 p-2 rounded border border-slate-700">
+                play ➔ <strong class="text-emerald-300">plays</strong><br>
+                stay ➔ <strong class="text-emerald-300">stays</strong> (Bukan *staies*)
+            </code>
+        </div>
+        <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600">
+            <div class="text-xs font-bold text-purple-300 mb-1">4. Verba Khusus</div>
+            <code class="text-xs font-mono text-white block bg-slate-950 p-2 rounded border border-slate-700">
+                have ➔ <strong class="text-purple-300">has</strong><br>
+                Kata kerja lainnya ➔ +s (work ➔ works)
+            </code>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Verba berakhiran konsonan + y wajib diubah menjadi -ies (cry ➔ cries, try ➔ tries).',
                     'Verba berakhiran vokal + y TIDAK BOLEH diubah jadi -ies, cukup ditambah -s (play ➔ plays, buy ➔ buys).',
@@ -1594,7 +1735,30 @@ class SelfStudySimplePresentData
                 'code' => '1.2.6',
                 'concept_title' => 'Posisi dan Fungsi Adverb of Frequency dalam Kalimat Verbal',
                 'concept_description' => 'Dalam kalimat verbal Simple Present, Adverbs of Frequency (always, usually, often, sometimes, rarely, never) diletakkan TEPAT SEBELUM kata kerja utama (Verb 1). Posisi ini berbeda dengan kalimat nominal di mana adverb berada setelah to be. Sementara itu, keterangan waktu spesifik (daily, every weekend) diletakkan di akhir atau awal kalimat.',
-                'formula' => 'Subject + [always / usually / often / rarely / never] + Verb 1(s/es) + Object',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono">ADVERB OF FREQUENCY</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Letak: Tepat <strong>SEBELUM</strong> Kata Kerja Utama</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">Rumus Posisi:</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">Subject + [Adverb] + Verb 1(s/es) + Object</code>
+        </div>
+        <div class="text-xs text-white">
+            <strong class="text-yellow-300">Daftar Adverb:</strong> <em>always</em> (100%), <em>usually</em> (90%), <em>often</em> (70%), <em>sometimes</em> (50%), <em>rarely</em> (10%), <em>never</em> (0%).
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">He <strong class="text-amber-300">always arrives</strong> on time for morning classes.</span>
+        </div>
+        <div class="text-xs text-white pl-3 border-l-2 border-emerald-400">
+            <span class="text-emerald-300 font-bold">✓ Benar:</span> <span class="text-white">always arrives</span> &nbsp;|&nbsp; <span class="text-rose-300 font-bold">✗ Salah:</span> <span class="text-white line-through">arrives always</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Adverb of frequency berada di antara Subjek dan Kata Kerja Utama (misal: "My dad always cooks breakfast", BUKAN "My dad cooks breakfast always").',
                     'Jika terdapat auxiliary verb (do/does), adverb diletakkan setelah auxiliary (misal: "They do not always agree").',
@@ -1852,7 +2016,35 @@ class SelfStudySimplePresentData
                 'code' => '1.2.7',
                 'concept_title' => 'Penggunaan Stative Verbs (Verba Keadaan & Pikiran) dalam Kalimat Sehari-hari',
                 'concept_description' => 'Stative verbs adalah kata kerja yang menggambarkan keadaan (state of being), proses pikiran, kepemilikan, atau perasaan yang bersifat tetap. Contoh: know, believe, contain, like, want, own. Stative verbs TIDAK PERNAH digunakan dalam bentuk Continuous (-ing) dan wajib menggunakan Simple Present.',
-                'formula' => 'Subject + Stative Verb 1(s/es) + Complement (TIDAK BOLEH dalam bentuk -ing)',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-rose-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/50 font-mono">STATIVE VERBS</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Verba Keadaan, Pikiran &amp; Kepemilikan</span>
+    </div>
+
+    <div class="px-3 py-1.5 rounded-lg bg-rose-950/70 border border-rose-400 text-xs text-white flex items-center gap-2">
+        <span class="font-black text-rose-300 uppercase tracking-wider">[LARANGAN FATAL]</span>
+        <span>Stative verbs <strong>TIDAK BISA</strong> menggunakan bentuk Continuous (<em>-ing</em>). Wajib Simple Present!</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3 border border-slate-600 space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-black text-amber-300 uppercase tracking-wide">Rumus:</span>
+            <code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1 rounded border border-emerald-500/40">Subject + Stative Verb 1(s/es) + Complement</code>
+        </div>
+        <div class="text-xs text-white">
+            <strong class="text-yellow-300">Contoh Verba:</strong> <em>know, believe, understand, want, need, prefer, like, love, remember, contain, belong, own</em>.
+        </div>
+        <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+            <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">I understand the explanation now.</span>
+        </div>
+        <div class="text-xs text-white pl-3 border-l-2 border-emerald-400">
+            <span class="text-emerald-300 font-bold">✓ Benar:</span> <span class="text-white">I understand</span> &nbsp;|&nbsp; <span class="text-rose-300 font-bold">✗ Salah:</span> <span class="text-white line-through">I am understanding</span>
+        </div>
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Stative verbs dilarang digunakan dalam bentuk Present Continuous (Dilarang "She is knowing the answer" ➔ WAJIB "She knows the answer").',
                     'Verba kepemilikan (have, own, contain, belong) selalu menggunakan Simple Present.',
@@ -2168,7 +2360,51 @@ class SelfStudySimplePresentData
                 'code' => '1.2.8',
                 'concept_title' => 'Identifikasi dan Eliminasi Double Predicate & Subject-Verb Mismatches',
                 'concept_description' => 'Salah satu kesalahan paling sering muncul dalam kalimat verbal sehari-hari adalah "Double Predicate", yaitu menyisipkan to be (is, am, are) sebelum kata kerja verbal (seperti "He is explains", "We are agree", "She is likes"). Kesalahan kedua adalah kegagalan menyelaraskan akhiran -s pada subjek tunggal atau salah menambahkan -s pada subjek jamak.',
-                'formula' => 'BENAR: Subject + Verb 1(-s/-es) | SALAH MUTLAK: Subject + [is/am/are] + Verb 1',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-rose-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/50 font-mono">KOREKSI KESALAHAN FATAL</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Eliminasi <em>Double Predicate</em> &amp; S-V Mismatch</span>
+    </div>
+
+    <!-- Perbandingan BENAR vs SALAH -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <!-- BENAR -->
+        <div class="rounded-xl bg-emerald-950/60 p-3 border border-emerald-400 space-y-1.5">
+            <div class="text-xs font-black text-emerald-300 uppercase tracking-wide flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> BENTUK BENAR
+            </div>
+            <code class="text-xs font-mono font-bold text-white block bg-slate-950 p-2 rounded border border-emerald-500/40">
+                Subject + Verb 1(-s/-es)
+            </code>
+            <div class="text-xs text-white pt-1 font-mono space-y-0.5">
+                <div>• <span class="text-emerald-300 font-bold">He explains</span> the concept.</div>
+                <div>• <span class="text-emerald-300 font-bold">We agree</span> with the proposal.</div>
+                <div>• <span class="text-emerald-300 font-bold">She likes</span> coffee.</div>
+            </div>
+        </div>
+
+        <!-- SALAH -->
+        <div class="rounded-xl bg-rose-950/60 p-3 border border-rose-400 space-y-1.5">
+            <div class="text-xs font-black text-rose-300 uppercase tracking-wide flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-400"></span> SALAH MUTLAK (Double Predicate)
+            </div>
+            <code class="text-xs font-mono font-bold text-white block bg-slate-950 p-2 rounded border border-rose-500/40">
+                Subject + [is/am/are] + Verb 1
+            </code>
+            <div class="text-xs text-white pt-1 font-mono space-y-0.5">
+                <div>• <span class="text-rose-300 line-through">He is explains</span> the concept.</div>
+                <div>• <span class="text-rose-300 line-through">We are agree</span> with the proposal.</div>
+                <div>• <span class="text-rose-300 line-through">She is likes</span> coffee.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-xs text-white pl-3 border-l-2 border-amber-400 bg-amber-950/50 p-2.5 rounded-r-lg">
+        <strong class="text-amber-300 uppercase">[KUNCI INGAT]:</strong> Jangan pernah menggabungkan to-be (<em>is, am, are</em>) dengan kata kerja V1 aktif!
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Dilarang keras menggabungkan to be (is/are) dengan Verb 1 dasar (e.g., "is explains" ➔ SALAH! Seharusnya "explains").',
                     'Kata "agree", "disagree", "like", "depend" adalah VERBA MURNI, bukan kata sifat. Tulis "I agree", bukan "I am agree".',
