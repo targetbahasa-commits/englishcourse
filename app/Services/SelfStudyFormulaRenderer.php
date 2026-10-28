@@ -128,10 +128,10 @@ class SelfStudyFormulaRenderer
      */
     protected static function formatFormulaBlocks(string $formula): string
     {
-        // Check if formula has pipe separated clauses or multiple distinct statements
-        if (str_contains($formula, '|') || str_contains($formula, ' vs ')) {
-            $separator = str_contains($formula, '|') ? '|' : ' vs ';
-            $chunks = array_map('trim', explode($separator, $formula));
+        // Split only top-level clauses (never inside parentheses or brackets)
+        $chunks = self::splitTopLevelClauses($formula);
+
+        if (count($chunks) > 1) {
             $out = '<div class="space-y-2">';
             foreach ($chunks as $idx => $chunk) {
                 if ($chunk === '') continue;
@@ -171,6 +171,16 @@ class SelfStudyFormulaRenderer
                     $out .= '<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span><span class="text-xs font-black text-sky-300 uppercase tracking-wide">[' . ($idx + 1) . '] BENTUK INTEROGATIF (TANYA)</span></div>';
                     $out .= '<code class="text-xs font-mono font-bold text-sky-300 bg-slate-950 px-2.5 py-1.5 rounded border border-sky-500/40 block break-words">' . htmlspecialchars($m[2], ENT_QUOTES, 'UTF-8') . '</code>';
                     $out .= '</div>';
+                } elseif (preg_match('/^(Subjek\s*"?I"?|Khusus\s*"?I"?)\s*:\s*(.*)/i', $chunk, $m)) {
+                    $out .= '<div class="space-y-1">';
+                    $out .= '<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span><span class="text-xs font-black text-sky-300 uppercase tracking-wide">[' . ($idx + 1) . '] KHUSUS SUBJEK "I" (AM)</span></div>';
+                    $out .= '<code class="text-xs font-mono font-bold text-sky-300 bg-slate-950 px-2.5 py-1.5 rounded border border-sky-500/40 block break-words">' . htmlspecialchars($m[2], ENT_QUOTES, 'UTF-8') . '</code>';
+                    $out .= '</div>';
+                } elseif (preg_match('/^(Subjek\s*Jamak|Subjek\s*You\s*\/\s*We\s*\/\s*They)\s*:\s*(.*)/i', $chunk, $m)) {
+                    $out .= '<div class="space-y-1">';
+                    $out .= '<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-xs font-black text-emerald-300 uppercase tracking-wide">[' . ($idx + 1) . '] SUBJEK YOU, WE, THEY &amp; JAMAK (ARE)</span></div>';
+                    $out .= '<code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1.5 rounded border border-emerald-500/40 block break-words">' . htmlspecialchars($m[2], ENT_QUOTES, 'UTF-8') . '</code>';
+                    $out .= '</div>';
                 } else {
                     $out .= '<div><code class="text-xs font-mono font-bold text-emerald-300 bg-slate-950 px-2.5 py-1.5 rounded border border-emerald-500/40 block break-words">' . htmlspecialchars($chunk, ENT_QUOTES, 'UTF-8') . '</code></div>';
                 }
@@ -191,10 +201,64 @@ class SelfStudyFormulaRenderer
     }
 
     /**
+     * Split string by '|' or ' vs ' only when not nested inside parentheses or brackets
+     */
+    protected static function splitTopLevelClauses(string $formula): array
+    {
+        if (str_contains($formula, ' vs ')) {
+            return array_map('trim', explode(' vs ', $formula));
+        }
+
+        if (!str_contains($formula, '|')) {
+            return [trim($formula)];
+        }
+
+        $chunks = [];
+        $current = '';
+        $parenDepth = 0;
+        $bracketDepth = 0;
+        $len = strlen($formula);
+
+        for ($i = 0; $i < $len; $i++) {
+            $char = $formula[$i];
+
+            if ($char === '(') {
+                $parenDepth++;
+            } elseif ($char === ')') {
+                if ($parenDepth > 0) $parenDepth--;
+            } elseif ($char === '[') {
+                $bracketDepth++;
+            } elseif ($char === ']') {
+                if ($bracketDepth > 0) $bracketDepth--;
+            }
+
+            if ($char === '|' && $parenDepth === 0 && $bracketDepth === 0) {
+                $trimmed = trim($current);
+                if ($trimmed !== '') {
+                    $chunks[] = $trimmed;
+                }
+                $current = '';
+            } else {
+                $current .= $char;
+            }
+        }
+
+        $trimmed = trim($current);
+        if ($trimmed !== '') {
+            $chunks[] = $trimmed;
+        }
+
+        return count($chunks) > 1 ? $chunks : [trim($formula)];
+    }
+
+    /**
      * Remove emojis and replace known alert markers with clean text badges
      */
     public static function cleanEmojis(string $text): string
     {
+        // Protect mathematical/linguistic arrows before emoji stripping
+        $text = str_replace(['➔', '→'], ['__ARROW_R__', '__ARROW_R__'], $text);
+
         // Replace common warning emojis with text tags
         $replacements = [
             '⛔ LARANGAN FATAL:' => '[LARANGAN FATAL]:',
@@ -215,7 +279,10 @@ class SelfStudyFormulaRenderer
         $pattern = '/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{1F900}-\x{1F9FF}\x{1F1E0}-\x{1F1FF}]/u';
         $cleaned = preg_replace($pattern, '', $text);
 
-        return trim($cleaned ?? $text);
+        // Restore arrows
+        $cleaned = str_replace('__ARROW_R__', '➔', $cleaned ?? $text);
+
+        return trim($cleaned);
     }
 
     /**

@@ -99,7 +99,53 @@ class SelfStudySimplePresentNominalPassiveData
                 'code' => '1.3.1',
                 'concept_title' => 'Kalimat Nominal Simple Present dengan Subjek I, You, We, They, dan Plural Nouns',
                 'concept_description' => 'Kalimat nominal menyatakan identitas, status, sifat, atau lokasi subjek tanpa kata kerja aksi. Untuk subjek jamak (They, We, You, Plural Nouns: my parents, the students, my friends), predikat wajib berupa to be \'are\' diikuti pelengkap (Complement: Noun Phrase, Adjective, atau Prepositional Phrase). Untuk subjek \'I\', gunakan to be \'am\'.',
-                'formula' => 'Subject (I ➔ am | You / We / They / Plural Nouns ➔ are) + Complement (Noun / Adjective / Adverbial)',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono tracking-wider">SIMPLE PRESENT NOMINAL</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Subjek I, You, We, They &amp; Benda Jamak (+ am/are)</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3.5 border border-slate-600 space-y-3">
+        <!-- Pola 1: Khusus Subjek I -->
+        <div class="space-y-1">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-black text-sky-300 uppercase tracking-wide flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span> [1] Khusus Subjek "I" (To Be: AM)
+                </span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-sky-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-sky-500/40 block">I + AM + Complement (Noun / Adjective / Adverbial)</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-sky-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">I am confident with our preparation today.</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-sky-400">
+                (Saya percaya diri dengan persiapan kami hari ini.)
+            </div>
+        </div>
+
+        <!-- Pola 2: Subjek You, We, They & Benda Jamak -->
+        <div class="space-y-1 pt-2.5 border-t border-slate-700/60">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-black text-emerald-300 uppercase tracking-wide flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> [2] Subjek You, We, They &amp; Benda Jamak (To Be: ARE)
+                </span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-emerald-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-emerald-500/40 block">S (You / We / They / Plural Nouns) + ARE + Complement</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">My two younger brothers are noisy every morning before leaving for school.</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-emerald-400">
+                (Kedua adik laki-laki saya sangat ribut setiap pagi sebelum berangkat sekolah.)
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaidah Utama -->
+    <div class="text-xs text-white pl-3 border-l-2 border-amber-400 bg-amber-950/40 p-2.5 rounded-r-lg">
+        <strong class="text-amber-300 uppercase">[KAIDAH UTAMA]:</strong> Subjek <strong>I</strong> wajib berpasangan dengan <strong>am</strong>. Subjek <strong>You / We / They / Jamak</strong> wajib berpasangan dengan <strong>are</strong>. Jangan pernah menyisipkan kata kerja aksi dasar setelah to be (misal: <em>They are study</em> ➔ SALAH MUTLAK).
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Subjek jamak wajib menggunakan to be \'are\'.',
                     'Subjek \'I\' menggunakan to be \'am\'.',
