@@ -86,42 +86,50 @@
                         </div>
                     </div>
 
-                    <!-- Tips Penentuan Tenses Box -->
-                    <div class="mx-5 sm:mx-8 mt-5 p-4 sm:p-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-950 shadow-xs">
-                        <div class="flex items-center gap-2 mb-2 font-bold text-emerald-900 text-sm sm:text-base">
-                            <span class="text-lg">💡</span> Tahap-Tahap Penentuan Tenses:
+                    <!-- Tips / Guide Box -->
+                    @if(!empty($guideBox))
+                        <div class="mx-5 sm:mx-8 mt-5 p-4 sm:p-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-950 shadow-xs">
+                            {!! $guideBox !!}
                         </div>
-                        <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium">
-                            <li>
-                                <strong>Tahap 1: Tentukan Jenis Bentuk Kalimat (Verbal, Nominal, atau Pasif)</strong>
-                                <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
-                                    <div>• <strong>Verbal:</strong> Ada kata kerja aksi aktif (<em>me-, ber-, tanpa awalan</em>).</div>
-                                    <div>• <strong>Nominal:</strong> Menyatakan sifat, profesi, atau keberadaan (<em>adalah, merupakan, ada, berada, berupa &rarr; gunakan be</em>).</div>
-                                    <div>• <strong>Pasif:</strong> Subjek dikenai tindakan (<em>di-, ter- &rarr; gunakan be + V3</em>).</div>
-                                </div>
-                            </li>
-                            <li>
-                                <strong>Tahap 2: Tentukan Aspek Bentuk (Aspect)</strong>
-                                <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
-                                    <div>• <strong>Perfect:</strong> Ada kata <em>sudah, telah, pernah, belum</em> &rarr; <code>have/has/had + V3</code>.</div>
-                                    <div>• <strong>Continuous:</strong> Ada kata <em>sedang</em> &rarr; <code>be + V-ing</code>.</div>
-                                    <div>• <strong>Modal:</strong> Ada kata <em>bisa/dapat (can), mungkin (may), harus (must), seharusnya (should)</em>.</div>
-                                    <div>• <strong>Simple:</strong> Jika tidak ada penanda aspek di atas &rarr; gunakan pola <strong>Simple</strong>.</div>
-                                </div>
-                            </li>
-                            <li>
-                                <strong>Tahap 3: Tentukan Waktu (Time Frame)</strong>
-                                <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
-                                    <div>• <strong>Present:</strong> Masa sekarang, kebiasaan, atau fakta umum (<em>default jika tidak ada penanda waktu khusus</em>).</div>
-                                    <div>• <strong>Past:</strong> Masa lampau / sejarah / peristiwa selesai (<em>kemarin, tahun lalu, era kuno &rarr; V2 / was / were / had</em>).</div>
-                                    <div>• <strong>Future:</strong> Masa depan (<em>akan, tahun depan &rarr; will + V1</em>).</div>
-                                </div>
-                            </li>
-                        </ol>
-                        <div class="mt-3 pt-2.5 border-t border-emerald-200/70 text-xs font-semibold text-emerald-800 flex items-center gap-1">
-                            <span>📌 Catatan Kunci:</span> <span>adalah, merupakan, ada, berupa, berada = <strong>Nominal (Wajib be)</strong> | di-, ter- = <strong>Pasif (be + V3)</strong></span>
+                    @else
+                        <!-- Tips Penentuan Tenses Box (Default) -->
+                        <div class="mx-5 sm:mx-8 mt-5 p-4 sm:p-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-950 shadow-xs">
+                            <div class="flex items-center gap-2 mb-2 font-bold text-emerald-900 text-sm sm:text-base">
+                                <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Tahap-Tahap Penentuan Tenses:</span>
+                            </div>
+                            <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium">
+                                <li>
+                                    <strong>Tahap 1: Tentukan Jenis Bentuk Kalimat (Verbal, Nominal, atau Pasif)</strong>
+                                    <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
+                                        <div>• <strong>Verbal:</strong> Ada kata kerja aksi aktif (<em>me-, ber-, tanpa awalan</em>).</div>
+                                        <div>• <strong>Nominal:</strong> Menyatakan sifat, profesi, atau keberadaan (<em>adalah, merupakan, ada, berada, berupa &rarr; gunakan be</em>).</div>
+                                        <div>• <strong>Pasif:</strong> Subjek dikenai tindakan (<em>di-, ter- &rarr; gunakan be + V3</em>).</div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <strong>Tahap 2: Tentukan Aspek Bentuk (Aspect)</strong>
+                                    <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
+                                        <div>• <strong>Perfect:</strong> Ada kata <em>sudah, telah, pernah, belum</em> &rarr; <code>have/has/had + V3</code>.</div>
+                                        <div>• <strong>Continuous:</strong> Ada kata <em>sedang</em> &rarr; <code>be + V-ing</code>.</div>
+                                        <div>• <strong>Modal:</strong> Ada kata <em>bisa/dapat (can), mungkin (may), harus (must), seharusnya (should)</em>.</div>
+                                        <div>• <strong>Simple:</strong> Jika tidak ada penanda aspek di atas &rarr; gunakan pola <strong>Simple</strong>.</div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <strong>Tahap 3: Tentukan Waktu (Time Frame)</strong>
+                                    <div class="ml-5 text-emerald-800 text-xs font-normal space-y-0.5 mt-0.5">
+                                        <div>• <strong>Present:</strong> Masa sekarang, kebiasaan, atau fakta umum (<em>default jika tidak ada penanda waktu khusus</em>).</div>
+                                        <div>• <strong>Past:</strong> Masa lampau / sejarah / peristiwa selesai (<em>kemarin, tahun lalu, era kuno &rarr; V2 / was / were / had</em>).</div>
+                                        <div>• <strong>Future:</strong> Masa depan (<em>akan, tahun depan &rarr; will + V1</em>).</div>
+                                    </div>
+                                </li>
+                            </ol>
+                            <div class="mt-3 pt-2.5 border-t border-emerald-200/70 text-xs font-semibold text-emerald-800 flex items-center gap-1">
+                                <span>Catatan Kunci:</span> <span>adalah, merupakan, ada, berupa, berada = <strong>Nominal (Wajib be)</strong> | di-, ter- = <strong>Pasif (be + V3)</strong></span>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="p-5 sm:p-8 space-y-4 sm:space-y-5">
                         <ol class="space-y-4 sm:space-y-5">
@@ -153,7 +161,7 @@
                                                 </div>
                                             @endif
 
-                                            @if(!empty($helper['vocab']))
+                                            @if(!empty($helper['vocab']) && is_array($helper['vocab']))
                                                 <div x-data="{ open: false }" class="relative inline-block">
                                                     <button type="button" @click="open = !open" @click.outside="open = false" class="w-6 h-6 rounded-md bg-green-50 border border-green-200 text-green-600 flex items-center justify-center text-xs font-bold hover:bg-green-100 transition-colors focus:outline-none shadow-sm">
                                                         v
@@ -171,6 +179,26 @@
                                                         <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
                                                     </div>
                                                 </div>
+                                            @endif
+
+                                            @if(auth()->check() && auth()->user()->isAdmin() && !empty($helper['original_id']))
+                                                <button type="button"
+                                                        onclick="openGrammarQuestionEditModal(
+                                                            {{ \Illuminate\Support\Js::from($helper['original_id']) }},
+                                                            {{ \Illuminate\Support\Js::from($q) }},
+                                                            {{ \Illuminate\Support\Js::from($helper['correct_answer'] ?? '') }},
+                                                            {{ \Illuminate\Support\Js::from($helper['tense'] ?? '') }},
+                                                            {{ \Illuminate\Support\Js::from($helper['vocab'] ?? []) }}
+                                                        )"
+                                                        class="w-6 h-6 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-600 flex items-center justify-center text-xs font-bold hover:bg-yellow-100 transition-colors focus:outline-none shadow-sm" title="Edit soal">
+                                                    e
+                                                </button>
+                                                <form action="{{ parse_url(route('admin.grammar.question.destroy', $helper['original_id']), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="w-6 h-6 rounded-md bg-red-50 border border-red-200 text-red-600 flex items-center justify-center text-xs font-bold hover:bg-red-100 transition-colors focus:outline-none shadow-sm" title="Hapus">
+                                                        x
+                                                    </button>
+                                                </form>
                                             @endif
                                         </div>
                                     </div>
@@ -293,7 +321,7 @@
                                     @if(!empty($paragraph['vocab']))
                                         <div x-data="{ showVocab: false }">
                                             <button type="button" @click="showVocab = !showVocab" class="w-full px-4 py-2.5 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 text-yellow-900 font-bold rounded-xl transition-colors flex items-center justify-between text-xs sm:text-sm shadow-xs">
-                                                <span class="flex items-center gap-2"><span>📚</span> Vocabulary Bantuan</span>
+                                                <span class="flex items-center gap-2"><span>Vocabulary Bantuan</span></span>
                                                 <svg :class="showVocab ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                 </svg>
@@ -435,6 +463,7 @@
         <x-conjunction-button />
         <x-preposition-button />
         <x-pronouns-button />
+        <x-adverb-button />
         <x-verb-patterns-button />
         <x-modal-button />
         <x-tenses-button />
@@ -445,8 +474,8 @@
     @if(empty($submitted))
         <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
             <button type="button" id="manual-save-btn" onclick="manualSaveGrammarDraft()"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                class="inline-flex items-center justify-center px-6 py-2.5 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer border border-white/20 active:scale-95 hover:brightness-110"
+                style="background-color: #1e3a8a;">
                 Save
             </button>
         </div>
@@ -674,6 +703,53 @@
             window.manualSaveGrammarDraft = manualSaveGrammarDraft;
         })();
     </script>
+    @endif
+
+    @if(auth()->check() && auth()->user()->isAdmin())
+        {{-- Shared admin "Edit soal" modal for this template - every meeting
+             that reads its questions from grammar_questions (see
+             GrammarWritingSessionController::meeting2SentenceData() for the
+             first one) reuses this same modal/JS pair, so it isn't
+             duplicated per meeting the way meeting3.blade.php's own copy is. --}}
+        <div x-data="{ open: false, id: null, question: '', answer: '', tense: '', vocab: {} }"
+             @open-grammar-question-edit-modal.window="open = true; id = $event.detail.id; question = $event.detail.question; answer = $event.detail.answer; tense = $event.detail.tense; vocab = $event.detail.vocab || {}"
+             x-show="open" x-cloak
+             class="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-7 border border-gray-100" @click.outside="open = false">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Soal</h3>
+                <form method="POST" :action="`{{ url('/admin/assignments/grammar-writing/questions') }}/${id}`">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kalimat (Indonesia)</label>
+                            <textarea name="question_text" x-model="question" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jawaban Benar (English)</label>
+                            <textarea name="correct_answer" x-model="answer" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tenses</label>
+                            <input type="text" name="tense" x-model="tense" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Vocab (JSON)</label>
+                            <textarea name="vocab" x-text="JSON.stringify(vocab, null, 2)" @input="vocab = $event.target.value" rows="4" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs font-mono"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" @click="open = false" class="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition">Batal</button>
+                        <button type="submit" class="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            window.openGrammarQuestionEditModal = function(id, question, answer, tense, vocab) {
+                window.dispatchEvent(new CustomEvent('open-grammar-question-edit-modal', { detail: { id, question, answer, tense, vocab } }));
+            };
+        </script>
     @endif
 
 </body>

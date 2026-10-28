@@ -1916,17 +1916,15 @@
                 <x-irregular-verbs-button />
             </div>
 
-            {{-- Floating Manual Save Button (Matching assignments/custom-class/68/meeting/3/grammar) --}}
+            {{-- Floating Manual Save Button (Matching Unified Blue Theme) --}}
             <div x-show="viewMode === 'practice' && !submitted" 
                  class="fixed bottom-6 z-40 pointer-events-auto" 
                  style="left: 50%; transform: translateX(-50%);">
                 <button type="button" 
                         id="manual-save-btn" 
                         @click="manualSaveDraft()"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path>
-                    </svg>
+                        class="inline-flex items-center justify-center px-6 py-2.5 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer border border-white/20 active:scale-95 hover:brightness-110"
+                        style="background-color: #1e3a8a;">
                     <span x-text="saveBtnText">Save</span>
                 </button>
             </div>
