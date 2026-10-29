@@ -817,7 +817,66 @@ HTML,
                 'code' => '1.3.3',
                 'concept_title' => 'Pola Negasi dan Kalimat Tanya pada Kalimat Nominal Simple Present',
                 'concept_description' => 'Kalimat nominal disangkal HANYA dengan menyisipkan partikel negasi \'not\' setelah to be: \'is not\' (isn\'t), \'are not\' (aren\'t), atau \'am not\'. Kalimat nominal TIDAK PERNAH menggunakan auxiliary \'do not\' atau \'does not\'. Untuk membentuk kalimat tanya, pindahkan to be ke posisi sebelum subjek.',
-                'formula' => 'Negatif: S + is / am / are + not + Complement | Tanya: (WH-word) + Is / Are + S + Complement?',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono tracking-wider">SIMPLE PRESENT NOMINAL</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Bentuk Negatif &amp; Interogatif (am/is/are not &amp; Is/Are...?)</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3.5 border border-slate-600 space-y-3.5">
+        <!-- [1] Bentuk Negatif -->
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                <span class="text-xs font-black text-rose-300 uppercase tracking-wide">[1] BENTUK NEGATIF (NOT)</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-rose-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-rose-500/40 block">Subject + IS / AM / ARE + NOT + Complement</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-rose-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">These preliminary survey findings are not representative of the broader national demographic.</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-rose-400">
+                (Temuan survei awal ini tidak mewakili seluruh populasi nasional secara akurat.)
+            </div>
+        </div>
+
+        <!-- [2] Bentuk Interogatif: Yes/No Question -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-700/60">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <span class="text-xs font-black text-sky-300 uppercase tracking-wide">[2] INTEROGATIF: YES/NO QUESTION</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-sky-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-sky-500/40 block">IS / ARE / AM + Subject + Complement...?</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-sky-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Is this antitrust regulatory framework adequate to prevent algorithmic market cartels?</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-sky-400">
+                (Apakah kerangka regulasi antimonopoli ini memadai untuk mencegah kartel pasar digital?)
+            </div>
+        </div>
+
+        <!-- [3] Bentuk Interogatif: WH- Question -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-700/60">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-xs font-black text-amber-300 uppercase tracking-wide">[3] INTEROGATIF: WH- QUESTIONS (INFORMASI)</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-amber-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-amber-500/40 block">WH- Word (Why / Where / What / How) + IS / ARE / AM + Subject + Complement...?</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-amber-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Why is the nationwide adoption of zero-emission mobility not as straightforward as analysts projected?</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-amber-400">
+                (Mengapa transisi mobilitas bebas emisi secara nasional tidak semudah yang diperkirakan para pakar?)
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaidah Utama -->
+    <div class="text-xs text-white pl-3 border-l-2 border-amber-400 bg-amber-950/40 p-2.5 rounded-r-lg">
+        <strong class="text-amber-300 uppercase">[KAIDAH UTAMA]:</strong> Kalimat nominal disangkal dengan <strong>to be + not</strong> (dilarang menggunakan do/does not). Pada pertanyaan Yes/No, to be ditempatkan sebelum subjek. Pada pertanyaan WH-, kata tanya berada di paling depan diikuti to be sebelum subjek.
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Dilarang menggunakan do not / does not pada kalimat nominal (e.g., \'The result does not valid\' adalah SALAH MUTLAK).',
                     'Gunakan \'is not\' atau \'are not\' diikuti Adjective, Noun, atau Prepositional Phrase.',
@@ -1675,7 +1734,66 @@ HTML,
                 'code' => '1.3.6',
                 'concept_title' => 'Bentuk Negasi dan Kalimat Tanya pada Kalimat Pasif Simple Present',
                 'concept_description' => 'Kalimat pasif negatif dibentuk dengan menyisipkan \'not\' tepat di antara to be dan Verb 3 (is not / are not + Past Participle). DILARANG menggunakan do/does not pada kalimat pasif. Untuk kalimat tanya pasif, pindahkan to be (Is atau Are) ke depan subjek penerima aksi, diikuti Verb 3.',
-                'formula' => 'Negatif: S + is / are + not + Verb 3 | Tanya: (WH) + Is / Are + S + Verb 3?',
+                'formula' => <<<'HTML'
+<div class="space-y-3 text-left">
+    <div class="flex items-center gap-2 pb-2 border-b border-emerald-500/40">
+        <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-mono tracking-wider">SIMPLE PRESENT PASSIVE</span>
+        <span class="text-xs sm:text-sm font-extrabold text-white">Bentuk Negatif &amp; Interogatif (is/are not + V3 &amp; Is/Are... V3?)</span>
+    </div>
+
+    <div class="rounded-xl bg-slate-900/90 p-3.5 border border-slate-600 space-y-3.5">
+        <!-- [1] Bentuk Negatif Pasif -->
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                <span class="text-xs font-black text-rose-300 uppercase tracking-wide">[1] BENTUK NEGATIF PASIF</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-rose-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-rose-500/40 block">Subject + IS / ARE + NOT + Verb 3 (Past Participle)</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-rose-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Hazardous industrial waste is not discharged directly into municipal waterways.</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-rose-400">
+                (Limbah industri berbahaya tidak dibuang langsung ke saluran pembuangan air kota.)
+            </div>
+        </div>
+
+        <!-- [2] Bentuk Interogatif Pasif: Yes/No Question -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-700/60">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <span class="text-xs font-black text-sky-300 uppercase tracking-wide">[2] INTEROGATIF PASIF: YES/NO QUESTION</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-sky-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-sky-500/40 block">IS / ARE + Subject + Verb 3 (Past Participle)...?</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-sky-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Is the empirical dataset peer-reviewed before being archived in the open repository?</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-sky-400">
+                (Apakah dataset empiris ditinjau sejawat sebelum diarsipkan di repositori terbuka?)
+            </div>
+        </div>
+
+        <!-- [3] Bentuk Interogatif Pasif: WH- Question -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-700/60">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-xs font-black text-amber-300 uppercase tracking-wide">[3] INTEROGATIF PASIF: WH- QUESTIONS</span>
+            </div>
+            <code class="text-xs sm:text-sm font-mono font-bold text-amber-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-amber-500/40 block">WH- Word (Why / Where / How) + IS / ARE + Subject + Verb 3...?</code>
+            <div class="text-xs sm:text-sm text-white font-mono pt-0.5">
+                <span class="text-amber-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">Why are these critical safety guidelines routinely disregarded by contractors?</span>
+            </div>
+            <div class="text-xs text-white pl-3 border-l-2 border-amber-400">
+                (Mengapa pedoman keselamatan penting ini secara rutin diabaikan oleh kontraktor?)
+            </div>
+        </div>
+    </div>
+
+    <!-- Kaidah Utama -->
+    <div class="text-xs text-white pl-3 border-l-2 border-amber-400 bg-amber-950/40 p-2.5 rounded-r-lg">
+        <strong class="text-amber-300 uppercase">[KAIDAH UTAMA]:</strong> Bentuk pasif negatif menggunakan <strong>to be + not + Verb 3</strong>. Pada pertanyaan Yes/No pasif, letakkan to be sebelum subjek penerima aksi diikuti Verb 3. Pada pertanyaan WH-, kata tanya mendahului to be.
+    </div>
+</div>
+HTML,
                 'rules' => [
                     'Bentuk pasif negatif: \'is not + V3\' (tunggal) atau \'are not + V3\' (jamak).',
                     'Jangan pernah menulis \'does not analyzed\' atau \'do not collected\' (kesalahan fatal campur aduk auxiliary).',

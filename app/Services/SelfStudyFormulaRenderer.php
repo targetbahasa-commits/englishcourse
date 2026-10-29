@@ -51,20 +51,42 @@ class SelfStudyFormulaRenderer
             }
         }
 
-        // Resolve Example (English & Indonesian)
-        $enSentence = '';
-        $idSentence = '';
-        if (!empty($sl['exercises'][0])) {
-            $ex0 = $sl['exercises'][0];
-            $idSentence = $ex0['id_sentence'] ?? '';
-            if (isset($ex0['correct_index']) && isset($ex0['options'][$ex0['correct_index']])) {
-                $enSentence = $ex0['options'][$ex0['correct_index']];
-            } elseif (!empty($ex0['correct'])) {
-                $enSentence = $ex0['correct'];
+        // Resolve Examples (Categorized: Statement, Yes/No Question, WH- Question)
+        $statementEx = null;
+        $yesNoEx = null;
+        $whEx = null;
+
+        if (!empty($sl['exercises']) && is_array($sl['exercises'])) {
+            foreach ($sl['exercises'] as $ex) {
+                $id = $ex['id_sentence'] ?? '';
+                $en = '';
+                if (isset($ex['correct_index']) && isset($ex['options'][$ex['correct_index']])) {
+                    $en = $ex['options'][$ex['correct_index']];
+                } elseif (!empty($ex['correct'])) {
+                    $en = $ex['correct'];
+                }
+                if ($en === '') continue;
+
+                $trimmedEn = trim($en);
+                $isQuestion = str_ends_with($trimmedEn, '?');
+
+                if ($isQuestion) {
+                    if (preg_match('/^(what|where|when|why|how|which|who|whom|whose|to what|under what)\b/i', $trimmedEn)) {
+                        if ($whEx === null) $whEx = ['en' => $trimmedEn, 'id' => $id];
+                    } else {
+                        if ($yesNoEx === null) $yesNoEx = ['en' => $trimmedEn, 'id' => $id];
+                    }
+                } else {
+                    if ($statementEx === null) $statementEx = ['en' => $trimmedEn, 'id' => $id];
+                }
+
+                if ($statementEx && $yesNoEx && $whEx) break;
             }
         } elseif (!empty($sl['example']['en'])) {
-            $enSentence = $sl['example']['en'];
-            $idSentence = $sl['example']['id'] ?? '';
+            $statementEx = [
+                'en' => trim($sl['example']['en']),
+                'id' => trim($sl['example']['id'] ?? '')
+            ];
         }
 
         // Resolve Key Rule
@@ -78,15 +100,58 @@ class SelfStudyFormulaRenderer
 
         // Build Example HTML
         $exampleHtml = '';
-        if ($enSentence !== '') {
-            $exampleHtml .= '<div class="text-xs sm:text-sm text-white font-mono pt-0.5">';
-            $exampleHtml .= '<span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">' . htmlspecialchars($enSentence, ENT_QUOTES, 'UTF-8') . '</span>';
-            $exampleHtml .= '</div>';
+        $formulaLower = strtolower($name . ' ' . $conceptTitle . ' ' . $formula);
+        $hasQuestionInPola = str_contains($formulaLower, 'tanya') ||
+                             str_contains($formulaLower, 'interogatif') ||
+                             str_contains($formulaLower, 'question') ||
+                             str_contains($formulaLower, 'wh-') ||
+                             str_contains($formulaLower, 'yes/no');
 
-            if ($idSentence !== '') {
-                $exampleHtml .= '<div class="text-xs text-white pl-3 border-l-2 border-emerald-400">';
-                $exampleHtml .= '(' . htmlspecialchars($idSentence, ENT_QUOTES, 'UTF-8') . ')';
+        if ($hasQuestionInPola && ($yesNoEx || $whEx)) {
+            // Render statement example if present
+            if ($statementEx) {
+                $label = str_contains($formulaLower, 'negatif') ? 'Contoh Negatif:' : 'Contoh Kalimat:';
+                $color = str_contains($formulaLower, 'negatif') ? 'rose' : 'emerald';
+                $exampleHtml .= '<div class="text-xs sm:text-sm text-white font-mono pt-1">';
+                $exampleHtml .= '<span class="text-' . $color . '-400 font-bold not-italic">' . $label . '</span> <span class="italic text-white">' . htmlspecialchars($statementEx['en'], ENT_QUOTES, 'UTF-8') . '</span>';
                 $exampleHtml .= '</div>';
+                if ($statementEx['id']) {
+                    $exampleHtml .= '<div class="text-xs text-white pl-3 border-l-2 border-' . $color . '-400">(' . htmlspecialchars($statementEx['id'], ENT_QUOTES, 'UTF-8') . ')</div>';
+                }
+            }
+
+            // Render Yes/No Question example
+            if ($yesNoEx) {
+                $exampleHtml .= '<div class="text-xs sm:text-sm text-white font-mono pt-1.5 border-t border-slate-700/60">';
+                $exampleHtml .= '<span class="text-sky-400 font-bold not-italic">Contoh Yes/No Question:</span> <span class="italic text-white">' . htmlspecialchars($yesNoEx['en'], ENT_QUOTES, 'UTF-8') . '</span>';
+                $exampleHtml .= '</div>';
+                if ($yesNoEx['id']) {
+                    $exampleHtml .= '<div class="text-xs text-white pl-3 border-l-2 border-sky-400">(' . htmlspecialchars($yesNoEx['id'], ENT_QUOTES, 'UTF-8') . ')</div>';
+                }
+            }
+
+            // Render WH- Question example
+            if ($whEx) {
+                $exampleHtml .= '<div class="text-xs sm:text-sm text-white font-mono pt-1.5 border-t border-slate-700/60">';
+                $exampleHtml .= '<span class="text-amber-400 font-bold not-italic">Contoh WH- Question:</span> <span class="italic text-white">' . htmlspecialchars($whEx['en'], ENT_QUOTES, 'UTF-8') . '</span>';
+                $exampleHtml .= '</div>';
+                if ($whEx['id']) {
+                    $exampleHtml .= '<div class="text-xs text-white pl-3 border-l-2 border-amber-400">(' . htmlspecialchars($whEx['id'], ENT_QUOTES, 'UTF-8') . ')</div>';
+                }
+            }
+        } else {
+            // Standard single primary example
+            $primaryEx = $statementEx ?: ($yesNoEx ?: $whEx);
+            if ($primaryEx) {
+                $exampleHtml .= '<div class="text-xs sm:text-sm text-white font-mono pt-0.5">';
+                $exampleHtml .= '<span class="text-emerald-400 font-bold not-italic">Contoh:</span> <span class="italic text-white">' . htmlspecialchars($primaryEx['en'], ENT_QUOTES, 'UTF-8') . '</span>';
+                $exampleHtml .= '</div>';
+
+                if ($primaryEx['id'] !== '') {
+                    $exampleHtml .= '<div class="text-xs text-white pl-3 border-l-2 border-emerald-400">';
+                    $exampleHtml .= '(' . htmlspecialchars($primaryEx['id'], ENT_QUOTES, 'UTF-8') . ')';
+                    $exampleHtml .= '</div>';
+                }
             }
         }
 
