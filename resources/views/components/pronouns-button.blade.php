@@ -83,7 +83,7 @@
             <!-- Header with Search -->
             <div class="p-6 border-b border-gray-100 bg-blue-50">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Daftar Pronoun (Kata Ganti)</h3>
+                    <h3 class="text-xl font-bold text-tb-primary">Daftar Pronoun (Kata Ganti)</h3>
                     <button @click="open = false" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -95,7 +95,7 @@
                         type="text" 
                         x-model="searchQuery"
                         placeholder="Cari kata ganti atau arti..."
-                        class="w-full px-4 py-2 pl-10 pr-10 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full px-4 py-2 pl-10 pr-10 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tb focus:border-transparent"
                     >
                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -113,12 +113,12 @@
                <table class="w-full text-sm text-left border-collapse">
                    <thead class="text-white sticky top-0 z-10">
                        <tr>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Subject</th>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Object</th>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Possessive Adjective</th>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Possessive Pronoun</th>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Reflexive Pronoun</th>
-                           <th class="p-3 border border-blue-600 bg-blue-500 sticky top-0 z-10 shadow-md">Arti</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Subject</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Object</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Possessive Adjective</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Possessive Pronoun</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Reflexive Pronoun</th>
+                           <th class="p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Arti</th>
                        </tr>
                    </thead>
                     <tbody class="divide-y divide-gray-100">

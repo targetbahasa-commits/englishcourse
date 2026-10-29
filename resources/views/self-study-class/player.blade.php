@@ -1461,93 +1461,102 @@
                                                 <div class="flex items-start gap-3 sm:gap-4 flex-1">
                                                     <!-- Distinctive Question Number Badge -->
                                                     <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold font-mono shrink-0 mt-0.5 shadow-2xs bg-slate-100 text-slate-800 border border-slate-200"
-                                                         :style="isDarkMode ? 'background-color: #374151; color: #e5e7eb; border-color: #4b5563;' : ''">
+                                                         :style="(isDarkMode ? 'background-color: #374151; color: #e5e7eb; border-color: #4b5563;' : '') + 'margin-bottom: -10px;'">
                                                         {{ $globalQIndex + 1 }}
                                                     </div>
                                                     <div class="flex-1 min-w-0 pt-0.5">
-                                                        <p class="text-sm md:text-base font-semibold text-slate-900 leading-relaxed tracking-tight" :style="isDarkMode ? 'color: #ffffff;' : ''">
+                                                        <p class="grammar-soal-text text-sm md:text-base font-semibold text-slate-900 leading-relaxed tracking-tight" :style="isDarkMode ? 'color: #ffffff;' : ''">
                                                             {{ $ex['id_sentence'] }}
                                                         </p>
                                                     </div>
                                                 </div>
-
-                                                <!-- Helper Buttons (? for Contoh Serupa, v for Vocab Helper) - Distinctive & Neutral -->
-                                                <div class="flex items-center gap-1.5 shrink-0 pt-0.5">
-                                                    <!-- Question Helper Tooltip (? - Contoh Serupa) -->
-                                                    <div x-data="{ open: false }" class="relative inline-block">
-                                                        <button type="button" 
-                                                                @click="open = !open" 
-                                                                @click.outside="open = false" 
-                                                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center text-xs font-bold transition shadow-2xs cursor-pointer"
-                                                                :class="{ 'bg-gray-700 hover:bg-gray-600 text-gray-300 border-gray-600': isDarkMode }"
-                                                                title="Contoh Serupa">
-                                                            ?
-                                                        </button>
-                                                        <div x-show="open" 
-                                                             x-transition:enter="transition ease-out duration-200"
-                                                             x-transition:enter-start="opacity-0 translate-y-2"
-                                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                                             x-transition:leave="transition ease-in duration-150"
-                                                             x-transition:leave-start="opacity-100 translate-y-0"
-                                                             x-transition:leave-end="opacity-0 translate-y-2"
-                                                             class="absolute bottom-full right-0 mb-2 w-72 sm:w-80 bg-slate-900 text-white text-xs rounded-xl p-3.5 shadow-xl z-20 text-left leading-relaxed" 
-                                                             style="display: none;">
-                                                            <strong class="block mb-1.5 text-slate-200 font-bold border-b border-slate-700 pb-1">Contoh Serupa:</strong>
-                                                            @if(!empty($ex['example']))
-                                                                <p class="text-slate-300 mb-1 leading-snug">{{ is_array($ex['example']) ? ($ex['example']['id'] ?? '') : $ex['example'] }}</p>
-                                                                <p class="text-sky-300 italic font-medium leading-snug">{{ is_array($ex['example']) ? ($ex['example']['en'] ?? '') : '' }}</p>
-                                                            @else
-                                                                <p class="text-slate-300">Target: <strong class="text-sky-300">{{ $ex['target_word'] ?? '' }}</strong></p>
-                                                                <p class="text-slate-400 text-[11px] mt-1">{{ $ex['explanation'] ?? '' }}</p>
-                                                            @endif
-                                                            <div class="absolute top-full right-3 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Vocabulary Helper Tooltip (v) -->
-                                                    @php
-                                                        $sentenceVocab = $ex['vocab'] ?? null;
-                                                    @endphp
-                                                    @if(!empty($sentenceVocab) && is_array($sentenceVocab))
-                                                    <div x-data="{ open: false }" class="relative inline-block">
-                                                        <button type="button" 
-                                                                @click="open = !open" 
-                                                                @click.outside="open = false" 
-                                                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center text-xs font-bold transition shadow-2xs cursor-pointer font-serif italic"
-                                                                :class="{ 'bg-gray-700 hover:bg-gray-600 text-gray-300 border-gray-600': isDarkMode }"
-                                                                title="Vocabulary Helper">
-                                                            v
-                                                        </button>
-                                                        <div x-show="open" 
-                                                             x-transition:enter="transition ease-out duration-200"
-                                                             x-transition:enter-start="opacity-0 translate-y-2"
-                                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                                             x-transition:leave="transition ease-in duration-150"
-                                                             x-transition:leave-start="opacity-100 translate-y-0"
-                                                             x-transition:leave-end="opacity-0 translate-y-2"
-                                                             class="absolute bottom-full right-0 mb-2 w-72 sm:w-80 bg-slate-900 text-white text-xs rounded-xl p-3.5 shadow-xl z-20 text-left leading-relaxed max-h-72 overflow-y-auto custom-scrollbar" 
-                                                             style="display: none;">
-                                                            <strong class="block mb-2 text-slate-200 font-bold border-b border-slate-700 pb-1">Vocabulary Helper:</strong>
-                                                            <ul class="space-y-1.5">
-                                                                @foreach($sentenceVocab as $en => $vocabData)
-                                                                    <li class="flex justify-between items-baseline text-xs gap-2 border-b border-slate-800 pb-1 last:border-0 last:pb-0">
-                                                                        <span class="text-sky-300 font-mono font-medium shrink-0">
-                                                                            {{ $en }}
-                                                                            <span class="text-slate-400 text-[10px]">{{ is_array($vocabData) ? ($vocabData['pos'] ?? '') : '' }}</span>
-                                                                        </span>
-                                                                        <span class="text-slate-200 text-right">{{ is_array($vocabData) ? ($vocabData['id'] ?? '') : $vocabData }}</span>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                            <div class="absolute top-full right-3 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                                                        </div>
-                                                    </div>
-                                                    @endif
-                                                </div>
                                             </div>
 
-                                            <!-- Typing Input Area with Restart Icon & Submit Button (Indented Under Sentence Prompt) -->
-                                            <div class="sm:ml-11 md:ml-13 pt-0.5 space-y-3">
+                                            <!-- Typing Input Area with Restart Icon, Helper Buttons & Submit Button (Indented Under Sentence Prompt) -->
+                                            <div class="sm:ml-11 md:ml-13 space-y-1" style="margin-top: 4px;">
+                                                <!-- Helper Buttons (? for Contoh Serupa, v for Vocab Helper, swap icon for Vocabulary Translate Toggle) - compact row, right-aligned directly above Submit -->
+                                                <div class="flex items-center justify-end gap-1">
+                                                        <!-- Question Helper Tooltip (? - Contoh Serupa) -->
+                                                        <div x-data="{ open: false }" class="relative inline-block">
+                                                            <button type="button"
+                                                                    @click="open = !open"
+                                                                    @click.outside="open = false"
+                                                                    class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center text-[10px] font-bold transition shadow-2xs cursor-pointer"
+                                                                    :style="isDarkMode ? 'background-color: #374151; color: #d1d5db; border-color: #4b5563;' : ''"
+                                                                    title="Contoh Serupa">
+                                                                ?
+                                                            </button>
+                                                            <div x-show="open"
+                                                                 x-transition:enter="transition ease-out duration-200"
+                                                                 x-transition:enter-start="opacity-0 translate-y-2"
+                                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                                 x-transition:leave="transition ease-in duration-150"
+                                                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                                                 x-transition:leave-end="opacity-0 translate-y-2"
+                                                                 class="absolute bottom-full right-0 mb-2 w-72 sm:w-80 bg-slate-900 text-white text-xs rounded-xl p-3.5 shadow-xl z-20 text-left leading-relaxed"
+                                                                 style="display: none;">
+                                                                <strong class="block mb-1.5 text-slate-200 font-bold border-b border-slate-700 pb-1">Contoh Serupa:</strong>
+                                                                @if(!empty($ex['example']))
+                                                                    <p class="text-slate-300 mb-1 leading-snug">{{ is_array($ex['example']) ? ($ex['example']['id'] ?? '') : $ex['example'] }}</p>
+                                                                    <p class="text-sky-300 italic font-medium leading-snug">{{ is_array($ex['example']) ? ($ex['example']['en'] ?? '') : '' }}</p>
+                                                                @else
+                                                                    <p class="text-slate-300">Target: <strong class="text-sky-300">{{ $ex['target_word'] ?? '' }}</strong></p>
+                                                                    <p class="text-slate-400 text-[11px] mt-1">{{ $ex['explanation'] ?? '' }}</p>
+                                                                @endif
+                                                                <div class="absolute top-full right-3 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Vocabulary Helper Tooltip (v) -->
+                                                        @php
+                                                            $sentenceVocab = $ex['vocab'] ?? null;
+                                                        @endphp
+                                                        @if(!empty($sentenceVocab) && is_array($sentenceVocab))
+                                                        <div x-data="{ open: false }" class="relative inline-block">
+                                                            <button type="button"
+                                                                    @click="open = !open"
+                                                                    @click.outside="open = false"
+                                                                    class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center text-[10px] font-bold transition shadow-2xs cursor-pointer font-serif italic"
+                                                                    :style="isDarkMode ? 'background-color: #374151; color: #d1d5db; border-color: #4b5563;' : ''"
+                                                                    title="Vocabulary Helper">
+                                                                v
+                                                            </button>
+                                                            <div x-show="open"
+                                                                 x-transition:enter="transition ease-out duration-200"
+                                                                 x-transition:enter-start="opacity-0 translate-y-2"
+                                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                                 x-transition:leave="transition ease-in duration-150"
+                                                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                                                 x-transition:leave-end="opacity-0 translate-y-2"
+                                                                 class="absolute bottom-full right-0 mb-2 w-72 sm:w-80 bg-slate-900 text-white text-xs rounded-xl p-3.5 shadow-xl z-20 text-left leading-relaxed max-h-72 overflow-y-auto custom-scrollbar"
+                                                                 style="display: none;">
+                                                                <strong class="block mb-2 text-slate-200 font-bold border-b border-slate-700 pb-1">Vocabulary Helper:</strong>
+                                                                <ul class="space-y-1.5">
+                                                                    @foreach($sentenceVocab as $en => $vocabData)
+                                                                        <li class="flex justify-between items-baseline text-xs gap-2 border-b border-slate-800 pb-1 last:border-0 last:pb-0">
+                                                                            <span class="text-sky-300 font-mono font-medium shrink-0">
+                                                                                {{ $en }}
+                                                                                <span class="text-slate-400 text-[10px]">{{ is_array($vocabData) ? ($vocabData['pos'] ?? '') : '' }}</span>
+                                                                            </span>
+                                                                            <span class="text-slate-200 text-right">{{ is_array($vocabData) ? ($vocabData['id'] ?? '') : $vocabData }}</span>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                                <div class="absolute top-full right-3 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                                                            </div>
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Vocabulary Translate Toggle: click words in the soal above for an inline translation, same mechanic as the Translate Tool in Reading -->
+                                                        <button type="button"
+                                                                onclick="window.toggleVocabMode()"
+                                                                class="vocab-toggle-btn w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                                                :style="isDarkMode ? 'background-color: #374151; color: #d1d5db; border-color: #4b5563;' : ''"
+                                                                title="Vocabulary: klik kata dalam soal untuk melihat artinya (seperti Translate Tool di Reading)">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h18M16.5 3 21 7.5m0 0L16.5 12M21 7.5H3"></path></svg>
+                                                        </button>
+                                                </div>
+
                                                 <div class="flex items-center gap-2.5">
                                                     <div class="relative flex-1">
                                                         <input type="text"
@@ -1572,7 +1581,7 @@
                                                         </button>
                                                     </div>
 
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             @click.prevent="submitQuestion({{ $globalQIndex }})"
                                                             x-show="!isQuestionSubmitted({{ $globalQIndex }})"
                                                             class="h-11 text-white text-sm font-semibold rounded-xl transition shadow-xs shrink-0 cursor-pointer flex items-center justify-center hover:opacity-95"
@@ -1902,6 +1911,11 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Vocabulary Helper shared popup + toggle/lookup script (no visible
+                 button here - the toggle lives inline per-question next to each
+                 soal's "v" badge instead of in the floating stack below) --}}
+            <x-vocabulary-button />
 
             {{-- Floating Helper Buttons Stack (Dictionary, Conjunction, Preposition, Pronoun, Adverb, Verb Palsu, Modal, Tenses Chart, Irregular Verbs) --}}
             <div class="self-study-floating-tools fixed bottom-6 right-3 sm:right-6 z-40 flex flex-col gap-1.5 sm:gap-2 items-end pointer-events-none [&>*]:pointer-events-auto">

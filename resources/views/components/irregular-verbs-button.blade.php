@@ -1,7 +1,8 @@
-<div x-data="{
-    open: false,
-    searchQuery: '',
-    verbs: [
+<script>
+    // Single source of truth for this app's curated irregular-verb list - also
+    // consumed by the Vocabulary translate popup (vocabulary-button.blade.php)
+    // to normalize "diverified"-style translations back to their base/V1 form.
+    window.__irregularVerbsList = window.__irregularVerbsList || [
         ['arise', 'arose', 'arisen', 'timbul'],
         ['awake', 'awoke', 'awoken', 'bangun'],
         ['be', 'was/were', 'been', 'menjadi'],
@@ -149,7 +150,12 @@
         ['withdraw', 'withdrew', 'withdrawn', 'menarik'],
         ['wring', 'wrung', 'wrung', 'memeras'],
         ['write', 'wrote', 'written', 'menulis']
-    ],
+    ];
+</script>
+<div x-data="{
+    open: false,
+    searchQuery: '',
+    verbs: window.__irregularVerbsList,
     get filteredVerbs() {
         if (!this.searchQuery.trim()) {
             return this.verbs;
@@ -187,23 +193,23 @@
             class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden">
           
             <!-- Header with Search -->
-            <div class="p-6 border-b border-gray-100 bg-yellow-50">
+            <div class="p-6 border-b border-blue-100 bg-blue-50">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Daftar Irregular Verbs</h3>
+                    <h3 class="text-xl font-bold text-tb-primary">Daftar Irregular Verbs</h3>
                     <!-- DEBUG: Search box version 2.0 loaded at 18:19:10 -->
 
                     <button @click="open = false" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                
+
                 <!-- Search Input -->
                 <div class="relative">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         x-model="searchQuery"
                         placeholder="Cari verb (V1, V2, V3, atau arti)..."
-                        class="w-full px-4 py-2 pl-10 pr-10 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        class="w-full px-4 py-2 pl-10 pr-10 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tb focus:border-transparent"
                     >
                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -226,16 +232,16 @@
                <table class="w-full text-xs sm:text-sm text-left border-collapse">
                    <thead class="text-white sticky top-0 z-10">
                        <tr>
-                           <th class="hidden sm:table-cell p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">No.</th>
-                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Base (V1)</th>
-                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Past (V2)</th>
-                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Participle (V3)</th>
-                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Arti</th>
+                           <th class="hidden sm:table-cell p-2 sm:p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">No.</th>
+                           <th class="p-2 sm:p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Base (V1)</th>
+                           <th class="p-2 sm:p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Past (V2)</th>
+                           <th class="p-2 sm:p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Participle (V3)</th>
+                           <th class="p-2 sm:p-3 border border-blue-900 bg-tb-primary sticky top-0 z-10 shadow-md">Arti</th>
                        </tr>
                    </thead>
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(verb, index) in filteredVerbs" :key="index">
-                            <tr class="odd:bg-white even:bg-yellow-50 hover:bg-yellow-100 transition-colors">
+                            <tr class="odd:bg-white even:bg-blue-50 hover:bg-blue-100 transition-colors">
                                 <td class="hidden sm:table-cell p-2 sm:p-3 border border-gray-200 text-center text-gray-500" x-text="index + 1"></td>
                                 <td class="p-2 sm:p-3 border border-gray-200 font-medium text-gray-800" x-text="verb[0]"></td>
                                 <td class="p-2 sm:p-3 border border-gray-200 text-gray-700" x-text="verb[1]"></td>
@@ -259,9 +265,9 @@
            </div>
 
             <!-- Footer Note -->
-            <div class="p-4 bg-yellow-50 border-t border-yellow-100 text-center">
+            <div class="p-4 bg-blue-50 border-t border-blue-100 text-center">
                 <p class="text-sm text-gray-700 font-medium">
-                    💡 Jika verb tidak ada di daftar maka tambah <span class="font-bold text-yellow-600">-ed</span> di akhir untuk Verb 2 dan Verb 3
+                    💡 Jika verb tidak ada di daftar maka tambah <span class="font-bold text-tb-primary">-ed</span> di akhir untuk Verb 2 dan Verb 3
                 </p>
             </div>
         </div>

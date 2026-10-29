@@ -30,6 +30,22 @@
         window.speechSynthesis.speak(utterance);
     },
 
+    sectionNumber(key) {
+        const order = ['translation', 'examples', 'synonyms', 'academic_words'];
+        const visible = {
+            translation: !!this.dictResult,
+            examples: (this.dictResult?.examples?.length ?? 0) > 0,
+            synonyms: (this.dictResult?.synonyms?.length ?? 0) > 0,
+            academic_words: (this.dictResult?.academic_words?.length ?? 0) > 0,
+        };
+        let n = 0;
+        for (const k of order) {
+            if (visible[k]) n++;
+            if (k === key) return n;
+        }
+        return n;
+    },
+
     async search() {
         if (!this.query.trim()) return;
         const q = this.query.trim();
@@ -234,7 +250,7 @@
             <!-- Header -->
             <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                    <h3 class="text-xl font-bold text-blue-900">Translation & Thesaurus</h3>
+                    <h3 class="text-xl font-bold text-tb-primary">Translation & Thesaurus</h3>
                     <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Auto-Detect</span>
                 </div>
                 <div class="flex items-center gap-1.5">
@@ -254,8 +270,8 @@
                            x-ref="queryInput"
                            x-model="query" 
                            placeholder="Type a word in English or Indonesia..." 
-                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
-                    <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm disabled:opacity-50 flex items-center gap-1.5" :disabled="loading">
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tb focus:outline-none text-sm">
+                    <button type="submit" class="bg-tb-primary text-white px-5 py-2 rounded-lg font-medium text-sm disabled:opacity-50 flex items-center gap-1.5" :disabled="loading">
                         <span x-show="!loading">Search</span>
                         <span x-show="loading" class="animate-pulse">...</span>
                     </button>
@@ -291,7 +307,7 @@
                     
                     <!-- 1. TRANSLATION -->
                     <div class="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">1. Translation</h4>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4" x-text="sectionNumber('translation') + '. Translation'"></h4>
                         
                         <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                             <!-- Source -->
@@ -314,8 +330,8 @@
                             <div class="text-center flex-1">
                                 <p class="text-xs text-gray-500 uppercase font-bold mb-1" x-text="dictResult?.source === 'en' ? 'Indonesia' : 'English'"></p>
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-bold text-blue-700" x-text="dictResult?.translation"></span>
-                                    <button @click="playAudio(dictResult?.translation, dictResult?.source == 'en' ? 'id-ID' : 'en-US')" class="text-blue-300 hover:text-blue-600">
+                                    <span class="text-2xl font-bold text-tb-primary" x-text="dictResult?.translation"></span>
+                                    <button @click="playAudio(dictResult?.translation, dictResult?.source == 'en' ? 'id-ID' : 'en-US')" class="text-blue-300 hover:text-tb-primary">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                                     </button>
                                 </div>
@@ -325,7 +341,7 @@
 
                     <!-- 2. EXAMPLES -->
                     <div x-show="dictResult?.examples?.length > 0">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">2. Examples (Contoh Kalimat)</h4>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3" x-text="sectionNumber('examples') + '. Examples (Contoh Kalimat)'"></h4>
                         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                             <template x-for="(example, idx) in dictResult?.examples" :key="idx">
                                 <div class="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
@@ -337,10 +353,10 @@
 
                     <!-- 3. SYNONYMS -->
                     <div x-show="dictResult?.synonyms?.length > 0" class="mb-4">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">3. Synonyms (Sinonim)</h4>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3" x-text="sectionNumber('synonyms') + '. Synonyms (Sinonim)'"></h4>
                         <div class="flex flex-wrap gap-2">
                             <template x-for="syn in dictResult?.synonyms">
-                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors cursor-pointer border border-transparent hover:border-purple-200" 
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-blue-100 hover:text-tb-primary transition-colors cursor-pointer border border-transparent hover:border-blue-200"
                                       @click="query = syn; search()" 
                                       x-text="syn"></span>
                             </template>
@@ -349,7 +365,7 @@
 
                     <!-- 4. ACADEMIC WORDS -->
                     <div x-show="dictResult?.academic_words?.length > 0">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">4. Academic Words</h4>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3" x-text="sectionNumber('academic_words') + '. Academic Words'"></h4>
                         <div class="flex flex-wrap gap-2">
                             <template x-for="aw in dictResult?.academic_words">
                                 <span class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-sm hover:bg-blue-100 transition-colors cursor-pointer" 

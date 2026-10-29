@@ -196,12 +196,12 @@
              class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[88vh] flex flex-col overflow-hidden">
           
             <!-- Header -->
-            <div class="p-5 border-b border-indigo-100 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex justify-between items-center">
+            <div class="p-5 border-b border-blue-100 bg-tb-primary text-white flex justify-between items-center">
                 <div>
                     <h3 class="text-xl font-bold">Panduan Lengkap Modal Auxiliaries</h3>
-                    <p class="text-xs text-indigo-100 mt-0.5">Rumus, fungsi, arti, dan contoh kata kerja bantu (Modal Verbs)</p>
+                    <p class="text-xs text-blue-100 mt-0.5">Rumus, fungsi, arti, dan contoh kata kerja bantu (Modal Verbs)</p>
                 </div>
-                <button @click="open = false" class="text-white hover:text-indigo-200 p-1 rounded-lg transition">
+                <button @click="open = false" class="text-white hover:text-blue-200 p-1 rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -209,21 +209,21 @@
             </div>
 
             <!-- Rumus / Key Rules Box -->
-            <div class="bg-indigo-50/80 px-6 py-3 border-b border-indigo-100">
+            <div class="bg-blue-50/80 px-6 py-3 border-b border-blue-100">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div class="bg-white p-2.5 rounded-xl border border-indigo-200 shadow-xs">
-                        <span class="font-bold text-indigo-900 block mb-1">1. Verbal (Dasar)</span>
-                        <code class="text-indigo-700 font-semibold font-mono">S + Modal + V1 (Bare Inf)</code>
+                    <div class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
+                        <span class="font-bold text-tb-primary block mb-1">1. Verbal (Dasar)</span>
+                        <code class="text-tb-primary font-semibold font-mono">S + Modal + V1 (Bare Inf)</code>
                         <p class="text-gray-600 mt-1">Tanpa <em class="text-red-500">to/s/es/ing</em> setelah modal.</p>
                     </div>
-                    <div class="bg-white p-2.5 rounded-xl border border-indigo-200 shadow-xs">
-                        <span class="font-bold text-indigo-900 block mb-1">2. Nominal / Adjective</span>
-                        <code class="text-indigo-700 font-semibold font-mono">S + Modal + be + Adj/Noun</code>
+                    <div class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
+                        <span class="font-bold text-tb-primary block mb-1">2. Nominal / Adjective</span>
+                        <code class="text-tb-primary font-semibold font-mono">S + Modal + be + Adj/Noun</code>
                         <p class="text-gray-600 mt-1">Gunakan <strong>be</strong> sebelum kata sifat/benda.</p>
                     </div>
-                    <div class="bg-white p-2.5 rounded-xl border border-indigo-200 shadow-xs">
-                        <span class="font-bold text-indigo-900 block mb-1">3. Pasif (Passive)</span>
-                        <code class="text-indigo-700 font-semibold font-mono">S + Modal + be + V3</code>
+                    <div class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
+                        <span class="font-bold text-tb-primary block mb-1">3. Pasif (Passive)</span>
+                        <code class="text-tb-primary font-semibold font-mono">S + Modal + be + V3</code>
                         <p class="text-gray-600 mt-1">Bermakna pasif ("di-" atau "ter-").</p>
                     </div>
                 </div>
@@ -235,7 +235,7 @@
                     <input type="text"
                            x-model="searchQuery"
                            placeholder="Cari modal, arti, atau fungsi..."
-                           class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                           class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-tb focus:outline-none">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
@@ -245,22 +245,22 @@
                 <!-- Category Filters -->
                 <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
                     <button @click="selectedCategory = 'all'"
-                            :class="selectedCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'all' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Semua</button>
                     <button @click="selectedCategory = 'ability'"
-                            :class="selectedCategory === 'ability' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'ability' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Kemampuan</button>
                     <button @click="selectedCategory = 'obligation'"
-                            :class="selectedCategory === 'obligation' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'obligation' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Keharusan / Larangan</button>
                     <button @click="selectedCategory = 'advice'"
-                            :class="selectedCategory === 'advice' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'advice' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Saran</button>
                     <button @click="selectedCategory = 'possibility'"
-                            :class="selectedCategory === 'possibility' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'possibility' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Kemungkinan</button>
                     <button @click="selectedCategory = 'future'"
-                            :class="selectedCategory === 'future' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            :class="selectedCategory === 'future' ? 'bg-tb-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                             class="px-3 py-1 rounded-lg text-xs font-semibold transition">Masa Depan / Tawaran</button>
                 </div>
             </div>
@@ -268,7 +268,7 @@
             <!-- Table Content -->
             <div class="overflow-y-auto p-4 flex-1" style="max-height: 52vh;">
                 <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-indigo-50 text-indigo-900 font-bold sticky top-0 border-b border-indigo-200">
+                    <thead class="bg-blue-50 text-tb-primary font-bold sticky top-0 border-b border-blue-200">
                         <tr>
                             <th class="p-3 w-32">Modal</th>
                             <th class="p-3 w-40">Arti (Bahasa Indonesia)</th>
@@ -278,15 +278,15 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(item, idx) in filteredModals" :key="idx">
-                            <tr class="hover:bg-indigo-50/50 transition-colors odd:bg-white even:bg-slate-50/60">
+                            <tr class="hover:bg-blue-50/50 transition-colors odd:bg-white even:bg-slate-50/60">
                                 <td class="p-3 align-top">
-                                    <span class="font-bold text-sm text-indigo-700 block" x-text="item.modal"></span>
-                                    <span class="inline-block mt-0.5 px-2 py-0.5 text-[10px] rounded-full bg-indigo-100 text-indigo-800 font-medium" x-text="item.type"></span>
+                                    <span class="font-bold text-sm text-tb-primary block" x-text="item.modal"></span>
+                                    <span class="inline-block mt-0.5 px-2 py-0.5 text-[10px] rounded-full bg-blue-100 text-tb-primary font-medium" x-text="item.type"></span>
                                 </td>
                                 <td class="p-3 align-top font-semibold text-gray-800" x-text="item.meaning"></td>
                                 <td class="p-3 align-top text-gray-600 leading-relaxed" x-text="item.function"></td>
                                 <td class="p-3 align-top">
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 font-mono text-[11px] text-indigo-800 mb-1" x-text="item.formula"></div>
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 font-mono text-[11px] text-tb-primary mb-1" x-text="item.formula"></div>
                                     <div class="text-gray-900 font-medium" x-text="item.example"></div>
                                     <div class="text-gray-500 italic text-[11px] mt-0.5" x-text="item.exampleId"></div>
                                 </td>
@@ -302,7 +302,7 @@
             </div>
 
             <!-- Footer Note -->
-            <div class="p-3 bg-indigo-50/50 border-t border-indigo-100 text-center text-xs text-gray-600">
+            <div class="p-3 bg-blue-50/50 border-t border-blue-100 text-center text-xs text-gray-600">
                 💡 <strong>Kunci Utama:</strong> Semua modal selalu diikuti oleh <strong>Verb 1 dasar (Bare Infinitive)</strong> atau <strong>be + Adjective/Noun</strong>.
             </div>
         </div>
